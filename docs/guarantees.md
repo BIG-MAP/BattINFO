@@ -152,6 +152,7 @@ Representative issue codes:
   cell configuration — see [Electrodes](records/half-cells.md))
 - `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
 - `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)
+- `semantic.timestamp_implausible` (a warning under every policy: a `*_at` Unix time outside 2000 to 2100) and `semantic.timestamp_out_of_range` (a `*_at` number that cannot be a Unix time in seconds, because it falls outside the years 1 to 9999 as a time in milliseconds does; an error under the strict and publisher policies, a warning under the others)
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
 - `publication.shacl_unavailable`, `publication.shapes_not_found` and `publication.shacl_runtime_error` (the SHACL publication shapes could not check a deposit graph because pyshacl could not be imported, the shapes file is missing or pyshacl failed: an error under the `publisher` policy, which `ws.zenodo()` applies before it mints a DOI, and a warning under the others)

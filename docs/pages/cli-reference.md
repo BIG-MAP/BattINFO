@@ -17,7 +17,7 @@ $ battinfo [OPTIONS] COMMAND [ARGS]...
 * `validate`: Validate a BattINFO record (JSON Schema +...
 * `init`: Create a minimal workspace scaffold with...
 * `map`: Map canonical JSON to JSON-LD for a target.
-* `push`: Publish battery data to Zenodo in one...
+* `push`: Package battery data and upload it to the...
 * `import-protocol`: One-liner protocol import: executable file...
 * `query`: Query BattINFO resources.
 * `create`: Create BattINFO resources.
@@ -101,18 +101,23 @@ $ battinfo map [OPTIONS] {input_path}
 
 ## `battinfo push`
 
-Publish battery data to Zenodo in one command.
+Package battery data and upload it to the Zenodo sandbox in one command.
+
+In this release the batch path uploads only to the Zenodo sandbox, so
+every run except --dry-run needs --sandbox. Uploads to zenodo.org from
+the batch path come in a later release; to publish there now, use
+ws.zenodo() from a battinfo.workspace().
 
 
 Accepts three layouts:
-  battinfo push ./flat_files/    --cell-spec &quot;Energizer CR2032&quot;   # groups by filename
-  battinfo push ./cell_folders/  --cell-spec &quot;Energizer CR2032&quot;   # one subdir per cell
-  battinfo push ./my_batch/                                        # existing batch.yaml
+  battinfo push ./flat_files/    --cell-spec &quot;Energizer CR2032&quot; --sandbox   # groups by filename
+  battinfo push ./cell_folders/  --cell-spec &quot;Energizer CR2032&quot; --sandbox   # one subdir per cell
+  battinfo push ./my_batch/                                     --sandbox   # existing batch.yaml
 
 
-One-time setup:
+One-time setup, with a token made on sandbox.zenodo.org:
   battinfo config set creator &quot;Family, Given; Institution&quot;
-  battinfo config set zenodo_token &lt;token&gt;
+  battinfo config set zenodo_sandbox_token &lt;token&gt;
 
 **Usage**:
 
@@ -132,8 +137,8 @@ $ battinfo push [OPTIONS] {folder}
 * `--lab <str>`: Lab name.
 * `--operator <str>`: Operator name.
 * `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Falls back to config.
-* `--token <str>`: Zenodo API token. Falls back to config / ZENODO_API_TOKEN.
-* `--sandbox`: Upload to sandbox.zenodo.org instead of production.
+* `--token <str>`: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.
+* `--sandbox`: Upload to sandbox.zenodo.org, with a token made there. Every upload needs it in this release.
 * `--community <str>`: Zenodo community. Default: from config.
 * `--no-community`: Skip community submission.
 * `-y, --yes`: Skip confirmation prompt.
@@ -1960,7 +1965,7 @@ $ battinfo batch [OPTIONS] COMMAND [ARGS]...
 * `add`: Add more cells to an existing batch...
 * `status`: Show the current state of a batch at a...
 * `package`: Build a flat Zenodo upload package from a...
-* `upload`: Upload a staged Zenodo package to Zenodo...
+* `upload`: Upload a staged Zenodo package to the...
 
 ### `battinfo batch init`
 
@@ -2098,7 +2103,12 @@ $ battinfo batch package [OPTIONS] {batch_dir}
 
 ### `battinfo batch upload`
 
-Upload a staged Zenodo package to Zenodo (or sandbox).
+Upload a staged Zenodo package to the Zenodo sandbox.
+
+In this release the batch path uploads only to the Zenodo sandbox, so
+--sandbox is required. Uploads to zenodo.org from the batch path come in
+a later release; to publish there now, use ws.zenodo() from a
+battinfo.workspace().
 
 
 Workflow:
@@ -2123,8 +2133,8 @@ $ battinfo batch upload [OPTIONS] {staging_dir}
 
 **Options**:
 
-* `--token <str>`: Zenodo API token. Env: ZENODO_API_TOKEN.
-* `--sandbox`: Use Zenodo sandbox (sandbox.zenodo.org).
+* `--token <str>`: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.
+* `--sandbox`: Upload to the Zenodo sandbox (sandbox.zenodo.org), with a token made there. Required in this release.
 * `--community <str>`: Zenodo community. Default: value from config or battinfo-reference.
 * `--no-community`: Skip community submission.
 * `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Repeat for multiple. Falls back to `battinfo config set creator`.
@@ -2162,6 +2172,10 @@ Examples:
   battinfo config set creator &quot;Clark, Simon; SINTEF | Smith, Jane; NTNU&quot;
   battinfo config set license CC-BY-4.0
   battinfo config set community battinfo-reference
+  battinfo config set zenodo_sandbox_token &lt;token&gt;
+
+zenodo_sandbox_token is a token made on sandbox.zenodo.org, which the
+batch path (battinfo batch upload, battinfo push) sends to the sandbox.
 
 A secret, such as zenodo_token, is echoed with only its last four
 characters shown, or fully hidden when it is shorter than 12 characters.
@@ -2175,7 +2189,7 @@ $ battinfo config set [OPTIONS] {key} {value}
 
 **Arguments**:
 
-* `key`: Config key: creator, license, community, zenodo_token.  [required]
+* `key`: Config key: creator, license, community, zenodo_token, zenodo_sandbox_token.  [required]
 * `value`: Value to store.  [required]
 
 **Options**:

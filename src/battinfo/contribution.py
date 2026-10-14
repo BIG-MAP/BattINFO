@@ -1069,6 +1069,30 @@ def _load_cell_spec_for_batch(cell_spec_iri: str) -> tuple[Any, Any]:
     return ct, spec
 
 
+def _is_file_url(value: object) -> bool:
+    return isinstance(value, str) and value.strip().lower().startswith("file:")
+
+
+def _without_local_urls(record: Any) -> Any:
+    """*record* without the ``file:`` URLs that name a batch's local folders.
+
+    The ``_finalize_*`` helpers of :mod:`battinfo.publication` give a record its
+    local folder as the source URL, and a dataset the folder as its access URL.
+    A batch package is uploaded to Zenodo, so such a URL would publish the
+    folder's absolute path, the user name included. The URLs are dropped after
+    the IRIs are minted, which keeps the IRIs as they were. A dataset left
+    without an access URL points at the Zenodo record in the package
+    (:meth:`battinfo.bundle.ZenodoCellRecord.to_flat_json`), whose id the
+    upload fills in.
+    """
+    update: dict[str, Any] = {}
+    if _is_file_url(record.source.url):
+        update["source"] = record.source.model_copy(update={"url": None})
+    if _is_file_url(getattr(record, "access_url", None)):
+        update["access_url"] = None
+    return record.model_copy(update=update) if update else record
+
+
 def package_batch(
     batch_dir: Path,
     staging_dir: Path | None = None,
@@ -1082,7 +1106,8 @@ def package_batch(
     Reads ``batch.yaml``, discovers all cell sub-folders, collects raw data
     files from each cell's ``data/timeseries/`` and ``data/eis/`` directories,
     builds a :class:`ZenodoCellRecord`, and calls :func:`build_zenodo_package`
-    to produce the staging directory.
+    to produce the staging directory. The package holds no local path: no
+    record names a batch folder, and each dataset points at the Zenodo record.
 
     Args:
         batch_dir: Root directory created by ``init_batch``.
@@ -1156,12 +1181,9 @@ def package_batch(
             name=cell_manifest.get("cell_name"),
             serial_number=cell_manifest.get("cell_name"),
             batch_id=cell_manifest.get("batch_id") or manifest.get("batch_id"),
-            source=ProvenanceInfo(
-                type="measurement",
-                url=(cell_dir / "data").resolve().as_uri(),
-            ),
+            source=ProvenanceInfo(type="measurement"),
         )
-        ci = _finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir)
+        ci = _without_local_urls(_finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir))
         if ci.id is not None:
             prior = seen_cell_iris.get(ci.id)
             if prior is not None:
@@ -1191,7 +1213,7 @@ def package_batch(
                 test_kind=test_kind,
                 source=ProvenanceInfo(type="measurement"),
             )
-            test = _finalize_test(raw_test, cell_instance=ci, dataset_dir=cell_dir)
+            test = _without_local_urls(_finalize_test(raw_test, cell_instance=ci, dataset_dir=cell_dir))
 
             ds_name = f"{cell_spec.name} {ci.name or cell_dir.name} {raw_path.stem}"
             raw_ds = Dataset(
@@ -1200,7 +1222,9 @@ def package_batch(
                 test_id=test.id,
                 source=ProvenanceInfo(type="measurement"),
             )
-            ds = _finalize_dataset(raw_ds, cell_instance=ci, test=test, dataset_dir=cell_dir)
+            # The dataset IRI is seeded from the folder's name (dataset_locator_seed),
+            # so the local access URL goes only after it is minted.
+            ds = _without_local_urls(_finalize_dataset(raw_ds, cell_instance=ci, test=test, dataset_dir=cell_dir))
 
             entries.append(
                 ZenodoDatasetEntry(
@@ -1267,8 +1291,17 @@ def push_batch(
     Returns a summary dict with keys: ``status``, ``zenodo_url``, ``cells``,
     ``files``, ``staging_dir``.  When *dry_run* is ``True`` returns the same
     dict with ``status="dry_run"`` and no Zenodo upload.
+
+    In this release the upload goes only to the Zenodo sandbox: with a token
+    and without ``sandbox=True`` or ``dry_run=True``, a ``ValueError`` is
+    raised before any file is moved, processed or packaged.
     """
     import shutil
+
+    from battinfo.zenodo import _require_sandbox
+
+    if zenodo_token and not dry_run:
+        _require_sandbox(sandbox)
 
     folder = Path(folder).resolve()
 
