@@ -10,11 +10,11 @@ Usage::
                 format="cylindrical", chemistry="alkaline-zn-mno2")
     # fill in the draft lab/Duracell-MN2400.cell-spec.json, then:
     spec = ws.load("Duracell-MN2400.cell-spec.json")
-    ws.add("cell", spec=spec, serial_numbers=["C01", "C02"])
+    ws.add("cell", spec=spec, serial_numbers=["MYLAB-MN2400-01", "MYLAB-MN2400-02"])  # serials only your lab uses
     ws.template("test-spec", name="CC discharge C/5", type="capacity_check")
     # fill in the draft lab/CC-discharge-C-5.test-spec.json, then:
     protocol = ws.load("CC-discharge-C-5.test-spec.json")
-    ws.add("test", spec=protocol, cell="C01", instrument="NEWARE BTS82")
+    ws.add("test", spec=protocol, cell="MYLAB-MN2400-01", instrument="NEWARE BTS82")
     ws.save()
 """
 
