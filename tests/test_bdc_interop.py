@@ -23,12 +23,31 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from battinfo import batch_import_bdc, import_bdc_record, to_bdc_record  # noqa: E402
+from battinfo import batch_import_bdc, import_bdc_record, record_to_jsonld, to_bdc_record  # noqa: E402
+from battinfo.entities import kind_for_doc  # noqa: E402
 from battinfo.transform import to_jsonld  # noqa: E402
 from battinfo.validate import validate_record  # noqa: E402
 
 FX = ROOT / "tests" / "fixtures" / "interop" / "bdc"
 DATASETS = FX / "canonical" / "datasets"
+
+
+# to_jsonld maps cell specs, materials, electrodes and components, and raises on
+# an unmapped @type. It does not emit cells, tests or datasets; record_to_jsonld does.
+RECORD_TO_JSONLD_ONLY = {"cell": "cell-instance", "test": "test", "dataset": "dataset"}
+
+
+def _emits_its_own_node(record: dict) -> bool:
+    """True when the record's JSON-LD has a node for the record's IRI."""
+    kind = kind_for_doc(record)
+    assert kind is not None, record
+    if kind.entity_type in RECORD_TO_JSONLD_ONLY:
+        doc = record_to_jsonld(record, RECORD_TO_JSONLD_ONLY[kind.entity_type])
+    else:
+        doc = to_jsonld(record, target="domain-battery")
+    graph = doc.get("@graph")
+    nodes = graph if isinstance(graph, list) else [doc]
+    return record[kind.record_key]["id"] in {node.get("@id") for node in nodes}
 
 
 def _record(name: str) -> dict:
@@ -116,7 +135,7 @@ def test_electrode_materials_deduped_and_linked() -> None:
 def test_every_record_validates_and_emits_jsonld() -> None:
     for record in batch_import_bdc(FX, validate=False).records():
         assert validate_record(record).ok, record
-        to_jsonld(record, target="domain-battery")
+        assert _emits_its_own_node(record), record
 
 
 def test_all_iris_unique() -> None:

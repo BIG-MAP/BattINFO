@@ -4,7 +4,10 @@ Tutorials
 Six notebooks, one story: understand the record model, describe a cell, record
 what happened in the lab, look under the semantic hood, go research-deep, and
 publish a real dataset end to end. Work through them in order the first time —
-each builds on the one before.
+each builds on the one before. The example files they read ship inside the
+package, so a pip install is enough to run them (tutorial 6 also needs the
+``processing`` extra). In a hosted notebook such as Colab, install BattINFO in a
+cell first, as :doc:`getting-started` shows.
 
 Tutorials are for **learning**: they take you somewhere, explaining as they go.
 When you already know the basics and just need to get a job done, use the

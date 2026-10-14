@@ -20,87 +20,136 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 
-SPEC_UNIT_COMPATIBILITY: dict[str, set[str]] = {
+# Units each spec property accepts, as canonical symbols: the spelling the curated
+# unit map uses, which normalize_unit_symbol makes of accepted alternatives such as
+# 'um', 'mOhm', 'degC' or 'g/cm³'. Symbols are case-sensitive, because case can change
+# magnitude: 'mV' is a millivolt and 'MV' a megavolt. The first symbol of each entry
+# is the example the CLI and validation hints show. All symbols of one property have
+# the same dimension, and every cell-spec property has an entry
+# (tests/test_spec_units.py checks both).
+SPEC_UNIT_COMPATIBILITY: dict[str, tuple[str, ...]] = {
     # Material properties (material-spec / material `property` map)
-    "specific_capacity": {"mah/g", "ah/kg"},
-    "specific_discharge_capacity": {"mah/g", "ah/kg"},
-    "first_cycle_efficiency": {"%", "percent"},
-    "true_density": {"g/cm3", "kg/m3"},
-    "tap_density": {"g/cm3", "kg/m3"},
-    "density": {"g/cm3", "kg/m3"},
-    "bet_surface_area": {"m2/g"},
-    "particle_size_d10": {"um", "nm"},
-    "particle_size_d50": {"um", "nm"},
-    "particle_size_d90": {"um", "nm"},
-    "average_voltage": {"v", "mv"},
-    "molar_mass": {"g/mol", "kg/mol"},
-    "discharging_capacity": {"ah", "mah"},
-    "charging_capacity": {"ah", "mah"},
-    "nominal_capacity": {"ah", "mah"},
-    "minimum_capacity": {"ah", "mah"},
-    "min_capacity": {"ah", "mah"},
-    "rated_capacity": {"ah", "mah"},
-    "discharging_energy": {"wh", "kwh", "mwh"},
-    "charging_energy": {"wh", "kwh", "mwh"},
-    "typical_energy": {"wh", "kwh", "mwh"},
-    "rated_energy": {"wh", "kwh", "mwh"},
-    "nominal_voltage": {"v", "mv"},
-    "charging_voltage": {"v", "mv"},
-    "discharging_cutoff_voltage": {"v", "mv"},
-    "specific_energy": {"wh/kg", "mah/g"},
-    "energy_density": {"wh/l", "wh/lt", "wh/liter"},
-    "specific_power": {"w/kg", "mw/g"},
-    "power_density": {"w/l", "w/lt", "w/liter"},
-    "internal_resistance": {"ω", "ohm", "mω", "mohm", "milliohm"},
-    "impedance": {"ω", "ohm", "mω", "mohm", "milliohm"},
-    "mass": {"g", "kg", "mg"},
-    "volume": {"l", "ml", "cm3", "cc", "mm3"},
-    "pulse_charging_current": {"a", "ma", "c"},
-    "continuous_charging_current": {"a", "ma", "c"},
-    "nominal_continuous_charging_current": {"a", "ma", "c"},
-    "maximum_continuous_charging_current": {"a", "ma", "c"},
-    "pulse_discharging_current": {"a", "ma", "c"},
-    "continuous_discharging_current": {"a", "ma", "c"},
-    "nominal_continuous_discharging_current": {"a", "ma", "c"},
-    "maximum_continuous_discharging_current": {"a", "ma", "c"},
-    "charging_time": {"s", "sec", "second", "seconds", "min", "minute", "minutes", "h", "hr", "hour", "hours"},
-    "nominal_energy": {"wh", "kwh", "mwh"},
-    "certified_usable_energy": {"wh", "kwh", "mwh"},
-    "cycle_life": {"count", "cycle", "cycles"},
-    "cycle_life_c_rate": {"c", "a/ah"},
-    "calendar_life": {"year", "years", "month", "months", "day", "days"},
-    "capacity_fade": {"%", "percent"},
-    "capacity_threshold_exhaustion": {"%", "percent"},
-    "power_capability": {"w", "kw", "mw"},
-    "maximum_power": {"w", "kw", "mw"},
-    "power_energy_ratio": {"w/wh", "kw/kwh"},
-    "round_trip_energy_efficiency": {"%", "percent"},
-    "round_trip_energy_efficiency_50pct": {"%", "percent"},
-    "dc_internal_resistance": {"ω", "ohm", "mω", "mohm", "milliohm"},
-    "diameter": {"mm", "cm", "m", "um", "μm"},
-    "height": {"mm", "cm", "m", "um", "μm"},
-    "width": {"mm", "cm", "m", "um", "μm"},
-    "length": {"mm", "cm", "m", "um", "μm"},
-    "thickness": {"mm", "cm", "m", "um", "μm"},
-    "minimum_charging_temperature": {"°c", "c", "degc", "k"},
-    "maximum_charging_temperature": {"°c", "c", "degc", "k"},
-    "charging_temperature_min": {"°c", "c", "degc", "k"},
-    "charging_temperature_max": {"°c", "c", "degc", "k"},
-    "minimum_discharging_temperature": {"°c", "c", "degc", "k"},
-    "maximum_discharging_temperature": {"°c", "c", "degc", "k"},
-    "discharging_temperature_min": {"°c", "c", "degc", "k"},
-    "discharging_temperature_max": {"°c", "c", "degc", "k"},
-    "minimum_storage_temperature": {"°c", "c", "degc", "k"},
-    "maximum_storage_temperature": {"°c", "c", "degc", "k"},
-    "storage_temperature_min": {"°c", "c", "degc", "k"},
-    "storage_temperature_max": {"°c", "c", "degc", "k"},
-    # Health / efficiency / self-discharge (D-1: these unit-bearing specs previously had NO
-    # compatibility entry, so any unit — e.g. state_of_health in 'furlongs' — passed strict).
-    "ac_internal_resistance": {"ω", "ohm", "mω", "mohm", "milliohm"},
-    "initial_coulombic_efficiency": {"%", "percent"},
-    "state_of_health": {"%", "percent"},
-    "self_discharge_rate": {"%", "percent", "%/month", "%/day", "%/year", "%/week", "%/hour", "%/h"},
+    "specific_capacity": ("mAh/g", "Ah/kg"),
+    "specific_discharge_capacity": ("mAh/g", "Ah/kg"),
+    "first_cycle_efficiency": ("%",),
+    "true_density": ("g/cm3", "kg/m3"),
+    "tap_density": ("g/cm3", "kg/m3"),
+    "density": ("g/cm3", "kg/m3"),
+    "bet_surface_area": ("m2/g",),
+    "particle_size_d10": ("µm", "nm"),
+    "particle_size_d50": ("µm", "nm"),
+    "particle_size_d90": ("µm", "nm"),
+    "average_voltage": ("V", "mV"),
+    "molar_mass": ("g/mol", "kg/mol"),
+    "discharging_capacity": ("Ah", "mAh"),
+    "charging_capacity": ("Ah", "mAh"),
+    "nominal_capacity": ("Ah", "mAh"),
+    "minimum_capacity": ("Ah", "mAh"),
+    "min_capacity": ("Ah", "mAh"),
+    "rated_capacity": ("Ah", "mAh"),
+    "typical_capacity": ("Ah", "mAh"),
+    "discharging_energy": ("Wh", "kWh", "mWh"),
+    "charging_energy": ("Wh", "kWh", "mWh"),
+    "typical_energy": ("Wh", "kWh", "mWh"),
+    "rated_energy": ("Wh", "kWh", "mWh"),
+    "nominal_energy": ("Wh", "kWh", "mWh"),
+    "certified_usable_energy": ("Wh", "kWh", "mWh"),
+    "nominal_voltage": ("V", "mV"),
+    "charging_voltage": ("V", "mV"),
+    "charging_cutoff_voltage": ("V", "mV"),
+    "discharging_cutoff_voltage": ("V", "mV"),
+    "upper_voltage_limit": ("V", "mV"),
+    "specific_energy": ("Wh/kg",),
+    "energy_density": ("Wh/L",),
+    "specific_power": ("W/kg", "mW/g"),
+    "power_density": ("W/L",),
+    "internal_resistance": ("mΩ", "Ω"),
+    "impedance": ("mΩ", "Ω"),
+    "dc_internal_resistance": ("mΩ", "Ω"),
+    "ac_internal_resistance": ("mΩ", "Ω"),
+    "mass": ("g", "kg", "mg"),
+    "volume": ("L", "mL", "cm3", "mm3"),
+    "electrode_area": ("cm2", "m2", "mm2"),
+    "external_surface_area": ("cm2", "m2", "mm2"),
+    # Currents only. A C-rate has the dimension 1/time, so 'C' is refused here, with a
+    # hint that names the charging_c_rate or discharging_c_rate condition key.
+    "pulse_charging_current": ("A", "mA"),
+    "continuous_charging_current": ("A", "mA"),
+    "nominal_continuous_charging_current": ("A", "mA"),
+    "maximum_continuous_charging_current": ("A", "mA"),
+    "maximum_pulse_charging_current": ("A", "mA"),
+    "pulse_discharging_current": ("A", "mA"),
+    "continuous_discharging_current": ("A", "mA"),
+    "nominal_continuous_discharging_current": ("A", "mA"),
+    "maximum_continuous_discharging_current": ("A", "mA"),
+    "maximum_pulse_discharging_current": ("A", "mA"),
+    "charging_time": ("h", "min", "s"),
+    # 'count' and '1' are both EMMO's UnitOne; 'cycles' is accepted as a spelling of 'count'.
+    "cycle_life": ("count", "1"),
+    "cycle_life_c_rate": ("A/Ah",),
+    # 'days' is accepted as a spelling of 'day', the one of these with an EMMO unit.
+    "calendar_life": ("year", "years", "month", "months", "day"),
+    "capacity_fade": ("%",),
+    "capacity_threshold_exhaustion": ("%",),
+    "power_capability": ("W", "kW", "mW"),
+    "maximum_power": ("W", "kW", "mW"),
+    "power_energy_ratio": ("W/Wh", "kW/kWh"),
+    "round_trip_energy_efficiency": ("%",),
+    "round_trip_energy_efficiency_50pct": ("%",),
+    "initial_coulombic_efficiency": ("%",),
+    "state_of_health": ("%",),
+    # A rate: the share of capacity lost per unit of time. A bare '%' has no time base
+    # and is refused.
+    "self_discharge_rate": ("%/month", "%/week", "%/day", "%/year", "%/h", "%/hour"),
+    "diameter": ("mm", "cm", "m", "µm"),
+    "height": ("mm", "cm", "m", "µm"),
+    "width": ("mm", "cm", "m", "µm"),
+    "length": ("mm", "cm", "m", "µm"),
+    "thickness": ("mm", "cm", "m", "µm"),
+    "minimum_charging_temperature": ("°C", "K"),
+    "maximum_charging_temperature": ("°C", "K"),
+    "charging_temperature_min": ("°C", "K"),
+    "charging_temperature_max": ("°C", "K"),
+    "minimum_discharging_temperature": ("°C", "K"),
+    "maximum_discharging_temperature": ("°C", "K"),
+    "discharging_temperature_min": ("°C", "K"),
+    "discharging_temperature_max": ("°C", "K"),
+    "minimum_storage_temperature": ("°C", "K"),
+    "maximum_storage_temperature": ("°C", "K"),
+    "storage_temperature_min": ("°C", "K"),
+    "storage_temperature_max": ("°C", "K"),
+    "operating_temperature_min": ("°C", "K"),
+    "operating_temperature_max": ("°C", "K"),
 }
+
+# Spellings normalize_unit_symbol leaves as they are, with the symbols they stand for.
+# A spelling is accepted on a property that allows one of those symbols, and the
+# unit_unmapped warning names that symbol, which is the one the unit map knows.
+_UNIT_SPELLINGS: dict[str, tuple[str, ...]] = {
+    # Degree Celsius on a temperature; a C-rate on cycle_life_c_rate. A current
+    # allows neither, so 'C' on a current is refused.
+    "C": ("°C", "A/Ah"),
+    "cycle": ("count",),
+    "cycles": ("count",),
+    "days": ("day",),
+    "Wh/lt": ("Wh/L",),
+    "Wh/liter": ("Wh/L",),
+    "W/lt": ("W/L",),
+    "W/liter": ("W/L",),
+}
+
+# Units of a C-rate (dimension 1/time), compared without case. On a current they get
+# a hint that names the C-rate condition key instead of a bare mismatch.
+_C_RATE_UNITS = frozenset({"c", "a/ah", "1/h", "h-1"})
+
+# Units an SI prefix letter can stand before, compared without case. A case variant
+# that turns the prefix 'm' (milli) into 'M' (mega), or the reverse, in front of one
+# of these changes the value a billionfold ('MV' for 'mV'); in 'min', 'mol' or
+# 'month' the 'm' is no prefix.
+_PREFIXABLE_UNITS = frozenset(
+    {"a", "ah", "v", "w", "wh", "ω", "ohm", "ohms", "m", "m2", "m3", "g", "l", "s", "pa", "j", "hz"}
+)
+_UNIT_FACTOR_SPLIT = re.compile(r"[/.·*()]")
 
 PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
     ("minimum_charging_temperature", "maximum_charging_temperature"),
@@ -113,47 +162,48 @@ PAIRED_SPEC_RANGES: tuple[tuple[str, str], ...] = (
     ("min_capacity", "nominal_capacity"),
 )
 
-# Plausibility bounds: (min_inclusive, max_inclusive) per (spec_name, normalised_unit).
+# Plausibility bounds: (min_inclusive, max_inclusive) per (spec_name, canonical unit symbol).
 # These are loose sanity checks — clearly-impossible values only — not chemistry-specific.
 # All comparisons use the numeric value as-is in the stated unit (no conversion).
 SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     # Material properties — loose sanity bounds catching decimal/units typos
-    "specific_capacity": {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
-    "specific_discharge_capacity": {"mah/g": (0.0, 4000.0), "ah/kg": (0.0, 4.0)},
-    "first_cycle_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    # (1 Ah/kg is 1 mAh/g, so the two specific-capacity units share one bound).
+    "specific_capacity": {"mAh/g": (0.0, 4000.0), "Ah/kg": (0.0, 4000.0)},
+    "specific_discharge_capacity": {"mAh/g": (0.0, 4000.0), "Ah/kg": (0.0, 4000.0)},
+    "first_cycle_efficiency": {"%": (0.0, 100.0)},
     "true_density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
     "tap_density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
     "density": {"g/cm3": (0.1, 25.0), "kg/m3": (100.0, 25000.0)},
     "bet_surface_area": {"m2/g": (0.0, 5000.0)},
-    "particle_size_d10": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "particle_size_d50": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "particle_size_d90": {"um": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
-    "average_voltage": {"v": (0.0, 6.0), "mv": (0.0, 6000.0)},
+    "particle_size_d10": {"µm": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d50": {"µm": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "particle_size_d90": {"µm": (0.001, 1000.0), "nm": (1.0, 1_000_000.0)},
+    "average_voltage": {"V": (0.0, 6.0), "mV": (0.0, 6000.0)},
     "molar_mass": {"g/mol": (1.0, 2_000_000.0), "kg/mol": (0.001, 2000.0)},
     # Voltages — catches decimal-shift errors (e.g. 35 V instead of 3.5 V)
-    "nominal_voltage": {"v": (0.3, 5.5), "mv": (300.0, 5500.0)},
-    "charging_voltage": {"v": (0.3, 6.0), "mv": (300.0, 6000.0)},
-    "discharging_cutoff_voltage": {"v": (0.0, 5.0), "mv": (0.0, 5000.0)},
-    "charging_cutoff_voltage": {"v": (1.0, 6.0)},
-    "upper_voltage_limit": {"v": (1.0, 6.0)},
+    "nominal_voltage": {"V": (0.3, 5.5), "mV": (300.0, 5500.0)},
+    "charging_voltage": {"V": (0.3, 6.0), "mV": (300.0, 6000.0)},
+    "discharging_cutoff_voltage": {"V": (0.0, 5.0), "mV": (0.0, 5000.0)},
+    "charging_cutoff_voltage": {"V": (1.0, 6.0)},
+    "upper_voltage_limit": {"V": (1.0, 6.0)},
     # Capacity — catches Ah/mAh confusion and orders-of-magnitude typos
-    "discharging_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "charging_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "nominal_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "minimum_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "min_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "rated_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
-    "typical_capacity": {"ah": (1e-4, 2000.0), "mah": (0.1, 2_000_000.0)},
+    "discharging_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "charging_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "nominal_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "minimum_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "min_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "rated_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
+    "typical_capacity": {"Ah": (1e-4, 2000.0), "mAh": (0.1, 2_000_000.0)},
     # Energy
-    "discharging_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "charging_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "nominal_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "typical_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "rated_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
-    "certified_usable_energy": {"wh": (1e-4, 200_000.0), "kwh": (1e-7, 200.0)},
+    "discharging_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
+    "charging_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
+    "nominal_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
+    "typical_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
+    "rated_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
+    "certified_usable_energy": {"Wh": (1e-4, 200_000.0), "kWh": (1e-7, 200.0)},
     # Specific energy / energy density — bounded by known cell chemistry physics
-    "specific_energy": {"wh/kg": (1.0, 1000.0), "mah/g": (1.0, 500.0)},
-    "energy_density": {"wh/l": (1.0, 2500.0)},
+    "specific_energy": {"Wh/kg": (1.0, 1000.0)},
+    "energy_density": {"Wh/L": (1.0, 2500.0)},
     # Physical dimensions — single-cell bounds
     "mass": {"g": (0.05, 70_000.0), "kg": (5e-5, 70.0)},
     "diameter": {"mm": (0.5, 500.0)},
@@ -162,15 +212,14 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "length": {"mm": (0.3, 2000.0)},
     "thickness": {"mm": (0.05, 200.0)},
     # Cycle life — catches 10x typos (100000 cycles instead of 10000)
-    "cycle_life": {"count": (1, 100_000), "cycle": (1, 100_000), "cycles": (1, 100_000)},
+    "cycle_life": {"count": (1, 100_000), "1": (1, 100_000)},
     # Efficiency / fade — must be a percentage
-    "round_trip_energy_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "round_trip_energy_efficiency_50pct": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "capacity_fade": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "capacity_threshold_exhaustion": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "initial_coulombic_efficiency": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "state_of_health": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
-    "self_discharge_rate": {"%": (0.0, 100.0), "percent": (0.0, 100.0)},
+    "round_trip_energy_efficiency": {"%": (0.0, 100.0)},
+    "round_trip_energy_efficiency_50pct": {"%": (0.0, 100.0)},
+    "capacity_fade": {"%": (0.0, 100.0)},
+    "capacity_threshold_exhaustion": {"%": (0.0, 100.0)},
+    "initial_coulombic_efficiency": {"%": (0.0, 100.0)},
+    "state_of_health": {"%": (0.0, 100.0)},
 }
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
@@ -260,18 +309,240 @@ def _numeric_spec_value(item: Mapping[str, Any]) -> float | None:
 
 
 def _unit_token(item: Mapping[str, Any]) -> str | None:
+    """The unit a quantity states, trimmed. Case is kept: 'mV' and 'MV' differ a billionfold."""
     for key in ("unit", "unit_text", "unit_code"):
         value = item.get(key)
         if isinstance(value, str) and value.strip():
-            return value.strip().lower()
+            return value.strip()
     return None
 
 
-def _normalized_unit(unit: str) -> str:
-    normalized = unit.replace(" ", "").replace("ohms", "ohm")
-    # pct is a plain percent, the same unit as % and percent (the JSON-LD
-    # export gives all three PercentUnit).
-    return "%" if normalized == "pct" else normalized
+def _unit_forms(unit: str) -> list[str]:
+    """The unit as the JSON-LD emitter reads it, then the same without spaces ('W h' is 'Wh')."""
+    from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
+
+    forms: list[str] = []
+    for candidate in (unit, unit.replace(" ", "")):
+        symbol = normalize_unit_symbol(candidate)
+        if symbol and symbol not in forms:
+            forms.append(symbol)
+    return forms
+
+
+def _casefold_index(pairs: list[tuple[str, str]]) -> dict[str, tuple[str, str] | None]:
+    """``{spelling.casefold(): (spelling, symbol)}``; None where two symbols share a key."""
+    index: dict[str, tuple[str, str] | None] = {}
+    for spelling, symbol in pairs:
+        key = spelling.casefold()
+        if key not in index:
+            index[key] = (spelling, symbol)
+            continue
+        known = index[key]
+        if known is not None and known[1] != symbol:
+            index[key] = None
+    return index
+
+
+@lru_cache(maxsize=None)
+def _spellings_by_casefold(allowed: tuple[str, ...]) -> dict[str, tuple[str, str] | None]:
+    """Each spelling of the allowed symbols, keyed without case: the symbols themselves,
+    the aliases normalize_unit_symbol turns into them, and the entries of _UNIT_SPELLINGS."""
+    from battinfo.transform.json_to_jsonld import _UNIT_ALIASES  # noqa: PLC0415
+
+    pairs = [(symbol, symbol) for symbol in allowed]
+    pairs += [(alias, symbol) for alias, symbol in _UNIT_ALIASES.items() if symbol in allowed]
+    pairs += [
+        (spelling, target) for spelling, targets in _UNIT_SPELLINGS.items() for target in targets if target in allowed
+    ]
+    return _casefold_index(pairs)
+
+
+@lru_cache(maxsize=1)
+def _unit_map_by_casefold() -> dict[str, tuple[str, str] | None]:
+    """Each symbol of the unit map and each alias of one, keyed without case."""
+    from battinfo.transform.json_to_jsonld import _UNIT_ALIASES, _unit_type_map, normalize_unit_symbol  # noqa: PLC0415
+
+    pairs = [(symbol, normalize_unit_symbol(symbol) or symbol) for symbol in _unit_type_map()]
+    pairs += list(_UNIT_ALIASES.items())
+    return _casefold_index(pairs)
+
+
+def _turns_milli_into_mega(written: str, spelling: str) -> bool:
+    """Whether ``spelling`` reads the SI prefix 'm' (milli) of ``written`` as 'M' (mega)
+    in front of a unit: 'MPa' for 'mPa'."""
+    for got, want in zip(_UNIT_FACTOR_SPLIT.split(written), _UNIT_FACTOR_SPLIT.split(spelling)):
+        if (
+            len(got) > 1
+            and len(want) > 1
+            and (got[0], want[0]) == ("m", "M")
+            and want[1:].casefold() in _PREFIXABLE_UNITS
+        ):
+            return True
+    return False
+
+
+def _swaps_milli_and_mega(written: str, spelling: str) -> bool:
+    """Whether ``written`` reads the SI prefix 'm' (milli) of ``spelling`` as 'M' (mega),
+    or the reverse, in front of a unit: 'MV' for 'mV', 'MAh/g' for 'mAh/g'."""
+    return _turns_milli_into_mega(written, spelling) or _turns_milli_into_mega(spelling, written)
+
+
+def _match_spec_unit(unit: str, allowed: tuple[str, ...]) -> tuple[str, str] | None:
+    """The allowed symbol a written unit stands for, and how it was written.
+
+    The second item is 'symbol' (the symbol, or a spelling normalize_unit_symbol turns
+    into it, such as 'um' or 'degC'), 'spelling' (an entry of _UNIT_SPELLINGS, such as
+    'cycles'), 'case' (another case that keeps the magnitude, such as 'ah') or
+    'magnitude' (another case that swaps milli and mega, such as 'MV' for 'mV').
+    None means the unit stands for none of the allowed symbols.
+    """
+    forms = _unit_forms(unit)
+    for form in forms:
+        if form in allowed:
+            return form, "symbol"
+    for form in forms:
+        for target in _UNIT_SPELLINGS.get(form, ()):
+            if target in allowed:
+                return target, "spelling"
+    index = _spellings_by_casefold(allowed)
+    for form in (unit, *forms):
+        hit = index.get(form.casefold())
+        if hit is not None:
+            spelling, symbol = hit
+            return symbol, "magnitude" if _swaps_milli_and_mega(form, spelling) else "case"
+    return None
+
+
+def _changes_a_one_letter_symbol(written: str, spelling: str) -> bool:
+    """Whether ``spelling`` changes the case of a one-letter factor of ``written``.
+
+    Case alone tells such symbols apart: 'M' (molar) and 'm' (metre), 'S' (siemens)
+    and 's' (second).
+    """
+    for got, want in zip(_UNIT_FACTOR_SPLIT.split(written), _UNIT_FACTOR_SPLIT.split(spelling)):
+        if len(got) == 1 and got != want:
+            return True
+    return False
+
+
+def _unit_map_match(unit: str) -> str | None:
+    """The unit-map symbol ``unit`` matches once case is ignored, when exactly one does.
+
+    A match that could change what the unit means is never offered: one that swaps
+    the prefixes milli and mega in either direction ('mPa' does not get 'MPa', a
+    billion times more, nor 'MΩ' get 'mΩ'), or that changes the case of a one-letter
+    symbol ('M' does not get 'm', nor 'S' get 's').
+    """
+    from battinfo.transform.json_to_jsonld import _unit_iri  # noqa: PLC0415
+
+    for form in (unit, *_unit_forms(unit)):
+        hit = _unit_map_by_casefold().get(form.casefold())
+        if (
+            hit is not None
+            and _unit_iri(hit[1]) is not None
+            and not _swaps_milli_and_mega(form, hit[0])
+            and not _changes_a_one_letter_symbol(form, hit[0])
+        ):
+            return hit[1]
+    return None
+
+
+def _unit_mismatch_message(spec_name: str, unit: str, allowed: tuple[str, ...], match: tuple[str, str] | None) -> str:
+    """Why ``unit`` is refused on ``spec_name``, with the fix where one is known."""
+    valid = ", ".join(allowed)
+    if match is not None:  # a case variant that swaps the prefixes milli and mega
+        return (
+            f"unit '{unit}' is not compatible with spec '{spec_name}': unit symbols are case-sensitive, and the "
+            f"prefix 'M' (mega) is 10^9 times 'm' (milli). Did you mean '{match[0]}'? (valid: {valid})"
+        )
+    forms = {form.casefold() for form in _unit_forms(unit)}
+    if spec_name.endswith("_current") and forms & _C_RATE_UNITS:
+        rate_key = "discharging_c_rate" if "discharging" in spec_name else "charging_c_rate"
+        return (
+            f"unit '{unit}' is not compatible with spec '{spec_name}' (valid: {valid}): '{unit}' gives a C-rate, "
+            "not a current. Give the current in A, which is the C-rate times the nominal capacity in Ah, or "
+            f"state the C-rate as '{rate_key}' in the conditions of the value it applies to."
+        )
+    if spec_name == "self_discharge_rate" and "%" in forms:
+        return (
+            f"unit '{unit}' is not compatible with spec 'self_discharge_rate' (valid: {valid}): a self-discharge "
+            "rate is the share of capacity lost per unit of time, so give the time base, as in '%/month'."
+        )
+    return f"unit '{unit}' is not compatible with spec '{spec_name}' (valid: {valid})."
+
+
+def _warn_unit_unmapped(
+    unit: str,
+    symbol: str | None,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn semantic.unit_unmapped, under every policy, when ``unit`` gets no EMMO unit IRI.
+
+    The JSON-LD export then writes the unit as text (schema:unitText) only. ``symbol``
+    is the accepted symbol the unit stands for, when the property has a unit check;
+    the warning names it when the unit is spelled another way ('ah' for 'Ah'). For a
+    property without a unit check it offers the unit-map symbol that matches once case
+    is ignored, unless that could change what the unit means (see ``_unit_map_match``).
+    """
+    from battinfo.transform.json_to_jsonld import _unit_iri, normalize_unit_symbol  # noqa: PLC0415
+
+    if _unit_iri(unit) is not None:
+        return
+    text_only = f"'{unit}' gets no EMMO unit IRI, so the JSON-LD export keeps it as text (schema:unitText) only."
+    file_mapping = "file a mapping in assets/mappings/domain-battery/unit_map.curated.json."
+    if symbol is not None and symbol != normalize_unit_symbol(unit):
+        if _unit_iri(symbol) is not None:
+            message = f"write '{symbol}'; {text_only}"
+        else:
+            message = f"{text_only} Write it '{symbol}', and {file_mapping}"
+    else:
+        guess = _unit_map_match(unit) if symbol is None else None
+        message = f"did you mean '{guess}'? {text_only}" if guess else f"{text_only} To give it one, {file_mapping}"
+    _append_issue(
+        issues,
+        code="semantic.unit_unmapped",
+        severity="warning",
+        path=path,
+        message=message,
+        resource_type=resource_type,
+    )
+
+
+def _check_spec_unit(
+    spec_name: str,
+    unit: str,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> str | None:
+    """Check the unit of one property; return the symbol it stands for, or None when refused.
+
+    A unit of another dimension, or a case variant that swaps the prefixes milli and
+    mega ('MV' for 'mV'), is semantic.unit_mismatch, an error under strict. A unit the
+    property accepts but that gets no EMMO unit IRI is the semantic.unit_unmapped
+    warning, as is any unit without one on a property that has no unit check.
+    """
+    allowed = SPEC_UNIT_COMPATIBILITY.get(spec_name)
+    if allowed is None:
+        _warn_unit_unmapped(unit, None, path, issues, resource_type)
+        forms = _unit_forms(unit)
+        return forms[0] if forms else None
+    match = _match_spec_unit(unit, allowed)
+    if match is None or match[1] == "magnitude":
+        _append_issue(
+            issues,
+            code="semantic.unit_mismatch",
+            severity=issue_severity,
+            path=path,
+            message=_unit_mismatch_message(spec_name, unit, allowed, match),
+            resource_type=resource_type,
+        )
+        return None
+    _warn_unit_unmapped(unit, match[0], path, issues, resource_type)
+    return match[0]
 
 
 def _append_issue(
@@ -777,14 +1048,15 @@ def _validate_size_code(
 def _validate_spec_plausibility(
     spec_name: str,
     spec_value: Mapping[str, Any],
+    symbol: str | None,
+    path: str,
     issues: list[ValidationIssue],
     resource_type: str | None,
 ) -> None:
-    unit_raw = _unit_token(spec_value)
-    if unit_raw is None:
+    """Warn on a value outside the loose bounds for its property, in the unit symbol it uses."""
+    if symbol is None:
         return
-    unit_norm = _normalized_unit(unit_raw)
-    bounds = SPEC_PLAUSIBILITY_BOUNDS.get(spec_name, {}).get(unit_norm)
+    bounds = SPEC_PLAUSIBILITY_BOUNDS.get(spec_name, {}).get(symbol)
     if bounds is None:
         return
     lo, hi = bounds
@@ -799,10 +1071,10 @@ def _validate_spec_plausibility(
                 issues,
                 code="semantic.value_out_of_plausible_range",
                 severity="warning",
-                path=f"specs.{spec_name}.{value_key}",
+                path=f"{path}.{value_key}",
                 message=(
-                    f"value {v} {unit_raw} for '{spec_name}' is outside the plausible range "
-                    f"[{lo}, {hi}] {unit_raw}. Verify units and magnitude."
+                    f"value {v} {symbol} for '{spec_name}' is outside the plausible range "
+                    f"[{lo}, {hi}] {symbol}. Verify units and magnitude."
                 ),
                 resource_type=resource_type,
             )
@@ -924,28 +1196,24 @@ def _validate_specs(
     issues: list[ValidationIssue],
     resource_type: str | None,
     issue_severity: str,
+    *,
+    path_prefix: str = "properties",
 ) -> None:
+    """Units, plausibility and ranges of a property map; issue paths start with ``path_prefix``."""
+    symbols: dict[str, str] = {}
     for spec_name, spec_value in specs.items():
         if not isinstance(spec_value, Mapping):
             continue
+        path = f"{path_prefix}.{spec_name}"
         # Non-finite numerics (NaN / +-Infinity) are caught record-wide by
         # _walk_non_finite (called from validate_semantic_report), so nested
         # quantities are covered too, not just flat specs.
         unit = _unit_token(spec_value)
-        if unit is not None and spec_name in SPEC_UNIT_COMPATIBILITY:
-            normalized = _normalized_unit(unit)
-            if normalized not in SPEC_UNIT_COMPATIBILITY[spec_name]:
-                valid = ", ".join(sorted(SPEC_UNIT_COMPATIBILITY[spec_name]))
-                _append_issue(
-                    issues,
-                    code="semantic.unit_mismatch",
-                    severity=issue_severity,
-                    path=f"specs.{spec_name}",
-                    message=f"unit '{unit}' is not compatible with spec '{spec_name}' (valid: {valid}).",
-                    resource_type=resource_type,
-                )
+        symbol = _check_spec_unit(spec_name, unit, path, issues, resource_type, issue_severity) if unit else None
+        if symbol is not None:
+            symbols[spec_name] = symbol
 
-        _validate_spec_plausibility(spec_name, spec_value, issues, resource_type)
+        _validate_spec_plausibility(spec_name, spec_value, symbol, path, issues, resource_type)
 
         min_value = spec_value.get("min_value")
         max_value = spec_value.get("max_value")
@@ -959,7 +1227,7 @@ def _validate_specs(
                 issues,
                 code="semantic.range_invalid",
                 severity=issue_severity,
-                path=f"specs.{spec_name}",
+                path=path,
                 message=f"min_value {min_value} must be <= max_value {max_value}.",
                 resource_type=resource_type,
             )
@@ -973,7 +1241,7 @@ def _validate_specs(
                 issues,
                 code="semantic.range_invalid",
                 severity=issue_severity,
-                path=f"specs.{spec_name}.typical_value",
+                path=f"{path}.typical_value",
                 message=f"typical_value {typical_value} must fall between min_value {min_value} and max_value {max_value}.",
                 resource_type=resource_type,
             )
@@ -987,14 +1255,15 @@ def _validate_specs(
         upper_num = _numeric_spec_value(upper)
         if lower_num is None or upper_num is None:
             continue
-        lower_unit = _unit_token(lower)
-        upper_unit = _unit_token(upper)
-        if lower_unit and upper_unit and _normalized_unit(lower_unit) != _normalized_unit(upper_unit):
+        # Compare the symbols the units stand for, so '°C' and 'degC' are one unit.
+        lower_unit = symbols.get(lower_key) or _unit_token(lower)
+        upper_unit = symbols.get(upper_key) or _unit_token(upper)
+        if lower_unit and upper_unit and lower_unit != upper_unit:
             _append_issue(
                 issues,
                 code="semantic.unit_mismatch",
                 severity=issue_severity,
-                path=f"specs.{lower_key}",
+                path=f"{path_prefix}.{lower_key}",
                 message=f"paired specs '{lower_key}' and '{upper_key}' must use the same unit.",
                 resource_type=resource_type,
             )
@@ -1004,7 +1273,7 @@ def _validate_specs(
                 issues,
                 code="semantic.range_invalid",
                 severity=issue_severity,
-                path=f"specs.{lower_key}",
+                path=f"{path_prefix}.{lower_key}",
                 message=f"spec '{lower_key}' value {lower_num} must be <= '{upper_key}' value {upper_num}.",
                 resource_type=resource_type,
             )
@@ -1110,7 +1379,7 @@ def _validate_test_semantics(
         )
 
 
-# Kelvin spellings as _unit_token returns them (lower-cased); "kel" is the
+# Kelvin spellings, compared without case ('K', 'Kelvin', 'KEL'); "kel" is the
 # UN/CEFACT code.
 _KELVIN_UNITS = frozenset({"k", "kelvin", "kel"})
 
@@ -1132,7 +1401,8 @@ def _validate_ambient_temperature_unit(
         holders.append(("test.conditions", test.get("conditions")))
     for prefix, conditions in holders:
         quantity = conditions.get("ambient_temperature") if isinstance(conditions, Mapping) else None
-        if not isinstance(quantity, Mapping) or _unit_token(quantity) not in _KELVIN_UNITS:
+        unit = _unit_token(quantity) if isinstance(quantity, Mapping) else None
+        if unit is None or unit.casefold() not in _KELVIN_UNITS:
             continue
         _append_issue(
             issues,
@@ -1189,6 +1459,9 @@ def _validate_method_step_classes(
 
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
+# The Unix times a date can be made of: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z.
+_EPOCH_FIRST = -62135596800
+_EPOCH_LAST = 253402300799
 
 
 def _walk_epoch_plausibility(
@@ -1196,12 +1469,19 @@ def _walk_epoch_plausibility(
     path: str,
     issues: list[ValidationIssue],
     resource_type: str | None,
+    hard_issue_severity: str = "warning",
 ) -> None:
     """Warn on any ``*_at`` epoch field outside 2000..2100.
 
     A 1970 timestamp on a citable record is always converter/import garbage
     (e.g. an epoch that was divided by 1000 upstream), yet it is schema-valid;
     this is the loud channel the red-team review found missing.
+
+    A time no date can be made of, most often one in milliseconds (past the
+    year 9999 as seconds), is ``semantic.timestamp_out_of_range`` instead, at
+    the policy's hard severity: an error under the strict and publisher
+    policies, so ``ws.save()`` stops it. A deposit graph would have to leave
+    such a time out.
     """
     if isinstance(value, Mapping):
         for key, item in value.items():
@@ -1212,8 +1492,23 @@ def _walk_epoch_plausibility(
                 and isinstance(item, (int, float))
                 and not isinstance(item, bool)
                 and item != 0
-                and not (_EPOCH_MIN <= float(item) <= _EPOCH_MAX)
+                # Compared as they are: float() of a very large int overflows.
+                and not (_EPOCH_MIN <= item <= _EPOCH_MAX)
             ):
+                if not (_EPOCH_FIRST <= item <= _EPOCH_LAST):
+                    _append_issue(
+                        issues,
+                        code="semantic.timestamp_out_of_range",
+                        severity=hard_issue_severity,
+                        path=child,
+                        message=(
+                            f"{key} = {item} cannot be a Unix time in seconds: it falls outside the "
+                            "years 1 to 9999, as a time in milliseconds does. Give it in seconds; a "
+                            "deposit graph leaves it out."
+                        ),
+                        resource_type=resource_type,
+                    )
+                    continue
                 _append_issue(
                     issues,
                     code="semantic.timestamp_implausible",
@@ -1227,10 +1522,10 @@ def _walk_epoch_plausibility(
                     resource_type=resource_type,
                 )
             else:
-                _walk_epoch_plausibility(item, child, issues, resource_type)
+                _walk_epoch_plausibility(item, child, issues, resource_type, hard_issue_severity)
     elif isinstance(value, list):
         for idx, item in enumerate(value):
-            _walk_epoch_plausibility(item, f"{path}[{idx}]", issues, resource_type)
+            _walk_epoch_plausibility(item, f"{path}[{idx}]", issues, resource_type, hard_issue_severity)
 
 
 def _walk_non_finite(
@@ -1611,7 +1906,7 @@ def validate_semantic_report(
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just
     # flat specs.
     _walk_non_finite(doc, "", issues, resource_type)
-    _walk_epoch_plausibility(doc, "", issues, resource_type)
+    _walk_epoch_plausibility(doc, "", issues, resource_type, hard_issue_severity)
     _walk_percent_basis(doc, "", issues, resource_type)
 
     specs = doc.get("properties")
@@ -1623,7 +1918,9 @@ def validate_semantic_report(
     for body_key in ("material_spec", "material", "electrode_spec", "electrode"):
         body = doc.get(body_key)
         if isinstance(body, Mapping) and isinstance(body.get("property"), Mapping):
-            _validate_specs(body["property"], issues, resource_type, hard_issue_severity)
+            _validate_specs(
+                body["property"], issues, resource_type, hard_issue_severity, path_prefix=f"{body_key}.property"
+            )
 
     # Every component body's property block gets the mappability check, with the
     # transform's own holder term tables (fraction, descriptor, coating,

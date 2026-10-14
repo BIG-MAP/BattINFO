@@ -79,8 +79,6 @@ def _graph(doc: dict) -> rdflib.Graph:
 
 def _iter_records():
     for kind_dir in sorted(p for p in EXAMPLES.iterdir() if p.is_dir()):
-        if kind_dir.name == "profiles":
-            continue  # profile documents, not records — no emitter
         # Recursive: some kinds keep worked examples in subfolders
         # (cell-spec/research/), and a sweep that skips them certifies nothing
         # about them.
@@ -143,9 +141,9 @@ def test_sweep_reaches_every_record_kind_and_every_file() -> None:
     """The sweep's reach is itself a contract: every kind directory contributes
     at least one record, and no packaged example file is left out."""
     swept = Counter(kind for kind, _path, _record in _iter_records())
-    kind_dirs = sorted(p.name for p in EXAMPLES.iterdir() if p.is_dir() and p.name != "profiles")
+    kind_dirs = sorted(p.name for p in EXAMPLES.iterdir() if p.is_dir())
     assert [k for k in kind_dirs if not swept[k]] == []
-    on_disk = sum(1 for p in EXAMPLES.rglob("*.json") if "profiles" not in p.relative_to(EXAMPLES).parts)
+    on_disk = sum(1 for _ in EXAMPLES.rglob("*.json"))
     assert sum(swept.values()) == on_disk
 
 

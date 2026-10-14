@@ -645,7 +645,9 @@ def cell_description(
             e.g. ``"lfp"``, ``"nmc"``, ``"nca"``.
         negative_electrode_basis: Negative electrode chemistry shortcode,
             e.g. ``"graphite"``, ``"lithium"``.
-        size_code: IEC or custom size code, e.g. ``"R18650"``, ``"P0035"``.
+        size_code: The size part of the IEC designation, ``R`` or ``P`` plus
+            dimensions, e.g. ``"R18650"``, ``"R2032"``, ``"P0035"``. The full
+            designation (``"CR2032"``) is the returned spec's ``iec_code``.
         construction: Assembly description from :func:`construction`.
         properties: Cell-level quantitative properties (capacity, voltage, etc.).
         positive_electrode: Positive electrode from :func:`electrode` (full cell).

@@ -874,6 +874,18 @@ export const recordsContext: Record<string, unknown> = {
     "Foam": "emmo:EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018",
     "PercentUnit": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
     "LithiumTitanate": "https://w3id.org/emmo/domain/chemical-substance#substance_acdb232f_8041_4e11_8a11_5db2d2baae4d",
-    "LithiumManganeseOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827"
+    "LithiumManganeseOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827",
+    "MilliAmpereHourPerGram": "emmo:MilliAmpereHourPerGram",
+    "AmpereHourPerKilogram": "emmo:AmpereHourPerKilogram",
+    "MilliAmpereHourPerSquareCentiMetre": "emmo:MilliAmpereHourPerSquareCentiMetre",
+    "SiemensPerCentiMetre": "emmo:SiemensPerCentiMetre",
+    "KiloPascal": "emmo:KiloPascal",
+    "MegaPascal": "emmo:MegaPascal",
+    "WattPerWattHour": "electrochemistry:WattPerWattHour",
+    "KiloWatt": "emmo:KiloWatt",
+    "MilliWatt": "emmo:MilliWatt",
+    "SquareMilliMetre": "emmo:SquareMilliMetre",
+    "CubicMilliMetre": "emmo:CubicMilliMetre",
+    "Day": "emmo:Day"
   }
 };

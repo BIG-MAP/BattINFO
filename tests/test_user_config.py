@@ -113,7 +113,8 @@ def test_strict_loading_of_a_corrupt_config_file_raises_and_names_it(config_path
         (b"just one value\n", "holds a single value"),
         (b"creator: Lovelace\nlicense: CC\xff0\n", "not UTF-8 text"),
         (b"creator: Lovelace\n---\nlicense: CC0-1.0\n", "not valid YAML"),
-        (b"creator: Lovelace\nembargo_until: 2026-02-30\n", r"not valid YAML \(day is out of range for month, line 2"),
+        # Python's own wording: "day is out of range for month" up to 3.13, "day 30 must be in range ..." from 3.14.
+        (b"creator: Lovelace\nembargo_until: 2026-02-30\n", r"not valid YAML \(day [^,]*month[^,]*, line 2"),
         (b"creator: Lovelace\nopen: !!bool maybe\n", r"not valid YAML \(cannot read the value as !!bool, line 2"),
         (b"creator: " + b"[" * 2000 + b"]" * 2000 + b"\n", "not valid YAML"),
     ],

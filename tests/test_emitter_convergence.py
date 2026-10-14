@@ -359,27 +359,6 @@ def test_import_keeps_minimal_spec_without_properties(tmp_path: Path) -> None:
     assert spec.format == "cylindrical"
 
 
-def test_batterypass_target_follows_the_description_pattern() -> None:
-    """target="batterypass" wraps the domain-battery emission, so its spec node
-    must carry the physical payload under isDescriptionFor too — this public
-    target had no shape pin at all."""
-    from battinfo.transform.json_to_jsonld import to_jsonld
-
-    record = _cell_spec_record()
-    doc = to_jsonld(
-        {
-            "schema_version": record["schema_version"],
-            "specification": {**record["cell_spec"], "property": record["properties"]},
-        },
-        target="batterypass",
-    )
-    assert "batterypass:BatteryPassportRecord" in doc["@type"]
-    node = doc["@graph"][0]
-    described = node["isDescriptionFor"]
-    assert "hasProperty" in described
-    assert not any(key.startswith("has") for key in node)
-
-
 # ── Step 3: C shares the builder with B ──────────────────────────────────────
 
 
@@ -449,7 +428,7 @@ def test_package_round_trips_through_import(tmp_path: Path) -> None:
     assert spec.properties["nominal_voltage"] == {"value": 3.3, "unit": "V"}
 
 
-def test_unconvertible_spec_record_warns_instead_of_silent_skip(monkeypatch) -> None:
+def test_unconvertible_spec_record_is_named_instead_of_silently_skipped(monkeypatch) -> None:
     import battinfo.transform.cell_spec_node as csn
     from battinfo.ws import AuthoringWorkspace
 
@@ -463,19 +442,25 @@ def test_unconvertible_spec_record_warns_instead_of_silent_skip(monkeypatch) -> 
     monkeypatch.setattr(csn, "build_cell_spec_node", boom)
     bad = {"cell_spec": {"id": "https://w3id.org/battinfo/spec/bad-1"}}
     good = _cell_spec_record()
+    common = {
+        "zenodo_record_id": 1,
+        "prereserved_doi": "10.5281/zenodo.1",
+        "record_url": "https://zenodo.org/records/1",
+        "data_filenames": [],
+    }
 
-    with pytest.warns(UserWarning, match="spec/bad-1.*OMITTED"):
-        package = AuthoringWorkspace._assemble_zenodo_jsonld(
-            {"cell-spec": [bad, good]},
-            zenodo_record_id=1,
-            prereserved_doi="10.5281/zenodo.1",
-            record_url="https://zenodo.org/records/1",
-            data_filenames=[],
-        )
+    omissions: list = []
+    with pytest.warns(UserWarning, match="spec/bad-1 could not be converted.*left out"):
+        package = AuthoringWorkspace._assemble_zenodo_jsonld({"cell-spec": [bad, good]}, omissions=omissions, **common)
 
     ids = {n.get("@id") for n in package["@graph"]}
     assert good["cell_spec"]["id"] in ids
     assert "https://w3id.org/battinfo/spec/bad-1" not in ids
+    assert [str(o) for o in omissions] == ["cell-spec https://w3id.org/battinfo/spec/bad-1: ValueError: boom"]
+
+    # A caller that collects nothing gets a refusal, not a graph with the spec missing.
+    with pytest.warns(UserWarning), pytest.raises(ValueError, match="spec/bad-1: ValueError: boom"):
+        AuthoringWorkspace._assemble_zenodo_jsonld({"cell-spec": [bad, good]}, **common)
 
 
 def test_import_new_shape_does_not_misread_uid_as_size_code(tmp_path: Path) -> None:

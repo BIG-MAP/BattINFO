@@ -11,6 +11,7 @@ from battinfo.validate.core import (
     ValidationPolicy,
     ValidationReport,
     ValidationResult,
+    ValidationSeverity,
     combine_reports,
     get_validation_policy,
 )
@@ -22,6 +23,34 @@ SHA256_RE = re.compile(r"^[A-Fa-f0-9]{64}$")
 _PUBLICATION_SHAPES_FILENAME = "publication.shapes.ttl"
 
 
+def _shacl_not_run_severity(policy: ValidationPolicy) -> ValidationSeverity:
+    """The severity of the finding that the publication shapes were not checked.
+
+    The shapes hold sh:Violation rules, so a graph they did not check may break one.
+    The publisher policy, which ws.zenodo() applies before it mints a DOI, makes that
+    an error, so the gate fails closed; the other policies make it a warning. (The
+    cell-spec shapes in validate/shacl.py only warn, so a record check that could
+    not run them stays a warning under every policy.)
+    """
+    return "error" if policy.name == "publisher" else "warning"
+
+
+def _shacl_not_run(policy: ValidationPolicy, code: str, message: str) -> ValidationReport:
+    return ValidationReport(
+        issues=(
+            ValidationIssue(
+                code=code,
+                severity=_shacl_not_run_severity(policy),
+                path="",
+                message=message,
+                validator="publication",
+                resource_type="jsonld-publication",
+            ),
+        ),
+        policy=policy,
+    )
+
+
 def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) -> ValidationReport:
     """Validate the published @graph against publication.shapes.ttl with pyshacl.
 
@@ -30,6 +59,9 @@ def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) ->
     gold-standard topology (catalog/dataset/distribution/test/provenance/conformance).
     Only runs on full @graph publication packages; single-node resolver documents are
     skipped (their shapes do not apply). SHACL severities are honoured directly.
+    When the shapes cannot be checked (pyshacl cannot be imported, the shapes file is
+    missing, or pyshacl fails), the report says so: an error under the publisher
+    policy, a warning under the others (:func:`_shacl_not_run_severity`).
     """
     # These shapes describe the gold-standard catalog topology produced by the shared
     # builder (AuthoringWorkspace._assemble_zenodo_jsonld). Run only when the document
@@ -49,25 +81,23 @@ def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) ->
 
     try:
         import pyshacl  # noqa: PLC0415
-    except ImportError:
-        return ValidationReport(policy=policy)  # pyshacl optional; dict-layer still ran
+    except ImportError as exc:
+        return _shacl_not_run(
+            policy,
+            "publication.shacl_unavailable",
+            f"pyshacl could not be imported ({exc}), so the graph was not checked against the SHACL "
+            "publication shapes. Install it with: pip install pyshacl",
+        )
 
     from battinfo.validate.shacl import _parse_shacl_report, _shapes_path  # noqa: PLC0415
 
     shapes_path = _shapes_path(_PUBLICATION_SHAPES_FILENAME)
     if shapes_path is None:
-        return ValidationReport(
-            issues=(
-                ValidationIssue(
-                    code="publication.shapes_not_found",
-                    severity="warning",
-                    path="",
-                    message=f"SHACL shapes '{_PUBLICATION_SHAPES_FILENAME}' not found; structural SHACL skipped.",
-                    validator="publication",
-                    resource_type="jsonld-publication",
-                ),
-            ),
-            policy=policy,
+        return _shacl_not_run(
+            policy,
+            "publication.shapes_not_found",
+            f"SHACL shapes '{_PUBLICATION_SHAPES_FILENAME}' not found, so the graph was not checked against "
+            "them. Reinstall battinfo, which ships them in battinfo/data/shapes/.",
         )
 
     import warnings as _warnings  # noqa: PLC0415
@@ -84,18 +114,11 @@ def _shacl_publication_report(data: dict[str, Any], policy: ValidationPolicy) ->
                 abort_on_first=False,
             )
     except Exception as exc:  # noqa: BLE001
-        return ValidationReport(
-            issues=(
-                ValidationIssue(
-                    code="publication.shacl_runtime_error",
-                    severity="warning",
-                    path="",
-                    message=f"Structural SHACL validation failed to run: {exc}",
-                    validator="publication",
-                    resource_type="jsonld-publication",
-                ),
-            ),
-            policy=policy,
+        return _shacl_not_run(
+            policy,
+            "publication.shacl_runtime_error",
+            f"Structural SHACL validation failed to run, so the graph was not checked against the "
+            f"publication shapes: {exc}",
         )
 
     if conforms:
@@ -496,6 +519,14 @@ def validate_publication_report(
     URIs, checksums, a non-empty ``schema:about`` and a distribution on every
     dataset but a collection, collection membership), the SHACL publication
     shapes, test conditions and the licence.
+
+    The SHACL shapes apply to a ``@graph`` with a ``dcat:Catalog`` node, the
+    graph of a Zenodo deposit. When they cannot be checked (pyshacl cannot be
+    imported, the shapes file is missing, or pyshacl fails), the report carries
+    ``publication.shacl_unavailable``, ``publication.shapes_not_found`` or
+    ``publication.shacl_runtime_error``: an error under the ``"publisher"``
+    policy, so a deposit is never published unchecked, and a warning under
+    the others.
 
     *policy* is a :class:`ValidationPolicy` or one of the names
     ``"default"``, ``"strict"``, ``"publisher"`` and ``"ingest"``. A policy

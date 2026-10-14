@@ -17,10 +17,7 @@ By participating in this project you agree to abide by our
 
 ## Development setup
 
-Requires **Python 3.11+**. This project uses [uv](https://docs.astral.sh/uv/)
-for environment and dependency management. `uv sync` manages a `.venv` at the
-repo root from the committed `uv.lock` — do not use system Python or `pip`
-directly.
+Requires **Python 3.11–3.14**. This project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management. `uv sync` manages a `.venv` at the repo root from the committed `uv.lock`; do not use system Python or `pip` directly.
 
 ```powershell
 # Create/sync the environment from the lockfile
@@ -31,9 +28,7 @@ Run tools via `uv run <cmd>`; no manual venv activation is needed.
 
 ## Quality gate
 
-Every pull request must pass the same checks CI runs across Python 3.11/3.12 on
-Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before
-pushing:
+Every pull request must pass the same checks CI runs across Python 3.11–3.14 on Linux and Windows ([CI](.github/workflows/ci.yml)). Run them locally before pushing:
 
 ```powershell
 # Lint and formatting
@@ -59,10 +54,8 @@ uv run python .tools/quality/run_verification.py
   modify upstream ontology source files.
 - **Do not hardcode ontology IRIs** as bare strings in business logic — define
   them as named constants or look them up via the term registry.
-- **The canonical contract is JSON Schema**; Pydantic models are generated for
-  the CLI and Python API. Keep the application (`bundle.py`) and generated
-  (`bundle_generated.py`) layers in sync — `tests/test_schema_sync.py` enforces
-  this.
+- **The JSON Schema is the save-time contract**, and the pydantic models in `src/battinfo/bundle.py` are the hand-written authoring surface. `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps. The table in [AGENTS.md](AGENTS.md#sources-of-truth-and-generated-files) lists which files are generated and how to regenerate them.
+- `bundle_generated.py` was generated from the LinkML schema once and has been edited by hand since, so do not regenerate it; `tests/test_schema_sync.py` checks that its enums match `bundle.py`. Regenerating or retiring it is planned for 0.9.
 - **Type hints and docstrings** on all public functions and classes.
 - All published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI,
   governed by [`IDENTIFIER_POLICY.md`](IDENTIFIER_POLICY.md).

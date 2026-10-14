@@ -940,7 +940,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ]
   },
-  "schema:size": "18650",
+  "schema:size": "R18650",
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -1996,7 +1996,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ]
   },
-  "schema:size": "2032",
+  "schema:size": "R2032",
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -2344,7 +2344,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ## Fields
 
-Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps and may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit. When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
+Generated from the packaged JSON Schemas — the same files `battinfo validate` and the registry's publish gate enforce. Every record also carries the shared envelope (`schema_version`, `provenance`, and optional `notes`, `funding`, `contributor`, `license`). Quantities are `{value, unit}` maps whose `value` is a number; text that is not a number goes in `value_text`. They may also carry `value_basis` (Measured, Conventional, Rated, or Nominal) and `conditions` (the parameters under which the value holds, each itself a quantity; a qualitative condition may be `value_text` alone). In JSON-LD, conditions ride a measurement node the quantity `isOutputOf`; the `voltage_reference` key instead becomes a `hasMetrologicalReference` datum on the quantity, beside its unit. When authoring, an instance references its spec with the `spec_id=` kwarg; the record stores the self-describing `<type>_spec_id` key shown in the tables below.
 
 ### cell-spec fields
 
@@ -2367,7 +2367,7 @@ The `cell_spec` block:
 | `additional_type` | string or array of string |  | Extra JSON-LD type IRIs or labels stacked onto the record's @type. |
 | `product_type` | `commercial` \| `research` \| `prototype` |  | Whether this cell spec is a commercial product, a research cell, or a prototype. |
 | `cell_format` | `cylindrical` \| `prismatic` \| `pouch` \| `coin` … (6 values) | yes | Mechanical format of the cell. |
-| `size_code` | string |  | Standard size designation (e.g. '18650', '21700', 'CR2032'). |
+| `size_code` | string |  | Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code. |
 | `iec_code` | string |  | IEC designation code (IEC 60086 / IEC 61960), when defined. |
 | `country_of_origin` | string |  | Country where the cell is manufactured. |
 | `rechargeable` | boolean |  | Whether this cell is rechargeable (true) or primary/single-use (false). |

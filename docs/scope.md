@@ -6,7 +6,7 @@ This page says what BattINFO covers and how mature each part is: what you can re
 
 BattINFO models the cell level and below. That means materials, electrodes, separators, current collectors, electrolytes and housings, the cells built from them, and the tests, test equipment and datasets around those cells. Modules and packs are on the roadmap; no schema or record type covers them yet.
 
-Tested runtime support is Python 3.11 and 3.12, on Linux and Windows.
+Tested runtime support is Python 3.11–3.14, on Linux and Windows. Python 3.15 is not supported yet; the known limitations below say why.
 
 ## Record types
 
@@ -36,7 +36,7 @@ These capabilities are covered by tests in CI, documented as supported, and are 
 - JSON-LD for every record type through `battinfo.record_to_jsonld`, built from the curated property and unit maps and the versioned records context at `https://w3id.org/battinfo/context/records/v1.json`
 - authoring with `battinfo.workspace()` for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs
 - publishing a workspace as a Zenodo deposit (`ws.zenodo()`, which leaves a draft unless `publish=True`) and submitting it to the registry review queue (`ws.submit()`), with `ws.preview_jsonld()` to run the publication checks on the deposit graph beforehand
-- single records through the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) and `battinfo.publish(...)`
+- single cell-spec records with `CellSpec` and `battinfo.publish(...)`, and single `Cell`, `TestSpec`, `Test` and `Dataset` records with `save_cell_instance`, `save_test_spec`, `save_test` and `save_dataset`
 - CLI and `battinfo.api` save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; `battinfo save record` saves a record of any type from a JSON file
 - detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through `cell_configuration`
 - test records with a controlled `kind` such as `cycling`, `capacity_check`, `rate_capability`, `gitt`, `hppc` or `eis` (the full list is in `assets/schemas/test.schema.json`)
@@ -64,6 +64,7 @@ Present but with no stability promise:
 - datasheet tooling under `.tools/datasheets/`, which is maintainer-only and has no public contract
 - semantic mapping candidate generation and review (`.tools/semantic/`)
 - reference validation for corpora larger than a repository-scale source tree
+- a Battery Pass crosswalk, from cell records to the Battery Pass Data Model. 0.8.0 has none: the draft `batterypass` mapping target and validation profile are removed, and the draft profile schema stays at its URL, marked withdrawn
 
 ## Known limitations in 0.8.0
 
@@ -99,9 +100,28 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
 
+### Linked data at record IRIs
+
+- A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:productID` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. Serving that model at record IRIs is planned for 0.9.
+
+### Command line
+
+- `battinfo dataset` is experimental: its `init`, `process` and `publish` steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with `ws.add("test", data=...)` and `ws.zenodo()` instead.
+
+### Tutorials
+
+- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
+
+### CLI batch path
+
+- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They send a sandbox token: `--token`, else `ZENODO_SANDBOX_TOKEN`, else `zenodo_sandbox_token` in the config file (`battinfo config set zenodo_sandbox_token <token>`). Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+- Run `battinfo batch package` again before you retry `battinfo batch upload`: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.
+
 ### Dependencies
 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.
+- `pyshacl`, which runs the SHACL shapes and is a core dependency, requires `rdflib` below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.
+- Python 3.15 is not supported yet. `requires-python` has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.
 
 ## Verification
 

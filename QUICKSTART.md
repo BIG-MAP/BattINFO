@@ -7,7 +7,7 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 | You want to… | Use | Entry point |
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` then `ws.quickstart()` |
-| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` (this page) |
+| Create a single cell-spec record in code and save or publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` (this page) |
 | Register materials, electrodes, and other components | **`battinfo.api` functions** | `create_material_spec(...)` + `save_material_spec(...)` — see the [how-to guides](docs/pages/howto.md) |
 
 If in doubt, start with `battinfo.workspace(".")` for cells, tests, datasets,
@@ -20,7 +20,7 @@ the guided tour is on the same page.
 
 ## Prerequisites
 
-- Python 3.11+
+- Python 3.11–3.14
 - A terminal
 
 Install BattINFO from GitHub into a virtual environment. 0.8.0 will be its first working release on PyPI.
@@ -52,7 +52,7 @@ cell_spec = CellSpec(
     manufacturer="Panasonic",
     model="NCR18650B",
     format="cylindrical",
-    chemistry="Li-ion",
+    chemistry="li-ion",
     size_code="R18650",
     nominal_capacity={"value": 3.4, "unit": "Ah"},
     nominal_voltage={"value": 3.6, "unit": "V"},
@@ -61,10 +61,10 @@ cell_spec = CellSpec(
 
 result = publish(cell_spec, destination="local", root=".battinfo/quickstart")
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/spec/jv2y-hq4t-cjrv-1w16
 ```
 
-BattINFO mints a stable, opaque IRI for the record and writes it to disk.
+BattINFO mints a stable, opaque IRI for the record and writes it to disk. The IRI comes from the manufacturer, model, format, chemistry and size code, so you get the same one as above.
 
 That IRI is **permanent, but not yet resolvable on the web** — opening
 `https://w3id.org/battinfo/spec/...` in a browser returns 404 for a record
@@ -77,7 +77,7 @@ hides it — use `ls -a`. The record you just created lives here:
 ```text
 .battinfo/quickstart/
 ├── index.json
-└── examples/cell-spec/cell-spec-<id>.json   # the canonical record (read in step 2)
+└── examples/cell-spec/cell-spec-jv2y-hq4t-cjrv-1w16.json   # the canonical record (read in step 2)
 ```
 
 ---
@@ -126,28 +126,23 @@ print([prop["@type"][0] for prop in cell["hasProperty"]])
 
 A cell spec is an *information entity*, a datasheet as data, not the physical cell it describes. So its `@type` is `BatteryCellSpecification` (an EMMO information object) stacked with `schema:ProductModel` and `schema:CreativeWork`. Its `isDescriptionFor` link points at a node for the cell the spec describes, and that node carries the EMMO types of the physical cell (`BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`) and one `hasProperty` node per quantity: the class (`NominalCapacity`), its `hasNumericalPart` with the number in `hasNumberValue`, and the unit IRI in `hasMeasurementUnit`. See [Tutorial 4](docs/guides/04-semantic-layer.ipynb) for how the spec, the cell and their EMMO types relate.
 
-The resolver JSON-LD is the document served at the cell spec's IRI. When you publish cells, tests and datasets with the workspace, the publication package links them to this spec (see [Tutorial 3](docs/guides/03-linked-records.ipynb)).
+`publish_record` builds this JSON-LD with the same spec node that a Zenodo deposit carries, and `battinfo.record_to_jsonld` builds that node in memory. It is not yet what the registry serves at the spec's IRI: that is the record body expanded with the records context, as the [known limitations](docs/scope.md#known-limitations-in-080) explain. When you publish cells, tests and datasets with the workspace, the publication package links them to this spec (see [Tutorial 3](docs/guides/03-linked-records.ipynb)).
 
 ---
 
 ## 4. Validate a record
 
-Validate the record you just created (step 1 wrote it under
-`.battinfo/quickstart/examples/`); `--source-root` tells the validator where
-linked records live:
+Validate the record you just created. Run this in the folder you ran step 1 in, with the virtual environment active, in any shell; `--source-root` tells the validator where linked records live:
 
-<!-- Not runner-executable: depends on the record step 1 just wrote (the
-     snippet runner executes blocks in isolation); verified by hand in an
-     empty directory. -->
+<!-- The doc-snippet runner runs shell blocks from the repository root, where this
+     record does not exist. tests/test_first_contact_files.py runs step 1 and then
+     this command, as written, in an empty folder. -->
 <!-- doc-snippet: skip -->
-```powershell
-# <id> is the end of the IRI step 1 printed (https://w3id.org/battinfo/spec/<id>);
-# print(result.debug_paths["canonical_record_path"]) gives the whole path
-.venv\Scripts\battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-<id>.json `
-    --source-root .battinfo/quickstart/examples --format json
+```bash
+battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-jv2y-hq4t-cjrv-1w16.json --source-root .battinfo/quickstart/examples --format json
 ```
 
-On a core install the output is:
+The output is:
 
 ```json
 {
@@ -155,27 +150,16 @@ On a core install the output is:
   "mode": "record",
   "policy": "default",
   "profile": null,
-  "source_root": ".battinfo\\quickstart\\examples",
-  "issue_count": 1,
+  "source_root": ".battinfo/quickstart/examples",
+  "issue_count": 0,
   "error_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "errors": [],
-  "issues": [
-    {
-      "code": "shacl.unavailable",
-      "severity": "warning",
-      "path": "",
-      "message": "pyshacl is not installed; SHACL validation skipped. Install with: pip install pyshacl",
-      "hint": null,
-      "validator": "shacl",
-      "resource_type": null,
-      "profile": null
-    }
-  ]
+  "issues": []
 }
 ```
 
-The record is valid (`ok: true`, `error_count: 0`). The one warning says that the optional SHACL check was skipped because `pyshacl` is not installed. With `pyshacl` installed (`pip install pyshacl`, or the `dev` extra) the check runs, and `issue_count` and `warning_count` are 0.
+The record is valid (`ok: true`) and has no issues: it passes the JSON Schema, the semantic rules and the SHACL shapes for cell specs. A plain install runs all three, since `pyshacl`, which checks the SHACL shapes, is one of battinfo's dependencies. On Windows, `source_root` shows the path with backslashes.
 
 ---
 

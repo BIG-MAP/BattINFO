@@ -4,7 +4,7 @@ The curated public surface is the ~34 names in ``__all__``: the record models,
 the workspace, publish/save/query/validate, and the JSON-LD transform.
 Everything else lives in its home module (``battinfo.api``,
 ``battinfo.interop``, ``battinfo.metadata``, …) and remains importable from
-the top level for one release with a ``DeprecationWarning`` pointing there.
+the top level until 0.9.0, with a ``DeprecationWarning`` pointing there.
 """
 
 from battinfo._publish import PublishResult, publish
@@ -25,7 +25,6 @@ from battinfo.api import (
     save_test_spec,
 )
 from battinfo.bundle import BattinfoBundle, Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec
-from battinfo.bundle_generated import SpecValue
 from battinfo.jsonld import record_to_jsonld
 from battinfo.materials import material_kinds
 from battinfo.publication import build_publication_package, load_publication_package
@@ -44,7 +43,6 @@ __all__ = [
     "Dataset",
     "ProvenanceInfo",
     "PublishResult",
-    "SpecValue",
     "Test",
     "TestSpec",
     "build_publication_package",
@@ -73,7 +71,7 @@ __all__ = [
     "workspace",
 ]
 
-# ── Off-surface names: importable for one release with a pointer to their home ──
+# ── Off-surface names: importable until 0.9.0 with a pointer to their home ──
 _LAZY_EXPORTS: dict[str, str] = {
     "BatchImportResult": "battinfo.interop",
     "BattdatImportResult": "battinfo.interop",
@@ -113,6 +111,7 @@ _LAZY_EXPORTS: dict[str, str] = {
     "SolidStateImportResult": "battinfo.interop",
     "SolventMixture": "battinfo.bundle",
     "SpecSet": "battinfo.bundle_generated",
+    "SpecValue": "battinfo.bundle_generated",
     "TableColumn": "battinfo.metadata",
     "TableSchema": "battinfo.metadata",
     "Terminal": "battinfo.bundle",
@@ -278,7 +277,7 @@ def __getattr__(name: str) -> object:
         replacement, target = _DEPRECATED_ALIASES[name]
         warnings.warn(
             f"battinfo.{name} is retired; use battinfo.{replacement} — same authoring "
-            f"field names. This alias will be removed one release after 0.8.",
+            f"field names. This alias will be removed in 0.9.0.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -289,8 +288,7 @@ def __getattr__(name: str) -> object:
             "battinfo.Workspace is the internal object-graph engine behind "
             "battinfo.workspace(); author through workspace() or the record "
             "models + publish(). If you really need the engine, import "
-            "battinfo._workspace.Workspace. The top-level name will be removed "
-            "one release after 0.8.",
+            "battinfo._workspace.Workspace. The top-level name will be removed in 0.9.0.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -302,7 +300,7 @@ def __getattr__(name: str) -> object:
         module_name = _LAZY_EXPORTS[name]
         warnings.warn(
             f"battinfo.{name} is moving off the curated top level; import it from "
-            f"{module_name} instead. Top-level access is kept for one release after 0.8.",
+            f"{module_name} instead. Top-level access will be removed in 0.9.0.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -318,7 +316,8 @@ def __getattr__(name: str) -> object:
     if name in _api._COMPONENT_WRAPPER_NAMES:
         warnings.warn(
             f"battinfo.{name} is moving off the curated top level; use battinfo.api.{name} "
-            f"(or the generic create/save/query component functions in battinfo.api).",
+            f"(or the generic create/save/query component functions in battinfo.api). "
+            "Top-level access will be removed in 0.9.0.",
             DeprecationWarning,
             stacklevel=2,
         )

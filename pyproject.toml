@@ -8,7 +8,10 @@ dynamic = ["version"]
 description = "Implementation and interoperability layer for the domain-battery ontology."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "Apache-2.0"
+# battinfo's own code is Apache-2.0. The wheel also ships EMMO-derived context
+# files and labels (CC BY 4.0) and five BPX example parameter sets (MIT); NOTICE
+# says which files are which.
+license = "Apache-2.0 AND CC-BY-4.0 AND MIT"
 license-files = ["LICENSE", "NOTICE"]
 authors = [
   { name = "Simon Clark" },
@@ -30,7 +33,6 @@ keywords = [
   "linked data",
   "JSON-LD",
   "FAIR data",
-  "Battery Pass",
   "semantic web",
 ]
 classifiers = [
@@ -40,15 +42,26 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Scientific/Engineering",
-  "Typing :: Typed",
+  # No "Typing :: Typed" yet: py.typed ships, but the modules in the mypy
+  # override below with ignore_errors are not type-checked.
 ]
 dependencies = [
-  "pydantic>=2.7",
+  # import battinfo fails on 2.7.0 to 2.10.3, and the generated record models
+  # (bundle_generated.py) set ConfigDict keys that only 2.11 and later read.
+  "pydantic>=2.11",
   "typer>=0.27.0",
-  "rich>=13.7",
+  # cli.py imports rich itself. typer 0.27.0 requires rich 13.8.0 or later.
+  "rich>=13.8",
   "jsonschema>=4.21",
-  "rdflib>=7.0",
+  # pyshacl runs the SHACL shapes, among them the publication shapes checked
+  # before a Zenodo DOI is minted. It is pure Python and loads only when a check
+  # runs. Its owlrl requires rdflib>=7.6.0, and pyshacl 0.40.1 requires rdflib
+  # below 8, so battinfo stays on rdflib 7 until a pyshacl release allows 8.
+  "rdflib>=7.6",
+  "pyshacl>=0.40.1",
   "pyld>=3.1.0",
   # The CLI batch path (battinfo push / batch / dataset, contribution.py) and
   # ~/.battinfo/config.yaml need it. 6.0.1 is the first release with Python
@@ -94,7 +107,6 @@ dev = [
   "nbformat>=5.9",
   "nbmake>=1.5",      # execute guide notebooks in CI (pytest --nbmake docs/guides)
   "ipykernel>=6.29",  # kernel for nbmake execution
-  "pyshacl>=0.40.1",
   "ruff>=0.16.0",
   "pytest>=9.1.1",
   "pytest-cov>=5.0",
@@ -113,12 +125,14 @@ docs = [
   "sphinx-design>=0.6",
 ]
 
+# An index keeps these as uploaded. The docs root forwards to stable/, the
+# newest final release. scripts/set_version.py moves the Changelog to the tag.
 [project.urls]
-Homepage = "https://github.com/BIG-MAP/BattINFO"
+Homepage = "https://battinfo.org"
 Repository = "https://github.com/BIG-MAP/BattINFO"
-Documentation = "https://github.com/BIG-MAP/BattINFO/tree/main/docs"
+Documentation = "https://big-map.github.io/BattINFO/"
 Issues = "https://github.com/BIG-MAP/BattINFO/issues"
-Changelog = "https://github.com/BIG-MAP/BattINFO/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/BIG-MAP/BattINFO/blob/v0.8.0/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"
@@ -140,6 +154,13 @@ battinfo = ["py.typed", "data/**/*"]
 
 [tool.setuptools.exclude-package-data]
 battinfo = ["**/__pycache__/*", "**/*.py[cod]"]
+
+[tool.uv]
+# uv rebuilds the editable install only when one of these files changes. Its
+# default list holds pyproject.toml but not the file with __version__, so after
+# scripts/set_version.py the installed metadata kept the old version, and
+# tests/installed_smoke.py, which compares the two, failed in a dev environment.
+cache-keys = [{ file = "pyproject.toml" }, { file = "src/battinfo/__init__.py" }]
 
 [tool.pytest.ini_options]
 norecursedirs = ["legacy"]

@@ -3,17 +3,23 @@
 Single home for the tiny helpers that were previously copy-pasted across
 modules (``api``, ``bundle``, ``publication``, ``local_workspace``,
 ``workspace_state``, ``_workspace``, ``ingest``, ``runtime``, ``ws``,
-``interop.battdat``, ``transform.json_to_jsonld``): path coercion, UTC
-timestamps, file hashing, and citation/DOI normalization.
+``interop.battdat``, ``transform.json_to_jsonld``): path coercion, file
+URIs and URL segments, UTC timestamps, file hashing, and citation/DOI
+normalization.
 """
 
 from __future__ import annotations
 
 import hashlib
+import math
+import numbers
+import os
 import re
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
-from urllib.parse import unquote, urlparse
+from typing import Any
+from urllib.parse import quote, unquote, urlparse
 
 PathLike = str | Path
 
@@ -72,6 +78,86 @@ def is_local_location(value: object) -> bool:
     return urlparse(text).scheme.lower() in ("", "file")
 
 
+def is_file_uri(value: object) -> bool:
+    """True for a ``file:`` URI, in any letter case."""
+    return isinstance(value, str) and urlparse(value.strip()).scheme.lower() == "file"
+
+
+# A drive letter where a file: URI has a host (file://C:/x) or starts its path
+# (/C:/x, or /C|/x in the oldest form).
+_URI_DRIVE_RE = re.compile(r"^[A-Za-z][:|]$")
+_URI_DRIVE_PATH_RE = re.compile(r"^/[A-Za-z][:|](?=[/\\]|$)")
+
+
+def _file_uri_path_text(uri: str) -> str:
+    """The path a ``file:`` URI names, as text with ``/`` separators, percent-decoded.
+
+    The one reading of a file URI, so that every caller agrees on it:
+
+    - ``file://server/share/x.csv`` and ``file:////server/share/x.csv`` name
+      the network path ``//server/share/x.csv``: the host is kept.
+    - ``file://localhost/C:/x.csv``, ``file:///C:/x.csv`` and ``file://C:/x.csv``
+      name ``C:/x.csv``: ``localhost`` is this computer, and the ``/`` in
+      front of a drive letter is dropped.
+    - ``file:///tmp/x.csv`` names ``/tmp/x.csv``.
+    """
+    parsed = urlparse(uri.strip())
+    host, path = unquote(parsed.netloc), unquote(parsed.path)
+    if host.lower() == "localhost":
+        host = ""
+    elif _URI_DRIVE_RE.fullmatch(host):
+        host, path = "", f"/{host[0]}:{path}"
+    if host:
+        return f"//{host}{path}"
+    if path.startswith("//"):
+        return "//" + path.lstrip("/")
+    if _URI_DRIVE_PATH_RE.match(path):
+        return f"{path[1]}:{path[3:]}"
+    return path
+
+
+def file_uri_to_path(url: str) -> Path:
+    """The path a ``file:`` URI, or a plain path string, names, read from the text alone.
+
+    A file URI is read as :func:`_file_uri_path_text` describes: a network
+    host is kept (``file://server/share/x`` is ``\\\\server\\share\\x`` on
+    Windows), ``localhost`` is dropped and so is the ``/`` before a drive
+    letter, and percent-escapes are decoded. Anything else is taken as a path.
+    Nothing here touches the file system.
+    """
+    return Path(location_text(url))
+
+
+def location_text(location: str) -> str:
+    """The path a ``file:`` URI, or a plain path string, names, as text, before :mod:`pathlib` reads it.
+
+    Pathlib's reading of a run of separators at the start differs between
+    Python versions (3.11 on Windows folds three into one), so a check that
+    must not depend on it, such as :func:`network_host`, reads this text.
+    """
+    text = location.strip()
+    return _file_uri_path_text(text) if is_file_uri(text) else text
+
+
+#: Characters a URL path segment may carry as they are, besides letters,
+#: digits and ``-._~`` (RFC 3986 ``pchar``). ``/`` is escaped so that a name
+#: stays one segment, and so is ``:``, so that a relative reference such as
+#: an RO-Crate ``@id`` cannot be read as a URL scheme.
+_URL_SEGMENT_SAFE = "!$&'()*+,;=@"
+
+
+def url_segment(name: str) -> str:
+    """*name* percent-encoded as one URL path segment.
+
+    Every file name that goes into a URL goes through here, so a space, ``#``,
+    ``?``, ``%``, ``/``, ``:`` and every non-ASCII character (as UTF-8) are
+    escaped: ``Cell 01 #3.csv`` becomes ``Cell%2001%20%233.csv``. Zenodo
+    decodes the path and stores the name itself, so the raw name is the one to
+    match files by and to show.
+    """
+    return quote(name, safe=_URL_SEGMENT_SAFE)
+
+
 def local_path(value: object) -> Path | None:
     """The file-system path a local location names, or ``None`` for a remote URL.
 
@@ -81,16 +167,51 @@ def local_path(value: object) -> Path | None:
         return value
     if not is_local_location(value):
         return None
-    text = str(value).strip()
-    parsed = urlparse(text)
-    if parsed.scheme.lower() == "file":
-        path_text = unquote(parsed.path)
-        if parsed.netloc:
-            path_text = f"//{parsed.netloc}{path_text}"
-        if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-            path_text = path_text[1:]  # /C:/... -> C:/...
-        return Path(path_text)
-    return Path(text)
+    return file_uri_to_path(str(value))
+
+
+def network_host(path: PathLike) -> str | None:
+    """The computer a network path names (``//server/share/x`` or ``\\\\server\\share\\x``), else ``None``.
+
+    Read from the text alone. A Windows device path (``\\\\?\\C:\\x``) starts
+    the same way and gives ``"?"``.
+    """
+    text = str(path).replace("\\", "/")
+    if not text.startswith("//"):
+        return None
+    return text.lstrip("/").split("/", 1)[0]
+
+
+def has_parent_reference(path: PathLike) -> bool:
+    """True when a part of *path* goes up a folder: ``..``, or a name Windows reads as one (``.. ``).
+
+    Parts are split on ``/`` and ``\\`` alike. A part made only of dots and
+    spaces, with two dots or more, counts.
+    """
+    return any(part.count(".") >= 2 and not part.strip(". ") for part in re.split(r"[\\/]", str(path)))
+
+
+def lexical_key(path: PathLike) -> str:
+    """*path* normalised from its text alone (``normpath``, then the case the OS compares in).
+
+    Two spellings of one absolute path, such as ``C:/Data/x.csv`` and
+    ``c:\\data\\x.csv`` on Windows, get one key. Symbolic links are not
+    followed, and nothing touches the file system.
+    """
+    return os.path.normcase(os.path.normpath(str(path)))
+
+
+def lexically_within(path: PathLike, root: PathLike) -> bool:
+    """True when *path* is *root* or lies under it, read from the text of both alone.
+
+    Both should be absolute. A path that goes up a folder (see
+    :func:`has_parent_reference`) is compared after ``normpath`` folds the
+    ``..`` away; callers that must not trust such a path check for it first.
+    """
+    inner, outer = lexical_key(path), lexical_key(root)
+    if inner == outer:
+        return True
+    return inner.startswith(outer if outer.endswith(os.sep) else outer + os.sep)
 
 
 #: Record fields that say where a file or its source can be downloaded. A
@@ -215,6 +336,57 @@ def _now_iso() -> str:
 
 def _now_unix() -> int:
     return int(datetime.now(timezone.utc).timestamp())
+
+
+def is_real_number(value: object) -> bool:
+    """True for a finite real number that is not a bool.
+
+    Python ints and floats count, and so does any other ``numbers.Real``
+    (numpy scalars among them), as JSON Schema's number type counts them.
+    These are the only values a quantity's ``value`` holds, and the only ones
+    the emitters write as ``hasNumberValue``. Text belongs in ``value_text``.
+    """
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        return False
+    if isinstance(value, numbers.Integral):
+        return True  # math.isfinite() overflows on an int too large for a float
+    return math.isfinite(value)
+
+
+# Plain decimal notation with ASCII digits, as JSON writes numbers, with an
+# optional sign and surrounding spaces. "2,5", "1_000", "0x10", "nan" and "inf" are text.
+_NUMBER_TEXT_RE = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
+
+
+def number_from_text(text: str) -> int | float | None:
+    """The number a numeric string spells, or None when the string is text.
+
+    ``"2.5"`` gives 2.5, ``" 3 "`` gives 3 (an int when there is no decimal
+    point or exponent) and ``"1e-3"`` gives 0.001. ``"2.5 V"``, ``"n/a"``,
+    ``"2,5"`` and a number too large for a float give None.
+    """
+    stripped = text.strip()
+    if not _NUMBER_TEXT_RE.fullmatch(stripped):
+        return None
+    try:
+        if not any(mark in stripped for mark in ".eE"):
+            return int(stripped)
+        number = float(stripped)
+    except ValueError:  # more digits than int() reads
+        return None
+    return number if math.isfinite(number) else None
+
+
+def jsonld_literal(value: Any) -> Any:
+    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
+    return value.get("@value") if isinstance(value, Mapping) else value
+
+
+def jsonld_text(value: Any) -> str | None:
+    """The text of a JSON-LD string value (plain, typed, or a list of them, joined by '; ')."""
+    items = value if isinstance(value, list) else [value]
+    texts = [text for item in items if isinstance(text := jsonld_literal(item), str) and text.strip()]
+    return "; ".join(texts) or None
 
 
 def is_dataset_series(additional_type: object) -> bool:

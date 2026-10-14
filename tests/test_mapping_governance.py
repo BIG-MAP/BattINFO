@@ -244,6 +244,27 @@ def test_battinfo_application_ontology_imports_are_pinned() -> None:
     assert "battinfo:hasInstance a owl:ObjectProperty" not in content
 
 
+def test_battinfo_application_ontology_mints_no_term_of_its_own() -> None:
+    """battinfo.ttl describes only the ontology: every other subject it names belongs to another vocabulary.
+
+    The w3id rules serve battinfo.ttl at the ontology IRI and its versions, not
+    at any IRI under https://w3id.org/battinfo/ that it might mint; those reach
+    the registry, which answers 404 for names it does not know. The record-layer
+    terms live in assets/vocab/battinfo-records.ttl, which the registry serves.
+    """
+    import rdflib
+
+    graph = rdflib.Graph().parse(ROOT / "battinfo.ttl", format="turtle")
+    ontologies = set(graph.subjects(rdflib.RDF.type, rdflib.OWL.Ontology))
+    assert ontologies == {rdflib.URIRef("https://w3id.org/battinfo#")}
+    own = sorted(
+        str(subject)
+        for subject in set(graph.subjects())
+        if str(subject).startswith("https://w3id.org/battinfo") and subject not in ontologies
+    )
+    assert own == [], f"battinfo.ttl mints terms that no w3id rule serves: {own}"
+
+
 # ── chemistry vocabulary (entity_type_map 0.6.0) ──────────────────────────────
 
 

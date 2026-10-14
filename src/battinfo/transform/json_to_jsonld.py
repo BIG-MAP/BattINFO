@@ -12,8 +12,8 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from battinfo._util import _citation_doi_from_url
-from battinfo.entities import COMPONENT_FAMILIES
+from battinfo._util import _citation_doi_from_url, is_real_number
+from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
 # Battery aggregation level -> EMMO domain-battery class (resolved by the
@@ -690,10 +690,12 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     Canonical symbols pass through unchanged. Accepted alternative spellings are
     rewritten: ASCII exponents (``mg/cm^2`` -> ``mg/cm2``, ``g/cm³`` -> ``g/cm3``),
     ASCII micro prefixes (``um`` -> ``µm``), Ohm spellings (``mOhm`` / ``milliohm`` ->
-    ``mΩ``), product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius
-    spellings (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out
-    names (``percent`` -> ``%``, ``hour`` -> ``h``). Unknown strings are returned
-    trimmed, so the caller can still fall back to ``schema:unitText``.
+    ``mΩ``, and the ohm sign U+2126 -> ``Ω``), the kelvin sign U+212A -> ``K``,
+    product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius spellings
+    (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out names
+    (``percent`` -> ``%``, ``hour`` -> ``h``). Case is kept, because it can change
+    magnitude (``mV`` is a millivolt, ``MV`` a megavolt). Unknown strings are
+    returned trimmed, so the caller can still fall back to ``schema:unitText``.
     """
     if not isinstance(unit, str):
         return None
@@ -709,6 +711,7 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     # A remaining interior space is a product separator ("mPa s").
     text = text.replace(" ", ".")
     text = text.replace("μ", "µ")  # Greek mu (U+03BC) -> micro sign (U+00B5)
+    text = text.replace("\u2126", "Ω").replace("\u212a", "K")  # ohm and kelvin signs -> the letters
     text = _MICRO_PREFIX_RE.sub("µ", text)
     text = _OHM_SUFFIX_RE.sub("Ω", text)
     return _UNIT_ALIASES.get(text, text)
@@ -779,10 +782,10 @@ def percent_basis_conflict(key: str, quantity: Any) -> str | None:
 def _percent_to_fraction(value: Any) -> float | None:
     """A percentage as a fraction of 1 (``41`` -> ``0.41``), or ``None`` if it is not a number.
 
-    Divides in decimal, so 4.3 gives 0.043 and not 0.043000000000000003. A
-    numeric string ("95") counts as its number.
+    Divides in decimal, so 4.3 gives 0.043 and not 0.043000000000000003. Only
+    a finite real number counts: text, even "95", is never scaled.
     """
-    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+    if not is_real_number(value):
         return None
     try:
         number = Decimal(str(value).strip())
@@ -1086,31 +1089,8 @@ def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] |
 
 
 def _bound_value(value: Any) -> int | float | None:
-    """A ``min_value`` or ``max_value`` that can be published: a number."""
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return None
-    return value
-
-
-def _number_value(value: Any) -> int | float | None:
-    """A ``value`` or ``typical_value`` that can be published as ``hasNumberValue``.
-
-    The records contexts type ``hasNumberValue`` as ``xsd:double``, so only a
-    number qualifies: a JSON number, or a string that reads as a finite one
-    (``"3.6"`` gives 3.6). Any other string, such as ``"about 500"``, would be
-    an ill-typed literal and gives ``None``; the caller publishes it as text.
-    """
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, (int, float)):
-        return value if math.isfinite(value) else None
-    if isinstance(value, str):
-        try:
-            number = float(value.strip())
-        except ValueError:
-            return None
-        return number if math.isfinite(number) else None
-    return None
+    """A ``min_value`` or ``max_value`` that can be published: a finite real number."""
+    return value if is_real_number(value) else None
 
 
 def _bound_as_number(term: str | None, lower: Any, upper: Any) -> int | float | None:
@@ -1134,18 +1114,33 @@ def _bound_as_number(term: str | None, lower: Any, upper: Any) -> int | float | 
 _QUANTITY_DATA_KEYS = ("hasNumericalPart", "hasStringValue", "schema:minValue", "schema:maxValue")
 
 
+def _add_string_value(node: dict[str, Any], text: Any) -> None:
+    """Add non-blank *text* to the node's ``hasStringValue``, growing a list for a second one."""
+    if not isinstance(text, str) or not text.strip():
+        return
+    existing = node.get("hasStringValue")
+    if existing is None:
+        node["hasStringValue"] = text
+    elif isinstance(existing, list):
+        if text not in existing:
+            existing.append(text)
+    elif existing != text:
+        node["hasStringValue"] = [existing, text]
+
+
 def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str | None = None) -> dict[str, Any] | None:
     """One EMMO quantity node: ``[class, value-basis class]`` with its number,
     unit, bounds, text, sample statistics and conditions.
 
-    The number is ``value``, else ``typical_value``, else the one bound the
-    class names (:func:`_bound_as_number`). ``hasNumberValue`` is
-    ``xsd:double``, so a ``value`` that is a string reading as a number is
-    published as that number, and any other string as ``hasStringValue``, with
-    a ``semantic.value_text_only`` warning. When the quantity has its own
-    ``value_text``, that is the ``hasStringValue`` and the warning says the
-    ``value`` string is not published. ``min_value`` and ``max_value`` are
-    always kept, as ``schema:minValue`` and ``schema:maxValue``. A percent unit
+    The number is ``value``, else ``typical_value``, else, when neither is
+    given, the one bound the class names (:func:`_bound_as_number`).
+    ``hasNumberValue`` is ``xsd:double`` and carries a finite real number only
+    (:func:`battinfo._util.is_real_number`). A string in ``value`` or
+    ``typical_value``, which the schema refuses, is never coerced, not even
+    "3.6": it is published as ``hasStringValue`` beside ``value_text``, with a
+    ``semantic.value_text_only`` warning. ``min_value`` and ``max_value`` are
+    kept when they are numbers, as ``schema:minValue`` and
+    ``schema:maxValue``. A percent unit
     in any spelling is PercentUnit; on a key that is not a fraction, a spelling
     that states a basis (``wt%``, ``vol%``) adds WeightPercent or VolumePercent
     to the node's classes. The fraction keys (``porosity``, ``mass_fraction``,
@@ -1179,10 +1174,12 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
 
     lower = _bound_value(quantity.get("min_value"))
     upper = _bound_value(quantity.get("max_value"))
-    stated = [quantity.get(field) for field in ("value", "typical_value") if quantity.get(field) is not None]
-    primary = next((number for number in map(_number_value, stated) if number is not None), None)
-    text = next((str(item).strip() for item in stated if _number_value(item) is None and str(item).strip()), None)
-    if not stated:
+    # hasNumberValue carries a finite real number only. A dict that skipped
+    # validation may hold text in value: it goes out as hasStringValue, beside
+    # value_text, and is never coerced here.
+    value, typical = quantity.get("value"), quantity.get("typical_value")
+    primary = value if is_real_number(value) else typical if is_real_number(typical) else None
+    if value is None and typical is None:
         primary = _bound_as_number(resolved_term, lower, upper)
     if primary is not None:
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
@@ -1191,25 +1188,16 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     if upper is not None:
         node["schema:maxValue"] = upper
 
-    value_text = quantity.get("value_text")
-    if text is not None and value_text:
+    text = next((item.strip() for item in (value, typical) if isinstance(item, str) and item.strip()), None)
+    if text is not None:
         warnings.warn(
-            f"semantic.value_text_only: '{name}' value '{text}' is not a number and is not "
-            f"published - the JSON-LD export carries value_text '{value_text}' as text "
-            "(hasStringValue) instead. Put the number in value.",
-            stacklevel=2,
-        )
-    elif text is not None:
-        warnings.warn(
-            f"semantic.value_text_only: '{name}' value '{text}' is not a number - the JSON-LD "
+            f"semantic.value_text_only: '{name}' value '{text}' is text, not a number - the JSON-LD "
             "export carries it as text (hasStringValue), not as a number. Put the number in "
             "value and the wording in value_text.",
             stacklevel=2,
         )
-    if value_text:
-        node["hasStringValue"] = value_text
-    elif text is not None:
-        node["hasStringValue"] = text
+    for item in (quantity.get("value_text"), value, typical):
+        _add_string_value(node, item)
 
     unit = quantity.get("unit") or quantity.get("unit_text")
     iri = _unit_iri(unit)
@@ -1704,15 +1692,19 @@ def _converter_quantity_node(
     *,
     property_types: dict[str, str] | None = None,
 ) -> dict[str, Any] | None:
-    if not isinstance(quantity, dict) or quantity.get("value") is None:
+    if not isinstance(quantity, dict):
         return None
+    value = quantity.get("value")
     type_name = (property_types or CONVERTER_PROPERTY_TYPES).get(name)
     if type_name is None:
         return None
-    node: dict[str, Any] = {
-        "@type": type_name,
-        "hasNumericalPart": {"@type": "emmo:RealData", "hasNumberValue": quantity["value"]},
-    }
+    node: dict[str, Any] = {"@type": type_name}
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "emmo:RealData", "hasNumberValue": value}
+    elif isinstance(value, str) and value.strip():
+        node["hasStringValue"] = value
+    else:
+        return None
     unit_token = _converter_unit_token(str(quantity.get("unit") or quantity.get("unit_text") or ""))
     if unit_token is not None:
         node["hasMeasurementUnit"] = unit_token
@@ -3796,6 +3788,58 @@ def _to_domain_battery_jsonld_component(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# Record kinds `_to_domain_battery_jsonld` routes. The other kinds (cell
+# instances, test specs, tests, datasets, equipment specs, equipment, channels
+# and organizations) are emitted by battinfo.record_to_jsonld only.
+_DOMAIN_BATTERY_RECORD_KEYS: frozenset[str] = frozenset(
+    {
+        "cell_spec",
+        "parameter_set",
+        "material_spec",
+        "material",
+        "electrode_spec",
+        "electrode",
+        *COMPONENT_FAMILIES,
+        *(f"{family}_spec" for family in COMPONENT_FAMILIES),
+    }
+)
+
+# Top-level keys of the base-profile envelope (battinfo.base.schema.json),
+# which the legacy emitter maps.
+_BASE_ENVELOPE_KEYS = ("record", "battery", "measurements")
+
+
+def _record_to_jsonld_type(kind: EntityKind) -> str:
+    """The ``record_type`` that :func:`battinfo.record_to_jsonld` takes for *kind*."""
+    return "cell-instance" if kind.entity_type == "cell" else kind.entity_type
+
+
+def _unrouted_document_error(data: dict[str, Any]) -> ValueError:
+    """The error for a document the domain-battery target cannot map.
+
+    Such documents used to fall through to the legacy emitter, which wrote a
+    ``schema:Dataset`` with no ``@id`` and none of the record's content.
+    """
+    kind = kind_for_doc(data)
+    if kind is None:
+        if isinstance(data.get("specification"), dict):
+            return ValueError("to_jsonld maps a cell descriptor only when it has a schema_version; add one.")
+        return ValueError(
+            "to_jsonld cannot map this document: it is not a BattINFO record and has none of the "
+            f"base-profile keys {', '.join(_BASE_ENVELOPE_KEYS)}."
+        )
+    hint = f"battinfo.record_to_jsonld(record, {_record_to_jsonld_type(kind)!r})"
+    if kind.record_key in _DOMAIN_BATTERY_RECORD_KEYS:
+        # A kind this target emits, without the schema_version that routes it.
+        # record_to_jsonld has its own emitter for a cell spec, but hands the
+        # other kinds back to to_jsonld, so only a cell spec gets the hint.
+        message = f"to_jsonld maps {kind.entity_type} records only when they have a schema_version; add one"
+        if kind.record_key == "cell_spec":
+            return ValueError(f"{message}, or use {hint}.")
+        return ValueError(f"{message}.")
+    return ValueError(f"to_jsonld does not emit {kind.entity_type} records; use {hint}.")
+
+
 def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     if isinstance(data.get("parameter_set"), dict):
         return _to_domain_battery_jsonld_parameter_set(data)
@@ -3873,7 +3917,9 @@ def _to_domain_battery_jsonld(data: dict[str, Any]) -> dict[str, Any]:
             "comment": data.get("notes"),
         }
         return _to_domain_battery_jsonld_descriptor(descriptor)
-    return _to_domain_battery_jsonld_legacy(data)
+    if kind_for_doc(data) is None and any(key in data for key in _BASE_ENVELOPE_KEYS):
+        return _to_domain_battery_jsonld_legacy(data)
+    raise _unrouted_document_error(data)
 
 
 def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
@@ -3948,36 +3994,29 @@ def _to_converter_compatible_jsonld(data: dict[str, Any]) -> dict[str, Any]:
     return doc
 
 
-def _to_batterypass_jsonld(data: dict[str, Any]) -> dict[str, Any]:
-    doc = _to_domain_battery_jsonld(data)
-    context = doc.get("@context", [])
-    if isinstance(context, list):
-        context.append({"batterypass": "https://w3id.org/batterypass#"})
-        doc["@context"] = context
-
-    current_type = doc.get("@type")
-    if current_type is None:
-        doc["@type"] = "batterypass:BatteryPassportRecord"
-    elif isinstance(current_type, list):
-        doc["@type"] = [*current_type, "batterypass:BatteryPassportRecord"]
-    else:
-        doc["@type"] = [current_type, "batterypass:BatteryPassportRecord"]
-    doc["batterypass:version"] = "1.2.0"
-    return doc
-
-
 def to_jsonld(data: dict[str, Any], target: str = "domain-battery") -> dict[str, Any]:
-    """Transform canonical JSON to JSON-LD for a given target."""
+    """Transform a record to JSON-LD for a mapping target.
+
+    ``target="domain-battery"`` maps cell-spec, material, electrode, component
+    and parameter-set records, and the base-profile envelope of
+    ``battinfo.base.schema.json``. For the other record kinds (cell
+    instances, test specs, tests, datasets, equipment specs, equipment,
+    channels and organizations) it raises ``ValueError`` naming
+    :func:`battinfo.record_to_jsonld`, which emits every kind, and it raises
+    ``ValueError`` for a document it cannot route. ``target="converter-compatible"``
+    maps a cell descriptor to BattInfoConverter JSON-LD.
+    """
     if target == "domain-battery":
         doc = _to_domain_battery_jsonld(data)
-    elif target == "batterypass":
-        doc = _to_batterypass_jsonld(data)
     elif target == "converter-compatible":
         return _to_converter_compatible_jsonld(data)
-    else:
+    elif target == "batterypass":
         raise ValueError(
-            f"Unknown mapping target '{target}'. Expected 'domain-battery', 'batterypass', or 'converter-compatible'."
+            "The 'batterypass' mapping target was removed in 0.8.0: it added a placeholder type, "
+            "not Battery Pass data. Use 'domain-battery'."
         )
+    else:
+        raise ValueError(f"Unknown mapping target '{target}'. Expected 'domain-battery' or 'converter-compatible'.")
     validation = validate_jsonld(doc)
     if not validation.ok:
         raise ValueError(f"json-ld validation failed: {'; '.join(validation.errors)}")

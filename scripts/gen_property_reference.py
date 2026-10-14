@@ -108,7 +108,12 @@ def build() -> str:
         "gets the warning `semantic.percent_basis_mismatch`.",
         "",
         "The unit symbols accepted in quantity dicts, and the unit IRI each maps",
-        "to (EMMO where a term exists, QUDT as the documented fallback):",
+        "to (EMMO where a term exists, QUDT as the documented fallback).",
+        "",
+        "Validation and the JSON-LD export read the usual alternative spellings as the listed symbol: "
+        "`um` as `µm`, `mOhm` as `mΩ`, `degC` and `℃` as `°C`, `g/cm³` as `g/cm3`. Case is kept, because "
+        "it can change magnitude: `mV` is a millivolt and `MV` a megavolt. A unit that is none of these is "
+        "written as text (`schema:unitText`) only, and validation warns `semantic.unit_unmapped`.",
         "",
         "| Symbol | Unit |",
         "|---|---|",

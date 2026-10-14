@@ -26,7 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
-from battinfo._util import is_dataset_series
+from battinfo._util import is_dataset_series, is_real_number
 from battinfo.entities import kind_for_doc
 from battinfo.testmethod import _is_current_density_unit, _other_quantity_of_unit
 
@@ -441,6 +441,80 @@ def resolve_unit_iri(unit_symbol: str) -> str | None:
     return None
 
 
+# Where the unit tables give an IRI more than one symbol, the one it reads back
+# as. UnitOne is written both for counts ('count') and for fractions ('1'); a
+# reader cannot tell which was meant, and '1' is the unit's own symbol.
+_READ_BACK_SYMBOLS: dict[str, str] = {
+    "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978": "1",
+}
+
+
+def _expand_unit_iri(term: str) -> str:
+    """*term* as a full IRI: a records-context term or a ``prefix:local`` IRI is expanded."""
+    mapped = _CONTEXT_INLINE.get(term)
+    if isinstance(mapped, Mapping):
+        mapped = mapped.get("@id")
+    if isinstance(mapped, str):
+        term = mapped
+    prefix, sep, local = term.partition(":")
+    base = _CONTEXT_INLINE.get(prefix) if sep else None
+    if isinstance(base, str) and base.endswith(("#", "/")):
+        return base + local
+    return term
+
+
+@lru_cache(maxsize=1)
+def _unit_symbols_by_iri() -> dict[str, str]:
+    """{full unit IRI -> symbol}: every table the emitters resolve a unit through, reversed.
+
+    The first symbol listed for an IRI wins, in the emitters' own order: the
+    curated map, the hand-kept aliases, the candidate map, then the
+    records-context unit terms and the test-condition extras. The unit IRIs
+    BattINFO wrote by mistake before 0.8.0 read back as the symbol they stood for.
+    """
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, MANUAL_UNIT_TYPES  # noqa: PLC0415
+
+    table: dict[str, str] = dict(_READ_BACK_SYMBOLS)
+
+    def _add(symbol: Any, iri: Any) -> None:
+        if isinstance(symbol, str) and symbol and isinstance(iri, str) and iri:
+            table.setdefault(_expand_unit_iri(iri), symbol)
+
+    for symbol, iri in _UNIT_MAP.items():
+        _add(symbol, iri)
+    for symbol, iri in MANUAL_UNIT_TYPES.items():
+        _add(symbol, iri)
+    candidates = _DATA / "mappings" / "domain-battery" / "unit_map.candidates.json"
+    if candidates.exists():
+        for entry in json.loads(candidates.read_text(encoding="utf-8")).get("mappings", []):
+            _add(entry.get("symbol"), entry.get("unit_iri"))
+    for symbol, iri in CONTEXT_UNIT_SYMBOLS.items():
+        _add(symbol, iri)
+    for symbol, iri in TEST_CONDITION_UNIT_IRI.items():
+        _add(symbol, iri)
+    for iri, symbol in LEGACY_UNIT_IRIS.items():
+        _add(symbol, iri)
+    return table
+
+
+def unit_symbol_for_iri(unit: Any) -> str | None:
+    """The unit symbol a unit IRI stands for, or ``None`` when no unit table names it.
+
+    The reverse of :func:`resolve_unit_iri` and of the unit lookup the JSON-LD
+    emitters use, for code that reads a graph back into records. *unit* may be
+    a full IRI, a compact one (``emmo:MilliVolt``), a records-context term or a
+    node reference (``{"@id": ...}``). Where several symbols share an IRI, the
+    canonical one comes back: ``°C`` for DegreeCelsius, ``1`` for UnitOne. An IRI
+    no table names gives ``None``; the caller decides what to keep, and a prefix
+    is never dropped to guess at the base unit.
+    """
+    if isinstance(unit, Mapping):
+        unit = unit.get("@id")
+    if not isinstance(unit, str) or not unit.strip():
+        return None
+    return _unit_symbols_by_iri().get(_expand_unit_iri(unit.strip()))
+
+
 def _attach_unit(node: dict, unit_symbol: Any) -> None:
     """Put the unit on a quantity node: its IRI when one is mapped, otherwise
     the symbol as ``schema:unitText``. A value never loses its unit.
@@ -455,14 +529,28 @@ def _attach_unit(node: dict, unit_symbol: Any) -> None:
         node["schema:unitText"] = str(unit_symbol)
 
 
+def _value_part(value: Any) -> dict:
+    """The value of a quantity node: ``hasNumericalPart`` for a finite real
+    number, ``hasStringValue`` for text, and nothing for anything else. Text
+    only gets here in a dict that skipped validation; it stays text and is
+    never coerced to a number."""
+    if is_real_number(value):
+        return {"hasNumericalPart": {"hasNumberValue": value}}
+    if isinstance(value, str) and value.strip():
+        return {"hasStringValue": value}
+    return {}
+
+
 def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
     """A test condition -> EMMO quantity node (the ``@type`` comes from the
-    controlled vocabulary), or ``None`` if the key is unmapped — the caller then
-    falls back to ``schema:PropertyValue``."""
+    controlled vocabulary), or ``None`` if the key is unmapped or the value is
+    neither a number nor text — the caller then falls back to
+    ``schema:PropertyValue``."""
     cls = TEST_CONDITION_CLASS.get(str(key).lower())
-    if not cls:
+    part = _value_part(value)
+    if not cls or not part:
         return None
-    node: dict = {"@type": cls, "hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = {"@type": cls, **part}
     # A generic class (e.g. ConventionalProperty for temperature) needs a human
     # label to say *which* property it is.
     if cls in TEST_CONDITION_GENERIC_CLASSES:
@@ -477,7 +565,7 @@ def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | No
 
 def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
     """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
-    node: dict = {"@type": emmo_class, "hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = {"@type": emmo_class, **_value_part(value)}
     _attach_unit(node, unit_symbol)
     return node
 
@@ -521,7 +609,7 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
     if mode == "group":
         gnode: dict = {"@type": step_emmo_class("group", None) or "IterativeWorkflow"}
         count = step.get("count")
-        if isinstance(count, int):
+        if isinstance(count, int) and is_real_number(count):
             gnode["NumberOfIterations"] = {"hasNumericalPart": {"hasNumberValue": count}}
         gnode["hasTask"] = [method_step_node(s) for s in (step.get("steps") or []) if isinstance(s, Mapping)]
         return gnode
@@ -928,9 +1016,10 @@ def _quantity(value: Any, unit: str) -> dict:
 
     Uses the same EMMO ``hasNumericalPart``/``hasNumberValue``/``hasMeasurementUnit``
     encoding as the published builder (ws.py) — a single, shared quantity serialization
-    across publication and validation (no parallel QUDT form).
+    across publication and validation (no parallel QUDT form). Text goes to
+    ``hasStringValue``, as in every emitter.
     """
-    node: dict = {"hasNumericalPart": {"hasNumberValue": value}}
+    node: dict = dict(_value_part(value))
     unit_iri = _UNIT_MAP.get(unit)
     if unit_iri:
         node["hasMeasurementUnit"] = {"@id": unit_iri}

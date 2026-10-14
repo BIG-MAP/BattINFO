@@ -34,6 +34,20 @@ def test_demoted_names_warn_and_resolve_identically() -> None:
     assert any("battinfo.interop" in str(w.message) for w in caught)
 
 
+def test_spec_value_is_off_the_curated_surface() -> None:
+    """SpecValue belongs to the LinkML layer in bundle_generated.py, not to the record models."""
+    from battinfo.bundle_generated import SpecValue
+
+    assert "SpecValue" not in battinfo.__all__
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        via_top = battinfo.__getattr__("SpecValue")
+    assert via_top is SpecValue
+    assert any(
+        issubclass(w.category, DeprecationWarning) and "battinfo.bundle_generated" in str(w.message) for w in caught
+    )
+
+
 def test_engine_is_demoted_with_the_one_workspace_message() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")

@@ -3,6 +3,8 @@ from __future__ import annotations
 import copy
 from typing import Any, Mapping
 
+from battinfo._util import number_from_text
+
 _CELL_TYPE_PRODUCT_TO_SNAKE = {
     "cellFormat": "cell_format",
     "positiveElectrodeBasis": "positive_electrode_basis",
@@ -186,4 +188,93 @@ def _main_entity_to_snake(value: Mapping[str, Any]) -> dict[str, Any]:
     return normalized
 
 
-__all__ = ["record_to_snake_aliases"]
+# Every key a quantity object can carry: the shared quantity module, the
+# cell-spec SpecItem (unit_code, raw) and the base schema's Quantity (unit_uri).
+# An object with a string ``value`` and no other keys than these is a quantity;
+# a checksum ({algorithm, value}) or an identifier ({property_id, value}) is not.
+_QUANTITY_KEYS = frozenset(
+    {
+        "value",
+        "min_value",
+        "max_value",
+        "typical_value",
+        "value_text",
+        "standard_deviation",
+        "sample_count",
+        "unit",
+        "unit_text",
+        "unit_code",
+        "unit_uri",
+        "value_basis",
+        "co_type",
+        "conditions",
+        "raw",
+    }
+)
+
+
+def migrate_quantity_values(node: Any, path: str = "") -> list[str]:
+    """Move text out of the quantity ``value`` fields under *node*, in place.
+
+    Before 0.8.0 most record types accepted text in a quantity's ``value``; it
+    now holds a number only, and text belongs in ``value_text``. This brings an
+    older record, or any part of one, up to date as it is read back: a numeric
+    string (``"2.5"``) becomes the number, and other text moves to
+    ``value_text``. When ``value_text`` already holds different text, the two
+    are joined, the text from ``value`` first (``"3.6-3.7; at 25 C"``), so
+    nothing the record said is lost; blank text is dropped.
+    Conditions maps and lists are walked as well.
+
+    Returns one line for each text value moved or dropped, naming its path
+    under *path*, for the caller to warn with; a numeric string becomes a
+    number without one. Validation never calls this, so a record that still
+    holds text in ``value`` fails it.
+    """
+    notes: list[str] = []
+    _migrate_quantities(node, path, notes)
+    return notes
+
+
+def _migrate_quantities(node: Any, path: str, notes: list[str]) -> None:
+    if isinstance(node, list):
+        for index, item in enumerate(node):
+            _migrate_quantities(item, f"{path}.{index}" if path else str(index), notes)
+        return
+    if not isinstance(node, dict):
+        return
+    text = node.get("value")
+    if isinstance(text, str) and node.keys() <= _QUANTITY_KEYS:
+        _migrate_text_value(node, text, f"{path}.value" if path else "value", notes)
+    for key, child in node.items():
+        if isinstance(child, (dict, list)):
+            _migrate_quantities(child, f"{path}.{key}" if path else str(key), notes)
+
+
+def _migrate_text_value(quantity: dict[str, Any], text: str, where: str, notes: list[str]) -> None:
+    number = number_from_text(text)
+    if number is not None:
+        quantity["value"] = number
+        return
+    held = quantity.get("value_text")
+    if not text.strip():
+        notes.append(f"{where}: dropped the blank text {text!r}")
+        target = None
+    elif isinstance(held, str) and held.strip() and held != text:
+        target = f"{text}; {held}"
+        notes.append(f"{where}: joined the text {text!r} to value_text, which now reads {target!r}")
+    else:
+        notes.append(f"{where}: moved the text {text!r} to value_text")
+        target = text
+    # Rebuild in place so value_text takes the place value had in the object.
+    items = [(key, item) for key, item in quantity.items() if key != "value_text"]
+    quantity.clear()
+    for key, item in items:
+        if key != "value":
+            quantity[key] = item
+        elif target is not None:
+            quantity["value_text"] = target
+        elif isinstance(held, str):
+            quantity["value_text"] = held
+
+
+__all__ = ["migrate_quantity_values", "record_to_snake_aliases"]

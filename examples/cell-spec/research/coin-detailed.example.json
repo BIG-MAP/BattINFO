@@ -12,7 +12,7 @@
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
     "negative_electrode_basis": "graphite",
-    "size_code": "2032"
+    "size_code": "R2032"
   },
   "properties": {
     "nominal_capacity": {
