@@ -55,13 +55,21 @@ jobs:
           name: docs-html
           path: docs/_build/html
 
-  # Versioned deploy to gh-pages: main -> dev/, tags -> vX.Y.Z/ + stable/,
-  # switcher.json regenerated from the published version directories.
+  # Versioned deploy to gh-pages: main -> dev/, each v* tag -> its own folder.
+  # A final release tag (vX.Y.Z) also updates switcher.json, and stable/ when
+  # it is the newest release; a pre-release tag such as v0.8.0rc1 leaves both
+  # alone (docs-deploy.sh).
   # (Requires GitHub Pages to be enabled from the gh-pages branch.)
   deploy:
     name: Deploy versioned docs
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     needs: build
+    # One deploy at a time. Each pushes to gh-pages, so the deploy of a release
+    # tag that ran next to the deploy of the main commit it was cut from would
+    # be refused at the push.
+    concurrency:
+      group: docs-deploy-gh-pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

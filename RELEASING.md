@@ -64,7 +64,7 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
    The hosted check (`scripts/check_hosted_files.py`) compares the files w3id serves (the v1 records context, every JSON Schema at its `$id` and the record vocabulary) with the tag's copies. For a final tag a difference stops the upload: deploy the registry with the tag's copies, then use "Re-run failed jobs" on the same run. If the upload itself stops part-way, "Re-run failed jobs" finishes it, since files PyPI already has are skipped. After the release, a daily workflow (`hosted-files.yml`) checks that the hosted context still holds every term of the last release with the same value.
 
-   A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation for the tag.
+   A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation of each tag in its own folder; only a final tag also updates `stable/` and the version switcher.
 
 8. Review the draft release and publish it. Zenodo then archives it under the concept DOI and takes the metadata, authors included, from `CITATION.cff`. The README badge and citation use the concept DOI and need no change.
 

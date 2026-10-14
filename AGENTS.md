@@ -33,7 +33,7 @@ uv run pytest --nbmake docs/guides/ -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags.
+CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags, and `tests/test_docs_deploy.py` runs `docs-deploy.sh` against a scratch gh-pages tree.
 
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
