@@ -1980,6 +1980,11 @@ After running this command:
   2. Edit battinfo.yaml in each cell folder if you have more metadata.
   3. Process each cell:  battinfo dataset process &lt;cell-folder&gt;
 
+
+A cell given a serial (--serials) gets the IRI any other BattINFO path
+gives that cell. A cell without one gets a random IRI, recorded in its
+battinfo.yaml: keep that file, nothing else can give the cell its IRI again.
+
 **Usage**:
 
 ```console
@@ -2001,7 +2006,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 * `--license <str>`: SPDX licence identifier.  [default: CC-BY-4.0]
 * `--iris <str>`: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).
 * `--serials <str>`: Comma-separated serial numbers (one per cell, used as folder names).
-* `--force`: Overwrite an existing output directory.
+* `--force`: Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.
 * `--help`: Show this message and exit.
 
 ### `battinfo batch add`
@@ -2010,7 +2015,7 @@ Add more cells to an existing batch directory.
 
 
 Reads batch.yaml to inherit cell spec, lab, operator, and project.
-New cells are numbered after the existing ones.
+A new cell without a serial gets a random IRI, recorded in its battinfo.yaml.
 Provide --batch-id / --operator / --project to override for the new cells.
 Updates the count in batch.yaml automatically.
 

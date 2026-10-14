@@ -354,6 +354,17 @@ def test_every_path_mints_one_cell_iri(case: str, tmp_path: Path) -> None:
         iris["create"] = api.create_cell_instance(
             cell_spec_id=CELL_SPEC_IRI, serial_number=fields["serial_number"], validate=False
         )["cell_instance"]["id"]
+    if "serial_number" in fields:  # `battinfo batch init` names a cell by its serial; without one it mints randomly
+        from battinfo.contribution import init_batch
+
+        (made,) = init_batch(
+            tmp_path / "batch",
+            CELL_SPEC_IRI,
+            1,
+            batch_id=fields.get("batch_id"),
+            serial_numbers=[fields["serial_number"]],
+        )["cells"]
+        iris["batch"] = made["cell_iri"]
     assert len(set(iris.values())) == 1, iris
 
 
@@ -438,22 +449,36 @@ def test_every_path_mints_one_test_iri(case: str, tmp_path: Path) -> None:
     assert len(set(iris.values())) == 1, iris
 
 
-def test_a_test_with_data_mints_one_iri_in_the_workspace_and_the_engine(tmp_path: Path) -> None:
-    """The run is told apart by its first data file's location in the workspace folder."""
+def test_a_test_with_data_mints_one_iri_in_the_workspace_the_engine_and_the_batch_package(tmp_path: Path) -> None:
+    """The run is told apart by its first data file's location in the workspace (or cell) folder."""
+    import json
+
     import battinfo
     from battinfo.bundle import CellSpec
+    from battinfo.contribution import init_batch, package_batch
+
+    def write_data(folder: Path) -> None:
+        data = folder / "data" / "S1_cycling.csv"
+        data.parent.mkdir(parents=True, exist_ok=True)
+        data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
 
     for path in ("engine", "ws"):
-        data = tmp_path / path / "data" / "S1.csv"
-        data.parent.mkdir(parents=True)
-        data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
+        write_data(tmp_path / path)
     engine = Workspace(tmp_path / "engine")
     cell = engine.cell(CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_number="S1")
-    test = engine.record_test(cell, kind="cycling", path=tmp_path / "engine" / "data" / "S1.csv")
+    test = engine.record_test(cell, kind="cycling", path=tmp_path / "engine" / "data" / "S1_cycling.csv")
     engine.render()
 
     ws = battinfo.workspace(tmp_path / "ws", registry_url=None)
     ws.add("cell", spec=CellSpec(id=CELL_SPEC_IRI, **SPEC_FIELDS), serial_numbers=["S1"])
-    (added,) = ws.add("test", type="cycling", cell="S1", data="data/S1.csv")
+    (added,) = ws.add("test", type="cycling", cell="S1", data="data/S1_cycling.csv")
     ws._ws.render()
-    assert added.id == test.id
+
+    # `battinfo batch package` reads the run from the file's place in the cell folder,
+    # and the kind from its name.
+    (made,) = init_batch(tmp_path / "batch", CELL_SPEC_IRI, 1, serial_numbers=["S1"])["cells"]
+    write_data(tmp_path / "batch" / made["folder"])
+    package = package_batch(tmp_path / "batch", creators=[{"name": "Clark, Simon", "affiliation": "SINTEF"}])
+    (entry,) = json.loads(Path(package["bundle_path"]).read_text(encoding="utf-8"))["datasets"]
+
+    assert added.id == test.id == entry["test"]["test"]["id"]

@@ -3603,7 +3603,11 @@ def batch_init(
         "--serials",
         help="Comma-separated serial numbers (one per cell, used as folder names).",
     ),
-    overwrite: bool = typer.Option(False, "--force", help="Overwrite an existing output directory."),
+    overwrite: bool = typer.Option(
+        False,
+        "--force",
+        help="Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.",
+    ),
 ) -> None:
     """Scaffold a multi-cell batch directory.
 
@@ -3620,6 +3624,11 @@ def batch_init(
          e.g. 2025-06-01__capacity_check__25degC.csv
       2. Edit battinfo.yaml in each cell folder if you have more metadata.
       3. Process each cell:  battinfo dataset process <cell-folder>
+
+    \b
+    A cell given a serial (--serials) gets the IRI any other BattINFO path
+    gives that cell. A cell without one gets a random IRI, recorded in its
+    battinfo.yaml: keep that file, nothing else can give the cell its IRI again.
     """
     from battinfo.contribution import init_batch
 
@@ -3683,7 +3692,7 @@ def batch_add(
 
     \b
     Reads batch.yaml to inherit cell spec, lab, operator, and project.
-    New cells are numbered after the existing ones.
+    A new cell without a serial gets a random IRI, recorded in its battinfo.yaml.
     Provide --batch-id / --operator / --project to override for the new cells.
     Updates the count in batch.yaml automatically.
     """

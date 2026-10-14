@@ -78,6 +78,12 @@ TEST_RUN_SAVED_WITHOUT_ID = (
     "with no name or protocol name."
 )
 DATASET_OF_MOVED_TEST = "A dataset's seed includes its test's IRI, which moved with the test seed."
+BATCH_CELL = (
+    "The batch path mints a cell that has a serial number through the shared cell seed (spec, serial, batch), "
+    "so it gets the IRI every other path gives it, and a cell without one gets a random IRI, recorded in its "
+    "battinfo.yaml, never one from its place in the batch."
+)
+TEST_ON_A_BATCH_CELL = TEST_RUN + " Its cell moved as well: " + BATCH_CELL
 
 #: Cases whose IRI moved since 057b66a0: case id -> (what it mints now, why it moved).
 MOVED: dict[str, tuple[str, str]] = {
@@ -141,6 +147,16 @@ MOVED: dict[str, tuple[str, str]] = {
         "https://w3id.org/battinfo/spec/pmda-v1sm-tv57-zrqt",
         CHEMISTRY_KEY,
     ),
+    "cell | batch | batch and folder index": (RANDOM, BATCH_CELL),
+    "cell | batch | folder index": (RANDOM, BATCH_CELL),
+    "cell | batch | serial": (
+        "https://w3id.org/battinfo/cell/fq1x-4nx3-v669-sp5x",
+        BATCH_CELL,
+    ),
+    "cell | batch | serial and batch": (
+        "https://w3id.org/battinfo/cell/enyv-qcg0-2ypb-r6v4",
+        BATCH_CELL,
+    ),
     "cell | publication | serial and name": (
         "https://w3id.org/battinfo/cell/df2p-j6g8-f4ks-av3c",
         PUBLICATION_SERIAL_FIRST,
@@ -150,7 +166,7 @@ MOVED: dict[str, tuple[str, str]] = {
         PUBLICATION_SERIAL_FIRST,
     ),
     "dataset | batch | data file": (
-        "https://w3id.org/battinfo/dataset/54nw-xwsp-ych4-bsbe",
+        "https://w3id.org/battinfo/dataset/t11a-1q7d-hw1j-an2v",
         DATASET_OF_MOVED_TEST,
     ),
     "dataset | engine | local file": (
@@ -286,8 +302,8 @@ MOVED: dict[str, tuple[str, str]] = {
         KIND_RESOLVED,
     ),
     "test | batch | data file": (
-        "https://w3id.org/battinfo/test/wfzv-bzmz-4vnv-czgg",
-        TEST_RUN,
+        "https://w3id.org/battinfo/test/gszh-7v6a-ttxz-3afm",
+        TEST_ON_A_BATCH_CELL,
     ),
     "test | engine | named": (
         "https://w3id.org/battinfo/test/jnz2-b453-nmwr-12jw",
@@ -567,14 +583,25 @@ def _cells(root: Path) -> dict[str, str]:
 
     from battinfo.contribution import init_batch  # noqa: PLC0415
 
-    def batch_iris(folder: str, count: int, **kwargs: Any) -> list[str]:
-        result = init_batch(root / "batch" / folder, cell_spec=spec_iri, count=count, **kwargs)
-        return [cell["cell_iri"] for cell in result["cells"]]
+    def batch_iris(folder: str, count: int, **kwargs: Any) -> str:
+        """The cell IRIs two ``battinfo batch init`` runs mint, or ``random`` when they differ."""
+        runs = [
+            ", ".join(
+                sorted(
+                    cell["cell_iri"]
+                    for cell in init_batch(root / "batch" / f"{folder}-{n}", cell_spec=spec_iri, count=count, **kwargs)[
+                        "cells"
+                    ]
+                )
+            )
+            for n in (1, 2)
+        ]
+        return _random_or(*runs)
 
-    rows["cell | batch | serial"] = batch_iris("serial", 1, serial_numbers=["C01"])[0]
-    rows["cell | batch | serial and batch"] = batch_iris("serial-batch", 1, batch_id="B7", serial_numbers=["C03"])[0]
-    rows["cell | batch | folder index"] = ", ".join(sorted(batch_iris("index", 2)))
-    rows["cell | batch | batch and folder index"] = batch_iris("batch-index", 1, batch_id="B7")[0]
+    rows["cell | batch | serial"] = batch_iris("serial", 1, serial_numbers=["C01"])
+    rows["cell | batch | serial and batch"] = batch_iris("serial-batch", 1, batch_id="B7", serial_numbers=["C03"])
+    rows["cell | batch | folder index"] = batch_iris("index", 2)
+    rows["cell | batch | batch and folder index"] = batch_iris("batch-index", 1, batch_id="B7")
     return rows
 
 
