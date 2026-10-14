@@ -130,6 +130,12 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 
 ::::
 
+```{admonition} Known gap
+:class: warning
+
+The unit map has no EMMO unit IRI for `mAh/g` yet, so the JSON-LD above writes the unit of the specific capacity as text (`schema:unitText`) only, and strict validation gives the warning `semantic.unit_unmapped`.
+```
+
 What to notice:
 
 - The `kind` resolves to the chemical-substance class IRI that types the emitted node — the genome's aggregation axis.

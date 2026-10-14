@@ -487,10 +487,12 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     Canonical symbols pass through unchanged. Accepted alternative spellings are
     rewritten: ASCII exponents (``mg/cm^2`` -> ``mg/cm2``, ``g/cm³`` -> ``g/cm3``),
     ASCII micro prefixes (``um`` -> ``µm``), Ohm spellings (``mOhm`` / ``milliohm`` ->
-    ``mΩ``), product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius
-    spellings (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out
-    names (``percent`` -> ``%``, ``hour`` -> ``h``). Unknown strings are returned
-    trimmed, so the caller can still fall back to ``schema:unitText``.
+    ``mΩ``, and the ohm sign U+2126 -> ``Ω``), the kelvin sign U+212A -> ``K``,
+    product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius spellings
+    (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out names
+    (``percent`` -> ``%``, ``hour`` -> ``h``). Case is kept, because it can change
+    magnitude (``mV`` is a millivolt, ``MV`` a megavolt). Unknown strings are
+    returned trimmed, so the caller can still fall back to ``schema:unitText``.
     """
     if not isinstance(unit, str):
         return None
@@ -506,6 +508,7 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     # A remaining interior space is a product separator ("mPa s").
     text = text.replace(" ", ".")
     text = text.replace("μ", "µ")  # Greek mu (U+03BC) -> micro sign (U+00B5)
+    text = text.replace("\u2126", "Ω").replace("\u212a", "K")  # ohm and kelvin signs -> the letters
     text = _MICRO_PREFIX_RE.sub("µ", text)
     text = _OHM_SUFFIX_RE.sub("Ω", text)
     return _UNIT_ALIASES.get(text, text)

@@ -717,6 +717,14 @@ FAMILIES = [
                 "heading": "A material spec (the powder as a product)",
                 "fn": snippet_material_spec,
                 "record_type": "material-spec",
+                # Goes when the curated unit map gains mAh/g: the generator then
+                # fails until this entry and the gap note are removed.
+                "known_warnings": (("semantic.unit_unmapped", "material_spec.property.specific_capacity"),),
+                "gap": (
+                    "The unit map has no EMMO unit IRI for `mAh/g` yet, so the JSON-LD above writes the "
+                    "unit of the specific capacity as text (`schema:unitText`) only, and strict validation "
+                    "gives the warning `semantic.unit_unmapped`."
+                ),
                 "notice": [
                     "The `kind` resolves to the chemical-substance class IRI that "
                     "types the emitted node — the genome's aggregation axis.",
@@ -1140,13 +1148,24 @@ def render_field_tables(schema_file: str) -> str:
 # ── Build ────────────────────────────────────────────────────────────────────
 
 
-def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None) -> str:
+def _validate_or_die(
+    record: dict,
+    where: str,
+    *,
+    schema_only: str | None = None,
+    known_warnings: tuple[tuple[str, str], ...] = (),
+) -> str:
     """Strict-validate; die loudly on ANY issue; return the verdict line.
 
     ``schema_only`` names a schema file for the one family the semantic
     validation path cannot reach (organizations have no entities-registry
     kind, so ``validate_record_report`` rejects them — a known gap the page
     states rather than hides).
+
+    ``known_warnings`` lists ``(code, path)`` warnings a section is allowed
+    because its known-gap note explains them. Any other issue still dies, and
+    so does a listed warning that no longer fires, so the note and the entry
+    go as soon as the gap is closed.
     """
     import battinfo
     from battinfo.validate.record import validate_record_report
@@ -1166,15 +1185,30 @@ def _validate_or_die(record: dict, where: str, *, schema_only: str | None = None
         )
 
     report = validate_record_report(record, policy="strict")
-    if report.issues:
-        details = NL.join(
-            f"  - {issue.severity} {issue.code} at {issue.path}: {issue.message}" for issue in report.issues
-        )
+    known = set(known_warnings)
+    unexpected = [
+        issue for issue in report.issues if issue.severity != "warning" or (issue.code, issue.path) not in known
+    ]
+    if unexpected:
+        details = NL.join(f"  - {issue.severity} {issue.code} at {issue.path}: {issue.message}" for issue in unexpected)
         raise SystemExit(
             f"gen_reference_records: the '{where}' reference record no longer "
             f"validates clean under the strict policy:{NL}{details}{NL}"
             "A reference record is contract — fix the record shape or the "
             "change that broke it, in this same PR."
+        )
+    closed = known - {(issue.code, issue.path) for issue in report.issues}
+    if closed:
+        raise SystemExit(
+            f"gen_reference_records: the '{where}' reference record no longer draws "
+            f"{sorted(closed)}. Remove them from the section's known_warnings, and "
+            "its known-gap note with them."
+        )
+    if known:
+        listed = ", ".join(f"{code} at {path}" for code, path in sorted(known))
+        return (
+            f"**Validated with known warnings**: strict policy, 0 errors, {len(known)} warning(s) the "
+            f"known-gap note explains: {listed} (battinfo {battinfo.__version__})."
         )
     return f"**Validated clean** — strict policy, 0 errors, 0 warnings (battinfo {battinfo.__version__})."
 
@@ -1195,6 +1229,7 @@ def build_sections(family: dict) -> list[dict]:
             record,
             f"{family['slug']}: {section['heading']}",
             schema_only=section.get("schema_only"),
+            known_warnings=tuple(section.get("known_warnings", ())),
         )
         jsonld = record_to_jsonld(record, section["record_type"]) if section.get("record_type") else None
         sections.append({**section, "record": record, "jsonld": jsonld, "verdict": verdict})

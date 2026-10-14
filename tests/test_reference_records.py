@@ -46,3 +46,24 @@ def test_generation_is_deterministic() -> None:
     # randomly minted uid or a wall-clock timestamp leak through would make the
     # drift gate flaky instead of honest.
     assert gen.render_all() == gen.render_all()
+
+
+def test_a_known_warning_is_allowed_only_while_it_fires() -> None:
+    # A section may list warnings its known-gap note explains. Any other issue
+    # still fails, and a listed warning that stops firing fails too, so the note
+    # cannot outlive the gap it describes.
+    import json
+
+    import pytest
+
+    record = json.loads((ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(encoding="utf-8"))
+    record["properties"].pop("cycle_life")  # value_text only, which warns on its own
+    record["properties"]["nominal_capacity"]["unit"] = "ah"  # warns semantic.unit_unmapped
+    known = (("semantic.unit_unmapped", "properties.nominal_capacity"),)
+
+    assert "known warnings" in gen._validate_or_die(record, "probe", known_warnings=known)
+    with pytest.raises(SystemExit, match="no longer validates clean"):
+        gen._validate_or_die(record, "probe")
+    record["properties"]["nominal_capacity"]["unit"] = "Ah"
+    with pytest.raises(SystemExit, match="no longer draws"):
+        gen._validate_or_die(record, "probe", known_warnings=known)

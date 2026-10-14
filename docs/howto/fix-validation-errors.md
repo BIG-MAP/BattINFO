@@ -26,6 +26,8 @@ print(spec.nominal_capacity)
 
 The value itself is a number, so write `2.5`, not `"2.5"`. Text that is not a number, such as a cycle life of `>1000`, goes in `value_text`: `cycle_life={"value_text": ">1000", "unit": "count"}`.
 
+Units are case-sensitive, because case can change magnitude: `MV` is a megavolt, so a nominal voltage in `MV` fails strict validation with a did-you-mean for `mV`. A unit spelled in another case that means the same, such as `ah`, passes with the warning `semantic.unit_unmapped`, which names the symbol to write (`Ah`) so the unit gets its EMMO IRI. `battinfo properties show nominal_voltage` lists the units a property accepts.
+
 **3. An invalid test kind**
 
 ```python
