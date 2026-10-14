@@ -275,7 +275,14 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 3.8
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+        "schema:valueReference": {
+          "@type": [
+            "ReferenceElectrode",
+            "LithiumElectrode"
+          ],
+          "skos:prefLabel": "Li/Li+"
+        }
       },
       {
         "@type": [
@@ -449,7 +456,14 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 3.4
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+        "schema:valueReference": {
+          "@type": [
+            "ReferenceElectrode",
+            "LithiumElectrode"
+          ],
+          "skos:prefLabel": "Li/Li+"
+        }
       },
       {
         "@type": [
@@ -855,7 +869,14 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "@type": "RealData",
           "hasNumberValue": 4.7
         },
-        "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
+        "hasMeasurementUnit": "https://w3id.org/emmo#Volt",
+        "schema:valueReference": {
+          "@type": [
+            "ReferenceElectrode",
+            "LithiumElectrode"
+          ],
+          "skos:prefLabel": "Li/Li+"
+        }
       },
       {
         "@type": [

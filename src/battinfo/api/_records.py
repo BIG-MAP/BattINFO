@@ -122,6 +122,8 @@ def _cell_spec_record_to_library_format(doc: dict[str, Any]) -> dict[str, Any]:
         "chemistry": product.get("chemistry", "unknown"),
     }
     for src, dst in [
+        ("name", "name"),
+        ("rechargeable", "rechargeable"),
         ("positive_electrode_basis", "positive_electrode_basis"),
         ("negative_electrode_basis", "negative_electrode_basis"),
         ("size_code", "size_code"),

@@ -37,7 +37,12 @@
       },
       "average_voltage": {
         "value": 4.7,
-        "unit": "V"
+        "unit": "V",
+        "conditions": {
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
       }
     }
   },

@@ -943,7 +943,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ]
   },
-  "schema:size": "18650",
+  "schema:size": "R18650",
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -1722,7 +1722,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "skos:prefLabel": "NominalCapacity",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 0.04
+          "hasNumberValue": 0.004
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#AmpereHour"
       },
@@ -1970,7 +1970,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ]
   },
-  "schema:size": "2032",
+  "schema:size": "R2032",
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
@@ -1984,7 +1984,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA COIN-NMC811-D (cell-spec)
+::::::{dropdown} Example Lab COIN-NMC811-D (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2021,11 +2021,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92",
   "schema:identifier": "tme2-0sy6-q89b-8m92",
-  "schema:name": "EMPA COIN-NMC811-D",
+  "schema:name": "Example Lab COIN-NMC811-D",
   "schema:model": "COIN-NMC811-D",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/tme2-0sy6-q89b-8m92",
   "isDescriptionFor": {
@@ -2037,7 +2037,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonGraphiteBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/tme2-0sy6-q89b-8m92#described",
-    "skos:prefLabel": "EMPA COIN-NMC811-D",
+    "skos:prefLabel": "Example Lab COIN-NMC811-D",
     "hasProperty": [
       {
         "@type": [
@@ -2059,7 +2059,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "skos:prefLabel": "NominalVoltage",
         "hasNumericalPart": {
           "@type": "RealData",
-          "hasNumberValue": 3.8
+          "hasNumberValue": 3.65
         },
         "hasMeasurementUnit": "https://w3id.org/emmo#Volt"
       }
@@ -2085,7 +2085,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:46+00:00"
   }
 }
@@ -2095,7 +2095,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA PRISM-LFP-100AH (cell-spec)
+::::::{dropdown} Example Lab PRISM-LFP-100AH (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2132,11 +2132,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01",
   "schema:identifier": "86k6-6tzd-c4sf-5s01",
-  "schema:name": "EMPA PRISM-LFP-100AH",
+  "schema:name": "Example Lab PRISM-LFP-100AH",
   "schema:model": "PRISM-LFP-100AH",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/86k6-6tzd-c4sf-5s01",
   "isDescriptionFor": {
@@ -2148,7 +2148,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumIonGraphiteBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/86k6-6tzd-c4sf-5s01#described",
-    "skos:prefLabel": "EMPA PRISM-LFP-100AH",
+    "skos:prefLabel": "Example Lab PRISM-LFP-100AH",
     "hasProperty": [
       {
         "@type": [
@@ -2196,7 +2196,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:47+00:00"
   }
 }
@@ -2206,7 +2206,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 :::::
 ::::::
 
-::::::{dropdown} EMPA COIN-ZNMNO2-ALK (cell-spec)
+::::::{dropdown} Example Lab COIN-ZNMNO2-ALK (cell-spec)
 :::::{tab-set}
 
 ::::{tab-item} Python
@@ -2243,11 +2243,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5",
   "schema:identifier": "jgyy-x3h5-drmv-5tn5",
-  "schema:name": "EMPA COIN-ZNMNO2-ALK",
+  "schema:name": "Example Lab COIN-ZNMNO2-ALK",
   "schema:model": "COIN-ZNMNO2-ALK",
   "schema:manufacturer": {
     "@type": "schema:Organization",
-    "schema:name": "EMPA"
+    "schema:name": "Example Lab"
   },
   "schema:url": "https://www.battery-genome.org/registry/spec/jgyy-x3h5-drmv-5tn5",
   "isDescriptionFor": {
@@ -2257,7 +2257,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "LithiumManganeseDioxideBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
-    "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK",
+    "skos:prefLabel": "Example Lab COIN-ZNMNO2-ALK",
     "hasProperty": [
       {
         "@type": [
@@ -2296,7 +2296,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@id": "https://w3id.org/battinfo/spec/gzt2-hrqq-gsfn-sp94#described"
     },
     "hasSeparator": {
-      "@id": "https://w3id.org/battinfo/spec/wgym-4xfa-pws1-ek1b#described"
+      "@id": "https://w3id.org/battinfo/spec/nqex-73kg-ptgm-6hq0#described"
     },
     "hasConstituent": {
       "@id": "https://w3id.org/battinfo/spec/38af-bpnv-1zmm-32hs#described"
@@ -2305,7 +2305,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:schemaVersion": "0.2.0",
   "dcterms:source": {
     "@type": "prov:Entity",
-    "dcterms:type": "datasheet",
+    "dcterms:type": "manual",
     "prov:generatedAtTime": "2026-06-18T08:52:47+00:00"
   }
 }

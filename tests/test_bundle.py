@@ -448,6 +448,51 @@ def test_library_record_keeps_its_name_through_load_and_save() -> None:
     assert spec.to_library_record()["specification"]["name"] == "Lab name for this cell"
 
 
+def test_library_record_keeps_rechargeable_through_load_and_save() -> None:
+    # A primary cell in the library says so: the chemistry key alone (li-mno2)
+    # does not, and the canonical record has a rechargeable field for it.
+    record = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
+            "manufacturer": "Energizer",
+            "model": "CR2032",
+            "format": "coin",
+            "chemistry": "li-mno2",
+            "rechargeable": False,
+        },
+        "provenance": {"source_type": "manual"},
+    }
+
+    spec = CellSpec.from_library_record(record)
+
+    assert spec.rechargeable is False
+    assert spec.to_record()["cell_spec"]["rechargeable"] is False
+    assert spec.to_library_record()["specification"]["rechargeable"] is False
+    del record["specification"]["rechargeable"]
+    assert "rechargeable" not in CellSpec.from_library_record(record).to_library_record()["specification"]
+
+
+def test_a_canonical_cell_spec_saved_to_the_library_keeps_name_and_rechargeable() -> None:
+    from battinfo.api._records import _cell_spec_record_to_library_format
+
+    record = CellSpec(
+        id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
+        name="Energizer CR2032",
+        manufacturer="Energizer",
+        model="CR2032",
+        format="coin",
+        chemistry="li-mno2",
+        rechargeable=False,
+    ).to_record()
+
+    specification = _cell_spec_record_to_library_format(record)["specification"]
+
+    assert specification["name"] == "Energizer CR2032"
+    assert specification["rechargeable"] is False
+    assert CellSpec.from_library_record({"specification": specification}).rechargeable is False
+
+
 def test_cell_specification_accepts_nested_objects() -> None:
     spec = CellSpec(
         id="https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw",

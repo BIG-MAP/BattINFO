@@ -667,6 +667,14 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "schema:unitText": "counts"
     }
   ],
+  "dcterms:subject": [
+    {
+      "@id": "https://w3id.org/battinfo/material/syzh-8sbd-ygb1-kfgg"
+    },
+    {
+      "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"
+    }
+  ],
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "measurement",

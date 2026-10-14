@@ -26,7 +26,7 @@ def test_quickstart_product_publish(tmp_path: Path) -> None:
         format="cylindrical",
         chemistry="Li-ion",
         size_code="R18650",
-        nominal_capacity={"value": 3.4, "unit": "Ah"},
+        nominal_capacity={"value": 3.2, "unit": "Ah"},
         nominal_voltage={"value": 3.6, "unit": "V"},
         mass={"value": 48.0, "unit": "g"},
     )
@@ -52,7 +52,7 @@ def test_full_chain_and_type_stacking(tmp_path: Path) -> None:
         format="cylindrical",
         chemistry="Li-ion",
         size_code="R18650",
-        specs={"nominal_capacity": {"value": 3.4, "unit": "Ah"}, "nominal_voltage": {"value": 3.6, "unit": "V"}},
+        specs={"nominal_capacity": {"value": 3.2, "unit": "Ah"}, "nominal_voltage": {"value": 3.6, "unit": "V"}},
     )
     cell = w.cell(spec, serial_number="FAC-001")
     test = w.test(cell, type="capacity_check", instrument="Maccor 4200")

@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.2.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/wf5m-53mk-n9bf-fa00",
+    "short_id": "wf5m53",
+    "identifier": "test-protocol:wf5m-53mk-n9bf-fa00",
+    "name": "1C Cycle Life at 25 C, LFP (2.5 to 3.65 V)",
+    "kind": "cycling",
+    "description": "Repeated 1C charge to 3.65 V and 1C discharge to 2.5 V at nominal room temperature, the voltage window of an LFP || graphite cell.",
+    "version": "1.0"
+  },
+  "method": [
+    {
+      "mode": "group",
+      "count": 500,
+      "steps": [
+        {
+          "mode": "cc",
+          "direction": "charge",
+          "setpoints": {
+            "c_rate": {
+              "value": 1.0,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 3.65,
+              "unit": "V",
+              "direction": "above"
+            }
+          ],
+          "description": "Charge at 1C until 3.65 V"
+        },
+        {
+          "mode": "cc",
+          "direction": "discharge",
+          "setpoints": {
+            "c_rate": {
+              "value": 1.0,
+              "unit": "A/Ah"
+            }
+          },
+          "termination": [
+            {
+              "quantity": "voltage",
+              "value": 2.5,
+              "unit": "V",
+              "direction": "below"
+            }
+          ],
+          "description": "Discharge at 1C until 2.5 V"
+        }
+      ]
+    }
+  ],
+  "record": {
+    "time_s": 30
+  },
+  "conditions": {
+    "temperature": {
+      "value": 25.0,
+      "unit": "degC"
+    }
+  },
+  "facets": {
+    "modes": [
+      "group"
+    ],
+    "directions": [
+      "charge",
+      "discharge"
+    ],
+    "control_modes": [
+      "current"
+    ],
+    "has_cv_hold": false,
+    "has_rest": false,
+    "has_eis": false,
+    "c_rates": [
+      1.0
+    ],
+    "voltage_window_V": [
+      2.5,
+      3.65
+    ],
+    "temperatures": [
+      25.0
+    ]
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781778468
+  },
+  "notes": [
+    "Example reusable BattINFO test protocol for LFP cells, whose upper voltage limit is 3.6 to 3.65 V. The 4.2 V cycle-life protocol (spec/8r2m-4v6k-9p3t-7n5x) suits NMC cells and would overcharge an LFP cell."
+  ]
+}
