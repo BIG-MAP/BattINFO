@@ -58,6 +58,9 @@ MATERIAL_IRI_RE = re.compile(
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_ROOT = PACKAGE_ROOT / "data" / "examples"
 SCHEMAS_ROOT = PACKAGE_ROOT / "data" / "schemas"
+# The curated cell specs that ship inside the package. Built from the package
+# directory, so it is the same folder in a source checkout and an installed wheel.
+PACKAGED_LIBRARY_CELL_SPEC_DIR = PACKAGE_ROOT / "data" / "library" / "cell-spec"
 
 DEFAULT_CELL_TYPES_DIR = EXAMPLES_ROOT / "cell-spec"
 DEFAULT_CELL_INSTANCES_DIR = EXAMPLES_ROOT / "cell-instance"
@@ -70,6 +73,9 @@ DEFAULT_LIBRARY_CELL_TYPES_DIR = Path(".battinfo") / "library" / "cell-spec"
 DEFAULT_LIBRARY_RDF_CELL_TYPES_DIR = Path(".battinfo") / "library-rdf" / "cell-spec"
 DEFAULT_LIBRARY_AGGREGATE_JSONLD = Path(".battinfo") / "library" / "cell-spec.jsonld"
 DEFAULT_LIBRARY_MANIFEST_JSON = Path(".battinfo") / "library-rdf" / "cell-spec.index.json"
+# Where save_library_cell_spec syncs a packaged copy: a path relative to the
+# current folder, meant for a source checkout. Code that reads the packaged
+# library uses PACKAGED_LIBRARY_CELL_SPEC_DIR.
 DEFAULT_PACKAGED_LIBRARY_CELL_TYPES_DIR = Path("src") / "battinfo" / "data" / "library" / "cell-spec"
 DEFAULT_PUBLISH_SOURCES = tuple(EXAMPLES_ROOT / kind.subdir for kind in ENTITY_KINDS)
 DEFAULT_INDEX_SOURCE_ROOT = EXAMPLES_ROOT

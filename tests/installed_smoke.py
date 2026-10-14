@@ -92,6 +92,47 @@ def main() -> None:
         assert stats["total_count"] >= 4
         assert index_path.exists()
 
+    check_batch_path()
+
+
+def check_batch_path() -> None:
+    """Run batch init, dataset process and batch package on a cell spec packaged with battinfo."""
+    from contextlib import chdir
+
+    import yaml
+
+    import battinfo
+    from battinfo.cli import app
+
+    packaged = Path(battinfo.__file__).resolve().parent / "data" / "library" / "cell-spec"
+    spec = json.loads(sorted(packaged.glob("*.json"))[0].read_text(encoding="utf-8"))["specification"]
+    runner = CliRunner()
+    # Run in a new temporary folder: neither the checkout's src/ nor a local
+    # .battinfo/library can stand in for the library inside the package.
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp_dir, chdir(tmp_dir):
+        result = runner.invoke(
+            app,
+            ["batch", "init", "batch", "--cell-spec", spec["id"], "--count", "1", "--serials", "S1", "--lab", "Lab"],
+        )
+        assert result.exit_code == 0, result.output
+        manifest = yaml.safe_load(Path("batch", "batch.yaml").read_text(encoding="utf-8"))
+        assert (manifest["manufacturer"], manifest["model"]) == (spec["manufacturer"], spec["model"]), manifest
+
+        Path("batch", "s1", "2025-06-01__capacity_check__25degC.csv").write_text(
+            "time,voltage\n0,3.0\n1,2.9\n", encoding="utf-8"
+        )
+        result = runner.invoke(app, ["dataset", "process", "batch"])
+        assert result.exit_code == 0, result.output
+
+        result = runner.invoke(app, ["batch", "package", "batch", "--creator", "Smoke, Test; Lab", "--no-community"])
+        assert result.exit_code == 0, result.output
+        bundle = json.loads(Path("batch", "staging", "battinfo.bundle.json").read_text(encoding="utf-8"))
+        cell_spec = bundle["cell_spec"]["cell_spec"]
+        assert cell_spec["id"] == spec["id"], cell_spec
+        assert (cell_spec["manufacturer"]["name"], cell_spec["model"]) == (spec["manufacturer"], spec["model"]), (
+            cell_spec
+        )
+
 
 if __name__ == "__main__":
     main()
