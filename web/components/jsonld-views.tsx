@@ -32,6 +32,10 @@ const UNIT_SYMBOL: Record<string, string> = {
   Litre: "L",
   MilliLitre: "mL",
   Percent: "%",
+  PercentUnit: "%",
+  // PercentUnit as its domain-electrochemistry local name, the form a
+  // hasMeasurementUnit IRI keeps when the document is compacted.
+  electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb: "%",
   DegreeCelsius: "°C",
   Kelvin: "K",
   Hour: "h",

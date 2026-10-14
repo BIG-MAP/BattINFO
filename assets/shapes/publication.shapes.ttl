@@ -7,6 +7,7 @@
 @prefix earl:    <http://www.w3.org/ns/earl#> .
 @prefix spdx:    <http://spdx.org/rdf/terms#> .
 @prefix battery: <https://w3id.org/emmo/domain/battery#> .
+@prefix electrochemistry: <https://w3id.org/emmo/domain/electrochemistry#> .
 @prefix bsh:     <https://w3id.org/battinfo/shapes/publication#> .
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -78,7 +79,7 @@ bsh:BatteryTestShape a sh:NodeShape ;
         sh:path prov:used ; sh:minCount 1 ; sh:severity sh:Violation ;
         sh:message "BatteryTest must record prov:used (the cell, and the spec when followed)." ] ;
     sh:property [
-        sh:path battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b ; sh:minCount 1 ; sh:severity sh:Violation ;
+        sh:path electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c ; sh:minCount 1 ; sh:severity sh:Violation ;
         sh:message "BatteryTest must reference its test object (hasTestObject → cell)." ] ;
     sh:property [
         sh:path prov:generated ; sh:minCount 1 ; sh:severity sh:Warning ;

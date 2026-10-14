@@ -54,19 +54,9 @@ the value-basis class alone.
 
 ## 4. Continuous-current rated properties (red-team W3.3, 2026-07-07)
 
-The canonical schema accepts `nominal_continuous_charging_current` /
-`nominal_continuous_discharging_current` (datasheet staples), but neither has a
-resolvable EMMO class — the candidate mappings still point at fabricated
-`w3id.org/emmo/domain/battery#nominalContinuous...` IRIs that do not exist in the 0.20.1
-closure. Until EMMO gains these terms, the keys validate with a
-`semantic.property_unmapped` warning and are omitted from JSON-LD.
+Resolved without a new class (owner ruling 2026-10-13). `nominal_continuous_charging_current` and `nominal_continuous_discharging_current` are curated as `ChargingCurrent` (`electrochemistry_79551e01_…`) and `DischargingCurrent` (`electrochemistry_e4d666ee_…`), the published classes of a current applied during charging or discharging. A standard continuous current is not a maximum, so neither key shares the `MaximumContinuous*Current` classes of the maximum keys, and the v1 records context was corrected to match before 0.8.0. A `NominalContinuousChargingCurrent` class is not needed unless upstream wants to tell a datasheet's standard current from any charging current.
 
-- **NominalContinuousChargingCurrent** — proposed electrochemistry class
-- **NominalContinuousDischargingCurrent** — proposed electrochemistry class
-- Also unmapped SpecSet keys awaiting terms or curation: `capacity_threshold_exhaustion`,
-  `charging_time`, `cycle_life_c_rate`, `maximum_power`, `power_capability`,
-  `power_energy_ratio`, `round_trip_energy_efficiency(_50pct)`
-  (see `tests/test_validation_plausibility.py` `KNOWN_UNMAPPED` — the list may only shrink).
+The other SpecSet keys that once waited here are mapped, except `cycle_life_c_rate` and `round_trip_energy_efficiency_50pct` (see `tests/test_validation_plausibility.py` `KNOWN_UNMAPPED`, which may only shrink).
 
 ## 5. Statistical dispersion of a sample (gap E7, 2026-08-17)
 
@@ -82,7 +72,7 @@ Searched and absent from the 0.20.2 / 0.37.2 / 1.0.2 closure, and again from the
 
 `MetrologicalUncertainty` (`EMMO_847724b7_…`) and `hasMetrologicalUncertainty` (`EMMO_662c64e7_…`) **are** in the closure and were deliberately not used. Per VIM, measurement uncertainty characterises the dispersion of values attributable to one measurand; a sample standard deviation over eight electrode discs characterises a population of distinct physical objects. Reusing the class would be a category claim of the same kind as the `CapacityFade` mapping fixed in 0.37.1, so the emitter says what it has instead: `schema:valueReference` → a named `schema:PropertyValue`.
 
-To wire after publishing: `_SAMPLE_STATISTIC_TERMS` and `_apply_sample_statistics` in `transform/json_to_jsonld.py` are the only emission site (both quantity-node builders route through it); add the class to `validate/jsonld.py` `_EXPLICIT_ALLOWED_TYPE_TERMS`, and append the terms to `records.context.v1.json` via `scripts/gen_context.py`. Records already published with the `schema:` qualifier keep expanding as they do, so the flip is additive rather than a v2.
+To wire after publishing: `_SAMPLE_STATISTIC_TERMS` and `_apply_sample_statistics` in `transform/json_to_jsonld.py` are the only emission site (both quantity-node builders route through it); append the terms to `records.context.v1.json` via `scripts/gen_context.py`. The `@type` check accepts any class the document's own context defines, so the class needs no other list. Records already published with the `schema:` qualifier keep expanding as they do, so the flip is additive rather than a v2.
 
 ## 6. ns#-retirement placeholders (2026-08-21)
 
@@ -90,7 +80,7 @@ Retiring the served `ns#` catch-all namespace put every canonical record-body ke
 
 | Placeholder | Wanted upstream | Notes |
 |---|---|---|
-| `battinfo:ambientTemperature` | test-condition quantity, domain-electrochemistry or domain-battery | The transform deliberately types generic conditions as `ConventionalProperty`; a dedicated `AmbientTemperature` quantity would let both the emitter and the flat record layer ground it. The 2026-09-20 parameter sweep considered typing it `ThermodynamicTemperature` via the property map but reverted: the published flat context already expands the key to this placeholder, and the context is append-only — the repoint waits for the class or the next context version, per this section's policy. |
+| ~~`battinfo:ambientTemperature`~~ | resolved (2026-10-13) | domain-electrochemistry 0.39.0 has `AmbientCelsiusTemperature` (`electrochemistry_abd08921_…`) and `AmbientThermodynamicTemperature`. Every packaged value is in degC, so the `ambient_temperature` term of the v1 records context was corrected before 0.8.0 to `AmbientCelsiusTemperature`, and validation warns `semantic.ambient_temperature_kelvin` on a kelvin value. The placeholder left `battinfo-records.ttl`. The emitter still types the condition node as `ConventionalProperty` with a label. |
 | `battinfo:voltageReference` | ~~relation~~ resolved in emission (2026-09-07) | The JSON-LD side no longer needs an upstream ask: the `voltage_reference` conditions key is intercepted and emitted as EMMO's own `hasMetrologicalReference` with class-typed reference-electrode nodes (see section 7). The placeholder remains only for the flat record key. |
 | `battinfo:stepMode` / `battinfo:stepDirection` | control-mode / direction quantities or a sanctioned literal pattern | Process classes (`ConstantCurrentCharging`, …) exist for typed emission; the flat step layer states mode/direction as literals and needs a predicate. |
 | `battinfo:lotId` | batch/lot identifier property, domain-battery | Sibling of `battinfo:batchId` (already a placeholder via `ci_batch_id`). |
@@ -220,6 +210,19 @@ To wire after any of these publish: curated entry in
 mirror, then `scripts/gen_context.py` and `scripts/gen_reference_records.py`; the
 value-basis-only typing retires automatically.
 
+## 11. Test-method steps without a process class (2026-10-14)
+
+The step vocabulary (`src/battinfo/data/vocab/test-method/step-modes.json`) named three process classes that no context defines, and the resistance setpoint was typed `ElectricalResistance`, a name EMMO does not have (it is `ElectricResistance`, EMMO core). All four expanded to relative IRIs. Since 2026-10-14 a step takes a published parent class where one is true of it and no class where none is. Each such entry names the class it waits for as `missing_class`, and `tests/test_mapping_governance.py` fails once the pinned context defines one, so the vocabulary can switch to it.
+
+| Wanted term | Kind | Placement | Until then |
+|---|---|---|---|
+| **`ConstantResistanceDischarging`** | Class | domain-electrochemistry, under `Discharging`, beside `ConstantCurrentDischarging` and `ConstantPowerDischarging` | A cr discharge step types as `Discharging`. |
+| **`ConstantResistanceCharging`** | Class | domain-electrochemistry, under `Charging` | A cr charge step gets no class. It keeps its parameters and its mode as `skos:prefLabel` ("cr charge"), and validation warns `semantic.method_step_unmapped`. |
+| **`ResistanceControlledProcess`** (or another name for it) | Class | domain-electrochemistry, beside `CurrentControlledProcess`, `PowerControlledProcess` and `VoltageControlledProcess` | A cr step with no charge or discharge direction gets no class, as above. |
+| **`ConstantCurrentConstantVoltageDischarging`** | Class | domain-electrochemistry, the twin of `ConstantCurrentConstantVoltageCharging` | A cccv discharge step types as `Discharging`. |
+
+A cccv step with no direction also gets no class, but needs nothing upstream, since a CC-CV step charges or discharges. In the same change a cc or cp step with no direction became a `CurrentControlledProcess` or `PowerControlledProcess`, a cv charge or discharge a `ConstantVoltageCharging` or `ConstantVoltageDischarging`, and a current cutoff a `LowerCurrentLimit` or `UpperCurrentLimit`; all of these are published.
+
 ## Landed upstream — stubs flipped
 
 ### domain-electrochemistry 0.36.0
@@ -334,9 +337,7 @@ curated map drift apart again.
 allowlisted only. Wiring them is a future save-gate addition (`capacity_loss`,
 `capacity_retention`, `charge_recovery`), not part of this pass.
 
-Still unmapped, with no upstream class: `cycle_life_c_rate`,
-`round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name) and
-the two `nominal_continuous_*_current` keys from section 4.
+Still unmapped, with no upstream class: `cycle_life_c_rate` and `round_trip_energy_efficiency_50pct` (measurement qualifiers upstream does not name). The two `nominal_continuous_*_current` keys from section 4 were curated as `ChargingCurrent` and `DischargingCurrent` on 2026-10-13.
 
 ### domain-electrochemistry 0.38.0 / 0.39.0 (domain-battery 0.21.0)
 
@@ -358,7 +359,7 @@ The SI-accepted units 0.38.0 brings into the closure (it imports EMMO's `siaccep
 
 `records.context.v1.json` gains the five new class terms. Two of its terms were wrong and were corrected in place (owner ruling 2026-10-13, `PRE_RELEASE_CORRECTIONS` in `scripts/gen_context.py`): `TemperatureCoefficientOfTheOpenCircuitVoltage` expanded to the `CoatingThickness` IRI, a mistake made when `entropic_coefficient` was wired on 2026-10-11, and now expands to `electrochemistry_3bb5ae23_…`; `degC` expanded to `EMMO_36a9bf69_…`, EMMO's class for the programming language C, and now expands to `emmo:DegreeCelsius`, the IRI EMMO 1.0.2 declares for the unit in `disciplines/units/siunits`.
 
-Every unit IRI BattINFO writes is now checked against the measurement-unit classes of the closure. Four are not units there and are allowed by name in `tests/test_mapping_governance.py`: `MilliAmpereHour` and `emmo:Percent` (both in the defects list), and `WeightPercent` and `VolumePercent`, which `unit_map.curated.json` gives the symbols `%` and `vol%` but which domain-electrochemistry declares as `PercentQuantity` classes, quantities rather than units. Whether those two symbols should move to UnitOne with rescaling, or wait for `emmo:Percent` to enter the closure, is open.
+Every unit IRI BattINFO writes is now checked against the measurement-unit classes of the closure, the Create page's unit table included. One is not a unit there and is allowed by name in `tests/test_mapping_governance.py`: `MilliAmpereHour` (in the defects list). `emmo:Percent`, `WeightPercent` and `VolumePercent` were allowed too until 2026-10-14, when `%` and `vol%` moved to `PercentUnit` in `unit_map.curated.json` 0.6.0, `CONTEXT_UNIT_SYMBOLS` and the flat `records.context.json`. `WeightPercent` and `VolumePercent`, which domain-electrochemistry declares as `PercentQuantity` classes, now carry the basis a spelling states (`wt%`, `vol%`) as an extra class of the quantity, and the fraction keys rescale every percent spelling to [0, 1] with `UnitOne`.
 
 ### Test-protocol method classes (chameo, via domain-electrochemistry 0.36.0)
 
@@ -399,21 +400,14 @@ Rechecked against the 0.21.0 / 0.39.0 / 0.15.0 / 1.0.2 closure on 2026-10-12: ev
   follows the IRI and keeps the prefLabel as the label.
 - **`FaradaicEfficiency` / `CoulombicEfficiency` label swap (0.36.0).** IRIs unchanged;
   battinfo only maps `InitialCoulombicEfficiency`, which is unaffected.
-- **Two `hasTestEquipment` object properties (new in 0.20.2).**
-  `battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c` (which battinfo declares and
-  emits) and `electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c`
-  now both carry that prefLabel. Neither is deprecated and neither points at the other,
-  but the upstream domain-battery context repointed the *label* to the electrochemistry
-  one, so a consumer resolving `hasTestEquipment` through that context and a consumer
-  reading a battinfo record's own context land on different IRIs. battinfo keeps the
-  battery term (still live, and already published in v1); upstream should merge them or
-  deprecate one with `dcterms:isReplacedBy`.
+- **Two `hasTestObject` and two `hasTestEquipment` object properties (new in 0.20.2).** `battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b` and `electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c` both carry the prefLabel `hasTestObject`, and `battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c` and `electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c` both carry `hasTestEquipment`. Neither of a pair is deprecated or points at the other, and only the electrochemistry ones have a definition; the upstream domain-battery context resolves both labels to them. battinfo moved its v1 terms (`hasTestObject`, `hasTestEquipment` and `cell_id`), the publication SHACL shape and the interop axiom to the electrochemistry pair before 0.8.0 (owner ruling 2026-10-13). Ask domain-battery to deprecate its two duplicates with `dcterms:isReplacedBy`.
 - **Duplicate `CapacityLoss`.** `electrochemistry_652b94f1_…` has it as prefLabel while
   `electrochemistry_e3d3d21c_…` (`CapacityFade`) carries it as an altLabel, so the string
   resolves to two classes. battinfo maps neither by key; the label is allowlisted only.
-- **`LithiumNickelManganeseOxideElectrode` is deprecated with no replacement.** `electrochemistry_41ddf723_…` carries `owl:deprecated true` in 0.37.2 and 0.39.0 with no `dcterms:isReplacedBy` and no dated comment, while 0.37.2 un-deprecated its seven chemistry siblings as defined classes. battinfo emits it as the electrode node of `positive_electrode_basis: lnmo` (`entity_type_map.json`). Ask upstream to un-deprecate it like the siblings (it already has the `hasActiveMaterial some LithiumNickelManganeseOxide` restriction) or to name a replacement.
+- **`LithiumNickelManganeseOxideElectrode` is deprecated with no replacement.** `electrochemistry_41ddf723_…` carries `owl:deprecated true` in 0.37.2 and 0.39.0 with no `dcterms:isReplacedBy` and no dated comment, while 0.37.2 un-deprecated its seven chemistry siblings as defined classes. Since 2026-10-13 battinfo types the electrode of `positive_electrode_basis: lnmo` as `MetalOxideElectrode`, one of the class's own superclasses (`entity_type_map.json`), and keeps the old term in the v1 records context only. Ask upstream to un-deprecate it like the siblings (it already has the `hasActiveMaterial some LithiumNickelManganeseOxide` restriction) or to name a replacement; the entity map can then name it again.
 - **`MilliAmpereHour` has no named superclass.** In EMMO 1.0.2 `disciplines/units/siacceptedunits`, `emmo:MilliAmpereHour` is defined by two restrictions only, while `AmpereHour` and `MilliAmpereHourPerGram` subclass their unit classes, so without a reasoner it does not classify as a `MeasurementUnit`. battinfo writes it for `mAh`, and the unit check allows it by name. Ask EMMO to give it the parents `AmpereHour` has (`ElectricChargeUnit`, `SIAcceptedDerivedUnit`).
-- **`Percent` is outside the import closure.** The records contexts map `%` to `emmo:Percent`, which EMMO 1.0.2 declares in `disciplines/units/specialunits`, a module the pinned chain does not import (domain-electrochemistry 0.38.0 added `siacceptedunits` for the hour and litre units, not this one). The curated unit map gives `%` the electrochemistry `WeightPercent` IRI for emitted quantities, so the context term (`CONTEXT_UNIT_SYMBOLS` in `jsonld.py`, frozen in v1) is the only place `emmo:Percent` appears.
+- **`Percent` is outside the import closure.** EMMO 1.0.2 declares `emmo:Percent` in `disciplines/units/specialunits`, a module the pinned chain does not import (domain-electrochemistry 0.38.0 added `siacceptedunits` for the hour and litre units, not this one), and gives it an SI multiplier of 1 where QUDT's PERCENT has 0.01. The v1 records context maps `%` to `PercentUnit` (`electrochemistry_8430be19_…`), the closure's only percent unit, since 2026-10-13, and the unit map, `CONTEXT_UNIT_SYMBOLS` in `jsonld.py`, the flat `records.context.json` and the Create page follow since 2026-10-14. Confirm with the domain-electrochemistry maintainers that `PercentUnit` is the long-term IRI before v1 freezes at 0.8.0.
+- **No `TypicalEnergy` class.** EMMO keeps typical apart from nominal for capacity (`TypicalCapacity` is not a `NominalCapacity`), but the closure has no `TypicalEnergy`. `typical_energy` maps to its parent `StoredEnergy` (`electrochemistry_46376e5d_…`) since 2026-10-13, as `rated_energy` and `certified_usable_energy` map to `RatedEnergy`. Ask domain-electrochemistry for `TypicalEnergy` under `StoredEnergy`, beside `NominalEnergy` and `RatedEnergy`.
 - **`NominalBatteryProperty` contradicts its own parent (red-team review, 2026-09-15).**
   `battery_fb9baf9b_680e_493e_a755_da9bb1fc9fae` is elucidated "a battery property
   defined by the manufacturer and determined under some specified conditions" - a

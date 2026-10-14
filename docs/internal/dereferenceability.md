@@ -73,11 +73,10 @@ resolution above — needs the ontologies, not doable offline):
 | Base units (`V`, `A`, `Ah`, `W`, `g`, `mm`, `degC`, …) | `emmo:<Label>` (e.g. `emmo:Volt`) and some opaque `emmo:EMMO_…` | curated; validate the readable-IRI forms resolve in the pinned EMMO release |
 | `Wh/kg`, `Wh/L` | `emmo:WattHourPerKilogram` / `…PerLitre` | curated; confirm against EMMO |
 | `W/kg` | `qudt:W-PER-KiloGM` (EMMO core lacks it) | curated QUDT fallback |
-| `W/L` | `qudt:W-PER-L` (EMMO core lacks it) | **added now, confidence 0.9 — confirm the exact QUDT code dereferences** |
+| `W/L` | `emmo:WattPerLitre` (EMMO 1.0.2 `siacceptedunits`, in the pinned closure) | curated; the QUDT IRI `W-PER-L` it replaced returned 404 on 2026-10-13 |
 
 Action: load the pinned `domain-electrochemistry`/EMMO + QUDT vocab and confirm each
-`unit_iri` in `assets/mappings/domain-battery/unit_map.curated.json` resolves; promote
-`W/L` to confidence 1.0 (or correct the code) once checked.
+`unit_iri` in `assets/mappings/domain-battery/unit_map.curated.json` resolves.
 
 ## Acceptance check
 

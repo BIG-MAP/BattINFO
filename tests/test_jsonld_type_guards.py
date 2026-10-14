@@ -76,13 +76,21 @@ def test_test_method_vocabulary_is_allowed() -> None:
     ws.preview_jsonld() on a workspace with a stepped test spec used to print
     8 errors (IterativeWorkflow, VoltageHold, Duration, ...) because the
     validator's allowed set never learned the test-method vocabulary the
-    library itself emits.
+    library itself emits. The check now reads the document's own context, so
+    every class of that vocabulary must be a class term of v1 (URL mode) and
+    of the inline protocol context. Relations such as hasTask are not types.
     """
-    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS
-    from battinfo.validate.jsonld import _allowed_type_terms
+    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS, test_protocol_context
+    from battinfo.validate.jsonld import _allowed_type_terms, type_term_issues
 
-    missing = set(TEST_METHOD_CONTEXT_TERMS) - _allowed_type_terms()
-    assert not missing, f"emitted method terms rejected by validator: {sorted(missing)}"
+    classes = {term for term in TEST_METHOD_CONTEXT_TERMS if term[:1].isupper()}
+    assert {"IterativeWorkflow", "VoltageHold", "Duration"} <= classes
+    missing = classes - _allowed_type_terms()
+    assert not missing, f"emitted method classes rejected under v1: {sorted(missing)}"
+    inline = {"@context": test_protocol_context(), "@graph": [{"@type": sorted(classes)}]}
+    assert not type_term_issues(inline)
+    relation = {"@context": test_protocol_context(), "@graph": [{"@type": "hasTask"}]}
+    assert [issue.code for issue in type_term_issues(relation)] == ["jsonld.type_term_unknown"]
 
 
 def test_every_class_term_of_the_records_context_is_allowed() -> None:
@@ -203,13 +211,12 @@ def test_inline_context_is_the_versioned_hosted_context() -> None:
 def test_every_packaged_record_type_resolves_in_the_inline_context() -> None:
     """No emitted @type may expand relative to the document base: every bare
     token must be a term of the inline context (prefixed and absolute forms
-    resolve by construction), and the validator must accept it. Sweeps the
-    whole packaged corpus, so equipment and prismatic records — the 0.8.0
-    review's divergent cases — are covered."""
+    resolve by construction), and the validator must accept it against the
+    document's own context. Sweeps the whole packaged corpus, so equipment and
+    prismatic records — the 0.8.0 review's divergent cases — are covered."""
     from battinfo.jsonld import _CONTEXT_INLINE
-    from battinfo.validate.jsonld import _allowed_type_terms
+    from battinfo.validate.jsonld import type_term_issues
 
-    allowed = _allowed_type_terms()
     examples = ROOT / "src" / "battinfo" / "data" / "examples"
     kind_dirs = sorted(p for p in examples.iterdir() if p.is_dir())
     assert kind_dirs, "packaged examples missing"
@@ -248,8 +255,7 @@ def test_every_packaged_record_type_resolves_in_the_inline_context() -> None:
                     continue  # absolute or prefixed — resolves by construction
                 if t not in _CONTEXT_INLINE:
                     unresolved.add(f"{kind}: {t}")
-                if t not in allowed:
-                    rejected.add(f"{kind}: {t}")
+            rejected.update(f"{kind}: {issue.render()}" for issue in type_term_issues(out))
     assert checked > 50, f"corpus sweep looks broken (only {checked} records emitted)"
     assert not unresolved, f"@type tokens that would expand relative: {sorted(unresolved)}"
     assert not rejected, f"emitted @type tokens the validator rejects: {sorted(rejected)}"

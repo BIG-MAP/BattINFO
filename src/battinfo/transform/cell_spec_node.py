@@ -16,14 +16,16 @@ The node shape is the canonical target shape:
   physical battery.
 - ``isDescriptionFor`` carries the described battery: the physical EMMO class stack
   derived from the descriptors (format / chemistry / electrode bases / IEC code /
-  rechargeable) via ``entity_type_map.json`` — chemistry and format are expressed
+  rechargeable) via ``entity_type_map.json``, the electrode bases adding only the
+  classes of the declared chemistry — chemistry and format are expressed
   through @type stacking, not as literal predicates — plus the ``hasProperty``
   quantities, composition and construction. No physical relation stays on the
   spec node.
 - Quantities use the EMMO ``hasProperty`` pattern via
   :func:`battinfo.transform.json_to_jsonld._descriptor_quantity_node`
   (list ``@type`` of ``[PropertyClass, co-type]``, ``hasNumericalPart`` typed
-  ``RealData``, ``hasMeasurementUnit`` as a bare unit IRI).
+  ``RealData``, ``hasMeasurementUnit`` as a bare unit IRI, and the bounds of a
+  range as ``schema:minValue`` / ``schema:maxValue``).
 - Provenance uses standard vocabularies only (dcterms / PROV-O) — no new
   ``battinfo:`` terms are minted.
 """
@@ -56,6 +58,7 @@ from battinfo.transform.json_to_jsonld import (
     _material_name_map,
     _property_type_map,
     described_iri,
+    electrode_basis_battery_types,
     schema_dimension_nodes,
 )
 
@@ -139,6 +142,10 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "isOutputOf",
     "BatteryMeasurement",
     "hasStringValue",
+    # The basis a percent unit states (wt%, vol%) rides as an extra class of the
+    # quantity; the unit itself is PercentUnit.
+    "WeightPercent",
+    "VolumePercent",
     # IEC designation datatype slot on the described cell.
     "hasIECCode",
     # Metrological datum on voltage-dimensioned quantities (voltage_reference).
@@ -229,8 +236,10 @@ def label_to_compact() -> dict[str, Any]:
 
     Combines (in order): the static core-class table, curated property-class
     prefLabels, curated unit prefLabels, every ``entity_type_map.json``
-    ``battery_types`` class resolvable in the bundled domain-battery context, and
-    the quantity-node structure terms (``RealData`` etc.).
+    ``battery_types`` class resolvable in the bundled domain-battery context,
+    the quantity-node structure terms (``RealData`` etc.), the classes of the
+    composition emitters' lookup tables and the ``emmo`` class of every
+    material kind in ``material_kinds.json``.
 
     Used both to extend the inline publication context and as the "is this class
     context-mappable?" filter for :func:`physical_type_stack`.
@@ -292,15 +301,25 @@ def label_to_compact() -> dict[str, Any]:
         for value in mapping.values():
             if isinstance(value, str):
                 _resolve(value)
+    # The class of every material kind: a material node and a parameter set's
+    # material_kind target are typed with it, in either context.
+    from battinfo.materials import material_kinds
+
+    for entry in material_kinds().get("kinds", {}).values():
+        if isinstance(entry, Mapping) and isinstance(entry.get("emmo"), str):
+            _resolve(entry["emmo"])
     return table
 
 
 def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
     """domain-battery class prefLabels describing the physical cell for a spec.
 
-    entity_type_map-driven: format, cell configuration, chemistry, positive/negative
-    electrode basis and IEC code each contribute their ``battery_types``;
-    ``rechargeable`` maps to SecondaryBattery / PrimaryBattery. Only classes that are
+    entity_type_map-driven: format, cell configuration, chemistry and IEC code each
+    contribute their ``battery_types``, and the positive and negative electrode bases
+    theirs only where they belong to the declared chemistry
+    (:func:`~battinfo.transform.json_to_jsonld.electrode_basis_battery_types`), so
+    a zinc cell with an MnO2 positive is never a lithium battery. ``rechargeable``
+    maps to SecondaryBattery / PrimaryBattery. Only classes that are
     context-mappable (present in :func:`label_to_compact`) are kept, so every emitted
     ``@type`` resolves in both the remote and the inline publication contexts.
 
@@ -316,14 +335,18 @@ def physical_type_stack(cell_spec: Mapping[str, Any]) -> list[str]:
         ("format", cell_spec.get("cell_format")),
         ("cell_configuration", configuration),
         ("chemistry", cell_spec.get("chemistry")),
-        ("positive_electrode_basis", cell_spec.get("positive_electrode_basis")),
-        ("negative_electrode_basis", cell_spec.get("negative_electrode_basis")),
-        ("iec_code", cell_spec.get("iec_code")),
     ):
         entry = _entity_mapping(section, key) or {}
         for battery_type in entry.get("battery_types", []):
             if battery_type not in types and battery_type in table:
                 types.append(battery_type)
+    for battery_type in electrode_basis_battery_types(cell_spec):
+        if battery_type not in types and battery_type in table:
+            types.append(battery_type)
+    iec_entry = _entity_mapping("iec_code", cell_spec.get("iec_code")) or {}
+    for battery_type in iec_entry.get("battery_types", []):
+        if battery_type not in types and battery_type in table:
+            types.append(battery_type)
     types = _drop_disjoint_format_types(types, cell_spec)
     if not types:
         types.append("BatteryCell")
@@ -404,7 +427,7 @@ def cell_spec_property_nodes(properties: Any, *, context_label: str = "") -> lis
     lossy edges: a key without a curated EMMO mapping gets no quantity class,
     only its value-basis class with the key as label
     (``semantic.property_unmapped``), and a quantity carrying only
-    ``value_text`` emits no numeric part (``semantic.value_text_only``).
+    ``value_text`` emits no number and no bound (``semantic.value_text_only``).
     """
     nodes: list[dict[str, Any]] = []
     if not isinstance(properties, Mapping):
@@ -424,7 +447,7 @@ def cell_spec_property_nodes(properties: Any, *, context_label: str = "") -> lis
             )
         has_number = any(
             isinstance(quantity.get(field), (int, float)) and not isinstance(quantity.get(field), bool)
-            for field in ("value", "typical_value")
+            for field in ("value", "typical_value", "min_value", "max_value")
         )
         if not has_number and isinstance(quantity.get("value_text"), str):
             warnings.warn(

@@ -19,8 +19,10 @@ ws = battinfo.workspace(".")
 ws.convert()                          # cycler files -> tidy tables
 hits = ws.search("molicel p45b")      # find your cell...
 spec = hits[0] if hits else battinfo.CellSpec(...)  # ...or describe it
-ws.add("cell", spec=spec, serial_numbers=["S1", "S2"])
-ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")
+# the serials on your cells, or labels only your lab uses (not "S1")
+ws.add("cell", spec=spec, serial_numbers=["MYLAB-P45B-001", "MYLAB-P45B-002"])
+ws.add("test", type="cycling", cell="MYLAB-P45B-001",
+       data="bdf/MYLAB-P45B-001.bdf.csv")
 
 ws.save()                             # validated records + stable IRIs
 ws.publish(zenodo=True)               # citable DOI + registry`;

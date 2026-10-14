@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import html
 import json
 import mimetypes
@@ -39,7 +38,15 @@ from battinfo.bundle import (
     Test,
     ZenodoCellRecord,
 )
-from battinfo.entities import dataset_locator_seed
+from battinfo.entities import (
+    cell_instance_identity_seed,
+    cell_spec_identity_seed,
+    dataset_locator_seed,
+    given_test_name,
+    seed_text,
+    stable_uid,
+    test_identity_seed,
+)
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
@@ -186,7 +193,6 @@ RO_CRATE_CONTEXT_URL = "https://w3id.org/ro/crate/1.2/context"
 RO_CRATE_PROFILE_URL = "https://w3id.org/ro/crate/1.2"
 OWL_CLASS_IRI = "http://www.w3.org/2002/07/owl#Class"
 RDFS_SUBCLASS_OF_IRI = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
-UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
 PROPERTY_TYPE_MAP = {
     "diameter": "Diameter",
@@ -228,16 +234,6 @@ def _tail_id(entity_id: str) -> str:
     return entity_id.rstrip("/").split("/")[-1]
 
 
-def _stable_uid(seed: str) -> str:
-    value = int.from_bytes(hashlib.sha256(seed.encode("utf-8")).digest()[:16], "big")
-    chars: list[str] = []
-    for _ in range(16):
-        value, remainder = divmod(value, 32)
-        chars.append(UID_ALPHABET[remainder])
-    token = "".join(reversed(chars))
-    return "-".join((token[:4], token[4:8], token[8:12], token[12:16]))
-
-
 _PUB_IRI_NAMESPACE: dict[str, str] = {
     "cell-spec": "spec",
     "cell": "cell",
@@ -253,8 +249,9 @@ _BATTINFO_BASE = "https://w3id.org/battinfo/"
 
 
 def _entity_iri(entity_type: str, seed: str) -> str:
+    """The IRI an identity seed mints, through the shared primitive ``entities.stable_uid``."""
     namespace = _PUB_IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"{_BATTINFO_BASE}{namespace}/{_stable_uid(seed)}"
+    return f"{_BATTINFO_BASE}{namespace}/{stable_uid(seed)}"
 
 
 def _cell_specification_iri(entity_id: str) -> str:
@@ -272,6 +269,11 @@ def _cell_spec_iri(entity_id: str) -> str:
 def _with_default(value: str | None, fallback: str) -> str:
     text = (value or "").strip()
     return text or fallback
+
+
+def _seed_text_or(value: Any, fallback: str) -> str:
+    """A free-text identity field as it enters a seed (``entities.seed_text``), else *fallback*."""
+    return seed_text(value) or fallback
 
 
 def _without_none(payload: dict[str, Any]) -> dict[str, Any]:
@@ -1502,14 +1504,12 @@ def _finalize_cell_spec(
             if cell_specification is not None
             else _entity_iri(
                 "cell-spec",
-                "::".join(
-                    [
-                        _with_default(finalized.manufacturer, "unknown-manufacturer"),
-                        _with_default(finalized.model, "unknown-model"),
-                        _with_default(finalized.format, "unknown-format"),
-                        _with_default(finalized.chemistry, "unknown-chemistry"),
-                        finalized.size_code or "",
-                    ]
+                cell_spec_identity_seed(
+                    manufacturer=finalized.manufacturer,
+                    model=finalized.model,
+                    format=finalized.format,
+                    chemistry=finalized.chemistry,
+                    size_code=finalized.size_code,
                 ),
             )
         )
@@ -1535,17 +1535,21 @@ def _finalize_cell_instance(
     if finalized.name is None:
         finalized.name = finalized.serial_number or finalized.batch_id or dataset_dir.name
     if finalized.id is None:
-        finalized.id = _entity_iri(
-            "cell",
-            "::".join(
-                [
-                    _with_default(finalized.cell_spec_id, "unknown-cell-spec"),
-                    finalized.serial_number or "",
-                    finalized.batch_id or "",
-                    _with_default(finalized.name, dataset_dir.name),
-                ]
-            ),
+        # The cell identity every surface shares (entities.cell_instance_identity_seed):
+        # the serial first, so renaming a cell that has one keeps its IRI, then the
+        # name, then the batch. A cell whose serial, batch and name are all blank is
+        # seeded from its dataset folder's name, as before.
+        seed = cell_instance_identity_seed(
+            cell_spec_id=finalized.cell_spec_id,
+            serial_number=finalized.serial_number,
+            batch_id=finalized.batch_id,
+            name=finalized.name,
         )
+        if seed is None:
+            seed = "::".join(
+                [_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", seed_text(dataset_dir.name)]
+            )
+        finalized.id = _entity_iri("cell", seed)
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
     source = finalized.source.model_copy(deep=True)
     if source.type is None:
@@ -1563,24 +1567,40 @@ def _finalize_test(
     *,
     cell_instance: Cell,
     dataset_dir: Path,
+    data_locator: str,
     dataset_id: str | None = None,
 ) -> Test:
+    """A finalized copy of *test*, its IRI minted from its identity when it has none.
+
+    *data_locator* is the location of the run's data (``entities.dataset_locator_seed``),
+    which tells it apart from another run of one kind on one cell
+    (``entities.test_identity_seed``); ``""`` when the run has none.
+    """
     finalized = test.model_copy(deep=True, update={"cell": None})
     if finalized.cell_instance_id is None:
         finalized.cell_instance_id = cell_instance.id
     protocol_name = finalized.protocol.name or "test"
+    given_name = given_test_name(
+        finalized.name,
+        kind=finalized.test_kind,
+        protocol_name=finalized.protocol.name,
+        cell_labels=(cell_instance.name, cell_instance.serial_number, cell_instance.batch_id),
+    )
     if finalized.name is None:
         finalized.name = f"{cell_instance.name} {protocol_name}"
     if finalized.id is None:
+        # The test seed every surface shares: cell, kind, protocol (its IRI, else its
+        # name) and the run, here the data's location, so the name does not enter.
         finalized.id = _entity_iri(
             "test",
-            "::".join(
-                [
-                    _with_default(finalized.cell_instance_id, "unknown-cell"),
-                    _with_default(finalized.test_kind, "other"),
-                    protocol_name,
-                    _with_default(finalized.name, "test"),
-                ]
+            test_identity_seed(
+                cell_id=finalized.cell_instance_id,
+                kind=finalized.test_kind,
+                protocol_id=finalized.protocol_id,
+                protocol_name=finalized.protocol.name,
+                data_locator=data_locator,
+                started_at=finalized.started_at,
+                name=given_name,
             ),
         )
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
@@ -1593,6 +1613,18 @@ def _finalize_test(
         source.retrieved_at = _now_unix()
     finalized.source = source
     return finalized
+
+
+def _dataset_locator(dataset: Dataset, dataset_dir: Path) -> str:
+    """The location part of a publication dataset's seed: an explicit remote URL, else the dataset folder.
+
+    The dataset's own seed and the run part of its test's seed both take it.
+    """
+    return dataset_locator_seed(
+        access_url=dataset.access_url or dataset_dir.resolve().as_uri(),
+        download_url=dataset.download_url,
+        dataset_path=dataset_dir,
+    )
 
 
 def _finalize_dataset(
@@ -1625,12 +1657,8 @@ def _finalize_dataset(
                 [
                     _with_default(finalized.cell_instance_id, "unknown-cell"),
                     finalized.test_id or "",
-                    dataset_locator_seed(
-                        access_url=finalized.access_url,
-                        download_url=finalized.download_url,
-                        dataset_path=dataset_dir,
-                    ),
-                    _with_default(finalized.name, dataset_dir.name),
+                    _dataset_locator(finalized, dataset_dir),
+                    _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
                 ]
             ),
         )
@@ -1664,6 +1692,7 @@ def _finalize_publication_bundle(
         test,
         cell_instance=finalized_cell_instance,
         dataset_dir=dataset_dir,
+        data_locator=_dataset_locator(dataset, dataset_dir),
     )
     finalized_dataset = _finalize_dataset(
         dataset,

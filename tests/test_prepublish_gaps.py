@@ -259,13 +259,41 @@ def test_two_cells_may_share_a_name_when_their_serials_differ(tmp_path: Path) ->
     assert [c.name for c in cells] == ["A", "A"]
 
 
-def test_re_adding_the_same_serial_and_name_is_a_no_op(tmp_path: Path) -> None:
+def test_re_adding_the_same_serial_and_name_returns_the_cells_already_added(tmp_path: Path) -> None:
     ws, spec = _ws_with_spec(tmp_path)
     first = ws.add("cell", spec=spec, names=["A", "A"], serial_numbers=["x1", "x2"])
     again = ws.add("cell", spec=spec, names=["A", "A"], serial_numbers=["x1", "x2"])
 
     assert len(first) == 2
-    assert again == []
+    assert len(again) == 2 and all(held is made for held, made in zip(again, first))
+    assert len(ws._ws.cells) == 2
+
+
+def test_a_rerun_that_adds_cells_and_their_tests_adds_nothing(tmp_path: Path) -> None:
+    """A how-to binds the cells ws.add returns and adds a test to each; running it twice adds nothing."""
+    ws, spec = _ws_with_spec(tmp_path)
+
+    def run() -> tuple[list, list]:
+        cells = ws.add("cell", spec=spec, serial_numbers=["C01", "C02", "C03"])
+        return cells, [ws.add("test", type="cycling", cell=cell)[0] for cell in cells]
+
+    cells, tests = run()
+    again_cells, again_tests = run()
+
+    assert [c.serial_number for c in again_cells] == ["C01", "C02", "C03"]
+    assert all(a is b for a, b in zip(again_cells, cells)) and all(a is b for a, b in zip(again_tests, tests))
+    assert (len(ws._ws.cells), len(ws._ws.tests)) == (3, 3)
+
+
+def test_re_adding_part_of_a_batch_returns_old_and_new_cells_in_order(tmp_path: Path) -> None:
+    ws, spec = _ws_with_spec(tmp_path)
+    (c01,) = ws.add("cell", spec=spec, serial_numbers=["C01"])
+
+    cells = ws.add("cell", spec=spec, serial_numbers=["C00", "C01", "C02"])
+
+    assert [c.serial_number for c in cells] == ["C00", "C01", "C02"]
+    assert cells[1] is c01
+    assert len(ws._ws.cells) == 3
 
 
 def test_a_repeated_serial_in_one_batch_fails_loudly(tmp_path: Path) -> None:

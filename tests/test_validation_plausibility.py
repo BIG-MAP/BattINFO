@@ -220,14 +220,23 @@ class TestPropertyMappability:
         }
 
     def test_unmapped_key_warns(self) -> None:
-        report = validate_semantic_report(
-            self._record({"nominal_continuous_charging_current": {"value": 4.875, "unit": "A"}})
-        )
+        report = validate_semantic_report(self._record({"cycle_life_c_rate": {"value": 1.0, "unit": "C"}}))
         issues = [i for i in report.issues if i.code == "semantic.property_unmapped"]
         assert len(issues) == 1 and issues[0].severity == "warning"
-        # The message states what actually happens: this key is typed with its
-        # unreviewed candidate class (the property is not silently omitted).
-        assert "candidate class 'ChargingCurrent'" in issues[0].message
+        # The message states what actually happens: the key keeps its value but
+        # gets no quantity class.
+        assert "no quantity class" in issues[0].message
+
+    def test_the_nominal_continuous_currents_are_mapped(self) -> None:
+        report = validate_semantic_report(
+            self._record(
+                {
+                    "nominal_continuous_charging_current": {"value": 2.5, "unit": "A"},
+                    "nominal_continuous_discharging_current": {"value": 2.5, "unit": "A"},
+                }
+            )
+        )
+        assert not [i for i in report.issues if i.code.startswith("semantic.property_")]
 
     def test_value_text_only_warns(self) -> None:
         report = validate_semantic_report(self._record({"cycle_life": {"value_text": ">1000", "unit": "count"}}))
@@ -237,13 +246,25 @@ class TestPropertyMappability:
         report = validate_semantic_report(
             self._record(
                 {
-                    "nominal_energy": {"value": 18.0, "unit": "Wh"},
-                    "rated_energy": {"value": 18.2, "unit": "Wh"},
+                    "charging_cutoff_voltage": {"value": 4.2, "unit": "V"},
+                    "upper_voltage_limit": {"value": 4.2, "unit": "V"},
                 }
             )
         )
         codes = [i.code for i in report.issues]
         assert "semantic.property_alias_collision" in codes
+
+    def test_nominal_and_rated_energy_are_distinct_quantities(self) -> None:
+        """rated_energy types as RatedEnergy, no longer as NominalEnergy."""
+        report = validate_semantic_report(
+            self._record(
+                {
+                    "nominal_energy": {"value": 18.0, "unit": "Wh"},
+                    "rated_energy": {"value": 18.2, "unit": "Wh"},
+                }
+            )
+        )
+        assert "semantic.property_alias_collision" not in [i.code for i in report.issues]
 
     def test_mapped_numeric_property_is_silent(self) -> None:
         report = validate_semantic_report(self._record({"nominal_capacity": {"value": 2.5, "unit": "Ah"}}))
@@ -264,13 +285,12 @@ def test_specset_keys_are_mapped_or_consciously_deferred() -> None:
 
     # Shrunk by domain-electrochemistry 0.37.1, which published ChargingTime,
     # MaximumPower, PowerToEnergyRatio, RoundTripEnergyEfficiency and
-    # EndOfLifeCapacityThreshold. What is left has no upstream class: the two
-    # nominal-continuous currents are still open requests, and the C-rate /
-    # 50%-SOC keys are measurement qualifiers upstream does not name.
+    # EndOfLifeCapacityThreshold, and again when the two nominal continuous
+    # currents were curated as ChargingCurrent and DischargingCurrent. What is
+    # left has no upstream class: the C-rate and 50%-SOC keys are measurement
+    # qualifiers upstream does not name.
     KNOWN_UNMAPPED = {
         "cycle_life_c_rate",
-        "nominal_continuous_charging_current",
-        "nominal_continuous_discharging_current",
         "round_trip_energy_efficiency_50pct",
     }
     spec_set = set(

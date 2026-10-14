@@ -350,6 +350,53 @@ def test_zinc_manganese_dioxide_variants_are_told_apart() -> None:
     assert chemistry["alkaline"]["alias_of"] == "alkaline-zn-mno2"
 
 
+# ── electrode bases follow the chemistry (entity_type_map 0.7.0) ──────────────
+
+
+def _entity_sections() -> dict[str, dict[str, dict[str, Any]]]:
+    path = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
+    return _load_json(path)["mappings"]
+
+
+def test_every_electrode_basis_class_names_the_chemistry_it_belongs_to() -> None:
+    # The emitter adds a basis's battery classes only to a cell of that
+    # chemistry. A class with no chemistry would never be emitted.
+    sections = _entity_sections()
+    recommended = {key for key, entry in sections["chemistry"].items() if "alias_of" not in entry}
+    for field in ("positive_electrode_basis", "negative_electrode_basis"):
+        current = {entry.get("node_type") for entry in sections[field].values()}
+        for key, entry in sections[field].items():
+            belongs_to = entry.get("battery_types_chemistry")
+            if entry.get("battery_types"):
+                assert belongs_to in recommended, f"{field}.{key}: battery_types_chemistry {belongs_to!r}"
+            else:
+                assert belongs_to is None, f"{field}.{key} adds no class, so names no chemistry"
+            for former in entry.get("former_node_types", []):
+                assert former not in current, f"{field}.{key}: {former} is still emitted"
+
+
+def test_a_chemistry_names_its_negative_electrode_from_the_basis_vocabulary() -> None:
+    # Validation reads the field both ways: a lithium or zinc negative electrode
+    # makes a full cell one of these couples. A negative electrode other couples
+    # use as well (graphite, silicon) must never be named here, or every li-ion
+    # cell built with it would be refused.
+    sections = _entity_sections()
+    named = {
+        key: entry["negative_electrode_basis"]
+        for key, entry in sections["chemistry"].items()
+        if "negative_electrode_basis" in entry
+    }
+    assert named == {
+        "li-metal": "lithium",
+        "zn-mno2": "zinc",
+        "zn-air": "zinc",
+        "zn-hgo": "zinc",
+        "ni-zn": "zinc",
+        "zn-br-flow": "zinc",
+    }
+    assert set(named.values()) <= set(sections["negative_electrode_basis"])
+
+
 def test_every_property_mapping_names_a_class_the_ontology_publishes() -> None:
     # Two candidate entries once carried class IRIs that were never minted
     # (battery#nominalContinuousChargingCurrent). The emitter used their labels
@@ -378,11 +425,15 @@ OPEN_CIRCUIT_VOLTAGE = _ELECTROCHEMISTRY + "9c657fdc_b9d3_4964_907c_f9a6e8c5f52b
 
 # Deprecated upstream and still emitted, each with its reason. The set may only
 # shrink: a test below fails once an entry is no longer deprecated.
-_DEPRECATED_IN_USE = {
-    # LithiumNickelManganeseOxideElectrode, the electrode node of
-    # positive_electrode_basis "lnmo". Deprecated since before 0.37.2 with no
+_DEPRECATED_IN_USE: set[str] = set()
+
+# Deprecated upstream and no longer emitted, but a term of the v1 records context,
+# which keeps every term it published. Nothing but that context may name them.
+_DEPRECATED_KEPT_IN_V1 = {
+    # LithiumNickelManganeseOxideElectrode. Deprecated since before 0.37.2 with no
     # replacement, while its siblings were restored as defined classes; the
-    # upstream ask is in docs/internal/ontology-additions-needed.md.
+    # upstream ask is in docs/internal/ontology-additions-needed.md. The electrode
+    # of positive_electrode_basis "lnmo" types as MetalOxideElectrode instead.
     _ELECTROCHEMISTRY + "41ddf723_245f_4ce8_b9b1_7d9b3b9eea7d",
 }
 
@@ -463,13 +514,19 @@ def test_no_emitted_emmo_iri_is_deprecated_in_the_pinned_closure() -> None:
     deprecated = {entry["iri"]: entry for entry in _load_json(_CLOSURE_TERMS)["deprecated"]}
     emitted = _emitted_emmo_iris()
     assert len(emitted) > 300, "the inventory of emitted IRIs looks broken"
+    kept_in_v1 = {
+        iri
+        for iri in _DEPRECATED_KEPT_IN_V1
+        if all(source.startswith("records.context.v1.json:") for source in emitted.get(iri, []))
+    }
     hits = {
         f"{deprecated[iri]['pref_label']} <{iri}> replaced by {deprecated[iri]['replaced_by']}": sources
         for iri, sources in emitted.items()
-        if iri in deprecated and iri not in _DEPRECATED_IN_USE
+        if iri in deprecated and iri not in _DEPRECATED_IN_USE and iri not in kept_in_v1
     }
     assert not hits, hits
-    assert _DEPRECATED_IN_USE <= set(deprecated), "an allowed deprecated term was restored upstream: drop it"
+    allowed = _DEPRECATED_IN_USE | _DEPRECATED_KEPT_IN_V1
+    assert allowed <= set(deprecated), "an allowed deprecated term was restored upstream: drop it"
 
 
 def test_curated_property_classes_agree_with_the_bundled_context() -> None:
@@ -485,6 +542,107 @@ def test_curated_property_classes_agree_with_the_bundled_context() -> None:
         if named != entry["class_iri"]:
             wrong[key] = (entry["class_pref_label"], entry["class_iri"], named)
     assert not wrong, wrong
+
+
+# ── test-method vocabulary and current-collector classes ──────────────────────
+
+_TEST_METHOD_VOCAB = ROOT / "src" / "battinfo" / "data" / "vocab" / "test-method"
+
+
+def _test_method_vocab_entries() -> list[tuple[str, dict[str, Any]]]:
+    """``(where, entry)`` for every entry of data/vocab/test-method/*.json that names an emmo_class."""
+    found: list[tuple[str, dict[str, Any]]] = []
+
+    def walk(value: Any, where: str) -> None:
+        if isinstance(value, dict):
+            if "emmo_class" in value:
+                found.append((where, value))
+            for key, item in value.items():
+                walk(item, f"{where}.{key}")
+
+    for path in sorted(_TEST_METHOD_VOCAB.glob("*.json")):
+        walk(_load_json(path), path.stem)
+    return found
+
+
+def _unresolved_classes(terms: dict[str, str]) -> dict[str, tuple[str, Any, Any]]:
+    """The ``{where: term}`` entries whose term the v1 records context and the
+    bundled EMMO context do not both define with the same IRI."""
+    v1 = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    bundled = _load_json(_CONTEXT_DIR / "domain-battery.context.json")["@context"]
+    wrong = {}
+    for where, term in terms.items():
+        in_v1 = _expand_with(v1, v1.get(term))
+        in_bundled = _expand_with(bundled, bundled.get(term))
+        if in_v1 is None or in_v1 != in_bundled:
+            wrong[where] = (term, in_v1, in_bundled)
+    return wrong
+
+
+def test_every_test_method_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """A step, setpoint or cut-off class the contexts do not define expands to a
+    relative IRI. Four of the 27 classes the vocabulary named did, among them
+    ConstantResistanceDischarging and ElectricalResistance."""
+    entries = _test_method_vocab_entries()
+    named = {where: entry["emmo_class"] for where, entry in entries if entry["emmo_class"]}
+    assert not _unresolved_classes(named)
+    assert len(set(named.values())) > 25, "the inventory of test-method classes looks broken"
+    # Where an entry also records the IRI, it is the one the class resolves to.
+    v1 = _load_json(_CONTEXT_DIR / "records.context.v1.json")["@context"]
+    wrong = {
+        where: entry["iri"]
+        for where, entry in entries
+        if entry.get("iri") and _expand_with(v1, entry["iri"]) != _expand_with(v1, v1.get(entry["emmo_class"]))
+    }
+    assert not wrong, wrong
+
+
+def test_a_test_method_class_that_has_no_published_class_names_what_is_missing() -> None:
+    """A step typed by a published parent, or by no class, names the class EMMO
+    lacks (queued in docs/internal/ontology-additions-needed.md). Once the pinned
+    context defines it, this fails so the vocabulary can use it."""
+    bundled = _load_json(_CONTEXT_DIR / "domain-battery.context.json")["@context"]
+    entries = _test_method_vocab_entries()
+    waiting = {where: entry["missing_class"] for where, entry in entries if entry.get("missing_class")}
+    assert set(waiting.values()) == {
+        "ConstantResistanceCharging",
+        "ConstantResistanceDischarging",
+        "ResistanceControlledProcess",
+        "ConstantCurrentConstantVoltageDischarging",
+    }
+    published = {where: name for where, name in waiting.items() if name in bundled}
+    assert not published, f"now in the pinned EMMO context, use it in the vocabulary: {published}"
+    # A step with no class names what it waits for, or says why none fits.
+    for where, entry in entries:
+        if entry["emmo_class"] is None:
+            assert entry.get("missing_class") or entry.get("note"), where
+
+
+def test_every_current_collector_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """'Stainless steel mesh' was typed Steel, which neither context defines, and
+    record_to_jsonld raised on an electrode spec that passed strict validation."""
+    from battinfo.transform.json_to_jsonld import _CC_FORM_FACTOR_MAP, _CC_MATERIAL_MAP
+
+    targets = {f"material:{key}": cls for key, cls in _CC_MATERIAL_MAP.items()}
+    targets.update({f"form:{key}": cls for key, cls in _CC_FORM_FACTOR_MAP.items()})
+    assert "Steel" not in targets.values()
+    assert {"StainlessSteel", "Mesh", "Foam"} <= set(targets.values())
+    assert not _unresolved_classes(targets)
+
+
+def test_every_material_kind_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """A parameter set about a material kind types its target with the kind's
+    class in a v1 document. LithiumTitanate (lto) and LithiumManganeseOxide
+    (lmo) were missing from v1, so record_to_jsonld refused such a record."""
+    from battinfo.materials import material_kinds
+    from battinfo.validate.jsonld import _allowed_type_terms
+
+    kinds = material_kinds()["kinds"]
+    targets = {f"kind:{key}": entry["emmo"] for key, entry in kinds.items() if entry.get("emmo")}
+    assert {"LithiumTitanate", "LithiumManganeseOxide"} <= set(targets.values())
+    assert len(targets) > 30, "the inventory of material kinds looks broken"
+    assert not _unresolved_classes(targets)
+    assert set(targets.values()) <= _allowed_type_terms()
 
 
 def test_electrode_open_circuit_potential_is_not_typed_as_a_cell_voltage() -> None:
@@ -565,14 +723,25 @@ _NOT_A_UNIT_IN_USE = {
     # A real EMMO unit, but EMMO 1.0.2 gives it no named superclass (only
     # restrictions), so it does not classify as a MeasurementUnit without a reasoner.
     "https://w3id.org/emmo#MilliAmpereHour",
-    # The `%` term of the records contexts. EMMO declares it in
-    # disciplines/units/specialunits, which the pinned chain does not import.
-    "https://w3id.org/emmo#Percent",
-    # WeightPercent and VolumePercent, the curated IRIs for `%` and `vol%`, are
-    # PercentQuantity classes in domain-electrochemistry, quantities rather than units.
-    _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
-    _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
 }
+
+PERCENT_UNIT = _ELECTROCHEMISTRY + "8430be19_6cae_4a15_a570_3c15d0d190eb"
+WEIGHT_PERCENT = _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505"
+VOLUME_PERCENT = _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba"
+
+_CREATE_MODEL = ROOT / "web" / "lib" / "create-model.ts"
+
+
+def _create_model_unit_iris() -> dict[str, str]:
+    """The Create page's hand-written ``UNIT_IRI`` table: unit token -> IRI."""
+    source = _CREATE_MODEL.read_text(encoding="utf-8")
+    prefixes = dict(re.findall(r'^const (\w+) = "([^"]+)";', source, flags=re.MULTILINE))
+    block = source.split("const UNIT_IRI: Record<string, string> = {", 1)[1].split("};", 1)[0]
+    table: dict[str, str] = {}
+    for token, prefix, local in re.findall(r'("[^"]+"|[A-Za-z]\w*)\s*:\s*(\w+)\s*\+\s*"([^"]+)"', block):
+        table[token.strip('"')] = prefixes[prefix] + local
+    assert table, "the UNIT_IRI table of create-model.ts was not found"
+    return table
 
 
 def _written_unit_iris() -> dict[str, list[str]]:
@@ -600,6 +769,8 @@ def _written_unit_iris() -> dict[str, list[str]]:
             add(_expand_with(context, context[term]), f"{name}:{term}")
         for symbol, value in CONTEXT_UNIT_SYMBOLS.items():
             add(_expand_with(context, value), f"CONTEXT_UNIT_SYMBOLS:{symbol}")
+    for token, iri in _create_model_unit_iris().items():
+        add(iri, f"create-model.ts:{token}")
     return found
 
 
@@ -667,5 +838,59 @@ def test_every_curated_unit_wins_in_the_emitter_table() -> None:
 def test_the_programming_language_c_is_read_back_but_never_written() -> None:
     from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
 
-    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C"}
+    assert LEGACY_UNIT_IRIS[PROGRAMMING_LANGUAGE_C] == "°C"
     assert PROGRAMMING_LANGUAGE_C not in _unit_type_map().values()
+
+
+def test_the_percent_quantities_are_read_back_but_never_written_as_units() -> None:
+    """``%`` and ``vol%`` named WeightPercent and VolumePercent, two quantities,
+    before 0.8.0. Both now name PercentUnit; records written with the old IRIs
+    still import with the symbol they stood for."""
+    from battinfo.jsonld import _UNIT_MAP, CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
+
+    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C", WEIGHT_PERCENT: "%", VOLUME_PERCENT: "vol%"}
+    for table in (_unit_type_map(), _UNIT_MAP):
+        assert table["%"] == table["vol%"] == PERCENT_UNIT
+        assert not {WEIGHT_PERCENT, VOLUME_PERCENT} & set(table.values())
+    assert CONTEXT_UNIT_SYMBOLS["%"] == "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+
+
+def test_the_create_page_units_agree_with_the_unit_map() -> None:
+    """Each unit the Create page writes is the one the Python emitter writes for
+    the same symbol, so a record made on the page and the same record saved
+    with the library publish the same unit IRI."""
+    from battinfo.transform.json_to_jsonld import _unit_iri
+
+    table = _create_model_unit_iris()
+    assert table["%"] == PERCENT_UNIT
+    disagree = {token: (iri, _unit_iri(token)) for token, iri in table.items() if _unit_iri(token) not in (None, iri)}
+    assert not disagree, disagree
+    closure_units = set(_load_json(_CLOSURE_TERMS)["measurement_units"])
+    unknown = {token: iri for token, iri in table.items() if _unit_iri(token) is None and iri not in closure_units}
+    assert not unknown, unknown
+
+
+# Classes that name a bound: a single max_value (or min_value) on a quantity
+# typed with one of them is that quantity's number.
+_BOUND_CLASS_NAME = re.compile(r"^(?P<max>Maximum|Upper)|^(?P<min>Minimum|Lower)")
+
+
+def test_every_bound_class_is_flagged_and_nothing_else() -> None:
+    expected: dict[str, str] = {}
+    flagged: dict[str, set[str]] = {}
+    for name in ("assets", "data"):
+        path = (
+            ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json"
+            if name == "assets"
+            else _MAPPING_DIR / "property_map.curated.json"
+        )
+        for entry in _load_json(path)["mappings"]:
+            label = entry["class_pref_label"]
+            match = _BOUND_CLASS_NAME.match(label)
+            if match:
+                expected[label] = "max" if match.group("max") else "min"
+            flagged.setdefault(label, set()).add(entry.get("bound", ""))
+    assert expected, "no bound classes found"
+    for label, flags in flagged.items():
+        assert flags == {expected.get(label, "")}, (label, flags)

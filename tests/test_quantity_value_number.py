@@ -186,36 +186,38 @@ def test_the_test_and_protocol_emitters_send_text_to_has_string_value() -> None:
     assert _numbers(_quantity(3.7, "V")) == [3.7]
 
 
+# Component quantities, fractions included, go through _descriptor_quantity_node,
+# the node builder every other quantity uses.
+
+
+@pytest.mark.filterwarnings("ignore:semantic.")
 def test_the_component_emitters_neither_coerce_nor_scale_text() -> None:
-    from battinfo.transform.json_to_jsonld import (
-        _converter_quantity_node,
-        _emmo_quantity_node,
-        _fraction_quantity_node,
-    )
+    from battinfo.transform.json_to_jsonld import _converter_quantity_node, _descriptor_quantity_node
 
-    fraction = _fraction_quantity_node("MassFraction", {"value": "95", "unit": "%"})
+    fraction = _descriptor_quantity_node("mass_fraction", {"value": "95", "unit": "%"})
     assert fraction is not None and fraction["hasStringValue"] == "95" and _numbers(fraction) == []
-    assert _numbers(_fraction_quantity_node("MassFraction", {"value": 95, "unit": "%"})) == [0.95]
+    assert _numbers(_descriptor_quantity_node("mass_fraction", {"value": 95, "unit": "%"})) == [0.95]
 
-    emmo = _emmo_quantity_node("Porosity", {"value": "0.3", "unit": "1"})
-    assert emmo is not None and emmo["hasStringValue"] == "0.3" and _numbers(emmo) == []
-    assert _emmo_quantity_node("Porosity", {"value": math.nan, "unit": "1"}) is None
+    porosity = _descriptor_quantity_node("porosity", {"value": "0.3", "unit": "1"})
+    assert porosity is not None and porosity["hasStringValue"] == "0.3" and _numbers(porosity) == []
+    assert _descriptor_quantity_node("porosity", {"value": math.nan, "unit": "1"}) is None
 
     converter = _converter_quantity_node("density", {"value": "1.2", "unit": "g/cm3"})
     assert converter is not None and converter["hasStringValue"] == "1.2" and _numbers(converter) == []
 
 
+@pytest.mark.filterwarnings("ignore:semantic.")
 def test_the_component_emitters_write_value_text() -> None:
-    from battinfo.transform.json_to_jsonld import _emmo_quantity_node, _fraction_quantity_node
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node
 
     for unit in ("1", "%"):
-        node = _fraction_quantity_node("MassFraction", {"value_text": "about 92", "unit": unit})
+        node = _descriptor_quantity_node("mass_fraction", {"value_text": "about 92", "unit": unit})
         assert node is not None and node["hasStringValue"] == "about 92" and _numbers(node) == []
-    beside = _fraction_quantity_node("MassFraction", {"value": 92, "value_text": "nominal", "unit": "%"})
+    beside = _descriptor_quantity_node("mass_fraction", {"value": 92, "value_text": "nominal", "unit": "%"})
     assert beside is not None and _numbers(beside) == [0.92] and beside["hasStringValue"] == "nominal"
-    emmo = _emmo_quantity_node("Thickness", {"value_text": "thin", "unit": "um"})
-    assert emmo is not None and emmo["hasStringValue"] == "thin" and _numbers(emmo) == []
-    assert _fraction_quantity_node("MassFraction", {"unit": "1"}) is None
+    thickness = _descriptor_quantity_node("thickness", {"value_text": "thin", "unit": "um"})
+    assert thickness is not None and thickness["hasStringValue"] == "thin" and _numbers(thickness) == []
+    assert _descriptor_quantity_node("mass_fraction", {"unit": "1"}) is None
 
 
 def test_a_component_fraction_given_as_text_reaches_the_json_ld() -> None:

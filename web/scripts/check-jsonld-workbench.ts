@@ -123,6 +123,17 @@ async function main() {
     );
   });
 
+  // 6b. A range carries its bounds instead of one number: no missing-value warning.
+  await check("semantic layer accepts a quantity given as a range", () => {
+    const framed = {
+      hasProperty: [
+        { "@type": "Height", min_value: 64.8, max_value: 65.2, hasMeasurementUnit: "emmo:MilliMetre" },
+      ],
+    };
+    const issues = checkSemantics(framed);
+    assert.ok(!issues.some((i) => /carries no value/.test(i.message)), `unexpected issues ${JSON.stringify(issues)}`);
+  });
+
   // 7. effectiveContext merges the hosted URL to the vendored terms.
   await check("effectiveContext resolves the hosted URL to vendored terms", () => {
     const ctx = effectiveContext({ "@context": RECORDS_CONTEXT_URL });

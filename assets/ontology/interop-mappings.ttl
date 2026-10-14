@@ -6,7 +6,7 @@
 @prefix dcterms:<http://purl.org/dc/terms/> .
 @prefix prov:   <http://www.w3.org/ns/prov#> .
 @prefix emmo:   <https://w3id.org/emmo#> .
-@prefix battery:<https://w3id.org/emmo/domain/battery#> .
+@prefix electrochemistry:<https://w3id.org/emmo/domain/electrochemistry#> .
 @prefix battinfo:<https://w3id.org/battinfo/> .
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -38,7 +38,7 @@ dcat:distribution   rdfs:subPropertyOf     schema:distribution .
 # relation is mirrored as the test's prov:used (alongside the used spec/plan).
 emmo:EMMO_c4bace1d_4db0_4cd3_87e9_18122bae2840   # hasOutput
     rdfs:subPropertyOf prov:generated .
-battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b  # hasTestObject
+electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c  # hasTestObject
     rdfs:subPropertyOf prov:used .
 
 # ── Instance ⇄ spec link (EMMO description mirrored as dcterms:conformsTo) ────
