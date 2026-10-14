@@ -2409,6 +2409,7 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
+    _converter_component_metadata(node, {k: v for k, v in electrolyte.items() if k != "comment"})
     comment = electrolyte.get("comment")
     if comment:
         node["schema:description"] = comment
@@ -2485,6 +2486,7 @@ def _electrode_holder_body(electrode_data: Any) -> dict[str, Any]:
     holder_spec_ref = electrode_data.get("electrode_spec_id")
     if isinstance(holder_spec_ref, str) and holder_spec_ref:
         node["schema:isVariantOf"] = {"@id": holder_spec_ref}
+    _converter_component_metadata(node, electrode_data)
     return node
 
 

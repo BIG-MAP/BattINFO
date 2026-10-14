@@ -19,6 +19,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **A coin case's coating and a cell's name reach the JSON-LD.** `housing.case.coating` and `cell_instance.name` were accepted by the schemas but never emitted.
 - **A cell spec's manufacturer keeps its link to the organization record.** The spec node wrote only the manufacturer's name and dropped `manufacturer.id`, so the link to the organization record (and through it to ROR and Wikidata) was lost; it is now the manufacturer's `@id`.
 - **A dataset's creators, publisher and `same_as` reach the JSON-LD**, as `dcterms:creator`, `dcterms:publisher` and `schema:sameAs` (the terms the schema model names). A person's or organization's `same_as` (ORCID, ROR, Wikidata) is the node's `@id`, an affiliation's included.
+- **A deposit's member dataset keeps what its record states.** Its own creators, publisher, publication and DOI win over the deposit's, as its licence already did; before, the publication graph replaced the creators with the deposit's and dropped the rest.
+- **An electrode's and an electrolyte's manufacturer, supplier and product ID reach the JSON-LD**, as they already did for the separator and the case.
 - **An electrode may be a monolithic `material` alone**, such as a lithium-metal counter electrode, as the field's description already said; the schema rejected it unless another field was present.
 - **The cell-conformance graph test checks each cell's own spec link.** It counted every `dcterms:conformsTo` edge in the corpus, which cell instances do not emit, and passed only because the counts happened to match; it now requires every cell instance to link its spec through `schema:isVariantOf`.
 

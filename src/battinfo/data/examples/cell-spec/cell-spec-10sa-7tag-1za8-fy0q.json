@@ -15,80 +15,13 @@
     "size_code": "R2032"
   },
   "working_electrode": {
-    "manufacturer": "Customcells",
-    "product_id": "11113, A-1594",
-    "current_collector": {
-      "name": "Copper",
-      "property": {
-        "thickness": {
-          "value": 15,
-          "unit": "um"
-        }
-      }
-    },
     "coating": {
       "component": {
         "active_material": [
           {
-            "name": "Graphite",
-            "property": {
-              "mass_fraction": {
-                "value": 95,
-                "unit": "%"
-              },
-              "loading": {
-                "value": 3.4,
-                "unit": "mg/cm2"
-              },
-              "d50_particle_size": {
-                "value": 10,
-                "unit": "um"
-              }
-            }
-          }
-        ],
-        "binder": [
-          {
-            "name": "PVDF",
-            "property": {
-              "mass_fraction": {
-                "value": 3,
-                "unit": "%"
-              }
-            }
-          }
-        ],
-        "additive": [
-          {
-            "name": "Carbon black",
-            "property": {
-              "mass_fraction": {
-                "value": 2,
-                "unit": "%"
-              }
-            }
+            "name": "Graphite"
           }
         ]
-      },
-      "property": {
-        "thickness": {
-          "value": 20,
-          "unit": "um"
-        },
-        "porosity": {
-          "value": 35,
-          "unit": "%"
-        },
-        "tortuosity": {
-          "value": 2.5,
-          "unit": "1"
-        }
-      }
-    },
-    "property": {
-      "diameter": {
-        "value": 15,
-        "unit": "mm"
       }
     }
   },

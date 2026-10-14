@@ -323,6 +323,16 @@ def test_housing_parts_landed_in_electrochemistry_0_36_are_typed() -> None:
 # ── Item 6: close the audited silent drops ──────────────────────────────────────
 
 
+def test_electrode_and_electrolyte_manufacturer_and_product_id_are_emitted() -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    record = json.loads((ROOT / "examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json").read_text(encoding="utf-8"))
+    cell = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
+    assert cell["hasPositiveElectrode"]["schema:productID"] == "100000030"
+    assert cell["hasNegativeElectrode"]["schema:manufacturer"]["schema:name"] == "Customcells"
+    assert cell["hasElectrolyte"]["schema:manufacturer"]["schema:name"] == "Solvionic"
+
+
 def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_separator_to_jsonld
 
