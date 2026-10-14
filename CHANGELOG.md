@@ -16,6 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Fixed
 
 - **A coin case's coating and a cell's name reach the JSON-LD.** `housing.case.coating` and `cell_instance.name` were accepted by the schemas but never emitted.
+- **A cell spec's manufacturer keeps its link to the organization record.** The spec node wrote only the manufacturer's name and dropped `manufacturer.id`, so the link to the organization record (and through it to ROR and Wikidata) was lost; it is now the manufacturer's `@id`.
 - **The cell-conformance graph test checks each cell's own spec link.** It counted every `dcterms:conformsTo` edge in the corpus, which cell instances do not emit, and passed only because the counts happened to match; it now requires every cell instance to link its spec through `schema:isVariantOf`.
 
 ## [0.8.0] - 2026-10-13

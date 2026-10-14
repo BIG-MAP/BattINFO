@@ -314,6 +314,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "A123 ANR26650M1-B",
   "schema:model": "ANR26650M1-B",
   "schema:manufacturer": {
+    "@id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7",
     "@type": "schema:Organization",
     "schema:name": "A123"
   },

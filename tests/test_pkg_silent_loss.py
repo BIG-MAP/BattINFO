@@ -346,6 +346,14 @@ def test_cell_instance_name_is_emitted() -> None:
     assert node["schema:name"] == "240616_bco_gr-NMC_01"
 
 
+def test_cell_spec_manufacturer_keeps_its_organization_link() -> None:
+    from battinfo.transform.cell_spec_node import build_cell_spec_node
+
+    org = "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    node = build_cell_spec_node({"cell_spec": {"manufacturer": {"type": "Organization", "id": org, "name": "Empa"}}})
+    assert node["schema:manufacturer"]["@id"] == org
+
+
 def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")

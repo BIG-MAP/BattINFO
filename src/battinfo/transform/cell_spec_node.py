@@ -545,10 +545,11 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if cell.get("model"):
         node["schema:model"] = cell["model"]
     if manufacturer_name:
-        node["schema:manufacturer"] = {
-            "@type": "schema:Organization",
-            "schema:name": manufacturer_name,
-        }
+        org: dict[str, Any] = {"@type": "schema:Organization", "schema:name": manufacturer_name}
+        # The organization record it points at carries the external IRIs (ROR, Wikidata).
+        if isinstance(manufacturer, Mapping) and manufacturer.get("id"):
+            org = {"@id": manufacturer["id"], **org}
+        node["schema:manufacturer"] = org
     if tail:
         node["schema:url"] = f"{REGISTRY_SPEC_URL_BASE}{tail}"
     # isDescriptionFor links the spec (an information artifact) to the described
