@@ -10,8 +10,8 @@ import warnings
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
-from urllib.parse import unquote, urlparse
 
+from battinfo._deposit_files import UnsafeLocation, location_path
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
@@ -21,9 +21,13 @@ from battinfo._util import (
     _now_iso,
     _now_unix,
     _sha256,
+    file_uri_to_path,
     is_dataset_series,
+    is_file_uri,
     is_real_number,
+    url_segment,
 )
+from battinfo.api._shared import PACKAGED_LIBRARY_CELL_SPEC_DIR
 from battinfo.bundle import (
     ZENODO_CELL_RECORD_FILENAME,
     BattinfoBundle,
@@ -63,6 +67,12 @@ def plan_artifact_inclusion(
     resolve to a file inside *workspace_root* is NOT copied automatically — it
     yields a non-blocking warning telling the user to place the file in the
     workspace if they want it published. Returns ``(files_to_include, warnings)``.
+
+    A locator is read as a deposit reads a data file location
+    (:func:`battinfo._deposit_files.location_path`): a ``file:`` URI or a path,
+    screened from its text before the file system is asked about it. A network
+    path outside the workspace, or a path that goes up a folder with ``..``,
+    is never looked up, and gets the warning too.
     """
     root = Path(workspace_root)
     included: list[Path] = []
@@ -78,11 +88,16 @@ def plan_artifact_inclusion(
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 continue  # already hosted elsewhere — nothing to upload
-            raw = text[len("file://") :] if text.startswith("file://") else text
-            raw = unquote(raw)
-            candidate = Path(raw)
-            resolved = candidate if candidate.is_absolute() else (root / candidate)
-            if resolved.is_file() and _is_within(resolved, root):
+            try:
+                resolved = location_path(text, root)
+            except UnsafeLocation as exc:
+                warnings_out.append(
+                    f"Artifact {text!r} (format {art.get('format', 'unknown')!r}) {exc.reason}, so it "
+                    f"was not read and will NOT be included in the publication. Place the file under "
+                    f"{root} to publish it."
+                )
+                continue
+            if resolved is not None and resolved.is_file() and _is_within(resolved, root):
                 key = resolved.resolve().as_posix()
                 if key not in seen:
                     seen.add(key)
@@ -114,7 +129,10 @@ def check_artifact_conformance(
     when the descriptive method diverges from the executable source of truth.
 
     Only artifacts whose format has an importer and whose file resolves inside the
-    workspace are checked; everything else is silently skipped. Returns warnings."""
+    workspace are checked; everything else is silently skipped, and a locator the
+    screen of :func:`battinfo._deposit_files.location_path` refuses (a network
+    path outside the workspace, or a path that goes up a folder) is never looked
+    up. Returns warnings."""
     from battinfo.interop import protocols as _protocols  # noqa: PLC0415
 
     root = Path(workspace_root)
@@ -127,11 +145,11 @@ def check_artifact_conformance(
         loc = art.get("locator")
         if not importer_name or not loc or str(loc).startswith(("http://", "https://")):
             continue
-        raw = str(loc)[len("file://") :] if str(loc).startswith("file://") else str(loc)
-        resolved = Path(unquote(raw))
-        if not resolved.is_absolute():
-            resolved = root / resolved
-        if not (resolved.is_file() and _is_within(resolved, root)):
+        try:
+            resolved = location_path(str(loc), root)
+        except UnsafeLocation:
+            continue
+        if resolved is None or not (resolved.is_file() and _is_within(resolved, root)):
             continue
         try:
             imported = getattr(_protocols, importer_name)(resolved)
@@ -153,9 +171,8 @@ def check_artifact_conformance(
     return out
 
 
-ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CR2032_DATASHEET = Path("ENERGIZER__CR2032.pdf")
-DEFAULT_CR2032_LIBRARY_SPEC = ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "ENERGIZER__CR2032.json"
+DEFAULT_CR2032_LIBRARY_SPEC = PACKAGED_LIBRARY_CELL_SPEC_DIR / "ENERGIZER__CR2032.json"
 DEFAULT_CR2032_DATASET_DIRS: tuple[Path, ...] = ()
 DEFAULT_PUBLISH_FILENAME = "battinfo.publish.jsonld"
 DEFAULT_RO_CRATE_METADATA_FILENAME = "ro-crate-metadata.json"
@@ -332,15 +349,8 @@ def _append_unique(values: list[str], value: str | None) -> list[str]:
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
-    parsed = urlparse(uri)
-    if parsed.scheme != "file":
-        return None
-    path_text = unquote(parsed.path)
-    if parsed.netloc:
-        path_text = f"//{parsed.netloc}{path_text}"
-    if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-        path_text = path_text[1:]
-    return Path(path_text)
+    """The path a ``file:`` URI names (see :func:`battinfo._util.file_uri_to_path`), or ``None``."""
+    return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
 def _resolve_dataset_dir(dataset: Dataset) -> Path:
@@ -2103,7 +2113,7 @@ def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any
     return {
         "@type": "schema:DataDownload",
         "schema:name": path.name,
-        "schema:contentUrl": f"{files_base_url}/{path.name}",
+        "schema:contentUrl": f"{files_base_url}/{url_segment(path.name)}",
         "schema:encodingFormat": guessed_format,
         "schema:contentSize": str(path.stat().st_size),
         "schema:sha256": _sha256(path),
@@ -2222,7 +2232,9 @@ def _zenodo_ro_crate(
     files_base_url = f"{zenodo_record_url}/files"
 
     meta_filenames = [publish_filename, bundle_filename]
-    has_part = [{"@id": f.name} for f in all_data_files] + [{"@id": fname} for fname in meta_filenames]
+    has_part = [{"@id": url_segment(f.name)} for f in all_data_files] + [
+        {"@id": url_segment(fname)} for fname in meta_filenames
+    ]
 
     root_dataset: dict[str, Any] = _without_none(
         {
@@ -2250,13 +2262,13 @@ def _zenodo_ro_crate(
         guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
         graph.append(
             {
-                "@id": path.name,
+                "@id": url_segment(path.name),
                 "@type": "File",
                 "name": path.name,
                 "encodingFormat": guessed_format,
                 "contentSize": path.stat().st_size,
                 "sha256": _sha256(path),
-                "url": f"{files_base_url}/{path.name}",
+                "url": f"{files_base_url}/{url_segment(path.name)}",
             }
         )
 
@@ -2268,13 +2280,13 @@ def _zenodo_ro_crate(
         if fpath.exists():
             graph.append(
                 {
-                    "@id": fname,
+                    "@id": url_segment(fname),
                     "@type": "File",
                     "name": fname,
                     "encodingFormat": media_type,
                     "contentSize": fpath.stat().st_size,
                     "sha256": _sha256(fpath),
-                    "url": f"{files_base_url}/{fname}",
+                    "url": f"{files_base_url}/{url_segment(fname)}",
                 }
             )
 
@@ -2376,9 +2388,9 @@ def build_zenodo_package(
         ),
     )
 
-    file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{f.name}" for f in all_data_files}
+    file_url_map: dict[str, str] = {f.name: f"{files_base_url}/{url_segment(f.name)}" for f in all_data_files}
     for fname in (publish_filename, ZENODO_CELL_RECORD_FILENAME, ro_crate_filename):
-        file_url_map[fname] = f"{files_base_url}/{fname}"
+        file_url_map[fname] = f"{files_base_url}/{url_segment(fname)}"
 
     return {
         "status": "ok",

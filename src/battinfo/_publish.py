@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from battinfo._workspace import Workspace
 from battinfo.api import build_curated_cell_spec_submission, submit_publication_package
-from battinfo.bundle import CellSpec
+from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec
 from battinfo.config import resolve_destination_config
 from battinfo.publication import publish as _legacy_publish
 
@@ -57,6 +57,15 @@ _LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset(
     }
 )
 
+# publish() takes a CellSpec only. Each other record model has a save function,
+# which mints its IRI; the error for one of them names it.
+_SAVE_FUNCTIONS: tuple[tuple[type, str], ...] = (
+    (Cell, "save_cell_instance"),
+    (TestSpec, "save_test_spec"),
+    (Test, "save_test"),
+    (Dataset, "save_dataset"),
+)
+
 
 def publish(
     obj: Any = None,
@@ -74,14 +83,32 @@ def publish(
     source_version: str | None = None,
     **legacy: Any,
 ) -> PublishResult | dict[str, Any]:
-    """Publish a BattINFO object to a named destination.
+    """Save one cell spec, and submit it when the destination is a registry.
 
-    ``publish(cell_spec, destination="local")`` saves the record in a
-    workspace folder; ``"registry"``, ``"battery-genome"``, ``"staging"`` and
-    ``"production"`` also submit it. Only ``CellSpec`` objects are supported.
+    ``publish(spec, destination="local")`` saves the record in a folder;
+    ``"registry"``, ``"battery-genome"``, ``"staging"`` and ``"production"``
+    also submit it.
+
+    ``publish()`` takes a ``CellSpec`` only. The other record models are saved
+    with their own function, which also mints the IRI: ``save_cell_instance``
+    for a ``Cell``, ``save_test_spec`` for a ``TestSpec``, ``save_test`` for a
+    ``Test`` and ``save_dataset`` for a ``Dataset``. To save and publish
+    linked cells, tests and datasets, use ``battinfo.workspace()``.
 
     Parameters
     ----------
+    obj:
+        The ``CellSpec`` to publish. Anything else raises ``TypeError``, and for
+        another record model the message names the function that saves it.
+    destination:
+        ``"local"`` (the default) saves the record only; ``debug_paths`` gives
+        its path. ``"registry"`` also submits it to the registry at
+        ``registry_base_url``. ``"battery-genome"``, ``"staging"`` and
+        ``"production"`` submit it too and return the record's Battery Genome
+        page URL, so they also need ``platform_base_url``. Values not passed
+        are read from environment variables such as ``BATTINFO_REGISTRY_URL``
+        and ``BATTINFO_API_KEY`` (``BATTINFO_STAGING_*`` and
+        ``BATTINFO_PRODUCTION_*`` for those two destinations).
     root:
         The workspace folder. Defaults to
         ``.battinfo/publish/<manufacturer>-<model>`` in the current folder.
@@ -94,6 +121,12 @@ def publish(
         Validation policy for the saved record. Defaults to ``"strict"``.
     registry_base_url, api_key, api_key_header, platform_base_url, workspace_id, publisher_id, source_version:
         Override the destination's configured values.
+
+    Returns
+    -------
+    PublishResult
+        The record's IRI and, after a submission, the registry's answer and
+        the URLs of the registry entry and the Battery Genome page.
 
     Notes
     -----
@@ -135,7 +168,7 @@ def publish(
     _refuse_keywords(legacy, "publish()")
 
     if obj is None:
-        raise TypeError("publish() requires a BattINFO object or the legacy publication-package keyword arguments.")
+        raise TypeError('publish() needs a CellSpec, as in publish(spec, destination="local").')
 
     resolved_destination = destination or "local"
     if isinstance(obj, CellSpec):
@@ -154,9 +187,23 @@ def publish(
             source_version=source_version,
         )
 
-    raise TypeError(
-        "publish(obj, destination=...) currently supports CellSpec objects. "
-        "Use battinfo.publish_publication_package(...) for dataset publication packages."
+    raise TypeError(_not_a_cell_spec(obj))
+
+
+def _not_a_cell_spec(obj: Any) -> str:
+    """Why ``publish()`` refuses *obj*, and the function that saves it instead."""
+    kind = type(obj).__name__
+    workspace_hint = "or use battinfo.workspace() to save and publish linked cells, tests and datasets."
+    for model, save_function in _SAVE_FUNCTIONS:
+        if isinstance(obj, model):
+            return (
+                f"publish() takes a CellSpec only, not a {kind}. Save a {kind} with "
+                f"battinfo.{save_function}(...), which mints its IRI, {workspace_hint}"
+            )
+    return (
+        f"publish() takes a CellSpec only, not a {kind}. Save another record model with its "
+        "save_* function (save_cell_instance, save_test_spec, save_test or save_dataset), a record "
+        f"dict or JSON file with battinfo.save_record(...), {workspace_hint}"
     )
 
 

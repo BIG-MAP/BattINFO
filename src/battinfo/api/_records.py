@@ -2284,7 +2284,10 @@ def build_cell_spec_library_rdf(
         except ValueError as exc:
             raise ValueError(f"{path}: {exc}") from exc
 
-        mapped = run_mapping(descriptor, target="domain-battery")
+        try:
+            mapped = run_mapping(descriptor, target="domain-battery")
+        except ValueError as exc:
+            raise ValueError(f"{path}: {exc}") from exc
         out_path = output_jsonld_dir_path / f"{path.stem}.jsonld"
         _write_json(out_path, mapped)
 

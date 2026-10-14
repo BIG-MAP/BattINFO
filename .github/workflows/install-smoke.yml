@@ -1,8 +1,12 @@
 # Verifies that the install commands documented for end users (README.md,
 # QUICKSTART.md, docs/pages/getting-started.rst) still succeed in a clean
-# virtual environment with stock pip against live PyPI. This complements the
-# uv.lock-based CI, which never exercises the plain-pip resolver a first-time
-# user hits.
+# virtual environment with stock pip against live PyPI, on the oldest and the
+# newest supported Python. This complements the uv.lock-based CI, which never
+# exercises the plain-pip resolver a first-time user hits.
+#
+# release.yml calls this workflow as a gate next to ci.yml (workflow_call), so
+# every TestPyPI rehearsal and every release tag installs the built wheel in
+# empty environments first.
 name: install-smoke
 
 on:
@@ -25,22 +29,30 @@ on:
       - docs/pages/troubleshooting.md
       - src/battinfo/_util.py
       - .github/workflows/install-smoke.yml
+  workflow_call:
+    inputs:
+      ref:
+        description: "Commit for the git URL install; release.yml passes the commit it releases"
+        type: string
+        default: ""
   workflow_dispatch:
 
 jobs:
   smoke:
-    name: pip install (${{ matrix.os }})
+    name: pip install (py${{ matrix.python-version }} · ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        # The oldest and the newest Python the classifiers name.
+        python-version: ["3.11", "3.14"]
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: pip install -e .
         shell: bash
@@ -83,15 +95,22 @@ jobs:
           cd "$work"
           "$py" -c "import bdf, fastnda, fastexcel, scipy; import battinfo; ws = battinfo.workspace('.'); out = ws.convert('*.csv'); assert len(out) == 1, out; print(open(out[0]).readline().strip())"
 
+      # The git URL install line of the README. Called from release.yml, it
+      # installs the commit being released (inputs.ref), so the gate never
+      # tests whatever main holds by then; otherwise main, as the README line
+      # does.
       - name: pip install git+https://github.com/BIG-MAP/BattINFO.git
         shell: bash
+        env:
+          REF: ${{ inputs.ref }}
         run: |
           set -euxo pipefail
+          spec="git+https://github.com/BIG-MAP/BattINFO.git${REF:+@$REF}"
           v="$RUNNER_TEMP/venv-git"
           python -m venv "$v"
           if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
           "$py" -m pip install --upgrade pip
-          "$py" -m pip install "git+https://github.com/BIG-MAP/BattINFO.git"
+          "$py" -m pip install "$spec"
           "$py" -c "import battinfo; print(battinfo.__version__)"
 
       # The install docs give that one converter line, and nothing in the repo
@@ -111,8 +130,10 @@ jobs:
 
       # What a PyPI user gets: the built wheel, stock pip, an empty environment,
       # a working directory outside the checkout. The core install runs the
-      # first Quickstart step; a second environment installs the wheel with the
-      # processing extra and converts a small CSV.
+      # first Quickstart step, checks that the SHACL shapes ran (pyshacl is
+      # a core dependency) and runs battinfo --help; a second environment
+      # installs the wheel with the processing extra, runs battinfo --help and
+      # converts a small CSV.
       - name: wheel in an empty environment, outside the checkout
         shell: bash
         run: |
@@ -122,9 +143,14 @@ jobs:
           wheel=$(ls "$RUNNER_TEMP"/dist/battinfo-*.whl)
           v="$RUNNER_TEMP/venv-wheel"
           python -m venv "$v"
-          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          if [ -f "$v/Scripts/python.exe" ]; then
+            py="$v/Scripts/python.exe"; cli="$v/Scripts/battinfo.exe"
+          else
+            py="$v/bin/python"; cli="$v/bin/battinfo"
+          fi
           "$py" -m pip install --upgrade pip
           "$py" -m pip install "$wheel"
+          "$cli" --help > /dev/null
           work="$RUNNER_TEMP/wheel-smoke"
           mkdir -p "$work"
           cd "$work"
@@ -133,7 +159,7 @@ jobs:
           import pathlib
 
           import battinfo
-          from battinfo import CellSpec, publish, validate_record
+          from battinfo import CellSpec, publish, validate_record, validate_record_report
 
           assert "site-packages" in pathlib.Path(battinfo.__file__).as_posix(), battinfo.__file__
           cell_spec = CellSpec(
@@ -150,15 +176,22 @@ jobs:
           assert result.canonical_iri.startswith("https://w3id.org/battinfo/spec/"), result.canonical_iri
           record = json.loads(pathlib.Path(result.debug_paths["canonical_record_path"]).read_text())
           validate_record(record)
+          codes = [issue.code for issue in validate_record_report(record).issues]
+          assert "shacl.unavailable" not in codes, codes
           print("wheel ok", battinfo.__version__, result.canonical_iri)
           PY
           "$py" quickstart.py
           "$py" -c "from battinfo.registry import Registry; print(Registry())"
           v="$RUNNER_TEMP/venv-wheel-processing"
           python -m venv "$v"
-          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          if [ -f "$v/Scripts/python.exe" ]; then
+            py="$v/Scripts/python.exe"; cli="$v/Scripts/battinfo.exe"
+          else
+            py="$v/bin/python"; cli="$v/bin/battinfo"
+          fi
           "$py" -m pip install --upgrade pip
           "$py" -m pip install "${wheel}[processing]"
+          "$cli" --help > /dev/null
           work="$RUNNER_TEMP/wheel-convert-smoke"
           mkdir -p "$work"
           cd "$work"

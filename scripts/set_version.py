@@ -9,6 +9,7 @@ This script writes it, then the stamps that follow from it:
 - ``version`` and ``date-released`` in CITATION.cff, and the tag named in the
   comment above the date,
 - the supported-versions table in SECURITY.md,
+- the Changelog URL in pyproject.toml, which names the release's tag,
 - a version pin in tests/installed_smoke.py, should one come back,
 
 and reruns the generators whose output embeds the version in record provenance:
@@ -18,8 +19,8 @@ scripts/gen_reference_records.py (docs/records/) and scripts/gen_web_examples.py
 The stamps outside ``__version__`` take the base version, X.Y.Z without its
 pre-release, post-release or development part. On a tree at 0.8.0, setting a
 release candidate (0.8.0rc1) or a rehearsal build (0.8.0.dev1) therefore changes
-only ``__version__`` and the generated files: battinfo.ttl, CITATION.cff and
-SECURITY.md keep naming the release it leads to.
+only ``__version__`` and the generated files: battinfo.ttl, CITATION.cff,
+SECURITY.md and pyproject.toml keep naming the release it leads to.
 
 ``--date`` sets the release date: ``date-released`` in CITATION.cff and the date
 of the release's heading in CHANGELOG.md, which RELEASING.md has you add first.
@@ -63,6 +64,7 @@ INIT = "src/battinfo/__init__.py"
 ONTOLOGY = "battinfo.ttl"
 CITATION = "CITATION.cff"
 SECURITY = "SECURITY.md"
+PYPROJECT = "pyproject.toml"
 SMOKE = "tests/installed_smoke.py"
 CHANGELOG = "CHANGELOG.md"
 GENERATORS = ("scripts/gen_reference_records.py", "scripts/gen_web_examples.py")
@@ -128,6 +130,16 @@ STAMPS = (
         re.compile(r"^\| < (?P<value>\d+\.\d+\.\d+) \| :x: \|", re.MULTILINE),
         "the oldest supported version",
         lambda v: f"{v.series}.0",
+    ),
+    # The package metadata on PyPI keeps the URL it was uploaded with, so it
+    # names the release's tag rather than main.
+    _Stamp(
+        PYPROJECT,
+        re.compile(
+            r'^Changelog = "https://github\.com/BIG-MAP/BattINFO/blob/v(?P<value>[^/"]+)/CHANGELOG\.md"$', re.MULTILINE
+        ),
+        "the tag in the Changelog URL",
+        lambda v: v.base,
     ),
     _Stamp(
         SMOKE, re.compile(r'__version__ == "(?P<value>[^"]*)"'), "the version pin", lambda v: v.text, required=False

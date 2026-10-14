@@ -24,11 +24,31 @@ from battinfo import (  # noqa: E402
     batch_import_solid_state_db,
     from_solid_state_db_row,
     iter_solid_state_records,
+    record_to_jsonld,
 )
+from battinfo.entities import kind_for_doc  # noqa: E402
 from battinfo.transform import to_jsonld  # noqa: E402
 from battinfo.validate import validate_record  # noqa: E402
 
 FIXTURE = ROOT / "tests" / "fixtures" / "interop" / "solid-state-db" / "db-master-sample.csv"
+
+
+# to_jsonld maps cell specs, materials, electrodes and components, and raises on
+# an unmapped @type. It does not emit cells, tests or datasets; record_to_jsonld does.
+RECORD_TO_JSONLD_ONLY = {"cell": "cell-instance", "test": "test", "dataset": "dataset"}
+
+
+def _emits_its_own_node(record: dict) -> bool:
+    """True when the record's JSON-LD has a node for the record's IRI."""
+    kind = kind_for_doc(record)
+    assert kind is not None, record
+    if kind.entity_type in RECORD_TO_JSONLD_ONLY:
+        doc = record_to_jsonld(record, RECORD_TO_JSONLD_ONLY[kind.entity_type])
+    else:
+        doc = to_jsonld(record, target="domain-battery")
+    graph = doc.get("@graph")
+    nodes = graph if isinstance(graph, list) else [doc]
+    return record[kind.record_key]["id"] in {node.get("@id") for node in nodes}
 
 
 def _rows() -> list[dict[str, str]]:
@@ -100,9 +120,9 @@ def test_every_record_validates_against_schema() -> None:
         assert result.ok, f"{record.get('schema_version')} record invalid: {result}"
 
 
-def test_every_record_emits_domain_battery_jsonld() -> None:
+def test_every_record_emits_jsonld_with_its_own_node() -> None:
     for record in iter_solid_state_records(batch_import_solid_state_db(FIXTURE, validate=False)):
-        to_jsonld(record, target="domain-battery")  # raises on an unmapped @type
+        assert _emits_its_own_node(record), record
 
 
 def test_all_iris_unique() -> None:

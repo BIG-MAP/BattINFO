@@ -14,12 +14,13 @@ if TYPE_CHECKING:  # jsonschema/referencing are imported lazily so `import batti
     from jsonschema.exceptions import ValidationError
     from referencing import Registry
 
+# profiles/batterypass.schema.json still ships, marked withdrawn, so that its
+# published URL keeps resolving; it is not a validation profile since 0.8.0.
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
     "cell-spec": "cell-spec.schema.json",
     "cell-instance": "cell-instance.schema.json",
     "dataset": "dataset.schema.json",
-    "batterypass": "profiles/batterypass.schema.json",
     "test-protocol": "test-protocol.schema.json",
     "test": "test.schema.json",
     "material-spec": "material-spec.schema.json",

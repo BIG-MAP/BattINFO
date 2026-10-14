@@ -15,6 +15,7 @@ fakes.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sys
@@ -82,11 +83,28 @@ def _saved_workspace(root: Path) -> AuthoringWorkspace:
     return ws
 
 
+def _deposit_ready_workspace(root: Path) -> AuthoringWorkspace:
+    """A saved workspace ws.zenodo() deposits: a licence, and a test with a data file."""
+    (root / "C01").mkdir(parents=True, exist_ok=True)
+    (root / "C01" / "cycling.csv").write_text("time_s,voltage_V\n0,3.0\n1,3.1\n", encoding="utf-8")
+    ws = battinfo.workspace(root, registry_url=None)
+    ws.license("cc-by-4.0")
+    ws.add(
+        "cell",
+        spec=CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion"),
+        serial_numbers=["C01"],
+    )
+    ws.add("test", type="cycling", cell="C01", data="C01/cycling.csv")
+    ws.save()
+    return ws
+
+
 class _FakeZenodo:
     """Stands in for battinfo.zenodo.ZenodoClient and remembers the token it was given."""
 
     def __init__(self) -> None:
         self.clients: list[tuple[str, bool]] = []
+        self.files: dict[str, str] = {}
 
     def client(self, token: str, sandbox: bool = False) -> _FakeZenodo:
         self.clients.append((token, sandbox))
@@ -95,8 +113,12 @@ class _FakeZenodo:
     def create_empty_deposit(self) -> dict:
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, keep: dict | None = None) -> dict:
+        self.files = {name: hashlib.md5(Path(path).read_bytes()).hexdigest() for path, name in upload_map.items()}  # noqa: S324
         return {"uploaded": sorted(upload_map.values()), "kept": [], "removed": []}
+
+    def list_files(self, deposit_id: int) -> list[dict]:
+        return [{"filename": name, "checksum": md5} for name, md5 in self.files.items()]
 
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         return {}
@@ -211,7 +233,7 @@ def test_zenodo_finds_a_token_that_is_only_in_the_credentials_file(
     tmp_path: Path, fake_zenodo: _FakeZenodo, sandbox: bool, name: str
 ) -> None:
     _write_credentials(tmp_path, **{name: "token-from-the-file"})
-    ws = _saved_workspace(tmp_path)
+    ws = _deposit_ready_workspace(tmp_path)
 
     result = ws.zenodo(sandbox=sandbox, creators=CREATORS)
 
@@ -225,7 +247,7 @@ def test_an_exported_variable_overrides_the_credentials_file(
 ) -> None:
     _write_credentials(tmp_path, ZENODO_API_TOKEN="token-from-the-file")
     monkeypatch.setenv("ZENODO_API_TOKEN", "token-from-the-environment")
-    ws = _saved_workspace(tmp_path)
+    ws = _deposit_ready_workspace(tmp_path)
 
     ws.zenodo(creators=CREATORS)
 
@@ -238,7 +260,7 @@ def test_an_explicit_argument_overrides_the_environment_and_the_file(
 ) -> None:
     _write_credentials(tmp_path, ZENODO_API_TOKEN="token-from-the-file")
     monkeypatch.setenv("ZENODO_API_TOKEN", "token-from-the-environment")
-    ws = _saved_workspace(tmp_path)
+    ws = _deposit_ready_workspace(tmp_path)
 
     ws.zenodo(token="token-passed-in", creators=CREATORS)
 

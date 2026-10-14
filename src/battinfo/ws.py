@@ -4,14 +4,17 @@ Usage::
 
     import battinfo
 
-    ws = battinfo.workspace()
-    ws.search("duracell mn2400")
-    ws.template("cell-spec", manufacturer="Duracell", model="MN2400")
-    # edit the generated JSON, then:
+    ws = battinfo.workspace("lab", registry_url=None)  # None: no registry lookups
+    ws.search("duracell mn2400")  # with a registry, ws.load(hit) reuses a published spec
+    ws.template("cell-spec", manufacturer="Duracell", model="MN2400",
+                format="cylindrical", chemistry="alkaline-zn-mno2")
+    # fill in the draft lab/Duracell-MN2400.cell-spec.json, then:
     spec = ws.load("Duracell-MN2400.cell-spec.json")
-    ws.add("cell-instance", spec=spec, from_file="cell_iris.json", match="duracell-mn2400")
-    ws.add("test", kind="capacity_check", datasets="bdf/*.bdf.parquet",
-           protocol="constant current discharge", instrument="NEWARE BTS82 cycler")
+    ws.add("cell", spec=spec, serial_numbers=["C01", "C02"])
+    ws.template("test-spec", name="CC discharge C/5", type="capacity_check")
+    # fill in the draft lab/CC-discharge-C-5.test-spec.json, then:
+    protocol = ws.load("CC-discharge-C-5.test-spec.json")
+    ws.add("test", spec=protocol, cell="C01", instrument="NEWARE BTS82")
     ws.save()
 """
 
@@ -33,12 +36,55 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
 
+from battinfo._deposit_files import (
+    DepositContext,
+    DepositFile,
+    DepositFilePlan,
+    Omission,
+    RemoteSource,
+    UnsafeLocation,
+    build_deposit_file_plan,
+    dataset_distributions,
+    deposit_file_problems,
+    kept_copy_problems,
+    location_key,
+    location_path,
+    measured_file,
+    path_key,
+)
+from battinfo._deposit_index import (
+    ZENODO_HOSTS,
+    DepositIndexError,
+    IndexedFile,
+    concept_of_record,
+    concept_records,
+    load_deposit_index,
+    load_deposit_state,
+    note_deposit,
+    note_hosted,
+    note_published,
+    register_sources,
+    registered_keys,
+    save_deposit_index,
+    save_deposit_state,
+    state_file,
+    state_path,
+    zenodo_environment,
+)
 from battinfo._fs_guard import remove_temp_tree
 from battinfo._jsonio import atomic_write_text as _atomic_write_text
 from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
-from battinfo._util import _now_iso, is_dataset_series, local_file_references
+from battinfo._util import (
+    _now_iso,
+    is_dataset_series,
+    is_local_location,
+    local_file_references,
+    path_name,
+    url_segment,
+)
+from battinfo._util import file_uri_to_path as _file_uri_to_path
 from battinfo._util import jsonld_literal as _jsonld_literal
 from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
@@ -430,6 +476,8 @@ _UNIX_EPOCH = "1970-01-01T00:00:00Z"
 BATTINFO_LD_FILENAME = "battinfo.json"
 # Legacy name in records published before the switch — still accepted on import.
 BATTINFO_LD_FILENAME_LEGACY = "battinfo.jsonld"
+# The RO-Crate metadata file a workspace deposit carries next to it.
+_ROCRATE_FILENAME = "ro-crate-metadata.json"
 
 # Battery Data Format (BDF) CSVW table schema. A BDF data file declares
 # conformance to this so a consumer can resolve every column name, type and unit
@@ -476,19 +524,49 @@ def validate_jsonld(doc: dict, *, where: str = "battinfo.json") -> dict:
     return doc
 
 
-def _unix_to_iso(ts: int | None) -> str | None:
-    """Convert a Unix timestamp (seconds) to an ISO-8601 datetime string."""
-    if ts is None:
+def _unix_to_iso(ts: int | float | str | None, *, what: str = "a timestamp") -> str | None:
+    """An ISO 8601 UTC datetime for a Unix time in seconds.
+
+    A string of digits is read as seconds, and any other string is returned
+    as it is: a time a record gives in ISO 8601 (a deviation's
+    ``occurred_at`` may be one) needs no conversion. A number no date can be
+    made of, such as a time in milliseconds (past the year 9999 as seconds),
+    gives ``None`` with a warning that names *what* it is, so a graph leaves
+    the time out rather than the record that holds it. Validation under the
+    strict policy reports such a time (``semantic.timestamp_out_of_range``).
+    """
+    if ts is None or isinstance(ts, bool):
         return None
+    if isinstance(ts, str):
+        text = ts.strip()
+        if not text.isdigit():
+            return text or None
+        ts = int(text)
     import datetime
 
-    return datetime.datetime.fromtimestamp(ts, tz=datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        moment = datetime.datetime(1970, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(seconds=ts)
+    except (OverflowError, ValueError):
+        warnings.warn(
+            f"{what} = {ts!r} is out of range as a Unix time in seconds (is it in milliseconds?), so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    except TypeError:
+        warnings.warn(
+            f"{what} = {ts!r} is neither a Unix time nor an ISO 8601 string, so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    return moment.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def _plan_zenodo_deposit(
     existing_id: str | None,
     existing_published: bool,
     record_id: str | None,
+    *,
+    recorded_in: str = ".battinfo/zenodo.json",
 ) -> tuple[str | None, str | None, str | None]:
     """Decide how a ``ws.zenodo()`` call maps to a Zenodo deposit action.
 
@@ -500,6 +578,9 @@ def _plan_zenodo_deposit(
     * existing record is **published**  → fork a NEW VERSION from it;
     * existing record is an **open draft**  → UPDATE that draft in place (Zenodo allows
       only one open draft per concept, so forking again would fail).
+
+    *recorded_in* is the file that records the existing record, named in the
+    warning.
 
     Returns ``(record_id, reuse_draft_id, warning)`` — exactly one of
     ``record_id``/``reuse_draft_id`` is set when versioning an existing record;
@@ -513,7 +594,7 @@ def _plan_zenodo_deposit(
             None,
             (
                 f"This workspace already has a published Zenodo record ({existing_id}); "
-                "creating a NEW VERSION. (Delete .battinfo/zenodo.json to start a "
+                f"creating a NEW VERSION. (Delete {recorded_in} to start a "
                 "brand-new record instead.)"
             ),
         )
@@ -525,6 +606,92 @@ def _plan_zenodo_deposit(
             "that draft in place rather than creating a new record."
         ),
     )
+
+
+def _unreadable_draft_message(state: Mapping[str, Any], exc: Exception) -> str:
+    """The refusal of a deposit whose recorded draft (*state*) Zenodo did not return, with how to go on.
+
+    A draft deleted on the Zenodo website (HTTP 404 or 410) does not take
+    the record's lineage with it. When the draft was a new version of a
+    published record, the way on is a new version of that record
+    (``record_id=``), never a new record. Only when nothing of the record
+    was published does the message point at the state file, whose deletion
+    starts a new record on that Zenodo alone.
+    """
+    environment = str(state.get("environment") or "production")
+    text = (
+        f"The draft {state['record_id']} recorded in {state_file(environment)} could not be read "
+        f"on {ZENODO_HOSTS[environment]}: {exc}"
+    )
+    if getattr(exc, "status", None) in (404, 410):
+        published = state.get("version_of")
+        if published:
+            text += (
+                f" If it was deleted there, run ws.zenodo(record_id={published!r}) to make a new "
+                f"version of the published record {published}, which the draft was a version of."
+            )
+        else:
+            text += (
+                " If it was deleted there, nothing of its record was published: delete "
+                f"{state_file(environment)} to start a new record on {ZENODO_HOSTS[environment]}."
+            )
+    return f"{text} Nothing was created on Zenodo."
+
+
+#: How a deposit refusal tells the user to give a dataset its local data file back.
+_POINT_AT_LOCAL_FILE = "Point each dataset at its local file again (ws.add(..., data=...), then ws.save())"
+
+
+def _kept_copies_refusal(
+    plan: DepositFilePlan, datasets: Iterable[object], lacking: Mapping[str, str], holder: str
+) -> str:
+    """The refusal of a deposit that keeps copies *holder* does not hold, naming each dataset that points at one.
+
+    *lacking* maps each such file's deposit name to what is wrong, as
+    :func:`~battinfo._deposit_files.kept_copy_problems` gives it, and
+    *datasets* are the dataset records the deposit read.
+    """
+    lines: builtins.list[str] = []
+    named: set[str] = set()
+    for record in datasets:
+        body = record.get("dataset") if isinstance(record, dict) else None
+        if not isinstance(body, dict):
+            continue
+        usable, _problems = dataset_distributions(body)
+        for dist in usable:
+            entry = plan.entry_for(dist["content_url"])
+            if entry is None or not entry.kept or entry.name not in lacking:
+                continue
+            lines.append(
+                f"dataset {body.get('id') or '(no id)'}: {dist['content_url']} ({entry.name} {lacking[entry.name]})"
+            )
+            named.add(entry.name)
+    lines += [f"{name} {problem}" for name, problem in lacking.items() if name not in named]
+    return (
+        f"Refusing to deposit: {holder} does not hold {len(lacking)} data file(s) that the dataset "
+        "records point at and for which this workspace has no local file to send: "
+        + "; ".join(dict.fromkeys(lines))
+        + f". {_POINT_AT_LOCAL_FILE}, then re-run."
+    )
+
+
+def _deposit_record_iris(record_sets: Mapping[str, list[dict]], graph: Mapping[str, Any]) -> list[str]:
+    """The IRIs of the workspace records the deposit *graph* has a node for, sorted."""
+    nodes = graph.get("@graph")
+    node_ids = {node.get("@id") for node in nodes if isinstance(node, dict)} if isinstance(nodes, list) else set()
+    iris = {
+        entity_id_from_doc(record) for records in record_sets.values() for record in records if isinstance(record, dict)
+    }
+    return sorted(iri for iri in iris if iri and iri in node_ids)
+
+
+def _with_citation_doi(record: dict, doi: str | None) -> dict:
+    """*record* with ``provenance.citation_doi`` set to *doi* when it has none; *record* itself without a DOI."""
+    if not doi:
+        return record
+    provenance = dict(record.get("provenance") or {})
+    provenance.setdefault("citation_doi", doi)
+    return {**record, "provenance": provenance}
 
 
 def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
@@ -566,20 +733,41 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
         return None
 
 
-def _file_uri_to_path(url: str) -> Path:
-    """Convert a file:// URI (or plain path string) to a local Path.
+def _distribution_file_name(url: str) -> str:
+    """The file name a distribution URL ends in, decoded, for display.
 
-    The old inline ``.replace("file:///", "")`` pattern silently turned POSIX
-    URIs into RELATIVE paths (file:///tmp/x -> tmp/x), so downstream
-    existence checks failed on Linux while passing on Windows (/C:/... keeps
-    its drive). urllib handles both platforms and percent-encoding.
+    A hosted URL carries its file name percent-encoded (``cell%2001.csv``);
+    the name shown in the graph is the decoded one (``cell 01.csv``). A URL
+    that cannot be parsed gives the text after its last ``/``.
     """
-    if url.startswith("file:"):
-        from urllib.parse import urlparse
-        from urllib.request import url2pathname
+    try:
+        if url.startswith(("http://", "https://")):
+            from urllib.parse import unquote, urlparse  # noqa: PLC0415
 
-        return Path(url2pathname(urlparse(url).path))
-    return Path(url)
+            return unquote(urlparse(url).path.rsplit("/", 1)[-1])
+        return path_name(_file_uri_to_path(url))
+    except (OSError, ValueError):
+        return url.rstrip("/").rsplit("/", 1)[-1]
+
+
+def _import_web_url(value: Any) -> str:
+    """*value* when it is an http(s) URL with a host, as text or as ``{"@id": ...}``; else ``""``.
+
+    ``ws.import_()`` keeps a URL from the document it reads only when this
+    returns it.
+    """
+    from urllib.parse import urlparse  # noqa: PLC0415
+
+    if isinstance(value, Mapping):
+        value = value.get("@id")
+    if not isinstance(value, str):
+        return ""
+    text = value.strip()
+    try:
+        parsed = urlparse(text)
+    except ValueError:
+        return ""
+    return text if parsed.scheme.lower() in ("http", "https") and parsed.netloc else ""
 
 
 # dcat:mediaType is written as the IANA media-type IRI under this base
@@ -780,6 +968,42 @@ def _normalize_orcid(value: str) -> str:
             f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
         )
     return token
+
+
+# How to give a Zenodo deposit its creators: the refusal and the preview say it.
+_CREATORS_HINT = (
+    'Pass creators=[{"name": "Family, Given", "orcid": "0000-0002-1825-0097"}], or credit '
+    'each author once with ws.contributor("0000-0002-1825-0097", name="Family, Given"), '
+    'or set a default with: battinfo config set creator "Family, Given; Institution".'
+)
+
+
+def _deposit_agents(agents: Iterable[Any], role: str) -> list[dict]:
+    """Copies of a deposit's creator or contributor dicts, each ORCID a bare id.
+
+    An ORCID may be given as the id or as its ``https://orcid.org/`` (or
+    ``http://``) URL. Zenodo takes the bare id, and the deposit graph and the
+    RO-Crate put ``https://orcid.org/`` in front of it once. Raises
+    ValueError, naming the *role* and the entry, for an entry that is not a
+    dict with a name, or an ORCID that is not one.
+    """
+    out: list[dict] = []
+    for position, agent in enumerate(agents, start=1):
+        if not isinstance(agent, Mapping) or not str(agent.get("name") or "").strip():
+            raise ValueError(
+                f"{role} {position} has no name. Give each {role} as a dict such as "
+                '{"name": "Family, Given", "orcid": "0000-0002-1825-0097"}.'
+            )
+        entry = dict(agent)
+        if entry.get("orcid"):
+            try:
+                entry["orcid"] = _normalize_orcid(entry["orcid"])
+            except ValueError as exc:
+                raise ValueError(f"{role} {entry['name']!r}: {exc}") from None
+        else:
+            entry.pop("orcid", None)  # an empty ORCID is left out
+        out.append(entry)
+    return out
 
 
 # A pragmatic set of the license identifiers Zenodo accepts most often (open
@@ -1253,6 +1477,19 @@ def _unresolved_record_references(doc: dict) -> list[str]:
     return sorted(missing)
 
 
+def _omission_list(omissions: Iterable[Omission], limit: int = 10) -> str:
+    """*omissions* on one line for a message: each once, the first *limit*, then how many more."""
+    unique = list(dict.fromkeys(omissions))
+    shown = "; ".join(str(omission) for omission in unique[:limit])
+    return shown + (f"; and {len(unique) - limit} more" if len(unique) > limit else "")
+
+
+def _shown_list(items: list[str], limit: int = 10) -> str:
+    """*items* on one line for a message: the first *limit*, then how many more."""
+    shown = "; ".join(items[:limit])
+    return shown + (f"; and {len(items) - limit} more" if len(items) > limit else "")
+
+
 def _not_found_locally_note(iris: list[str]) -> str:
     """Why the records in *iris* have no node in the deposit, and how to fetch them."""
     shown = ", ".join(iris[:5]) + (f" and {len(iris) - 5} more" if len(iris) > 5 else "")
@@ -1365,7 +1602,10 @@ def _apply_conformance_jsonld(
                 }
             if dev.get("description"):
                 dev_node["schema:description"] = dev["description"]
-            iso_ts = _unix_to_iso(dev.get("occurred_at"))
+            # An ISO 8601 string, as the schema allows, or a Unix time.
+            iso_ts = _unix_to_iso(
+                dev.get("occurred_at"), what=f"occurred_at of a deviation of {node.get('@id') or 'a record'}"
+            )
             if iso_ts:
                 dev_node["prov:startedAtTime"] = iso_ts
             duration_s = dev.get("duration_s")
@@ -2934,6 +3174,10 @@ class AuthoringWorkspace:
         — export a CSV from the instrument software first, then
         ``ws.convert('*.csv')`` or :meth:`convert_csv`.
 
+        Each file converted, and each file written, is registered as a data
+        file of this workspace in ``.battinfo/deposit-files.json``, so a Zenodo
+        deposit may read it (see :meth:`zenodo`).
+
         Parameters
         ----------
         pattern:
@@ -3625,7 +3869,11 @@ class AuthoringWorkspace:
         reports the reference as unresolved.  ``data`` is a path or list of paths to files that
         exist; a relative path resolves against the workspace root, not the
         current directory, and a missing file raises ``FileNotFoundError``
-        naming the path it resolved to.  ``type`` is the test
+        naming the path it resolved to.  The workspace registers each data
+        file, and each original from ``raw=`` or :meth:`convert`, in
+        ``.battinfo/deposit-files.json``, so a Zenodo deposit reads it even
+        on a network share outside the workspace folder (see :meth:`zenodo`).
+        ``type`` is the test
         type (``"cycling"``, ``"capacity_check"``, …); ``kind`` is accepted as an alias.
         ``channel`` attaches the test to an equipment channel — a channel IRI, a
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
@@ -3989,11 +4237,13 @@ class AuthoringWorkspace:
         *,
         zenodo: bool = False,
         sandbox: bool = False,
+        creators: builtins.list[dict] | None = None,
         doi: str | None = None,
         only: str | builtins.list[str] | None = None,
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
         allow_local_files: bool = False,
+        archive_hosted_files: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -4009,9 +4259,17 @@ class AuthoringWorkspace:
         This is equivalent to running, in order::
 
             ws.save()
-            ws.upload()              # only when zenodo=True
-            ws.zenodo(publish=True)  # only when zenodo=True
+            ws.upload()                                 # only with zenodo=True and R2 storage
+            ws.zenodo(publish=True, creators=creators)  # only when zenodo=True
             ws.submit(note=note, doi=...)
+
+        With ``zenodo=True`` the Zenodo token and the deposit's creators are
+        looked up first, and the file that records the workspace's Zenodo
+        record is read (see :meth:`zenodo`), so a call that fails any of these
+        is refused before anything is saved, uploaded or sent. A deposit that
+        would archive data files hosted in R2 storage is refused after the
+        save, before anything is uploaded or sent, unless
+        ``archive_hosted_files=True``.
 
         For finer control — e.g. reviewing a Zenodo draft before it goes live —
         call those four steps individually instead.
@@ -4022,7 +4280,8 @@ class AuthoringWorkspace:
             Provenance note attached to every submitted record.
         zenodo:
             Upload data files and archive on Zenodo before submitting.  Publishes
-            the Zenodo deposit immediately and records its DOI in each record.
+            the Zenodo deposit immediately and records its DOI in each record
+            the deposit holds.
             A deposit of more than 90 data files is zipped by test kind, and the
             registry cannot yet point at files inside an archive, so without R2
             object storage such a workspace is refused before anything is
@@ -4030,6 +4289,16 @@ class AuthoringWorkspace:
             split it.
         sandbox:
             Use ``sandbox.zenodo.org`` (only relevant with ``zenodo=True``).
+            A sandbox deposit is a dry run: it leaves the records pointing at
+            their local files and records no DOI, and the registry refuses
+            local files. So unless R2 object storage is configured, or
+            ``allow_local_files=True``, the call is refused before anything is
+            saved: use ``ws.zenodo(sandbox=True)`` for the dry run.
+        creators:
+            The Zenodo deposit's creators (only with ``zenodo=True``), as
+            :meth:`zenodo` takes them. Without them the workspace contributors
+            (:meth:`contributor`) are the creators, and without those the creator
+            set with ``battinfo config set creator``.
         doi:
             A pre-existing DOI to attach (e.g. from a Zenodo draft you reviewed).
         only:
@@ -4039,17 +4308,50 @@ class AuthoringWorkspace:
             :meth:`submit`); ``zenodo=True`` deposits the files first and points
             the records at the deposited copies. ``True`` lifts the check, for a
             local test registry only.
+        archive_hosted_files:
+            Archive data files hosted in R2 storage in the Zenodo deposit (only
+            with ``zenodo=True``; see :meth:`zenodo`). With R2 storage
+            configured, ``zenodo=True`` puts the data files in R2 with
+            :meth:`upload` before the deposit, so it needs this too. Without
+            it such a call is refused after the save, before anything is
+            uploaded or sent, and the refusal names the files.
         """
+        if zenodo:
+            # A deposit without a token or a creator, or one whose recorded
+            # Zenodo record cannot be read, is refused before the save, the zip
+            # check and the R2 upload, not by ws.zenodo() after them.
+            self._zenodo_token(None, sandbox)
+            creators = self._deposit_creators(creators)
+            self._load_zenodo_state(zenodo_environment(sandbox))
+            if sandbox and not allow_local_files and not self._r2_configured():
+                raise ValueError(
+                    "Refusing to publish: a sandbox deposit is a dry run, so it leaves the records "
+                    "pointing at their local data files, and the registry refuses those. Nothing was "
+                    "saved, deposited or sent. Use ws.zenodo(sandbox=True) for the dry run, and "
+                    "ws.publish(zenodo=True) to publish (allow_local_files=True is for a local test "
+                    "registry only)."
+                )
         self._publishing = True
         try:
             self.save()
         finally:
             self._publishing = False
-        if zenodo and not allow_local_files and not self._r2_configured():
-            # Records point at Zenodo's copies of their files; a zipped deposit has
-            # none to point at. Refuse before anything is deposited.
-            self._refuse_a_zipped_deposit()
         if zenodo:
+            # Both checks below come before the R2 upload and the deposit.
+            plan = self._deposit_file_plan(
+                self._ws.source_root,
+                report=False,
+                measure=False,
+                context=self._deposit_context(sandbox=sandbox),
+            )
+            if not archive_hosted_files:
+                # Files hosted in R2 go into the deposit only when asked for,
+                # those ws.upload() is about to put there included.
+                self._refuse_hosted_files(plan, verb="publish", from_publish=True)
+            if not allow_local_files and not self._r2_configured():
+                # Records point at Zenodo's copies of their files; a zipped deposit has
+                # none to point at. Refuse before anything is deposited.
+                self._refuse_a_zipped_deposit(plan)
             if self._r2_configured():
                 self.upload()
             else:
@@ -4058,8 +4360,9 @@ class AuthoringWorkspace:
                     "data files (records get the Zenodo download URLs). R2 is "
                     "only needed for team-internal registry hosting."
                 )
-            result = self.zenodo(publish=True, sandbox=sandbox)
-            doi = doi or result.doi
+            # ws.submit() takes the DOI from the deposit's record in
+            # .battinfo/zenodo.json, and puts it on the records the deposit holds.
+            self.zenodo(publish=True, sandbox=sandbox, creators=creators, archive_hosted_files=archive_hosted_files)
         return self.submit(
             note=note,
             doi=doi,
@@ -4412,7 +4715,8 @@ class AuthoringWorkspace:
             One of:
 
             * A **Zenodo record ID** (string of digits, e.g. ``"14523891"``)
-            * A **URL** pointing directly to a ``battinfo.json`` file
+            * An **http(s) URL** pointing directly to a ``battinfo.json`` file;
+              a URL with any other scheme is refused
             * A **local file path** to a ``battinfo.json`` file (the legacy
               ``battinfo.jsonld`` name is still accepted)
 
@@ -4420,7 +4724,10 @@ class AuthoringWorkspace:
             When *source* is a Zenodo record ID, use ``sandbox.zenodo.org``
             instead of production.
         token:
-            Optional Zenodo API token for private records.
+            Optional Zenodo API token for private records. It is sent only
+            over https to the Zenodo host *sandbox* chooses (``zenodo.org`` or
+            ``sandbox.zenodo.org``): never to another host, and never on a
+            redirect. A URL on another host is read without it, with a warning.
 
         Returns
         -------
@@ -4432,6 +4739,16 @@ class AuthoringWorkspace:
             "reason": ...}], "datasets": [...]}``. A test on a cell the
             deposit only points at (a "defined elsewhere" stub, for a cell
             published in the registry) is skipped, with its datasets.
+
+        The document may come from anyone, so only http(s) download URLs come
+        into the workspace. A distribution whose download URL is anything else, a
+        ``file:`` URL or a path to this computer or another one, is left out
+        with a warning, so a later deposit of this workspace never reads a file
+        a document named. A dataset left with no file keeps the http(s) page
+        the deposit gives it (its ``schema:url``, else the deposit record) as
+        its ``access_url``, with the URL that was left out in its notes; a
+        dataset without such a page is skipped, with the reason ``no http(s)
+        download URL``.
 
         Example::
 
@@ -4672,15 +4989,34 @@ class AuthoringWorkspace:
             print(f"  instance: {sn or iri}")
 
         # ── 7. Import tests + datasets ─────────────────────────────────────────
+        # The document may come from anyone, so only http(s) download URLs
+        # enter the workspace. A file: URL or a path would point this
+        # workspace's next deposit at a file on this computer or on another
+        # one, so each is left out, with a warning.
         dist_by_url: dict[str, dict] = {}
         dists_by_dataset: dict[str, builtins.list[dict]] = {}
+        dataset_node_by_iri: dict[str, dict] = {}
+        left_out_urls: dict[str, builtins.list[str]] = {}
         for ds_node in dataset_nodes:
+            ds_iri = ds_node.get("@id", "")
+            dataset_node_by_iri.setdefault(ds_iri, ds_node)
             ds_dists = ds_node.get("dcat:distribution") or []
             for dist in ds_dists if isinstance(ds_dists, list) else [ds_dists]:
-                url = dist.get("dcat:downloadURL", "") if isinstance(dist, dict) else ""
+                raw_url = dist.get("dcat:downloadURL") if isinstance(dist, dict) else None
+                url = _import_web_url(raw_url)
                 if url:
+                    dist = {**dist, "dcat:downloadURL": url}
                     dist_by_url[url] = dist
-                    dists_by_dataset.setdefault(ds_node.get("@id", ""), []).append(dist)
+                    dists_by_dataset.setdefault(ds_iri, []).append(dist)
+                elif raw_url:
+                    shown = raw_url.get("@id", raw_url) if isinstance(raw_url, Mapping) else raw_url
+                    left_out_urls.setdefault(ds_iri, []).append(str(shown))
+                    warnings.warn(
+                        f"Left out the download URL {shown!r} of dataset {ds_iri}: ws.import_() keeps "
+                        "only http(s) URLs, so that a deposit cannot point this workspace at a file "
+                        "on this computer or on another one.",
+                        stacklevel=2,
+                    )
 
         def _first_id(v: Any) -> str:
             """Resolve an @id from a node ref that may be a dict or a list of dicts."""
@@ -4739,31 +5075,64 @@ class AuthoringWorkspace:
             test_imported = False
             for output in outputs:
                 ds_iri = output.get("@id", "")
-                # Find the distribution for this dataset: its own file the test
-                # generated, then any file the test generated (one dataset held
-                # every file before the catalog shape), then its own first file,
-                # then a file whose URL carries the dataset uid.
                 own = dists_by_dataset.get(ds_iri, [])
-                dist = (
-                    next((d for d in own if _generated_by(d, test_iri)), None)
-                    or next((d for d in dist_by_url.values() if _generated_by(d, test_iri)), None)
-                    or (own[0] if own else None)
-                )
-                if dist is None:
-                    dist = next(
-                        (d for d in dist_by_url.values() if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
-                        None,
+                left_out = left_out_urls.get(ds_iri, [])
+                dist = None
+                if own or not left_out:
+                    # Find the distribution for this dataset: its own file the test
+                    # generated, then any file the test generated (one dataset held
+                    # every file before the catalog shape), then its own first file,
+                    # then a file whose URL carries the dataset uid. A dataset whose
+                    # own files were all left out never borrows another's.
+                    dist = (
+                        next((d for d in own if _generated_by(d, test_iri)), None)
+                        or next((d for d in dist_by_url.values() if _generated_by(d, test_iri)), None)
+                        or (own[0] if own else None)
                     )
-                if dist is None:
+                    if dist is None:
+                        dist = next(
+                            (d for d in dist_by_url.values() if ds_iri.split("/")[-1] in d.get("dcat:downloadURL", "")),
+                            None,
+                        )
+                note = None
+                if dist is not None:
+                    dl_url = dist["dcat:downloadURL"]
+                    cs = dist.get("spdx:checksum") or {}
+                    fmt = _media_type_from_jsonld(dist.get("dcat:mediaType"))
+                    fname = dist.get("schema:name") or _distribution_file_name(dl_url)
+                elif left_out:
+                    # Every download URL the dataset had was left out. It is kept
+                    # without a file, at the http(s) page the deposit gives it,
+                    # and its notes say what was left out.
+                    ds_node = dataset_node_by_iri.get(ds_iri) or {}
+                    dl_url = _import_web_url(ds_node.get("schema:url")) or _import_web_url(
+                        ds_node.get("dcterms:isPartOf")
+                    )
+                    if not dl_url:
+                        skipped_datasets.append(
+                            {
+                                "dataset": ds_iri,
+                                "test": test_iri,
+                                "cell": cell_iri,
+                                "reason": "no http(s) download URL",
+                            }
+                        )
+                        continue
+                    cs, fmt = {}, ""
+                    fname = f"{ds_node.get('schema:name') or ds_iri} (without its file)"
+                    listed = ", ".join(repr(location) for location in left_out)
+                    note = (
+                        f"Imported without a file: the deposit gave the download URL {listed}, which "
+                        "ws.import_() does not keep, as it is not an http(s) URL."
+                        if len(left_out) == 1
+                        else f"Imported without a file: the deposit gave the download URLs {listed}, which "
+                        "ws.import_() does not keep, as they are not http(s) URLs."
+                    )
+                else:
                     skipped_datasets.append(
                         {"dataset": ds_iri, "test": test_iri, "cell": cell_iri, "reason": "no distribution"}
                     )
                     continue
-
-                dl_url = dist.get("dcat:downloadURL", "")
-                cs = dist.get("spdx:checksum") or {}
-                fmt = _media_type_from_jsonld(dist.get("dcat:mediaType"))
-                fname = dist.get("schema:name", dl_url.split("/")[-1])
 
                 self._ws.record_test(
                     test_cell,
@@ -4782,6 +5151,8 @@ class AuthoringWorkspace:
                     self._ws.tests[-1].id = test_iri
                 if self._ws.datasets and ds_iri:
                     self._ws.datasets[-1].id = ds_iri
+                if note is not None and self._ws.datasets:
+                    self._ws.datasets[-1].comment.append(note)
                 test_imported = True
                 imported_datasets += 1
                 print(f"  test:     {fname}")
@@ -4910,6 +5281,15 @@ class AuthoringWorkspace:
             Version label for this submission batch.  Defaults to today's date.
         note:
             Provenance note attached to every submitted record.
+        doi:
+            A DOI to record on every submitted record, as
+            ``provenance.citation_doi``. Without it, the DOI of the Zenodo
+            record this workspace continues (``.battinfo/zenodo.json``) goes
+            on the records its deposit holds, and only once it is published
+            on zenodo.org: never a sandbox DOI, nor the DOI a draft has
+            reserved. A recorded draft is first checked with Zenodo (when
+            ``ZENODO_API_TOKEN`` is set), in case it was published on the
+            website since.
         allow_local_files:
             Records whose download or source locations (``access_url``,
             ``content_url``, ``download_url``, ``provenance.source_url``,
@@ -4932,12 +5312,9 @@ class AuthoringWorkspace:
         pid = self._credential("BATTINFO_PUBLISHER_ID", explicit=publisher_id)
         ver = source_version or datetime.date.today().isoformat()
 
-        # The Zenodo DOI (passed, or stored from ws.zenodo()) is recorded as
-        # provenance.citation_doi — a field the registry record schemas allow — so
-        # each submitted record links to its archived dataset. The schemas do not
-        # include a free-text provenance.comment field (additionalProperties: false),
-        # so `note` is accepted for API compatibility but not attached to provenance.
-        resolved_doi = doi or self._load_zenodo_state().get("doi")
+        # The schemas do not include a free-text provenance.comment field
+        # (additionalProperties: false), so `note` is accepted for API
+        # compatibility but not attached to provenance.
 
         if not key:
             raise RuntimeError(
@@ -5188,6 +5565,12 @@ class AuthoringWorkspace:
                 outcomes=prefailed,
             )
 
+        # The Zenodo DOI is recorded as provenance.citation_doi, a field the
+        # registry record schemas allow, so each submitted record links to its
+        # archived dataset: the DOI passed for every record, or else the
+        # deposit's DOI for the records it holds, once it is published.
+        doi_for = self._submission_doi(doi)
+
         def _selected(subdir: str) -> list[Path]:
             return [f for f in selected.get(subdir, []) if f in parsed]
 
@@ -5310,11 +5693,7 @@ class AuthoringWorkspace:
                     or src.stem
                 )
                 source_local_id = body.get("short_id") or src.stem
-                if resolved_doi:
-                    raw = dict(raw)
-                    prov = dict(raw.get("provenance") or {})
-                    prov.setdefault("citation_doi", resolved_doi)
-                    raw["provenance"] = prov
+                raw = _with_citation_doi(raw, doi_for(body.get("id")))
                 record_links = []
                 if spec_ref and isinstance(body.get(spec_ref), str):
                     record_links.append(
@@ -5403,12 +5782,7 @@ class AuthoringWorkspace:
             name = product.get("name")
             title = name.strip() if isinstance(name, str) and name.strip() else f"{mfr_name} {model}".strip()
             source_local_id = _make_record_slug(mfr_name, model, year)
-
-            if resolved_doi:
-                raw = dict(raw)
-                prov = dict(raw.get("provenance") or {})
-                prov.setdefault("citation_doi", resolved_doi)
-                raw["provenance"] = prov
+            raw = _with_citation_doi(raw, doi_for(product.get("id")))
 
             payload = _cell_spec_submission_payload(
                 raw,
@@ -5439,11 +5813,7 @@ class AuthoringWorkspace:
             ci = raw.get("cell_instance", {})
             label = ci.get("name") or ci.get("serial_number") or ci.get("short_id", "")
             source_local_id = ci.get("short_id") or label.lower().replace(" ", "-")
-            if resolved_doi:
-                raw = dict(raw)
-                prov = dict(raw.get("provenance") or {})
-                prov.setdefault("citation_doi", resolved_doi)
-                raw["provenance"] = prov
+            raw = _with_citation_doi(raw, doi_for(ci.get("id")))
             spec_record = _find_spec_record(cell_spec_dir, ci.get("cell_spec_id", ""))
 
             # Relationships: instanceOf -> cell_spec, hasDataset -> each dataset,
@@ -5503,11 +5873,7 @@ class AuthoringWorkspace:
             tp = raw.get("test_spec", {})
             title = tp.get("name") or tp.get("short_id", "")
             source_local_id = tp.get("short_id") or src.stem
-            if resolved_doi:
-                raw = dict(raw)
-                prov = dict(raw.get("provenance") or {})
-                prov.setdefault("citation_doi", resolved_doi)
-                raw["provenance"] = prov
+            raw = _with_citation_doi(raw, doi_for(tp.get("id")))
 
             # Reverse links: hasTest -> each test that conforms to this protocol.
             self_iri = tp.get("id")
@@ -5548,11 +5914,7 @@ class AuthoringWorkspace:
             test = raw.get("test", {})
             title = test.get("name") or test.get("short_id", "")
             source_local_id = test.get("short_id") or src.stem
-            if resolved_doi:
-                raw = dict(raw)
-                prov = dict(raw.get("provenance") or {})
-                prov.setdefault("citation_doi", resolved_doi)
-                raw["provenance"] = prov
+            raw = _with_citation_doi(raw, doi_for(test.get("id")))
 
             # Relationships: testsCell -> cell, conformsTo -> test_spec.
             related = []
@@ -5607,12 +5969,7 @@ class AuthoringWorkspace:
                 # schema requires at least one entry when the key is present, so
                 # an empty list would be rejected at the registry gate.
                 ds = {k: v for k, v in ds.items() if k != "distributions"}
-            if resolved_doi:
-                prov = dict(raw.get("provenance") or {})
-                prov.setdefault("citation_doi", resolved_doi)
-                raw = {**raw, "dataset": ds, "provenance": prov}
-            else:
-                raw = {**raw, "dataset": ds}
+            raw = _with_citation_doi({**raw, "dataset": ds}, doi_for(self_iri))
 
             # Relationships: aboutCell -> cell, generatedByTest -> test.
             links = ds_links.get(self_iri, {})
@@ -5792,7 +6149,7 @@ class AuthoringWorkspace:
 
         For every dataset record, reads its processed BDF file (parquet or csv) and
         writes a downsampled Plotly figure ``<stem>.plot.json`` and a ``<stem>.png``
-        next to it, then registers them on the dataset.  ``ws.upload()`` pushes them
+        next to it, then adds them to the dataset.  ``ws.upload()`` pushes them
         to R2 and ``ws.submit()`` exposes them as ``plot_data`` / ``plot_static``
         distributions — what the platform renders as the dataset's curve preview.
 
@@ -5805,6 +6162,14 @@ class AuthoringWorkspace:
 
         Requires the plotting extras (``pip install "battinfo[processing]"``);
         datasets whose columns are unrecognised are skipped with a warning.
+
+        The data file's location is screened as a Zenodo deposit screens it
+        (see :meth:`zenodo`), before anything asks the file system about it: a
+        file on another computer that this workspace did not register, or a
+        path that goes up a folder with ``..``, is not read, and its dataset
+        is skipped with a warning. The previews are registered as data files
+        of this workspace (``.battinfo/deposit-files.json``), so a deposit
+        reads them wherever they lie, on a lab share next to the data too.
         """
         import hashlib
 
@@ -5815,6 +6180,7 @@ class AuthoringWorkspace:
             print("  No dataset records -- run ws.save() first.")
             return []
 
+        registered = self._registered_sources()
         written: list[Path] = []
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
@@ -5825,9 +6191,14 @@ class AuthoringWorkspace:
 
             processed = next((d for d in dists if d.get("role") == "processed"), None)
             src_url = (processed or {}).get("content_url") or ds.get("access_url") or ""
-            local = _file_uri_to_path(src_url)
-            if not local.is_absolute():
-                local = self._root / local
+            try:
+                local = location_path(src_url, self._root, registered=registered)
+            except UnsafeLocation as exc:
+                print(f"  WARNING: dataset {ds.get('id') or record_path.name}: {exc.refusal()}; skipping preview")
+                continue
+            if local is None:
+                print(f"  WARNING: processed file is not on this computer, skipping preview: {src_url}")
+                continue
             if not local.exists():
                 print(f"  WARNING: processed file not found, skipping preview: {local.name}")
                 continue
@@ -5839,8 +6210,12 @@ class AuthoringWorkspace:
                 print(f"  could not generate a preview for {ds.get('name')} (unrecognised columns?)")
                 continue
 
+            previews = [path for path in (json_path, png_path) if path is not None and path.exists()]
+            # Registered before a record names them: a deposit reads a file on
+            # another computer only when the workspace registered it.
+            self._register_sources(previews, by="ws.process")
             for path, fmt in ((json_path, "application/json"), (png_path, "image/png")):
-                if path is None or not path.exists():
+                if path is None or path not in previews:
                     continue
                 dists.append(
                     {
@@ -5868,65 +6243,129 @@ class AuthoringWorkspace:
         """True when R2 object storage is configured (environment or this workspace's credentials file)."""
         return bool(self._credential("R2_ENDPOINT"))
 
-    def _apply_zenodo_file_urls(self, record_url: str, uploaded_names: set) -> int:
+    def _apply_zenodo_file_urls(self, record_url: str, plan: DepositFilePlan, *, local_only: bool = False) -> int:
         """Point dataset records at the Zenodo-hosted copies of their files.
 
         Mirrors what :meth:`upload` does for R2, without any extra storage:
-        each distribution whose filename was deposited gets
-        ``{record_url}/files/{name}`` as its ``content_url`` (plus a sha256
-        checksum if the local file is readable), the primary distribution
-        sets the dataset ``access_url``, and a ``provenance.source_url`` naming
-        a deposited local file follows it. Returns the number of records updated.
-        """
-        import hashlib
+        each distribution whose file the deposit carries as itself (not
+        inside a zip archive) gets ``{record_url}/files/{name}``, with the
+        deposit name percent-encoded, as its ``content_url``, the primary
+        distribution sets the dataset ``access_url``, and a
+        ``provenance.source_url`` naming a deposited file follows it. A
+        record's file is found in *plan* by its resolved path, so two files
+        that share a name each get their own URL. A copy hosted elsewhere (R2,
+        ``plan.hosted``) stays as it is.
 
+        The distribution states the file the deposit holds: its ``checksum``
+        becomes the sha256 the plan measured, unless it already states the
+        file's sha256 or md5, and a ``content_size`` it gives becomes the
+        size the plan measured. A checksum written when the file was added
+        is stale once the file changes, and the deposit holds the file as it
+        is now.
+
+        A record that points at the copy an earlier version of the deposit
+        holds is moved to this one, unless *local_only*: a draft run moves
+        only the records that still name a local file, which need a URL
+        before :meth:`submit`, and leaves a record on a published copy, whose
+        URL works, until the draft is published. A record already on this
+        deposit's copy is brought up to date either way.
+
+        The datasets in memory get the same locations, so a later
+        :meth:`save` keeps them. Returns the number of records updated.
+        """
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
-        public_by_name = {name: f"{record_url}/files/{name}" for name in uploaded_names}
+        own_files = f"{record_url}/files/"
+
+        def _deposited(location: object) -> DepositFile | None:
+            if isinstance(location, str) and location in plan.hosted:
+                return None  # the records keep pointing at a hosted copy
+            if local_only and not is_local_location(location) and not str(location).startswith(own_files):
+                return None  # a copy in another record moves when the draft is published
+            entry = plan.entry_for(location)
+            return None if entry is None or entry.archive else entry
+
+        def _public_url(location: object) -> str | None:
+            entry = _deposited(location)
+            return f"{record_url}/files/{entry.segment}" if entry is not None else None
+
         patched = 0
+        rewritten: dict[str, dict] = {}
         for record_path in sorted(ds_dir.glob("*.json")):
-            raw = json.loads(record_path.read_text(encoding="utf-8"))
-            ds = raw.get("dataset", {})
-            dists = ds.get("distributions") or []
-            if not dists:
+            # Read as the deposit read it (a BOM is allowed), and leave alone what
+            # is not a dataset record: this runs after a publish, and must not fail.
+            raw = _read_json(record_path)
+            ds = raw.get("dataset") if isinstance(raw, dict) else None
+            if not isinstance(ds, dict):
+                continue
+            dists = ds.get("distributions")
+            if not dists or not isinstance(dists, list):
                 continue
             new_dists: list[dict] = []
             primary_url: str | None = None
-            changed = False
+            changed = deposited = False
             for dist in dists:
-                local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = _file_uri_to_path(local_url)
-                if not local_file.is_absolute():
-                    local_file = self._root / local_file
-                name = local_file.name
-                if name not in uploaded_names:
+                if not isinstance(dist, dict):
                     new_dists.append(dist)
                     continue
-                public_url = f"{record_url}/files/{name}"
-                dist = {**dist, "content_url": public_url}
-                if local_file.is_file() and not dist.get("checksum"):
-                    dist["checksum"] = {
-                        "algorithm": "sha256",
-                        "value": hashlib.sha256(local_file.read_bytes()).hexdigest(),
-                    }
-                changed = True
+                local_url = dist.get("content_url") or ds.get("access_url") or ""
+                entry = _deposited(local_url)
+                if entry is None:
+                    new_dists.append(dist)
+                    continue
+                deposited = True
+                public_url = f"{record_url}/files/{entry.segment}"
+                if public_url != dist.get("content_url"):
+                    dist = {**dist, "content_url": public_url}
+                    changed = True
+                if entry.sha256 and not entry.stated_by(dist.get("checksum")):
+                    dist = {**dist, "checksum": {"algorithm": "sha256", "value": entry.sha256}}
+                    changed = True
+                if entry.sha256 and "content_size" in dist and dist["content_size"] != str(entry.size):
+                    dist = {**dist, "content_size": str(entry.size)}
+                    changed = True
                 new_dists.append(dist)
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
             # The provenance source of a workspace dataset is its own data file;
             # point it at the deposited copy too, so no local path is left to publish.
-            if _point_source_url_at_public_copy(raw, public_by_name):
+            if _point_source_url_at_public_copy(raw, _public_url):
                 changed = True
-            if not changed:
-                continue
+            if primary_url and primary_url != ds.get("access_url"):
+                changed = True
             raw["dataset"]["distributions"] = new_dists
             if primary_url:
                 raw["dataset"]["access_url"] = primary_url
+            if deposited and isinstance(ds.get("id"), str):
+                rewritten[ds["id"]] = raw
+            if not changed:
+                continue
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
             self._session_paths.add(record_path)
             patched += 1
+        self._point_datasets_in_memory_at(rewritten)
         return patched
+
+    def _point_datasets_in_memory_at(self, records: Mapping[str, dict]) -> None:
+        """Give each dataset in memory the locations its saved record was just given.
+
+        *records* maps a dataset IRI to its record as written. :meth:`save`
+        writes the datasets in memory, so without this the next save would
+        point the records back at the local files.
+        """
+        for dataset in self._ws.datasets:
+            record = records.get(dataset.id or "")
+            body = record.get("dataset") if isinstance(record, dict) else None
+            if not isinstance(body, dict):
+                continue
+            if isinstance(body.get("access_url"), str):
+                dataset.access_url = body["access_url"]
+            if isinstance(body.get("distributions"), list):
+                dataset.distributions = copy.deepcopy(body["distributions"])
+            provenance = record.get("provenance") if isinstance(record, dict) else None
+            if isinstance(provenance, dict) and isinstance(provenance.get("source_url"), str):
+                dataset.source.url = provenance["source_url"]
 
     def upload(
         self,
@@ -5950,7 +6389,15 @@ class AuthoringWorkspace:
 
         Upload is **idempotent**: if an object already exists in R2 with a
         matching SHA-256, the file is skipped.  Each dataset record on disk is
-        updated in-place so ``ws.submit()`` sends the R2 URL, not the local path.
+        updated in-place so ``ws.submit()`` sends the R2 URL, not the local path,
+        and so is each dataset in memory, so a later ``ws.save()`` keeps it.
+        ``.battinfo/deposit-files.json`` records the local file behind each R2
+        URL, and whether it went to the private bucket. A later
+        :meth:`zenodo` refuses a deposit of files hosted in R2 unless it is
+        called with ``archive_hosted_files=True``. It then archives each one
+        from that local file and names in a warning each one from the private
+        bucket, since the deposit makes it public; the records keep the R2
+        URLs.
 
         Parameters
         ----------
@@ -5961,7 +6408,9 @@ class AuthoringWorkspace:
             download URLs under ``R2_PUBLIC_BASE_URL``. ``False`` writes to
             ``R2_BUCKET_PRIVATE`` (or *bucket*) without the ACL and gives the
             records ``s3://`` locations. It never falls back to the public
-            bucket: with no private bucket set it raises.
+            bucket: with no private bucket set it raises. A Zenodo deposit
+            archives such a file only with ``archive_hosted_files=True``,
+            which makes it public, and names it in a warning.
         dry_run:
             Print what would be uploaded without doing anything.
 
@@ -5983,7 +6432,6 @@ class AuthoringWorkspace:
             from boto3.s3.transfer import TransferConfig
         except ImportError:
             raise ImportError("boto3 is required for ws.push_datasets(). Install with: pip install boto3")
-        import hashlib
 
         endpoint = self._credential("R2_ENDPOINT")
         access_key = self._credential("R2_ACCESS_KEY_ID")
@@ -6028,7 +6476,13 @@ class AuthoringWorkspace:
             print("  No dataset records -- run ws.save() first.")
             return []
 
+        # A location is screened as a Zenodo deposit screens it: a network path
+        # outside the workspace that it did not register, or a path that goes
+        # up a folder, is never read.
+        index = load_deposit_index(self._root)
+        registered = registered_keys(index)
         urls: list[str] = []
+        rewritten: dict[str, dict] = {}
         for record_path in sorted(ds_dir.glob("*.json")):
             raw = json.loads(record_path.read_text(encoding="utf-8"))
             ds = raw.get("dataset", {})
@@ -6041,24 +6495,37 @@ class AuthoringWorkspace:
             # file in the dataset gets a resolvable public URL, not just the first.
             new_dists: list[dict] = []
             primary_url: str | None = None
-            public_by_name: dict[str, str] = {}
+            public_by_path: dict[str, str] = {}
+            hosted: dict[str, IndexedFile] = {}
             for dist in dists:
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                local_file = _file_uri_to_path(local_url)
-                if not local_file.is_absolute():
-                    local_file = self._root / local_file
+                try:
+                    local_file = location_path(local_url, self._root, registered=registered)
+                except UnsafeLocation as exc:
+                    print(f"  WARNING: dataset {ds.get('id') or record_path.name}: {exc.refusal()}")
+                    new_dists.append(dist)
+                    continue
+                if local_file is None:
+                    new_dists.append(dist)  # already at a URL elsewhere
+                    continue
 
                 if not local_file.exists():
                     print(f"  WARNING: file not found, skipping: {local_file.name}")
                     new_dists.append(dist)
                     continue
 
-                # Compute SHA-256 of local file
-                sha256 = hashlib.sha256(local_file.read_bytes()).hexdigest()
+                # Size, md5 and SHA-256 of the local file, from one read of it.
+                measured = measured_file(local_file, local_file.name)
+                sha256 = measured.sha256
 
-                # R2 key: datasets/{short_id}/{filename}
+                # R2 key: datasets/{short_id}/{filename}; the public URL carries
+                # each part of it percent-encoded.
                 r2_key = f"datasets/{short_id}/{local_file.name}"
-                public_url = f"{public_base}/{r2_key}" if public_base else f"s3://{bucket_name}/{r2_key}"
+                public_url = (
+                    f"{public_base}/{'/'.join(url_segment(part) for part in r2_key.split('/'))}"
+                    if public_base
+                    else f"s3://{bucket_name}/{r2_key}"
+                )
 
                 if dry_run:
                     print(f"  [dry-run] would upload {local_file.name} -> {r2_key}")
@@ -6101,7 +6568,14 @@ class AuthoringWorkspace:
                 # Update this distribution with the R2 URL + checksum
                 dist = {**dist, "content_url": public_url, "checksum": {"algorithm": "sha256", "value": sha256}}
                 new_dists.append(dist)
-                public_by_name[local_file.name] = public_url
+                public_by_path[path_key(local_file)] = public_url
+                hosted[public_url] = IndexedFile(
+                    path=str(local_file.resolve()),
+                    size=measured.size,
+                    md5=measured.md5,
+                    sha256=sha256,
+                    private=not public,
+                )
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
                     primary_url = public_url
@@ -6111,14 +6585,67 @@ class AuthoringWorkspace:
             urls.append(primary_url or new_dists[0]["content_url"])
             raw["dataset"]["access_url"] = primary_url or new_dists[0]["content_url"]
             raw["dataset"]["distributions"] = new_dists
-            _point_source_url_at_public_copy(raw, public_by_name)
+
+            def _r2_public_url(location: object) -> str | None:
+                key = location_key(location, self._root, registered=registered) if isinstance(location, str) else None
+                return public_by_path.get(key) if key is not None else None
+
+            _point_source_url_at_public_copy(raw, _r2_public_url)
+            # The local file behind each URL is recorded before the record names
+            # only the URL, so a Zenodo deposit can still find the file.
+            if note_hosted(index, hosted):
+                save_deposit_index(self._root, index)
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
+            if isinstance(ds.get("id"), str):
+                rewritten[ds["id"]] = raw
 
             # Keep session paths in sync so submit() picks up the updated record
             self._session_paths.add(record_path)
 
+        self._point_datasets_in_memory_at(rewritten)
         print(f"\nPushed {len(urls)} dataset(s) to {bucket_name}")
         return urls
+
+    def _zenodo_token(self, token: str | None, sandbox: bool) -> str:
+        """The Zenodo token: *token*, else ``ZENODO_SANDBOX_TOKEN`` or ``ZENODO_API_TOKEN``.
+
+        The variable is looked up in the order of :meth:`_resolve_credential`:
+        a :meth:`login` of this session, the environment, then this
+        workspace's ``.battinfo/credentials``.
+        """
+        var = "ZENODO_SANDBOX_TOKEN" if sandbox else "ZENODO_API_TOKEN"
+        tok = self._credential(var, explicit=token)
+        if not tok:
+            raise RuntimeError(
+                f"Zenodo token required. Pass token= to ws.zenodo(), or set {var} in the environment "
+                "or in .battinfo/credentials."
+            )
+        return tok
+
+    def _deposit_creators(self, creators: builtins.list[dict] | None, *, required: bool = True) -> builtins.list[dict]:
+        """The creators of this workspace's Zenodo deposit, each ORCID a bare id.
+
+        The first of these that names anyone: *creators*, the workspace
+        contributors (:meth:`contributor`), and the creator set with
+        ``battinfo config set creator`` (``~/.battinfo/config.yaml``). With
+        *required*, finding none raises ValueError. :meth:`zenodo` asks before
+        it sends anything, and :meth:`publish` with ``zenodo=True`` before it
+        saves or uploads.
+        """
+        chosen: builtins.list[Any] = list(creators or [])
+        if not chosen:
+            chosen = [ref.to_dict() for ref in self._get_contributors()]
+        if not chosen:
+            from battinfo.config import resolve_creators  # noqa: PLC0415
+
+            chosen = list(resolve_creators(None))
+        if not chosen and required:
+            raise ValueError(
+                "No creators for the Zenodo deposit: creators= is empty, the workspace has no "
+                "contributors, and no creator was read from ~/.battinfo/config.yaml. Zenodo does "
+                f"not publish a deposit without one. Nothing was sent to Zenodo. {_CREATORS_HINT}"
+            )
+        return _deposit_agents(chosen, "creator")
 
     def zenodo(
         self,
@@ -6134,6 +6661,7 @@ class AuthoringWorkspace:
         contributors: builtins.list[dict] | None = None,
         license: str | None = None,
         keywords: builtins.list[str] | None = None,
+        archive_hosted_files: bool = False,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -6141,13 +6669,116 @@ class AuthoringWorkspace:
         all data files plus a ``battinfo.json`` linked data document, and
         optionally publishes.
 
-        Safe to re-run: if the workspace already has a record this never errors. With
-        ``record_id=None`` it *warns* and moves the workflow forward — a published
-        record forks a NEW VERSION; an existing open draft is UPDATED in place (Zenodo
-        permits one open draft per concept). Delete ``.battinfo/zenodo.json`` to force a
-        brand-new record. Default ``publish=False`` leaves a reviewable draft, so a new
-        version is never published (and no DOI minted) without an explicit ``publish=True``
-        or a click on Zenodo.
+        Re-running it continues the workspace's record and never starts a second
+        one by itself. With ``record_id=None`` it *warns* and moves the workflow
+        forward: a published record forks a NEW VERSION; an existing open draft is
+        UPDATED in place (Zenodo permits one open draft per concept). A recorded
+        draft is first checked with Zenodo, so a draft published on the website
+        since, or by a run that stopped before it recorded the publish, gets a new
+        version. A run can still stop with a refusal, and each refusal names the
+        way on. A recorded draft deleted on the website is one: the way on is a
+        new version of the published record the draft was made from
+        (``record_id=``), or, when nothing of the record was published, a new
+        record. Delete ``.battinfo/zenodo.json`` (``.battinfo/zenodo-sandbox.json``
+        for the sandbox) to force a brand-new record. Default ``publish=False``
+        leaves a reviewable draft, so a new version is never published (and no DOI
+        minted) without an explicit ``publish=True`` or a click on Zenodo.
+
+        Each Zenodo has its own record: ``.battinfo/zenodo.json`` names the one on
+        zenodo.org and ``.battinfo/zenodo-sandbox.json`` the one on the sandbox, so
+        a dry run with ``sandbox=True`` never touches the record on zenodo.org,
+        and the next deposit there continues it. A sandbox deposit leaves the
+        dataset records as they are, and :meth:`submit` never records its DOI.
+
+        Nothing is sent before the token and the creators are known and the
+        deposit graph passes the publication check. A draft gets that check as
+        a publish does, since it is one click from published. The deposit is
+        recorded in the state file as soon as it exists, so a run that fails
+        after that leaves a draft the next run updates. The metadata goes up
+        before any file, and metadata Zenodo does not accept stops the run with
+        a :class:`~battinfo.zenodo.ZenodoError` naming the fields. The data
+        files go up before the graph and the RO-Crate that describe them, and
+        the dataset records are pointed at the deposited files last, after the
+        publish when there is one. A record that names a local file is pointed
+        there after a draft too, so :meth:`submit` sends https URLs, which work
+        once the draft is published. A record on the copy an earlier published
+        version holds keeps that working URL until the new version is
+        published. The datasets in memory are pointed there too, so a later
+        :meth:`save` keeps the URLs. Each distribution then states the sha256 of
+        the file the deposit holds (and its size, when it gives one), as the
+        deposit graph does, so a file that changed since it was added is
+        described as it is now.
+
+        A record pointed at its deposited copy keeps its data in later deposits.
+        ``.battinfo/deposit-files.json`` records the local file behind each
+        deposited copy, with its size, md5 and sha256, so a new version, a retry
+        after a failed run, or a new record after ``.battinfo/zenodo.json`` was
+        deleted finds the file again. A draft's files count there only once the
+        draft is published, so a draft deleted on the website leaves the entries
+        of the published record as they were. A file whose local copy is gone is
+        kept as the record the deposit starts from holds it (the copy a new
+        version takes over from the one before), when its md5 is the one
+        recorded. Zenodo is asked for that record's files before anything is
+        created or changed, and a copy it does not hold refuses the deposit,
+        naming each dataset and how to point it at its local file again; with no
+        record to start from, a file with no local copy refuses the deposit
+        before anything is sent. Each file keeps its name, and so its URL, from
+        one version to the next.
+
+        A deposit whose records point at files :meth:`upload` put in R2 storage
+        is refused before anything is sent, and the refusal names the files,
+        unless ``archive_hosted_files=True``: the deposit then archives each from
+        the local file :meth:`upload` recorded, and the records keep their R2
+        URLs.
+
+        A record that points at a copy of its data the deposit should carry, but
+        whose local file this workspace has no record of, refuses the deposit
+        rather than being linked to: an R2 copy an earlier build's
+        :meth:`upload` made, an ``s3:`` URL, and a file in a sandbox record
+        (from a deposit on zenodo.org). Any other Zenodo file URL on the
+        deposit's Zenodo that the workspace cannot place is put to Zenodo
+        before the deposit is created or changed, whether or not the deposit
+        continues a record, since an earlier build pointed records at the drafts
+        and versions it made without recording them. A draft of this account
+        that is not published refuses the deposit, since no reader can download
+        its files, and so does a version of the record the deposit continues.
+        A published record of this account in another concept, and anyone
+        else's record, stay links. The refusal names each dataset and how to
+        point it at its local file again.
+
+        A deposit carries every record or none. A record the deposit graph
+        cannot convert, or a distribution entry that is not an object with a
+        ``content_url``, refuses the deposit, a draft too, before anything is
+        sent, and the refusal names each record and why. A time that is no date,
+        such as a Unix time in milliseconds, is only left out, with a warning.
+        Once the files are up, the deposit's file list is checked: every file
+        sent must be on it with its md5, every download URL in the graph under
+        this record must name a file the deposit holds, a sha256 or size a
+        distribution of such a file states must be the one the deposit read,
+        and every distribution of a member dataset needs a download URL, a
+        file of the deposit or an http(s) URL elsewhere. A publish that fails
+        the check is refused before the DOI is minted; a draft is kept, with a
+        warning that lists the problems.
+
+        Each local data file is deposited once, under its own name, however many
+        distributions name it. Names are compared as Windows and macOS compare
+        them, ignoring case and Unicode normalisation: a file whose name another
+        file of the deposit already has gets a short hash of its path in the
+        workspace in front (``3f2a9c1d-cycling.csv``), and the first file keeps
+        its name. URLs carry the names percent-encoded.
+        A deposit of more than 90 data files is zipped, one archive per test kind.
+
+        Each data file location in the records is screened from its text before
+        anything asks the file system about it. A file on this computer is read
+        wherever it lies. A file on another computer (``file://server/share/...``
+        or ``\\\\server\\share\\...``) is read only when it lies in the workspace
+        folder, as every file of a workspace kept on a network share or a mapped
+        drive does, or when this workspace registered it: ``ws.add(..., data=...)``
+        and :meth:`convert` register the files they are given, and :meth:`process`
+        the previews it writes, in ``.battinfo/deposit-files.json``. A path that
+        goes up a folder with ``..`` is never read. A record that names a file
+        the screen refuses stops the deposit before anything is sent, and the
+        refusal names it.
 
         The token is *token*, else ``ZENODO_API_TOKEN`` (production) or
         ``ZENODO_SANDBOX_TOKEN`` (sandbox) from the environment, then from this
@@ -6160,19 +6791,37 @@ class AuthoringWorkspace:
             record, or update its open draft); first run creates a new record. An
             explicit Zenodo record ID forks a new version from that record.
         publish:
-            ``False`` (default) — leave a draft for review; publish by clicking on
-            Zenodo or re-running with ``publish=True``. ``True`` runs the
-            publication check before it contacts Zenodo, so a refusal leaves
-            no draft behind.
+            ``False`` (default) leaves a draft for review: publish it by clicking
+            on Zenodo, or re-run with ``publish=True``. Either way the publication
+            check runs before Zenodo is contacted, so a refusal leaves no draft
+            behind. With ``True`` the deposit's files are checked after the
+            upload and before the publish, and a draft whose files do not match
+            stays a draft.
         sandbox:
-            Use ``sandbox.zenodo.org`` for testing.
+            Use ``sandbox.zenodo.org`` for testing. A dry run there leaves the
+            records as they are, and its record is kept in
+            ``.battinfo/zenodo-sandbox.json``, apart from the record on
+            zenodo.org: nothing needs deleting before the real deposit.
         community:
             Zenodo community identifier (default ``"battery-knowledge-base"``).
             ``None`` leaves the deposit out of any community.
         creators:
-            List of ``{"name": "...", "affiliation": "...", "orcid": "..."}`` dicts.
+            List of ``{"name": "Family, Given", "affiliation": "...", "orcid": "..."}``
+            dicts. Without them the workspace contributors (:meth:`contributor`)
+            are the creators, and without those the creator set with
+            ``battinfo config set creator``. With none of these the call is
+            refused before anything is sent. An ORCID may be the bare id or its
+            ``https://orcid.org/`` URL; Zenodo gets the bare id.
+        contributors:
+            More people, as dicts like ``creators``, each with an optional Zenodo
+            contributor ``"type"`` (default ``"ProjectMember"``).
         keywords:
             Extra keywords appended to auto-derived list.
+        archive_hosted_files:
+            Archive the data files :meth:`upload` put in R2 storage, which a
+            deposit otherwise refuses. Each comes from its local file, and a
+            warning names each one from the private bucket
+            (``upload(public=False)``), since the deposit makes it public.
 
         Returns
         -------
@@ -6181,11 +6830,11 @@ class AuthoringWorkspace:
         Example::
 
             ws.save()
-            result = ws.zenodo(publish=False)   # draft for review
+            result = ws.zenodo()               # a draft, for review on Zenodo
             print(result.draft_url)
 
-            result = ws.zenodo(record_id=result.record_id, publish=True)
-            ws.submit(doi=result.doi)
+            result = ws.zenodo(publish=True)   # publishes that same draft
+            ws.submit()                        # records carry the deposit's DOI
 
         License precedence: an explicit ``license=`` here is authoritative for the
         deposit; otherwise the workspace default (``ws.license(...)``) is used; if
@@ -6193,42 +6842,36 @@ class AuthoringWorkspace:
         """
         import tempfile
 
-        from battinfo.zenodo import ZenodoClient
+        from battinfo.zenodo import KeptFilesError, ZenodoClient, ZenodoError
 
+        # Each numbered step runs only once the steps before it have passed, so
+        # a refusal leaves as little behind as it can. ws.publish(zenodo=True)
+        # runs step 1 before it saves or uploads anything.
+
+        # ── 1. Token, creators and the stored record, before anything is sent ─
         # License precedence: explicit arg > workspace default > cc-by-4.0.
         if license is None:
             license = self._get_license() or "cc-by-4.0"
+        tok = self._zenodo_token(token, sandbox)
+        creators = self._deposit_creators(creators)
+        contributors = _deposit_agents(contributors or [], "contributor")
+        # The record this workspace continues on this Zenodo (.battinfo/zenodo.json,
+        # or .battinfo/zenodo-sandbox.json for the sandbox) and the local files
+        # behind its deposits (.battinfo/deposit-files.json); either file that
+        # cannot be read stops the run here. The record on the other Zenodo is
+        # left as it is.
+        environment = zenodo_environment(sandbox)
+        recorded_in = state_file(environment)
+        state = self._load_zenodo_state(environment)
+        index = load_deposit_index(self._root)
+        record_id = str(record_id) if record_id is not None else None
 
-        # ── Resolve token ──────────────────────────────────────────────────────
-        var = "ZENODO_SANDBOX_TOKEN" if sandbox else "ZENODO_API_TOKEN"
-        tok = self._credential(var, explicit=token)
-        if not tok:
-            raise RuntimeError(
-                f"Zenodo token required. Pass token=, or set {var} in the environment or in .battinfo/credentials."
-            )
-
-        # ── Resolve what this call should do (warn, never error) ───────────────
-        # A workspace that already has a record keeps moving forward on re-run: a
-        # published record forks a new version; an open draft is updated in place.
-        import warnings  # noqa: PLC0415
-
-        state = self._load_zenodo_state()
-        record_id, reuse_draft_id, _version_warning = _plan_zenodo_deposit(
-            state.get("record_id"),
-            bool(state.get("published")),
-            record_id,
-        )
-        if _version_warning:
-            warnings.warn(_version_warning, stacklevel=2)
-            print(f"  WARNING: {_version_warning}")
-
+        # ── 2. Records, read fail-closed ───────────────────────────────────────
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
-        # Fail closed before anything reaches Zenodo, a draft included (a draft
-        # is one click from published): the deposit's parameter sets must pass
-        # the record check ws.submit() runs.
+        # The deposit's parameter sets must pass the record check ws.submit() runs.
         deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
         _print_replaced_legacy_parameter_sets(replaced_legacy)
         parameter_set_errors = _parameter_set_publication_errors(deposit_records)
@@ -6242,49 +6885,110 @@ class AuthoringWorkspace:
         # the one given, or the automatic one the metadata would derive, so a
         # deposit made without a title still names its catalog node.
         title = self._deposit_title(title)
-        domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
+        domain = ZENODO_HOSTS[environment]
 
-        # ── Build staging directory ────────────────────────────────────────────
-        # The data files do not depend on the deposit, so they are staged before
-        # one exists, and with publish=True the graph is checked before too.
+        # ── 3. File plan ───────────────────────────────────────────────────────
+        # One entry per file, with its deposit name and digests. Everything
+        # below takes file names and URLs from the plan. A record that points
+        # at a copy an earlier deposit made is found through the index: its
+        # local file goes up again when it changed, and when it is gone the
+        # copy the record already holds is kept.
+        context = self._deposit_context(sandbox=sandbox, record_id=record_id, state=state, index=index)
+        plan = self._deposit_file_plan(records_dir, context=context)
+        kept_files = plan.kept_files()
+        # A file ws.upload() put in R2 storage goes into the deposit only when
+        # the call asks for it, and one from the private bucket with a warning.
+        if archive_hosted_files:
+            self._warn_private_hosted_files(plan)
+        else:
+            self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
+
+        # ── 4. Placeholder graph, checked for a draft as for a publish ─────────
+        # A refusal here leaves no draft behind. The graph is built as
+        # ws.preview_jsonld() builds it, with placeholders for the record id and
+        # DOI the deposit does not have yet. No check reads those values beyond
+        # their form, which the placeholders share, and the dataset records take
+        # the deposited file URLs only at the end, so the verdict is the one the
+        # deposit's own graph gets. That graph is checked again before a DOI is
+        # minted. A record the plan or the graph had to leave out refuses the
+        # deposit first, naming each record and why.
+        omissions = list(plan.omissions)
+        version_of = record_id or (state.get("record_id") if state.get("published") else None)
+        placeholder_graph = self._build_zenodo_jsonld(
+            zenodo_record_id=0,
+            prereserved_doi="10.5281/zenodo.RECORD_ID",
+            record_url=f"https://{domain}/records/RECORD_ID",
+            file_plan=plan,
+            title=title,
+            description=description or "",
+            creators=creators,
+            contributors=contributors,
+            license=license or "",
+            keywords=keywords or [],
+            is_version_of=f"https://{domain}/records/{version_of}" if version_of else "",
+            omissions=omissions,
+        )
+        self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
+        # The records the deposit holds: ws.submit() records its DOI on these only.
+        held_records = _deposit_record_iris(deposit_records, placeholder_graph)
+
+        # ── 5. Reconcile with the live deposit ─────────────────────────────────
+        # A recorded draft may have been published since: on the Zenodo
+        # website, or by a run that stopped before it recorded the publish.
+        # Zenodo then holds a published record, which gets a new version. A
+        # draft deleted there stops the run with the way on that keeps the
+        # record's lineage.
+        client = ZenodoClient(token=tok, sandbox=sandbox)
+        live_draft: dict | None = None
+        if record_id is None and state and not state.get("published"):
+            try:
+                live_draft = self._reconcile_zenodo_draft(client, state, index=index)
+            except ZenodoError as exc:
+                raise ZenodoError(_unreadable_draft_message(state, exc), status=exc.status) from exc
+        # A record may point at a Zenodo file the workspace cannot place: a
+        # copy an earlier build made in a draft or a version it never
+        # recorded, or a link to someone else's record. Only Zenodo knows; ask
+        # before anything is created or changed.
+        self._refuse_unknown_zenodo_copies(
+            client,
+            plan,
+            context,
+            continues=record_id or state.get("deposit_id") or state.get("record_id"),
+            live_draft=live_draft,
+        )
+
+        # What this call does to the workspace's record (warn, never error): a
+        # published record forks a new version; an open draft is updated in place.
+        stored_record = state.get("record_id")
+        record_id, reuse_draft_id, _version_warning = _plan_zenodo_deposit(
+            stored_record,
+            bool(state.get("published")),
+            record_id,
+            recorded_in=recorded_in,
+        )
+        # A file with no local copy is kept as the record the deposit starts
+        # from holds it; a copy that record lacks refuses the deposit before a
+        # draft is made or changed.
+        self._refuse_missing_kept_copies(
+            client,
+            plan,
+            deposit_records.get("dataset", []),
+            starts_from=reuse_draft_id if reuse_draft_id is not None else record_id,
+            updates_draft=reuse_draft_id is not None,
+        )
+        if _version_warning:
+            warnings.warn(_version_warning, stacklevel=2)
+            print(f"  WARNING: {_version_warning}")
+
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
-            # Bundle data files (zip by test kind if >90 files)
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
+            # The files to upload: the data files themselves, or one zip per
+            # test kind when there are more than _ZENODO_ZIP_THRESHOLD.
+            data_files = self._bundle_data_files(tmpdir, plan)
 
-            if publish:
-                # Refuse before anything reaches Zenodo, so a refused publish leaves no
-                # draft behind. The graph is built as ws.preview_jsonld() builds it,
-                # with placeholders for the record id and DOI the deposit does not have
-                # yet. No check reads those values beyond their form, which the
-                # placeholders share, and the dataset records take the deposited file
-                # URLs only after the graph is built, so the verdict is the one the
-                # deposit's own graph gets. That graph is checked again before the DOI
-                # is minted.
-                self._assert_publishable(
-                    self._build_zenodo_jsonld(
-                        zenodo_record_id=0,
-                        prereserved_doi="10.5281/zenodo.RECORD_ID",
-                        record_url=f"https://{domain}/records/RECORD_ID",
-                        data_filenames=data_filenames,
-                        title=title,
-                        description=description or "",
-                        creators=creators or [],
-                        contributors=contributors or [],
-                        license=license or "",
-                        keywords=keywords or [],
-                        is_version_of=f"https://{domain}/records/{record_id}" if record_id else "",
-                    ),
-                    nothing_sent=True,
-                )
-
-            client = ZenodoClient(token=tok, sandbox=sandbox)
-
-            # ── Create / version / reuse the deposit ───────────────────────────
-            # Files are synced incrementally below (sync_files): a new version inherits the
-            # prior version's files from Zenodo, so unchanged data is NOT re-uploaded.
+            # ── 6. Create or reuse the deposit, and record it ──────────────────
             if reuse_draft_id is not None:
-                deposit = client.get_deposit(reuse_draft_id)  # update existing draft
+                deposit = live_draft if live_draft is not None else client.get_deposit(reuse_draft_id)
             elif record_id is not None:
                 deposit = client.create_new_version(record_id)  # fork from published
             else:
@@ -6295,6 +6999,38 @@ class AuthoringWorkspace:
             prereserved_doi: str = (
                 deposit.get("metadata", {}).get("prereserve_doi", {}).get("doi", f"10.5281/zenodo.{zenodo_record_id}")
             )
+            # The concept record groups the versions of one record. A run that
+            # continues the stored record keeps the concept id stored with it.
+            continues = bool(stored_record) and (reuse_draft_id is not None or record_id == stored_record)
+            concept = str(
+                (state.get("concept_record_id") if continues else None)
+                or deposit.get("conceptrecid")
+                or concept_of_record(index, environment, str(record_id or stored_record or ""))
+                or record_id
+                or (stored_record if continues else None)
+                or zenodo_record_id
+            )
+            # Recorded now, so a run that fails below leaves a draft the next
+            # run updates instead of one it forgets. A draft of a new version
+            # keeps the published record it was made from, the way on should
+            # the draft be deleted on the website.
+            made_from = state.get("version_of") if reuse_draft_id is not None else record_id
+            state = {
+                "environment": environment,
+                "concept_record_id": concept,
+                "record_id": str(zenodo_record_id),
+                "deposit_id": str(deposit_id),
+                "doi": prereserved_doi,
+                "published": False,
+                **({"version_of": str(made_from)} if made_from else {}),
+                "records": held_records,
+            }
+            self._save_zenodo_state(state)
+            # The records may point at files under this version, under the one it
+            # was made from, and under the one the workspace recorded before.
+            known = [str(zenodo_record_id), record_id or "", stored_record if continues else ""]
+            if note_deposit(index, environment, concept, record_ids=[item for item in known if item]):
+                save_deposit_index(self._root, index)
 
             # A version (new fork or an updated draft) is a version of its concept record;
             # record the lineage in the JSON-LD. For a new fork that's the source record_id;
@@ -6307,25 +7043,46 @@ class AuthoringWorkspace:
                 is_version_of = ""
 
             record_url = f"https://{domain}/records/{zenodo_record_id}"
+            draft_url = f"https://{domain}/deposit/{deposit_id}"
 
+            # ── 7. Metadata, before any file ───────────────────────────────────
+            # Metadata Zenodo does not accept raises a ZenodoError naming the
+            # fields, so no file goes up to a deposit whose metadata was refused.
+            try:
+                client.update_metadata(
+                    deposit_id,
+                    self._build_zenodo_metadata(
+                        title=title,
+                        description=description,
+                        creators=creators,
+                        contributors=contributors,
+                        license=license,
+                        community=community,
+                        extra_keywords=keywords,
+                    ),
+                )
+            except ZenodoError as exc:
+                raise ZenodoError(
+                    f"{exc} This run uploaded no file. The draft ({draft_url}) is recorded in "
+                    f"{recorded_in}, so the next ws.zenodo() updates it.",
+                    status=exc.status,
+                ) from exc
+
+            # ── 8. and 9. Data files, then the graph and the RO-Crate ──────────
             # Single consolidated JSON-LD (replaces all individual JSON records)
             jsonld = self._build_zenodo_jsonld(
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 record_url=record_url,
-                data_filenames=data_filenames,
+                file_plan=plan,
                 title=title,
                 description=description or "",
-                creators=creators or [],
-                contributors=contributors or [],
+                creators=creators,
+                contributors=contributors,
                 license=license or "",
                 keywords=keywords or [],
                 is_version_of=is_version_of,
             )
-            # Name the records the graph points at but has no node for (a draft is not checked).
-            _unresolved = _unresolved_record_references(jsonld)
-            if _unresolved:
-                print(f"  WARNING: {_not_found_locally_note(_unresolved)}")
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
                 encoding="utf-8",
@@ -6334,21 +7091,48 @@ class AuthoringWorkspace:
             # RO-Crate metadata for EOSC portal compliance
             self._build_rocrate(
                 tmpdir,
-                data_filenames,
+                [*data_files, *kept_files],
                 title=title,
                 description=description or "",
-                creators=creators or [],
-                contributors=contributors or [],
+                creators=creators,
+                contributors=contributors,
                 license=license,
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 sandbox=sandbox,
             )
 
-            upload_map = {f: f.name for f in sorted(tmpdir.iterdir()) if f.is_file()}
-            # Incremental sync: only files whose content changed are uploaded; unchanged
-            # files already on the deposit (e.g. inherited data on a new version) are kept.
-            sync = client.sync_files(deposit_id, upload_map)
+            # Each file under its deposit name, the data files from where they
+            # are, and before the graph and the RO-Crate that link to them. The
+            # map is built from the plan, not from a folder listing, which on
+            # macOS can hand names back in another Unicode form.
+            upload_map = {f.path: f.name for f in sorted(data_files, key=lambda f: f.name)}
+            # The md5 of each file as sent, for the check in step 10.
+            sent = {f.name: f.md5 for f in data_files}
+            for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME):
+                upload_map[tmpdir / name] = name
+                sent[name] = measured_file(tmpdir / name, name).md5
+            # A file with no local copy stays as the deposit holds it, with the
+            # md5 recorded when it was deposited. Only files nothing names any
+            # more are removed, so a new version keeps the data files it takes
+            # over from the one before.
+            keep = {f.name: f.md5 for f in kept_files}
+            # Incremental sync: only files whose content changed are uploaded;
+            # unchanged files already on the deposit are kept.
+            try:
+                sync = client.sync_files(deposit_id, upload_map, keep=keep)
+            except KeptFilesError as exc:
+                # Checked in step 5 against the record the draft starts from;
+                # the draft itself lacks the copy all the same.
+                raise ZenodoError(
+                    _kept_copies_refusal(plan, deposit_records.get("dataset", []), exc.files, f"the draft {draft_url}")
+                    + f" No file on the draft was changed, and the draft is recorded in {recorded_in}."
+                ) from exc
+            except ZenodoError as exc:
+                raise ZenodoError(
+                    f"{exc} The draft ({draft_url}) is recorded in {recorded_in}, so the next ws.zenodo() updates it.",
+                    status=exc.status,
+                ) from exc
             print(
                 f"  Files on deposit {deposit_id}: "
                 f"{len(sync['uploaded'])} uploaded, {len(sync['kept'])} unchanged (kept), "
@@ -6356,31 +7140,63 @@ class AuthoringWorkspace:
             )
             for name in sync["uploaded"]:
                 print(f"    + {name}")
-
-            # Zenodo now hosts these files: point the dataset records at the
-            # public record URLs so ws.submit() sends resolvable links even
-            # when no R2 object storage is configured (the public path).
-            patched = self._apply_zenodo_file_urls(record_url, set(upload_map.values()))
-            if patched:
-                print(f"  Dataset records updated with Zenodo file URLs: {patched}")
+            # The local file behind each copy the draft holds, recorded before
+            # any record names only the copy, so the next deposit still finds
+            # it. They count for the published versions only once the draft is
+            # published: a draft deleted on the website leaves the entries of
+            # the record it was made from as they were.
+            # A kept copy is listed too when its local file and digests are
+            # known, so the draft's entries cover every data file it holds.
+            deposited = {
+                f.name: IndexedFile(path=str(f.path), size=f.size, md5=f.md5, sha256=f.sha256)
+                for f in plan.files
+                if not f.archive and (not f.kept or (f.path.parts and f.md5))
+            }
+            if note_deposit(index, environment, concept, files=deposited, draft=str(zenodo_record_id)):
+                save_deposit_index(self._root, index)
 
         finally:
             remove_temp_tree(tmpdir)
 
-        # ── Set metadata ───────────────────────────────────────────────────────
-        metadata = self._build_zenodo_metadata(
-            title=title,
-            description=description,
-            creators=creators or [],
-            contributors=contributors or [],
-            license=license,
-            community=community,
-            extra_keywords=keywords,
-        )
-        client.update_metadata(deposit_id, metadata)
+        # ── 10. Check the deposit's files ──────────────────────────────────────
+        # The deposit must hold every file sent, with its md5, every file kept,
+        # and every file the graph links to under this record; each
+        # distribution of a member dataset needs a download URL, a file of the
+        # deposit or an http(s) URL elsewhere. A distribution of a planned file
+        # must state the sha256 and size the plan measured. A publish is
+        # refused here, before the DOI exists; a draft is left as it is, with
+        # the problems reported.
+        try:
+            listing: object = client.list_files(deposit_id)
+            file_problems = deposit_file_problems(
+                jsonld,
+                files_base=f"{record_url}/files",
+                listing=listing,
+                sent=sent,
+                kept=keep,
+                planned={f.name: f for f in plan.files},
+            )
+        except ZenodoError as exc:
+            file_problems = [f"the deposit's files could not be listed ({exc})"]
+        if file_problems and publish:
+            raise RuntimeError(
+                "Refusing to publish: the deposit does not hold the files its records point at: "
+                + "; ".join(file_problems)
+                + f". Nothing was published. The draft ({draft_url}) is recorded in "
+                f"{recorded_in}, so the next ws.zenodo() updates it."
+            )
+        if file_problems:
+            warnings.warn(
+                f"The Zenodo draft {draft_url} does not hold the files its records point at: "
+                + "; ".join(file_problems)
+                + ". Do not publish it as it is.",
+                stacklevel=2,
+            )
+            print(f"  WARNING: the draft does not hold the files its records point at ({len(file_problems)}):")
+            for problem in file_problems:
+                print(f"    {problem}")
 
-        # ── Publish or leave as draft ──────────────────────────────────────────
-        draft_url = f"https://{domain}/deposit/{deposit_id}"
+        # ── 11. and 12. Publish, and record the deposit as published ───────────
         doi = prereserved_doi
         published = False
 
@@ -6389,6 +7205,11 @@ class AuthoringWorkspace:
             pub = client.publish_deposit(deposit_id)
             doi = pub.get("doi", prereserved_doi)
             published = True
+            # Published, the record is the version the next one is made from.
+            state = {key: value for key, value in state.items() if key != "version_of"}
+            state = {**state, "doi": doi, "published": True}
+            self._save_zenodo_state(state)
+            self._note_draft_published(index, environment, concept, str(zenodo_record_id))
             print(f"  Published: {record_url}")
             print(f"  DOI: {doi}")
         else:
@@ -6396,14 +7217,19 @@ class AuthoringWorkspace:
             print(f"  Pre-reserved DOI: {doi}")
             print('  Review it, then click "Publish" on Zenodo -- or re-run with publish=True.')
 
-        self._save_zenodo_state(
-            {
-                "record_id": str(zenodo_record_id),
-                "doi": doi,
-                "published": published,
-                "sandbox": sandbox,
-            }
-        )
+        # ── 13. Point the dataset records at the deposited files ───────────────
+        # Zenodo now hosts these files: ws.submit() then sends resolvable links
+        # even when no R2 object storage is configured (the public path). A
+        # draft moves only the records that still name a local file: a record
+        # on the copy a published version holds has a working URL, and moves
+        # when the new version is published. A sandbox deposit is a dry run,
+        # and its URLs must never reach a record.
+        if sandbox:
+            print("  The dataset records are left as they are: a sandbox deposit is a dry run.")
+        else:
+            patched = self._apply_zenodo_file_urls(record_url, plan, local_only=not publish)
+            if patched:
+                print(f"  Dataset records updated with Zenodo file URLs: {patched}")
 
         return ZenodoResult(
             record_id=str(zenodo_record_id),
@@ -6485,7 +7311,8 @@ class AuthoringWorkspace:
     ) -> Path:
         """Generate ``ro-crate-metadata.json`` locally for review.
 
-        Uses placeholder values for the Zenodo URL.
+        Uses placeholder values for the Zenodo URL. The creators and their
+        ORCIDs are the ones :meth:`zenodo` would give the deposit.
 
         Example::
 
@@ -6495,28 +7322,31 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
+        creators = self._deposit_creators(creators, required=False)
+        contributors = _deposit_agents(contributors or [], "contributor")
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
+        plan = self._deposit_file_plan(records_dir)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-rocrate-"))
         try:
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
+            data_files = [*self._bundle_data_files(tmpdir, plan), *plan.kept_files()]
             # Write a placeholder linked-data file so contentSize is available
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
             self._build_rocrate(
                 tmpdir,
-                data_filenames,
+                data_files,
                 title=title,
                 description=description,
-                creators=creators or [],
-                contributors=contributors or [],
+                creators=creators,
+                contributors=contributors,
                 license=license,
                 zenodo_record_id=0,
                 prereserved_doi="10.5281/zenodo.RECORD_ID",
             )
-            src = tmpdir / "ro-crate-metadata.json"
+            src = tmpdir / _ROCRATE_FILENAME
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
             shutil.copy2(src, out)
         finally:
@@ -6542,10 +7372,15 @@ class AuthoringWorkspace:
 
         Uses placeholder values for the Zenodo record URL and DOI so the
         structure can be inspected without creating a deposit.  Pass the same
-        ``title``/``creators``/``license`` you would give :meth:`upload` to preview
+        ``title``/``creators``/``license`` you would give :meth:`zenodo` to preview
         the rights and attribution that will be embedded in the published record.
         Without a ``title`` the preview carries the automatic title
-        :meth:`zenodo` would give the deposit.
+        :meth:`zenodo` would give the deposit, and without ``creators`` the
+        creators it would find (see :meth:`zenodo`); with none, the checks
+        report it, since :meth:`zenodo` refuses such a deposit. A record the
+        deposit would leave out, because it cannot be converted or a
+        distribution entry of it names no file, is listed as an error too,
+        with the reason.
 
         Parameters
         ----------
@@ -6563,8 +7398,6 @@ class AuthoringWorkspace:
             ws.save()
             ws.preview_jsonld()   # writes battinfo.preview.jsonld
         """
-        import tempfile
-
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
@@ -6574,27 +7407,31 @@ class AuthoringWorkspace:
         # when neither is set, which the gold-standard panel then nudges on.
         if not license:
             license = self._get_license() or ""
+        # The creators ws.zenodo() would find, every ORCID a bare id.
+        creators = self._deposit_creators(creators, required=False)
+        contributors = _deposit_agents(contributors or [], "contributor")
 
-        # Collect data filenames using same logic as the real upload (dry run)
-        tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-preview-"))
-        try:
-            data_filenames = self._bundle_data_files(tmpdir, records_dir)
-        finally:
-            remove_temp_tree(tmpdir)
+        # The data files and their deposit names, planned as ws.zenodo() plans
+        # them. The graph needs only the names, so the files are not read.
+        plan = self._deposit_file_plan(records_dir, measure=False)
 
+        # What the plan and the graph leave out is listed below as errors, since
+        # ws.zenodo() refuses a deposit over any of it.
+        omissions = list(plan.omissions)
         jsonld = self._build_zenodo_jsonld(
             zenodo_record_id=0,
             prereserved_doi="10.5281/zenodo.RECORD_ID",
             record_url="https://zenodo.org/records/RECORD_ID",
-            data_filenames=data_filenames,
+            file_plan=plan,
             title=self._deposit_title(title),
             description=description or "",
-            creators=creators or [],
-            contributors=contributors or [],
+            creators=creators,
+            contributors=contributors,
             license=license or "",
             keywords=keywords or [],
             version=version or "",
             is_version_of=is_version_of or "",
+            omissions=omissions,
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
@@ -6611,9 +7448,12 @@ class AuthoringWorkspace:
             report = validate_publication_report(jsonld, policy="publisher")
             deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
             _print_replaced_legacy_parameter_sets(replaced_legacy)
-            errors = [i.message for i in report.issues if i.severity == "error"] + [
+            errors = [f"left out of the deposit: {omission}" for omission in dict.fromkeys(omissions)]
+            errors += [i.message for i in report.issues if i.severity == "error"] + [
                 f"parameter set {problem}" for problem in _parameter_set_publication_errors(deposit_records)
             ]
+            if not creators:
+                errors.append(f"no creators: ws.zenodo() refuses a deposit without them. {_CREATORS_HINT}")
             warnings = [i for i in report.issues if i.severity == "warning"]
             if not errors and not warnings:
                 print("  Gold-standard: PASS (no validation issues)")
@@ -6625,7 +7465,10 @@ class AuthoringWorkspace:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
-            unresolved = _unresolved_record_references(jsonld)
+            # A record left out above has no node because it could not be
+            # converted, not because it is missing locally.
+            left_out = {omission.record for omission in omissions}
+            unresolved = [iri for iri in _unresolved_record_references(jsonld) if iri not in left_out]
             if unresolved:
                 print(f"  {_not_found_locally_note(unresolved)}")
         except Exception as exc:  # noqa: BLE001 — preview must still write + return its path
@@ -6634,21 +7477,41 @@ class AuthoringWorkspace:
         out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Written: {out}")
         print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
-        print(f"  Data files:  {len(data_filenames)}")
+        print(f"  Data files:  {len(plan.deposited_names())}")
         return out
 
-    def _assert_publishable(self, jsonld: dict, *, nothing_sent: bool = False) -> None:
+    def _assert_publishable(
+        self,
+        jsonld: dict,
+        *,
+        omissions: Iterable[Omission] = (),
+        nothing_sent: bool = False,
+        draft: bool = False,
+    ) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
 
-        Missing data files are checked from the most recent :meth:`_bundle_data_files` run.
-        ``nothing_sent`` says in the refusal that no deposit was made (the check
-        :meth:`zenodo` runs before it contacts Zenodo)."""
+        *omissions* are what the deposit file plan and the deposit graph left out
+        (``plan.omissions``, and the list :meth:`_build_zenodo_jsonld` fills):
+        any at all refuses, naming each record and why, before the rest is
+        checked. Missing data files are checked from the most recent deposit file
+        plan (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
+        deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo).
+        With ``draft`` the refusal is of the deposit itself: :meth:`zenodo` checks a
+        draft as it checks a publish, since a draft is one click from published."""
+        verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
+        left_out = list(dict.fromkeys(omissions))
+        if left_out:
+            records = len({(omission.kind, omission.record) for omission in left_out})
+            raise RuntimeError(
+                f"Refusing to {verb}: {records} record(s) would go into the deposit incomplete: "
+                f"{_omission_list(left_out)}. Fix or remove these records, then re-run.{sent_note}"
+            )
         missing = getattr(self, "_missing_data_files", [])
         if missing:
             raise RuntimeError(
-                f"Refusing to publish: {len(missing)} distribution data file(s) are missing and were "
+                f"Refusing to {verb}: {len(missing)} distribution data file(s) are missing and were "
                 f"not uploaded, so the deposit would be incomplete: {'; '.join(missing[:5])}. "
                 f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
@@ -6657,111 +7520,256 @@ class AuthoringWorkspace:
 
             report = validate_publication_report(jsonld, policy="publisher")
         except Exception as exc:  # noqa: BLE001
-            raise RuntimeError(f"Could not validate the record before publishing: {exc}") from exc
+            raise RuntimeError(f"Could not validate the record before {doing}: {exc}") from exc
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
             unresolved = _unresolved_record_references(jsonld)
+            # Only a draft that already exists can be left as one: the check
+            # before anything is sent refuses a draft for the same errors.
+            draft_hint = "" if draft or nothing_sent else ", or leave the deposit as a draft"
             raise RuntimeError(
-                f"Refusing to publish: {len(errors)} validation error(s) in the record "
-                "(run ws.preview_jsonld() to see them, or leave the deposit as a draft): "
+                f"Refusing to {verb}: {len(errors)} validation error(s) in the record "
+                f"(run ws.preview_jsonld() to see them{draft_hint}): "
                 + "; ".join(i.message for i in errors[:5])
                 + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
                 + sent_note
             )
 
-    def _bundle_data_files(self, tmpdir: Path, records_dir: Path) -> builtins.list[str]:
-        """Copy data files into *tmpdir*, zipping by test kind when >90 files."""
-        import shutil
+    def _bundle_data_files(self, tmpdir: Path, plan: DepositFilePlan) -> builtins.list[DepositFile]:
+        """The data files to upload, each under its deposit name in *plan*.
+
+        A file is uploaded from where it is. When the deposit is zipped (more
+        than ``_ZENODO_ZIP_THRESHOLD`` files), the files of each test kind are
+        packed into one archive in *tmpdir*, each under its deposit name, so no
+        two members share a name, and the archives are uploaded instead. A
+        file the deposit keeps (``plan.kept_files()``) has nothing to upload.
+        """
         import zipfile
 
-        unique = self._deposit_data_files(records_dir)
-        filenames: list[str] = []
-        if len(unique) <= _ZENODO_ZIP_THRESHOLD:
-            for lp, _ in unique:
-                shutil.copy2(lp, tmpdir / lp.name)
-                filenames.append(lp.name)
-        else:
-            # Group by test kind → one zip per kind
-            by_kind: dict[str, list[Path]] = {}
-            for lp, kind in unique:
-                by_kind.setdefault(kind, []).append(lp)
-            for kind, paths in sorted(by_kind.items()):
-                zip_name = f"{kind}.zip"
-                with zipfile.ZipFile(tmpdir / zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for lp in sorted(paths):
-                        zf.write(lp, lp.name)
-                filenames.append(zip_name)
-                print(f"  Bundled {len(paths)} files -> {zip_name}")
+        if not plan.zipped:
+            return plan.local_files()
+        archives: list[DepositFile] = []
+        for archive, members in plan.archives().items():
+            target = tmpdir / archive
+            with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as zf:
+                for entry in sorted(members, key=lambda member: member.name):
+                    zf.write(entry.path, entry.name)
+            archives.append(measured_file(target, archive, kind=members[0].kind))
+            print(f"  Bundled {len(members)} files -> {archive}")
+        return archives
 
-        return filenames
+    def _recorded_deposit_names(self, context: DepositContext) -> dict[str, str]:
+        """The deposit names earlier versions of the Zenodo record *context* continues gave its files.
 
-    def _deposit_data_files(self, records_dir: Path, *, report: bool = True) -> builtins.list[tuple[Path, str]]:
-        """The ``(local file, test kind)`` pairs a Zenodo deposit uploads, one per file name.
+        Keyed by the file's resolved local path (``_deposit_files.path_key``),
+        read from ``.battinfo/deposit-files.json``. The deposit file plan gives
+        each such file its recorded name before it names any other file, so a
+        file keeps its public URL from one version to the next even when a new
+        file with the same name comes first.
+        """
+        return context.recorded_names()
+
+    def _deposit_context(
+        self,
+        *,
+        sandbox: bool | None = None,
+        record_id: str | None = None,
+        state: Mapping[str, Any] | None = None,
+        index: Mapping[str, Any] | None = None,
+    ) -> DepositContext:
+        """What a deposit of this workspace knows about its Zenodo record before it asks Zenodo.
+
+        Read from the state file of the environment (*state*) and
+        ``.battinfo/deposit-files.json`` (*index*) unless given. *sandbox*
+        ``None`` is zenodo.org, as for the previews. The deposit continues the
+        record the state names, unless *record_id* names a record outside it;
+        it then continues that one. The records it knows of are the state's
+        record, deposit and the published record a draft of a new version was
+        made from, and the versions the index lists for its concept. It starts
+        from *record_id* when given, else from the state's record. The R2
+        public base URL, when one is configured, tells a copy :meth:`upload`
+        made from any other URL.
+        """
+        environment = zenodo_environment(bool(sandbox))
+        state = self._load_zenodo_state(environment) if state is None else state
+        index = load_deposit_index(self._root) if index is None else index
+        public_base = (self._credential("R2_PUBLIC_BASE_URL") or "").strip().rstrip("/")
+        concept: str | None = None
+        records: set[str] = set()
+        starts_from = record_id
+        if state and state.get("environment") == environment:
+            stored = str(state["record_id"])
+            stored_concept = state.get("concept_record_id") or concept_of_record(index, environment, stored)
+            stored_records = {stored, *concept_records(index, environment, stored_concept)}
+            for key in ("deposit_id", "version_of"):
+                if state.get(key):
+                    stored_records.add(str(state[key]))
+            if record_id is None or record_id in stored_records:
+                concept, records = stored_concept, stored_records
+            if record_id is None:
+                starts_from = stored
+        if record_id is not None and record_id not in records:
+            concept = concept_of_record(index, environment, record_id)
+            records = {record_id, *concept_records(index, environment, concept)}
+        return DepositContext(
+            environment=environment,
+            concept=concept,
+            records=frozenset(records),
+            index=index,
+            hosted_bases=(public_base,) if public_base else (),
+            starts_from=starts_from,
+        )
+
+    def _registered_sources(self) -> frozenset[str]:
+        """The keys of the local data files this workspace registered (``.battinfo/deposit-files.json``).
+
+        A deposit reads a file on another computer only when it lies in the
+        workspace folder or is registered here (see
+        :func:`battinfo._deposit_files.location_path`). Raises
+        :class:`~battinfo._deposit_index.DepositIndexError` when the file
+        cannot be read.
+        """
+        return registered_keys(load_deposit_index(self._root))
+
+    def _register_sources(self, paths: Iterable[Path | None], *, by: str) -> None:
+        """Register each of *paths* (``None`` entries skipped) as a data file of this workspace."""
+        register_sources(self._root, [path for path in paths if path is not None], by=by)
+
+    def _deposit_file_plan(
+        self,
+        records_dir: Path,
+        *,
+        report: bool = True,
+        measure: bool = True,
+        context: DepositContext | None = None,
+    ) -> DepositFilePlan:
+        """The files a Zenodo deposit of this workspace carries, planned before anything is sent.
+
+        Collects every ``file:`` distribution of the dataset records and the
+        artifacts placed in the workspace, then plans them (see
+        :func:`battinfo._deposit_files.build_deposit_file_plan`): one entry per
+        resolved local file, each with its deposit name, percent-encoded URL
+        segment, size, md5 and sha256. Staging, the deposit graph, the RO-Crate
+        and the record rewrite read their names from the result.
+
+        A distribution whose URL is a copy an earlier deposit or
+        :meth:`upload` made is a file of the deposit too, found through
+        *context* (by default the one :meth:`_deposit_context` reads): its
+        local file is planned when it is there; when it is gone, a deposit
+        that continues the record holding the copy keeps that copy, and any
+        other lists the file as missing. A ``file:`` location whose file is
+        gone is kept the same way when the record the deposit continues holds
+        the copy the index noted for that file: a sandbox deposit leaves the
+        records on their local files. The URL of a copy :meth:`upload`
+        made goes into ``plan.hosted``, which :meth:`zenodo` refuses unless it
+        is asked to archive such files. A copy of the workspace's own data
+        whose local file the index does not know is an omission instead of a
+        link (see ``DepositContext.refusal_for``): an R2 copy an earlier build
+        made, an ``s3:`` URL, or a URL in a sandbox record from a deposit on
+        zenodo.org. Any other Zenodo file URL on the deposit's Zenodo that
+        the workspace cannot place goes into ``plan.unplaced`` for
+        :meth:`zenodo` to ask Zenodo about.
+
+        Each location is screened from its text before anything asks the file
+        system about it. A network path outside the workspace folder that this
+        workspace did not register (``ws.add(..., data=...)`` and
+        :meth:`convert` register their files, :meth:`process` its previews),
+        and a path that goes up a folder with ``..``, are never read: each is
+        an omission that names its dataset.
 
         With *report* the missing data files and the artifact warnings are printed
         and kept for zenodo() and publish to act on; without it the files are only
-        counted (the up-front check in publish()).
+        planned (the up-front count in publish()). Without *measure* the files are
+        not read.
+
+        Nothing is skipped in silence. A record file that cannot be read, and a
+        distribution entry that is not an object with a ``content_url``, become
+        omissions (``plan.omissions``, printed with *report*): :meth:`zenodo`
+        refuses the deposit over them, and :meth:`preview_jsonld` lists them as
+        errors. A record whose body is not an object is left to the deposit
+        graph, which names it the same way.
         """
+        omissions: list[Omission] = []
+
+        def _saved(folder: str) -> list[tuple[Path, dict]]:
+            """The records saved under *folder*, with their files, in file order."""
+            saved: list[tuple[Path, dict]] = []
+            sub_dir = records_dir / folder
+            for path in sorted(sub_dir.glob("*.json")) if sub_dir.is_dir() else []:
+                try:
+                    record = _read_json(path)
+                except (OSError, ValueError) as exc:
+                    omissions.append(Omission(folder, path.name, f"its file cannot be read ({exc})"))
+                    continue
+                if isinstance(record, dict):
+                    saved.append((path, record))
+            return saved
+
         # Map dataset IRI → test kind via test records (test.dataset_ids), with the
         # dataset's own about naming its test as the fallback, the same links the
         # deposit graph uses to pick each file's <kind>.zip.
+        tests = _saved("test")
         ds_to_kind: dict[str, str] = {}
         test_kind: dict[str, str] = {}
-        test_dir = records_dir / "test"
-        if test_dir.exists():
-            for f in sorted(test_dir.glob("*.json")):
-                try:
-                    raw = json.loads(f.read_text(encoding="utf-8"))
-                    test = raw.get("test", {})
-                    kind = test.get("kind", "other")
-                    if test.get("id"):
-                        test_kind[test["id"]] = kind
-                    for ds_id in test.get("dataset_ids") or []:
-                        ds_to_kind[ds_id] = kind
-                except Exception:
-                    continue
+        for _path, raw in tests:
+            test = raw.get("test")
+            if not isinstance(test, dict):
+                continue
+            kind = str(test.get("kind") or "other")
+            if isinstance(test.get("id"), str) and test["id"]:
+                test_kind[test["id"]] = kind
+            dataset_ids = test.get("dataset_ids")
+            for ds_id in dataset_ids if isinstance(dataset_ids, list) else []:
+                if isinstance(ds_id, str):
+                    ds_to_kind[ds_id] = kind
 
-        # Collect local data file paths
-        collected: list[tuple[Path, str]] = []  # (local_path, kind)
-        missing: list[str] = []  # file-scheme distributions whose local file is absent
-        ds_dir = records_dir / "dataset"
-        if ds_dir.exists():
-            for ds_file in sorted(ds_dir.glob("*.json")):
-                try:
-                    raw = json.loads(ds_file.read_text(encoding="utf-8"))
-                    ds = raw.get("dataset", {})
-                    ds_id = ds.get("id", "")
-                    kind = ds_to_kind.get(ds_id) or next(
-                        (test_kind[a] for a in (ds.get("about") or []) if a in test_kind),
-                        "other",
-                    )
-                    for dist in ds.get("distributions") or []:
-                        url = dist.get("content_url") or ""
-                        if not url.startswith("file://"):
-                            continue
-                        lp = _file_uri_to_path(url)
-                        if lp.exists():
-                            collected.append((lp, kind))
-                        else:
-                            # Do NOT silently drop a distribution whose data file is missing: the
-                            # deposit would be published incomplete (a distribution pointing at a
-                            # file that was never uploaded). Warn now; block publish later (R-7).
-                            missing.append(str(lp))
-                            if report:
-                                print(f"  WARNING: data file for a distribution is missing (not uploaded): {lp}")
-                except Exception:
+        # The local data file locations, as the records give them, in record order.
+        # Nothing here touches a data file: the plan screens each location from
+        # its text before it asks the file system about it, and refuses a network
+        # path outside the workspace that ws.add() did not register, and a path
+        # that goes up a folder. A distribution entry that names no file is an
+        # omission; the dataset's other files are still planned. A URL that is a
+        # copy one of this workspace's deposits or uploads made is a file of the
+        # deposit too, found through the index.
+        context = context or self._deposit_context()
+        locations: list[tuple[str, str]] = []  # (content_url, kind)
+        owners: dict[str, str] = {}  # content_url -> the dataset that names it first
+        remote: list[tuple[RemoteSource, str]] = []
+        unplaced: dict[str, list[tuple[str, str]]] = {}  # record id -> (dataset, URL)
+        for record_path, raw in _saved("dataset"):
+            ds = raw.get("dataset")
+            if not isinstance(ds, dict):
+                continue
+            ds_id = ds["id"] if isinstance(ds.get("id"), str) and ds["id"] else ""
+            short_id = ds["short_id"] if isinstance(ds.get("short_id"), str) else ""
+            about = ds.get("about")
+            kind = ds_to_kind.get(ds_id) or next(
+                (
+                    test_kind[a]
+                    for a in (about if isinstance(about, list) else [])
+                    if isinstance(a, str) and a in test_kind
+                ),
+                "other",
+            )
+            usable, problems = dataset_distributions(ds)
+            omissions.extend(Omission("dataset", ds_id or record_path.name, problem) for problem in problems)
+            for dist in usable:
+                url = dist["content_url"]
+                if url.startswith("file://"):
+                    locations.append((url, kind))
+                    owners.setdefault(url, ds_id or record_path.name)
                     continue
-        if report:
-            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
-            self._missing_data_files = missing
-
-        # Deduplicate (a file may appear in multiple distributions)
-        seen: set[str] = set()
-        unique: list[tuple[Path, str]] = []
-        for lp, kind in collected:
-            if lp.name not in seen:
-                seen.add(lp.name)
-                unique.append((lp, kind))
+                source = context.source_for(url)
+                if source is not None:
+                    remote.append((source, kind))
+                    continue
+                refusal = context.refusal_for(url, short_id=short_id)
+                if refusal:
+                    omissions.append(Omission("dataset", ds_id or record_path.name, refusal))
+                    continue
+                record = context.unplaced_record(url)
+                if record is not None:
+                    unplaced.setdefault(record, []).append((ds_id or record_path.name, url))
 
         # ── Actionable artifacts (Layer B) ─────────────────────────────────────
         # Only files the user has explicitly placed in the workspace are published;
@@ -6769,36 +7777,54 @@ class AuthoringWorkspace:
         # rather than auto-copied, so publication contains exactly what was opted in.
         from battinfo.publication import plan_artifact_inclusion  # noqa: PLC0415
 
-        artifact_records: list[dict] = []
-        for sub in ("test-protocol", "test"):
-            sub_dir = records_dir / sub
-            if sub_dir.exists():
-                for f in sorted(sub_dir.glob("*.json")):
-                    try:
-                        artifact_records.append(json.loads(f.read_text(encoding="utf-8")))
-                    except Exception:
-                        continue
+        artifact_records = [raw for _path, raw in _saved("test-protocol")] + [raw for _path, raw in tests]
         artifact_files, artifact_warnings = plan_artifact_inclusion(artifact_records, self._root)
-        if report:
-            self._artifact_warnings = artifact_warnings
-            for warning in artifact_warnings:
-                print(f"  WARNING: {warning}")
-        for lp in artifact_files:
-            if lp.name not in seen:
-                seen.add(lp.name)
-                unique.append((lp, "protocol"))
-        return unique
 
-    def _refuse_a_zipped_deposit(self) -> None:
+        plan = build_deposit_file_plan(
+            locations,
+            root=self._root,
+            artifacts=artifact_files,
+            artifact_warnings=artifact_warnings,
+            omissions=omissions,
+            recorded_names=self._recorded_deposit_names(context),
+            # A data file never takes the name of the deposit's own metadata files.
+            reserved_names=(BATTINFO_LD_FILENAME, _ROCRATE_FILENAME),
+            zip_threshold=_ZENODO_ZIP_THRESHOLD,
+            measure=measure,
+            registered=registered_keys(context.index),
+            owners=owners,
+            remote=remote,
+            unplaced=unplaced,
+            held=context.held_files(),
+        )
+        if report:
+            # Do NOT silently drop a distribution whose data file is missing: the
+            # deposit would be published incomplete (a distribution pointing at a
+            # file that was never uploaded). Warn now; block publish later (R-7).
+            for path in plan.missing:
+                print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            for omission in plan.omissions:
+                print(f"  WARNING: left out of the deposit: {omission}")
+            # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
+            self._missing_data_files = list(plan.missing)
+            self._artifact_warnings = list(plan.artifact_warnings)
+            for warning in plan.artifact_warnings:
+                print(f"  WARNING: {warning}")
+        return plan
+
+    def _refuse_a_zipped_deposit(self, plan: DepositFilePlan | None = None) -> None:
         """Refuse publish(zenodo=True) before any deposit exists when its files would be zipped.
 
         A deposit of more than ``_ZENODO_ZIP_THRESHOLD`` data files is zipped by
         test kind, and the registry cannot yet point a record at a file inside an
         archive: the records would keep their local file paths, and the registry
-        half would refuse them only after the DOI was minted.
+        half would refuse them only after the DOI was minted. *plan* is the
+        deposit's file plan, made here when not given.
         """
-        count = len(self._deposit_data_files(self._ws.source_root, report=False))
-        if count > _ZENODO_ZIP_THRESHOLD:
+        if plan is None:
+            plan = self._deposit_file_plan(self._ws.source_root, report=False, measure=False)
+        count = len(plan.local_files())
+        if plan.zipped:
             raise ValueError(
                 f"Refusing to publish: this workspace has {count} data files, and a Zenodo deposit "
                 f"of more than {_ZENODO_ZIP_THRESHOLD} is zipped by test kind. The registry cannot yet "
@@ -6808,6 +7834,54 @@ class AuthoringWorkspace:
                 f"{_ZENODO_ZIP_THRESHOLD} data files."
             )
 
+    def _refuse_hosted_files(self, plan: DepositFilePlan, *, verb: str, from_publish: bool = False) -> None:
+        """Refuse a deposit that would archive data files hosted in R2 storage, and name the files.
+
+        The files are the copies :meth:`upload` made that the dataset records
+        point at (``plan.hosted``). From :meth:`publish` with R2 storage
+        configured, they are also the local data files :meth:`upload` is about
+        to put there, since :meth:`publish` runs it before the deposit. A
+        deposit archives such files only when it is called with
+        ``archive_hosted_files=True``. *verb* names what is refused
+        (``publish`` or ``deposit``).
+        """
+        hosted = sorted(plan.hosted)
+        uploading = from_publish and self._r2_configured()
+        local = [self._rel_to_root(str(entry.path)) for entry in plan.located_files()] if uploading else []
+        if not hosted and not local:
+            return
+        sentences = [f"Refusing to {verb}: the deposit would archive data files hosted in R2 storage."]
+        if local:
+            sentences.append(
+                "R2 storage is configured, so ws.publish(zenodo=True) puts these in R2 with ws.upload() "
+                f"before the deposit: {_shown_list(local)}."
+            )
+        if hosted:
+            sentences.append(f"The dataset records point at these copies ws.upload() made: {_shown_list(hosted)}.")
+        sentences.append(
+            "A Zenodo deposit makes a public copy of each file it holds, so it archives files hosted in "
+            "R2 only when asked: pass archive_hosted_files=True to archive them from their local files, "
+            "with the records still pointing at R2."
+        )
+        if local and not hosted:
+            sentences.append("To let Zenodo host the files instead, run ws.zenodo(publish=True), then ws.submit().")
+        sentences.append("Nothing was uploaded, deposited or sent." if from_publish else "Nothing was sent to Zenodo.")
+        raise ValueError(" ".join(sentences))
+
+    def _warn_private_hosted_files(self, plan: DepositFilePlan) -> None:
+        """Name in a warning each data file the deposit archives from the private R2 bucket, since it makes them public."""
+        private = sorted(plan.private_hosted)
+        if not private:
+            return
+        warnings.warn(
+            f"The deposit archives {len(private)} data file(s) that ws.upload(public=False) put in the "
+            "private R2 bucket, and it makes them public: " + "; ".join(private),
+            stacklevel=3,
+        )
+        print(f"  WARNING: the deposit makes {len(private)} data file(s) from the private R2 bucket public:")
+        for url in private:
+            print(f"    {url}")
+
     @staticmethod
     def _assemble_zenodo_jsonld(
         record_sets: dict[str, builtins.list[dict]],
@@ -6815,7 +7889,7 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: builtins.list[str],
+        data_filenames: builtins.list[str] | None = None,
         title: str = "",
         description: str = "",
         creators: builtins.list[dict] | None = None,
@@ -6826,6 +7900,8 @@ class AuthoringWorkspace:
         version: str = "",
         is_version_of: str = "",
         referenced_records: dict[str, builtins.list[dict]] | None = None,
+        file_plan: DepositFilePlan | None = None,
+        omissions: builtins.list[Omission] | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -6836,6 +7912,27 @@ class AuthoringWorkspace:
         interactive authoring flow (:meth:`_build_zenodo_jsonld`) and the
         programmatic contribution flow (``publication.build_zenodo_package``) emit
         byte-identical graphs.
+
+        A record the builder cannot convert (one that is not an object, has no
+        id, or raises while its node is built) and a distribution entry that is
+        not an object with a ``content_url`` are left out of the graph with a
+        warning that names them and why. Given an ``omissions`` list, the
+        builder appends each to it and returns the graph, for the caller to
+        refuse (:meth:`zenodo`) or report (:meth:`preview_jsonld`). Without
+        one it raises a ``ValueError`` naming them all, so no caller publishes
+        a graph with records missing. A time it cannot read as a date is left
+        out with a warning, not the record that holds it (see ``_unix_to_iso``).
+
+        A local file's download URL is ``{files_base_url}/{name}`` with the name
+        percent-encoded. With ``file_plan`` (a workspace deposit) a distribution
+        or artifact finds its file in the plan by resolved path, and takes the
+        file's deposit name and, in a zipped deposit, its archive. A
+        distribution of a file the plan measured states the plan's sha256 and
+        size, not the ones its record gives, which date from when the file was
+        added.
+        ``data_filenames`` serves the package builders, whose staged files have
+        unique names: a local file whose name is among them is deposited under
+        that name, and otherwise its ``<kind>.zip`` when that is among them.
 
         ``referenced_records`` holds copies of published records the deposit
         points at but does not carry, in the same shape (a workspace keeps
@@ -6901,19 +7998,24 @@ class AuthoringWorkspace:
             label_to_compact,
         )
 
+        named_files = list(data_filenames or [])
+        files_base = files_base_url or f"{record_url}/files"
+
         def _artifact_download_url(loc: str) -> Any:
             """Resolve an artifact locator to its download URL. An http(s) locator is
             already hosted; a workspace file that is being uploaded resolves to its
-            hosted URL (like data files); an un-uploaded local locator is kept as the
-            relative literal (no hosted copy exists)."""
+            hosted URL (like data files, the archive holding it in a zipped deposit);
+            an un-uploaded local locator is kept as the relative literal (no hosted
+            copy exists)."""
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 return {"@id": text}
-            raw = text[len("file://") :] if text.startswith("file://") else text
-            fname = Path(raw).name
-            if fname in data_filenames:
-                base = files_base_url or f"{record_url}/files"
-                return {"@id": f"{base}/{fname}"}
+            if file_plan is not None:
+                entry = file_plan.entry_for(text)
+                return {"@id": entry.url(files_base)} if entry is not None else text
+            fname = path_name(_file_uri_to_path(text))
+            if fname in named_files:
+                return {"@id": f"{files_base}/{url_segment(fname)}"}
             return text
 
         def _artifact_distribution(art: dict) -> dict:
@@ -6922,6 +8024,44 @@ class AuthoringWorkspace:
             from battinfo.jsonld import artifact_distribution_node  # noqa: PLC0415
 
             return artifact_distribution_node(art, locator_url=_artifact_download_url)
+
+        # ── Records left out, never in silence ─────────────────────────────────
+        # A record that cannot be converted is named, with the reason, in a
+        # warning and in the omissions the caller gets back, or in the
+        # ValueError raised once the graph is built when the caller asked for
+        # none: a deposit with records missing must not be published.
+        _omitted: builtins.list[Omission] = []
+
+        def _omit(kind: str, record: str, reason: object, *, whole: bool = True) -> None:
+            """Leave *record* (or, without *whole*, a part of it) out of the graph, and say so."""
+            if isinstance(reason, BaseException):
+                reason = f"{type(reason).__name__}: {reason}"
+            omission = Omission(kind, record, str(reason))
+            if omission in _omitted:
+                return
+            _omitted.append(omission)
+            what = (
+                f"The {kind} record {record} could not be converted to JSON-LD and is left out"
+                if whole
+                else f"Part of the {kind} record {record} is left out"
+            )
+            warnings.warn(f"{what} of the deposit graph: {omission.reason}", stacklevel=3)
+
+        def _record_body(raw: object, key: str, kind: str, index: int) -> tuple[dict, str] | None:
+            """A record's body (``raw[key]``) and IRI, or ``None``, and an omission, without them.
+
+            A record without an IRI is named by its place among the records of
+            its kind (``#2``).
+            """
+            body = raw.get(key) if isinstance(raw, dict) else None
+            if not isinstance(body, dict):
+                _omit(kind, f"#{index + 1}", f"not a {kind} record (no '{key}' object)")
+                return None
+            iri = body.get("id")
+            if not isinstance(iri, str) or not iri:
+                _omit(kind, f"#{index + 1}", "it has no id")
+                return None
+            return body, iri
 
         # ── Load cell specs ────────────────────────────────────────────────────
         # One canonical builder (shared with the resolver path): the physical
@@ -6932,50 +8072,40 @@ class AuthoringWorkspace:
         # chemistry/format keyword strings, collected from the records (the node
         # no longer carries the verbatim literals).
         _spec_keywords: set[str] = set()
-        _ct_recs = record_sets.get("cell-spec", [])
-        if _ct_recs:
-            for raw in _ct_recs:
-                prod = raw.get("cell_spec", {}) if isinstance(raw, dict) else {}
-                iri = prod.get("id", "") if isinstance(prod, dict) else ""
-                if not iri:
-                    continue
-                try:
-                    spec_nodes[iri] = build_cell_spec_node(raw)
-                except Exception as exc:  # noqa: BLE001 - one bad record must not sink the deposit
-                    warnings.warn(
-                        f"cell-spec record '{iri}' could not be converted to "
-                        f"JSON-LD and will be OMITTED from the publication graph: {exc}",
-                        stacklevel=2,
-                    )
-                    continue
-                for _field in ("chemistry", "cell_format"):
-                    if prod.get(_field):
-                        _spec_keywords.add(str(prod[_field]))
+        for _index, raw in enumerate(record_sets.get("cell-spec", []) or []):
+            _found = _record_body(raw, "cell_spec", "cell-spec", _index)
+            if _found is None:
+                continue
+            prod, iri = _found
+            try:
+                spec_nodes[iri] = build_cell_spec_node(raw)
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("cell-spec", iri, exc)
+                continue
+            for _field in ("chemistry", "cell_format"):
+                if prod.get(_field):
+                    _spec_keywords.add(str(prod[_field]))
 
         # ── Map cell instance IRI → {cell_spec_id, serial_number} ──────────────────
         instances: dict[str, dict] = {}
-        _ci_recs = record_sets.get("cell-instance", [])
-        if _ci_recs:
-            for raw in _ci_recs:
-                try:
-                    ci = raw.get("cell_instance", {})
-                    iri = ci.get("id", "")
-                    if iri:
-                        instances[iri] = {
-                            "name": ci.get("name", ""),
-                            "serial_number": ci.get("serial_number", ""),
-                            "cell_spec_id": ci.get("cell_spec_id", ""),
-                            "grade": ci.get("grade"),
-                            "manufactured_at": ci.get("manufactured_at"),
-                            "expires_at": ci.get("expires_at"),
-                            "batch_id": ci.get("batch_id"),
-                            "conformance": ci.get("conformance"),
-                            # The electrode records built into this cell, kept
-                            # whole so the node builder can role-type them.
-                            "cell_instance": ci,
-                        }
-                except Exception:
-                    continue
+        for _index, raw in enumerate(record_sets.get("cell-instance", []) or []):
+            _found = _record_body(raw, "cell_instance", "cell-instance", _index)
+            if _found is None:
+                continue
+            ci, iri = _found
+            instances[iri] = {
+                "name": ci.get("name", ""),
+                "serial_number": ci.get("serial_number", ""),
+                "cell_spec_id": ci.get("cell_spec_id", ""),
+                "grade": ci.get("grade"),
+                "manufactured_at": ci.get("manufactured_at"),
+                "expires_at": ci.get("expires_at"),
+                "batch_id": ci.get("batch_id"),
+                "conformance": ci.get("conformance"),
+                # The electrode records built into this cell, kept
+                # whole so the node builder can role-type them.
+                "cell_instance": ci,
+            }
 
         # Published records this deposit may point at without carrying them:
         # the copies a workspace keeps of a cell or test spec it referenced in
@@ -7117,10 +8247,12 @@ class AuthoringWorkspace:
         test_nodes: list[dict] = []
         _test_recs = record_sets.get("test", [])
         if _test_recs:
-            for raw in _test_recs:
+            for _index, raw in enumerate(_test_recs):
+                _found = _record_body(raw, "test", "test", _index)
+                if _found is None:
+                    continue
+                test, test_iri = _found
                 try:
-                    test = raw.get("test", {})
-                    test_iri = test.get("id", "")
                     cell_id = test.get("cell_id", "")
                     protocol = test.get("protocol_name", "")
                     instrument = test.get("instrument_name", "")
@@ -7131,12 +8263,11 @@ class AuthoringWorkspace:
                         "protocol": protocol,
                         "test_iri": test_iri,
                     }
-                    if test_iri:
-                        test_info[test_iri] = _tinfo
+                    test_info[test_iri] = _tinfo
                     for ds_id in test.get("dataset_ids") or []:
                         ds_to_test[ds_id] = dict(_tinfo)
 
-                    if test_iri and cell_id:
+                    if cell_id:
                         tnode: dict = {
                             "@type": ["BatteryTest", "schema:Action", "prov:Activity"],
                             "@id": test_iri,
@@ -7206,17 +8337,10 @@ class AuthoringWorkspace:
                             tnode["prov:generated"] = outputs
                         # Activity timing (measured period, sourced from the data) —
                         # PROV start/end plus schema.org mirror so the test is placed in
-                        # time without parsing the time-series.
-                        _start = (
-                            _unix_to_iso(int(test["started_at"]))
-                            if str(test.get("started_at") or "").isdigit()
-                            else test.get("started_at")
-                        )
-                        _end = (
-                            _unix_to_iso(int(test["ended_at"]))
-                            if str(test.get("ended_at") or "").isdigit()
-                            else test.get("ended_at")
-                        )
+                        # time without parsing the time-series. A time that is no date
+                        # (one in milliseconds) is left out with a warning, not the test.
+                        _start = _unix_to_iso(test.get("started_at") or None, what=f"started_at of test {test_iri}")
+                        _end = _unix_to_iso(test.get("ended_at") or None, what=f"ended_at of test {test_iri}")
                         if _start:
                             tnode["prov:startedAtTime"] = _start
                             tnode["schema:startTime"] = _start
@@ -7233,7 +8357,10 @@ class AuthoringWorkspace:
                                 _artifact_distribution(a) for a in raw["artifacts"] if isinstance(a, dict)
                             ]
                         test_nodes.append(tnode)
-                except Exception:
+                    else:
+                        _omit("test", test_iri, "it names no cell (cell_id)")
+                except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                    _omit("test", test_iri, exc)
                     continue
 
         # ── Build test spec (protocol) nodes ───────────────────────────────────
@@ -7246,12 +8373,14 @@ class AuthoringWorkspace:
         # The importer keys off ``BatteryTest``/``BatteryCellSpecification`` types
         # (see import_), so these nodes are ignored on round-trip — safe to add.
         test_spec_nodes: list[dict] = []
-        for raw in record_sets.get("test-protocol", []):
-            if not isinstance(raw, dict):
+        for _index, raw in enumerate(record_sets.get("test-protocol", []) or []):
+            _found = _record_body(raw, "test_spec", "test-protocol", _index)
+            if _found is None:
                 continue
             try:
                 snode = test_protocol_node(raw, locator_url=_artifact_download_url)
-            except Exception:
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("test-protocol", _found[1], exc)
                 continue
             if snode is not None:
                 test_spec_nodes.append(snode)
@@ -7261,58 +8390,70 @@ class AuthoringWorkspace:
         # "processed" file plus the original "raw" instrument file kept for
         # provenance. Collect every distribution, not just the last.
         ds_meta: dict[str, dict] = {}
-        _ds_recs = record_sets.get("dataset", [])
-        if _ds_recs:
-            for raw in _ds_recs:
-                try:
-                    ds = raw.get("dataset", {})
-                    ds_id = ds.get("id", "")
-                    ti = dict(ds_to_test.get(ds_id, {}))
-                    own_about = ds_about.get(ds_id, [])
-                    # No test lists this dataset: take the test and cell from the
-                    # dataset's own about (first entry of each kind is the primary,
-                    # matching Dataset.to_record's ordering).
-                    if not ti.get("test_iri"):
-                        _t = next((a for a in own_about if _about_kind(a) == "test"), "")
-                        if _t:
-                            ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
-                            ti["test_iri"] = _t
-                    if not ti.get("cell_id"):
-                        ti["cell_id"] = next((a for a in own_about if _about_kind(a) == "cell"), "") or test_info.get(
-                            ti.get("test_iri", ""), {}
-                        ).get("cell_id", "")
-                    dists = []
-                    for dist in ds.get("distributions") or []:
-                        url = dist.get("content_url") or ""
-                        fname = _file_uri_to_path(url).name
-                        dists.append(
-                            {
-                                "filename": fname,
-                                "content_url": url,
-                                "format": dist.get("encoding_format", ""),
-                                # The whole checksum block, algorithm included. Carrying
-                                # only the value here is what let an md5 digest be
-                                # published under the sha256 term downstream.
-                                "checksum": dist.get("checksum") or {},
-                                "role": dist.get("role", ""),
-                                "description": dist.get("description", ""),
-                                "content_size": dist.get("content_size", ""),
-                            }
-                        )
-                    ds_meta[ds_id] = {
-                        "name": ds.get("name", ""),
-                        "cell_id": ti.get("cell_id", ""),
-                        "test_iri": ti.get("test_iri", ""),
-                        "kind": ti.get("kind", ""),
-                        # schema:about: the record's own about first, then the cell
-                        # the reverse (test.dataset_ids) mapping found.
-                        "about": list(dict.fromkeys([*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])])),
-                        "is_series": is_dataset_series(ds.get("additional_type")),
-                        "dists": dists,
-                        "ds": ds,  # full dataset record for discoverability fields
+        for _index, raw in enumerate(record_sets.get("dataset", []) or []):
+            _found = _record_body(raw, "dataset", "dataset", _index)
+            if _found is None:
+                continue
+            ds, ds_id = _found
+            ti = dict(ds_to_test.get(ds_id, {}))
+            own_about = ds_about.get(ds_id, [])
+            # No test lists this dataset: take the test and cell from the
+            # dataset's own about (first entry of each kind is the primary,
+            # matching Dataset.to_record's ordering).
+            if not ti.get("test_iri"):
+                _t = next((a for a in own_about if _about_kind(a) == "test"), "")
+                if _t:
+                    ti = {**test_info.get(_t, {}), **{k: v for k, v in ti.items() if v}}
+                    ti["test_iri"] = _t
+            if not ti.get("cell_id"):
+                ti["cell_id"] = next((a for a in own_about if _about_kind(a) == "cell"), "") or test_info.get(
+                    ti.get("test_iri", ""), {}
+                ).get("cell_id", "")
+            # An entry that is not an object with a content_url names no file:
+            # it is left out and reported, the dataset's other files kept.
+            _usable, _problems = dataset_distributions(ds)
+            for _problem in _problems:
+                _omit("dataset", ds_id, _problem, whole=False)
+            dists = []
+            for dist in _usable:
+                url = dist["content_url"]
+                # A deposited file is named as the deposit names it.
+                _entry = file_plan.entry_for(url) if file_plan is not None else None
+                fname = _entry.name if _entry is not None else _distribution_file_name(url)
+                # The whole checksum block, algorithm included. Carrying only
+                # the value here is what let an md5 digest be published under
+                # the sha256 term downstream.
+                _checksum_block = dist.get("checksum") or {}
+                _content_size = dist.get("content_size", "")
+                if _entry is not None and _entry.sha256:
+                    # The deposit holds the file as the plan measured it: a
+                    # checksum or size the record took when the file was added
+                    # is stale once the file changed.
+                    _checksum_block = {"algorithm": "sha256", "value": _entry.sha256}
+                    _content_size = str(_entry.size)
+                dists.append(
+                    {
+                        "filename": fname,
+                        "content_url": url,
+                        "format": dist.get("encoding_format", ""),
+                        "checksum": _checksum_block,
+                        "role": dist.get("role", ""),
+                        "description": dist.get("description", ""),
+                        "content_size": _content_size,
                     }
-                except Exception:
-                    continue
+                )
+            ds_meta[ds_id] = {
+                "name": ds.get("name", ""),
+                "cell_id": ti.get("cell_id", ""),
+                "test_iri": ti.get("test_iri", ""),
+                "kind": ti.get("kind", ""),
+                # schema:about: the record's own about first, then the cell
+                # the reverse (test.dataset_ids) mapping found.
+                "about": list(dict.fromkeys([*own_about, *([ti["cell_id"]] if ti.get("cell_id") else [])])),
+                "is_series": is_dataset_series(ds.get("additional_type")),
+                "dists": dists,
+                "ds": ds,  # full dataset record for discoverability fields
+            }
 
         # ── Build member dataset nodes (one dcat:Dataset per test result) ──────
         # The Zenodo record is a CATALOG; each test result is its own dcat:Dataset
@@ -7336,15 +8477,24 @@ class AuthoringWorkspace:
         _cov_ends: list[str] = []
 
         def _download_url(dist: dict, kind: str) -> str:
-            fname = dist["filename"]
-            _files_base = files_base_url or f"{record_url}/files"
             cu = dist.get("content_url") or ""
+            if file_plan is not None:
+                # The deposit file that holds this file, found by resolved path:
+                # the file itself, or its archive in a zipped deposit. A URL of
+                # a copy an earlier deposit or an upload made counts too, so the
+                # graph links to the copy this deposit holds.
+                entry = file_plan.entry_for(cu)
+                if entry is not None:
+                    return entry.url(files_base)
             if cu.startswith(("http://", "https://")):
                 return cu  # already a hosted file — use verbatim
-            if fname in data_filenames:
-                return f"{_files_base}/{fname}"
+            if file_plan is not None:
+                return ""
+            fname = dist["filename"]
+            if fname in named_files:
+                return f"{files_base}/{url_segment(fname)}"
             kind_zip = f"{kind}.zip"
-            return f"{_files_base}/{kind_zip}" if kind_zip in data_filenames else ""
+            return f"{files_base}/{url_segment(kind_zip)}" if kind_zip in named_files else ""
 
         for ds_id, meta in sorted(ds_meta.items()):
             dists = []
@@ -7456,7 +8606,7 @@ class AuthoringWorkspace:
             _ds = meta.get("ds") or {}
             if _ds.get("description"):
                 member["schema:description"] = _ds["description"]
-            if _ds.get("access_url", "").startswith(("http://", "https://")):
+            if isinstance(_ds.get("access_url"), str) and _ds["access_url"].startswith(("http://", "https://")):
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
                 member["schema:url"] = _ds["access_url"]
@@ -7483,15 +8633,12 @@ class AuthoringWorkspace:
                 member["schema:measurementTechnique"] = list(_ds["measurement_techniques"])
             if _ds.get("measurement_methods"):
                 member["schema:measurementMethod"] = list(_ds["measurement_methods"])
-
-            # Dates: convert Unix timestamps to ISO-8601; pass ISO strings through.
-            def _as_iso(v: object) -> object:
-                return _unix_to_iso(int(v)) if isinstance(v, (int, float)) else v
-
-            if _ds.get("created_at"):
-                member["schema:dateCreated"] = _as_iso(_ds["created_at"])
-            if _ds.get("modified_at"):
-                member["schema:dateModified"] = _as_iso(_ds["modified_at"])
+            # Dates: Unix times as ISO 8601, ISO strings as they are. A time that
+            # is no date (one in milliseconds) is left out with a warning.
+            for _field, _term in (("created_at", "schema:dateCreated"), ("modified_at", "schema:dateModified")):
+                _when = _unix_to_iso(_ds.get(_field) or None, what=f"{_field} of dataset {ds_id}")
+                if _when:
+                    member[_term] = _when
             # NOTE: no per-member schema:datePublished — a member dataset isn't published
             # independently; the deposit's publication date lives on the catalog (set at
             # Zenodo publish). The *measured* period is schema:temporalCoverage below,
@@ -7517,36 +8664,40 @@ class AuthoringWorkspace:
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
             cell_spec_id = inst.get("cell_spec_id", "")
-            spec_node = spec_nodes.get(cell_spec_id, {})
-            # Inherit the physical type from the spec's isDescriptionFor
-            phys_type = spec_node.get("isDescriptionFor", {}).get("@type", "BatteryCell")
+            try:
+                spec_node = spec_nodes.get(cell_spec_id, {})
+                # Inherit the physical type from the spec's isDescriptionFor
+                phys_type = spec_node.get("isDescriptionFor", {}).get("@type", "BatteryCell")
 
-            inode: dict = {
-                "@type": phys_type,
-                "@id": cell_iri,
-                "dcterms:conformsTo": {"@id": cell_spec_id},  # instance-of link
-                "hasDescription": {"@id": cell_spec_id},
-                "schema:isVariantOf": {"@id": cell_spec_id},  # ProductModel persona
-            }
-            # The electrode records this cell was built from. The spec body is in
-            # hand here, so a half cell's counter electrode also carries
-            # ReferenceElectrode — the reading an instance cannot make alone.
-            inode.update(electrode_role_links(inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)))
-            if inst.get("name"):
-                inode["schema:name"] = inst["name"]
-            if inst.get("serial_number"):
-                inode["schema:serialNumber"] = inst["serial_number"]
-            if inst.get("grade"):
-                inode["schema:quality"] = inst["grade"]
-            if inst.get("manufactured_at"):
-                inode["schema:productionDate"] = _typed_date(inst["manufactured_at"])
-            if inst.get("expires_at"):
-                inode["schema:expires"] = _typed_date(inst["expires_at"])
-            if inst.get("batch_id"):
-                inode["schema:identifier"] = inst["batch_id"]
-            # Conformance assessment (vs the cell spec) as a DQV annotation; the
-            # instance-of link above already ties the cell to its spec.
-            _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
+                inode: dict = {
+                    "@type": phys_type,
+                    "@id": cell_iri,
+                    "dcterms:conformsTo": {"@id": cell_spec_id},  # instance-of link
+                    "hasDescription": {"@id": cell_spec_id},
+                    "schema:isVariantOf": {"@id": cell_spec_id},  # ProductModel persona
+                }
+                # The electrode records this cell was built from. The spec body is in
+                # hand here, so a half cell's counter electrode also carries
+                # ReferenceElectrode — the reading an instance cannot make alone.
+                inode.update(electrode_role_links(inst.get("cell_instance") or {}, cell_spec_bodies.get(cell_spec_id)))
+                if inst.get("name"):
+                    inode["schema:name"] = inst["name"]
+                if inst.get("serial_number"):
+                    inode["schema:serialNumber"] = inst["serial_number"]
+                if inst.get("grade"):
+                    inode["schema:quality"] = inst["grade"]
+                if inst.get("manufactured_at"):
+                    inode["schema:productionDate"] = _typed_date(inst["manufactured_at"])
+                if inst.get("expires_at"):
+                    inode["schema:expires"] = _typed_date(inst["expires_at"])
+                if inst.get("batch_id"):
+                    inode["schema:identifier"] = inst["batch_id"]
+                # Conformance assessment (vs the cell spec) as a DQV annotation; the
+                # instance-of link above already ties the cell to its spec.
+                _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
+            except Exception as exc:  # noqa: BLE001 - collected; the deposit is refused, not sunk
+                _omit("cell-instance", cell_iri, exc)
+                continue
             instance_nodes.append(inode)
 
         # ── Build typed stubs for externally-defined cell specs ────────────────
@@ -7791,6 +8942,18 @@ class AuthoringWorkspace:
         for _term, _val in TEST_METHOD_CONTEXT_TERMS.items():
             context.setdefault(_term, _val)
 
+        # What was left out goes back to a caller that asked for it, and stops
+        # any other: a graph with records missing is not published.
+        if _omitted:
+            if omissions is None:
+                _records = len({(omission.kind, omission.record) for omission in _omitted})
+                raise ValueError(
+                    f"{_records} record(s) could not be converted in full to JSON-LD, so a graph "
+                    f"of them would be incomplete: {_omission_list(_omitted)}. Fix or remove these "
+                    "records, then build the graph again."
+                )
+            omissions.extend(omission for omission in _omitted if omission not in omissions)
+
         doc = {"@context": context, "@graph": graph}
         # Fail fast if the assembled document is not valid JSON-LD, rather than
         # discovering it only after upload (or in a downstream consumer).
@@ -7802,7 +8965,7 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         record_url: str,
-        data_filenames: builtins.list[str],
+        data_filenames: builtins.list[str] | None = None,
         title: str = "",
         description: str = "",
         creators: builtins.list[dict] | None = None,
@@ -7811,6 +8974,8 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        file_plan: DepositFilePlan | None = None,
+        omissions: builtins.list[Omission] | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
@@ -7818,6 +8983,10 @@ class AuthoringWorkspace:
         it only sources the canonical record dicts from the workspace directory,
         and the copies of published records it references from
         ``.battinfo/references/`` (read for stub nodes, never deposited).
+        :meth:`zenodo` and :meth:`preview_jsonld` pass the deposit's ``file_plan``
+        (:meth:`_deposit_file_plan`), which names every local file, and an
+        ``omissions`` list that collects the records the graph leaves out;
+        without one a record left out raises a ``ValueError``.
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
@@ -7827,6 +8996,8 @@ class AuthoringWorkspace:
             prereserved_doi=prereserved_doi,
             record_url=record_url,
             data_filenames=data_filenames,
+            file_plan=file_plan,
+            omissions=omissions,
             title=title,
             description=description,
             creators=creators,
@@ -7840,7 +9011,7 @@ class AuthoringWorkspace:
     def _build_rocrate(
         self,
         tmpdir: Path,
-        data_filenames: builtins.list[str],
+        data_files: builtins.list[DepositFile],
         *,
         title: str,
         description: str,
@@ -7857,9 +9028,12 @@ class AuthoringWorkspace:
         - Lists ``battinfo.json`` and all data files as ``hasPart``
         - References the Zenodo record URL and DOI
         - Is processable by any RO-Crate-aware tool (EOSC portals, WorkflowHub, etc.)
-        """
-        import hashlib
 
+        *data_files* are the data files the deposit holds: those
+        :meth:`_bundle_data_files` uploads and those it keeps. A file's ``@id``
+        is its deposit name percent-encoded, a relative URL, and its ``name``
+        the name itself; size and sha256 come from the plan.
+        """
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
 
@@ -7881,7 +9055,7 @@ class AuthoringWorkspace:
         contributor_nodes = [_contributor_node(c) for c in contributors] if contributors else []
 
         # Root Dataset
-        parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": fn} for fn in data_filenames]
+        parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
         root: dict = {
             "@type": "Dataset",
             "@id": "./",
@@ -7913,11 +9087,11 @@ class AuthoringWorkspace:
 
         # Data file entities
         file_entities: list[dict] = []
-        for fn in data_filenames:
-            fp = tmpdir / fn
+        for data_file in data_files:
+            fn = data_file.name
             entity: dict = {
                 "@type": "File",
-                "@id": fn,
+                "@id": data_file.segment,
                 "name": fn,
                 "encodingFormat": (
                     "application/x-parquet"
@@ -7929,17 +9103,16 @@ class AuthoringWorkspace:
                     else "application/octet-stream"
                 ),
             }
-            if fp.exists():
-                entity["contentSize"] = str(fp.stat().st_size)
-                sha = hashlib.sha256(fp.read_bytes()).hexdigest()
-                entity["sha256"] = sha
+            if data_file.sha256:
+                entity["contentSize"] = str(data_file.size)
+                entity["sha256"] = data_file.sha256
             file_entities.append(entity)
 
         graph = [
             # Required self-reference node
             {
                 "@type": "CreativeWork",
-                "@id": "ro-crate-metadata.json",
+                "@id": _ROCRATE_FILENAME,
                 "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
                 "about": {"@id": "./"},
             },
@@ -7952,7 +9125,7 @@ class AuthoringWorkspace:
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph": graph,
         }
-        (tmpdir / "ro-crate-metadata.json").write_text(
+        (tmpdir / _ROCRATE_FILENAME).write_text(
             json.dumps(crate, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
@@ -8062,17 +9235,265 @@ class AuthoringWorkspace:
             )
         return meta
 
-    def _zenodo_state_path(self) -> Path:
-        return self._root / ".battinfo" / "zenodo.json"
+    def _load_zenodo_state(self, environment: str = "production") -> dict:
+        """The record this workspace continues on the Zenodo of *environment*, or ``{}``.
 
-    def _load_zenodo_state(self) -> dict:
-        p = self._zenodo_state_path()
-        return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
+        ``.battinfo/zenodo.json`` for zenodo.org, ``.battinfo/zenodo-sandbox.json``
+        for the sandbox. Raises :class:`~battinfo._deposit_index.DepositIndexError`,
+        naming the file, when it cannot be read.
+        """
+        return load_deposit_state(self._root, environment)
 
     def _save_zenodo_state(self, state: dict) -> None:
-        p = self._zenodo_state_path()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(state, indent=2, ensure_ascii=False), encoding="utf-8")
+        """Write *state* to the state file of its environment, atomically."""
+        save_deposit_state(self._root, state)
+
+    def _reconcile_zenodo_draft(self, client: Any, state: dict, *, index: dict[str, Any] | None = None) -> dict | None:
+        """Ask Zenodo whether the draft *state* records is still a draft.
+
+        Returns the live draft when it is. When it was published since, on the
+        Zenodo website or by a run that stopped before it recorded the
+        publish, *state* is updated to say so (with the DOI) and saved, the
+        files the draft holds count among those of the published versions in
+        the deposit index (*index*, else the one on disk, when it can be
+        read), and ``None`` is returned.
+        """
+        from battinfo.zenodo import deposit_is_published  # noqa: PLC0415
+
+        draft = state["record_id"]
+        deposit = client.get_deposit(state.get("deposit_id") or draft)
+        if not deposit_is_published(deposit):
+            return deposit
+        metadata = deposit.get("metadata") if isinstance(deposit.get("metadata"), dict) else {}
+        doi = deposit.get("doi") or metadata.get("doi") or state.get("doi")
+        state.update(
+            published=True,
+            doi=str(doi or ""),
+            record_id=str(deposit.get("record_id") or draft),
+        )
+        state.pop("version_of", None)  # published, it is the version the next one is made from
+        self._save_zenodo_state(state)
+        environment = str(state.get("environment") or "production")
+        if index is None:
+            try:
+                index = load_deposit_index(self._root)
+            except DepositIndexError:
+                index = None  # ws.zenodo() names the file when it reads it
+        if index is not None:
+            concept = state.get("concept_record_id") or concept_of_record(index, environment, draft)
+            self._note_draft_published(index, environment, concept, draft)
+        print(
+            f"  The Zenodo draft {state['record_id']} has been published since this workspace "
+            f"recorded it; {state_file(environment)} now says so."
+        )
+        return None
+
+    def _note_draft_published(
+        self, index: dict[str, Any], environment: str, concept: str | None, record_id: str
+    ) -> None:
+        """Count the files the draft *record_id*, now published, holds among those of the published versions.
+
+        An index that cannot be written is left as it is, with a warning:
+        the draft's own entries give the next deposit, which starts from
+        this record, the same files.
+        """
+        try:
+            if note_published(index, environment, concept, record_id):
+                save_deposit_index(self._root, index)
+        except OSError as exc:
+            warnings.warn(
+                f"The Zenodo record {record_id} is published, but .battinfo/deposit-files.json could not "
+                f"be written ({exc}). It still lists the record's files as those of a draft, which the "
+                "next deposit reads the same way.",
+                stacklevel=3,
+            )
+
+    def _refuse_unknown_zenodo_copies(
+        self,
+        client: Any,
+        plan: DepositFilePlan,
+        context: DepositContext,
+        *,
+        continues: str | None,
+        live_draft: Mapping[str, Any] | None,
+    ) -> None:
+        """Refuse a deposit whose records point at Zenodo files that may be copies of its own data no reader can use.
+
+        *plan* lists such URLs by record id (``plan.unplaced``): Zenodo file
+        URLs on the deposit's Zenodo, under a record the deposit does not
+        continue, whose file the deposit index does not know. An earlier build
+        pointed records at the drafts and versions it made without recording
+        them, so the URL may be a copy of a file whose local source this
+        workspace does not know. Zenodo is asked about each such record, before
+        anything is created or changed:
+
+        - a record Zenodo does not show this account (HTTP 403, 404 or 410) is
+          someone else's, and the deposit links to it;
+        - a draft of this account that is not published serves its files to no
+          reader, and refuses the deposit;
+        - a published record of this account refuses the deposit when it is a
+          version of the record the deposit continues (*continues*, the record
+          or draft the run starts from; *live_draft* is that draft as Zenodo
+          returned it, when the run already asked), since the version the
+          deposit is made from need not hold its files. Any other is a link.
+
+        The concept record of the continued record is looked up only when a
+        published record needs the comparison. The refusal names each dataset
+        and how to point it at its local file again.
+        """
+        if not plan.unplaced:
+            return
+        from battinfo.zenodo import ZenodoError, deposit_is_published  # noqa: PLC0415
+
+        host = ZENODO_HOSTS[context.environment]
+        concept = context.concept
+        # Without a recorded concept, the continued record's is asked of
+        # Zenodo once, when a published record needs the comparison.
+        concept_known = bool(concept) or not continues
+        refused: builtins.list[str] = []
+        try:
+            for record, uses in sorted(plan.unplaced.items()):
+                try:
+                    found = client.get_deposit(record)
+                except ZenodoError as exc:
+                    if exc.status in (403, 404, 410):
+                        continue  # not this account's record: a link elsewhere
+                    raise
+                if not deposit_is_published(found):
+                    why = (
+                        f"is in the draft {record} on {host}, which this Zenodo account has not "
+                        "published, so no reader can download it"
+                    )
+                else:
+                    if not concept_known:
+                        stored = live_draft if live_draft is not None else client.get_deposit(continues)
+                        concept = str(stored.get("conceptrecid") or "") or None
+                        concept_known = True
+                    if not concept or str(found.get("conceptrecid") or "") != concept:
+                        continue  # another published record of this account: a link
+                    why = (
+                        f"is in the record {record}, a version of this workspace's own Zenodo record "
+                        f"(concept {concept} on {host}) that the workspace never recorded, and the "
+                        "version this deposit is made from need not hold it"
+                    )
+                refused.extend(f"dataset {dataset}: {url} {why}" for dataset, url in uses)
+        except ZenodoError as exc:
+            raise ZenodoError(
+                f"{exc} (asked to tell which Zenodo record holds files the dataset records point at). "
+                "Nothing was created on Zenodo.",
+                status=exc.status,
+            ) from exc
+        if refused:
+            raise RuntimeError(
+                f"Refusing to deposit: {len(refused)} distribution(s) point at a copy on Zenodo whose "
+                "local file this workspace has no record of, and the deposit cannot link to it: "
+                + "; ".join(refused)
+                + f". {_POINT_AT_LOCAL_FILE}, then re-run. Nothing was created on Zenodo."
+            )
+
+    def _refuse_missing_kept_copies(
+        self,
+        client: Any,
+        plan: DepositFilePlan,
+        datasets: Iterable[object],
+        *,
+        starts_from: str | None,
+        updates_draft: bool,
+    ) -> None:
+        """Refuse a deposit whose kept copies the record it starts from does not hold, before anything is created.
+
+        A data file with no local copy is kept as the record the deposit
+        starts from (*starts_from*) holds it: the draft it updates
+        (*updates_draft*), or the published record a new version is made from,
+        whose files the new version takes over. Zenodo is asked for that
+        record's files, so a copy it does not hold, or holds with another md5
+        than the one recorded, refuses the deposit before a draft is made or
+        changed. *datasets* are the dataset records, to name the ones whose
+        copy is missing.
+        """
+        kept = plan.kept_files()
+        if not kept or starts_from is None:
+            return
+        from battinfo.zenodo import ZenodoError  # noqa: PLC0415
+
+        try:
+            listing = client.list_files(starts_from)
+        except ZenodoError as exc:
+            raise ZenodoError(
+                f"{exc} (asked which data files the Zenodo record {starts_from} holds). Nothing was created on Zenodo.",
+                status=exc.status,
+            ) from exc
+        lacking = kept_copy_problems(listing, {entry.name: entry.md5 for entry in kept})
+        if lacking:
+            holder = (
+                f"the draft {starts_from} that this deposit updates"
+                if updates_draft
+                else f"the published record {starts_from} that this deposit makes a new version of"
+            )
+            raise RuntimeError(
+                _kept_copies_refusal(plan, datasets, lacking, holder) + " Nothing was created or changed on Zenodo."
+            )
+
+    def _submission_doi(self, doi: str | None) -> Callable[[object], str | None]:
+        """The DOI :meth:`submit` records on a record, by the record's IRI.
+
+        *doi*, when given, goes on every record. Without it, the DOI of the
+        Zenodo record this workspace continues goes on the records its deposit
+        holds, and only once it is published on zenodo.org. A recorded draft is
+        first checked with Zenodo (when ``ZENODO_API_TOKEN`` is set), in case
+        it was published on the website since.
+        """
+        if doi:
+            return lambda iri: doi
+        state = self._load_zenodo_state("production")
+        if not state:
+            # No record on zenodo.org: a state file that is there names a sandbox
+            # record (zenodo.json does so only as an earlier build wrote it).
+            if any(state_path(self._root, environment).exists() for environment in ZENODO_HOSTS):
+                print(
+                    f"  NOTE: this workspace's Zenodo record is on the sandbox ({state_file('sandbox')}), "
+                    "and a sandbox DOI is never recorded on the records."
+                )
+            return lambda iri: None
+        record = f"The Zenodo record {state['record_id']} in {state_file('production')}"
+        checked = True
+        if not state.get("published"):
+            checked = self._check_zenodo_draft(state)
+        if not state.get("published"):
+            unchecked = "" if checked else " (it could not be checked whether it was published since)"
+            print(
+                f"  NOTE: {record} is a draft{unchecked}, so its DOI is not recorded on the records. "
+                "Publish it, then submit again."
+            )
+            return lambda iri: None
+        stored = str(state.get("doi") or "")
+        if "records" not in state:
+            hint = f"Pass doi={stored!r} to record it on every record." if stored else "Pass doi= to record one."
+            print(
+                f"  NOTE: {record} does not list the records its deposit holds, so its DOI is not "
+                f"recorded on them. {hint}"
+            )
+            return lambda iri: None
+        held = frozenset(state["records"])
+        return lambda iri: stored if stored and isinstance(iri, str) and iri in held else None
+
+    def _check_zenodo_draft(self, state: dict) -> bool:
+        """For :meth:`submit`: ask Zenodo about the draft *state* records, if a token is set.
+
+        Returns False when it could not be checked: no ``ZENODO_API_TOKEN``,
+        or Zenodo did not answer (a warning says why).
+        """
+        from battinfo.zenodo import ZenodoClient, ZenodoError  # noqa: PLC0415
+
+        token = self._credential("ZENODO_API_TOKEN")
+        if not token:
+            return False
+        try:
+            self._reconcile_zenodo_draft(ZenodoClient(token=token), state)
+        except ZenodoError as exc:
+            warnings.warn(f"The Zenodo draft {state['record_id']} could not be checked: {exc}", stacklevel=3)
+            return False
+        return True
 
     # ── Conversion provenance: converted-file → original-source mapping ──────────
     def _conversions_path(self) -> Path:
@@ -8093,7 +9514,11 @@ class AuthoringWorkspace:
         names are recorded alongside the source link so the loss stays visible
         after the session ends. Entries without loss keep the legacy plain-string
         form (out -> src) for compatibility with existing manifests.
+
+        Both files are registered as data files of this workspace too, so a
+        Zenodo deposit may read them wherever they lie (see :meth:`zenodo`).
         """
+        self._register_sources([src, out], by="ws.convert")
         conv = self._load_conversions()
         if unmapped_columns:
             conv[str(out.resolve())] = {
@@ -8133,7 +9558,7 @@ class AuthoringWorkspace:
         fmt: str = "json-ld",
         output_dir: str | Path | None = None,
     ) -> builtins.list[Path]:
-        """Export all workspace records as RDF.
+        """Export the workspace's saved cell specs, cells, test specs, tests and datasets as RDF.
 
         Converts each record to JSON-LD, loads it into an RDF graph, then
         serializes to the requested format.  Requires ``ws.save()`` first.
@@ -9645,7 +11070,7 @@ class AuthoringWorkspace:
                         f"spec={test_spec!r} is not a test-protocol reference. Pass a "
                         "battinfo.TestSpec (authored inline or via ws.load(<draft file>)), "
                         "or the IRI of a test-protocol saved in this workspace "
-                        "(https://w3id.org/battinfo/test-protocol/...). A plain string is "
+                        "(https://w3id.org/battinfo/spec/...). A plain string is "
                         "not accepted as a protocol name: it would leave the run unlinked "
                         "to any saved protocol."
                     )
@@ -9706,6 +11131,14 @@ class AuthoringWorkspace:
                     "to use the originals recorded by ws.convert()."
                 )
             pinned_dataset_ids = self._pinned_dataset_iris(dataset_iris, len(files))
+            # The original of each data file: explicit raw= wins; otherwise the
+            # convert() manifest.
+            sources: builtins.list[Path | None] = (
+                list(raw_files) if raw_files else [self._resolve_raw_source(f) for f in files]
+            )
+            # The workspace registers every file it makes a dataset from, so a
+            # Zenodo deposit may read it wherever it lies (a lab share, say).
+            self._register_sources([*files, *sources], by="ws.add")
             # Measured period per data file (from the BDF unix_time_second column), so
             # the test activity and each dataset are placed in time from the data itself
             # rather than the record-assembly clock.
@@ -9741,8 +11174,7 @@ class AuthoringWorkspace:
             label = getattr(resolved, "name", None) or getattr(resolved, "serial_number", None) or resolved.id or "cell"
             n_raw = 0
             for i, f in enumerate(files):
-                # Explicit raw= wins; otherwise fall back to the convert() manifest.
-                src = raw_files[i] if raw_files else self._resolve_raw_source(f)
+                src = sources[i]
                 if src is not None:
                     n_raw += 1
                 _per = periods[i]
@@ -10004,6 +11436,8 @@ class AuthoringWorkspace:
                 "  Or reference existing ones: ws.load(ws.search(type='cell', batch='...'))"
             )
 
+        # Registered as the explicit form registers its files (see _register_sources).
+        self._register_sources([*matched_files, *(self._resolve_raw_source(f) for f in matched_files)], by="ws.add")
         print(f"Matching {len(matched_files)} file(s) to cell instances...")
         unmatched: list[Path] = []
         tests = []
@@ -10209,19 +11643,18 @@ def _cell_spec_submission_payload(
     )
 
 
-def _point_source_url_at_public_copy(record: dict, public_by_name: Mapping[str, str]) -> bool:
+def _point_source_url_at_public_copy(record: dict, public_url_for: Callable[[object], str | None]) -> bool:
     """Replace a local ``provenance.source_url`` with the public URL of the same file.
 
-    *public_by_name* maps a deposited file's name to its public URL. Returns
-    True when the record changed.
+    *public_url_for* maps a location (a ``file:`` URI or a path) to the public
+    URL of the file it names, found by resolved path, or to ``None`` when that
+    file has no public copy; a file that merely shares the name of an uploaded
+    one is not taken for it. Returns True when the record changed.
     """
-    from battinfo._util import local_path, path_name  # noqa: PLC0415
-
     provenance = record.get("provenance")
     if not isinstance(provenance, dict):
         return False
-    source = local_path(provenance.get("source_url"))
-    public = public_by_name.get(path_name(source)) if source is not None else None
+    public = public_url_for(provenance.get("source_url"))
     if not public:
         return False
     provenance["source_url"] = public
@@ -10711,8 +12144,19 @@ def _bump_version(ver: str) -> str:
 
 
 def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | None = None) -> str:
-    """Return raw JSON-LD text from a Zenodo record ID, URL, or local file path."""
-    import urllib.request
+    """Return raw JSON-LD text from a Zenodo record ID, an http(s) URL, or a local file path.
+
+    *token* goes only over https to the Zenodo API host of the environment
+    *sandbox* chooses (``zenodo.org``, or ``sandbox.zenodo.org``), for the
+    record's file list and for a file link on that host: never to another
+    host, never over plain http, and never on a redirect (see
+    :func:`_import_fetch`). A source URL whose scheme is not http or https is
+    refused, and so is a link in Zenodo's file list that is not an http(s) URL;
+    such a link is never read as a local path.
+    """
+    from urllib.parse import urlparse  # noqa: PLC0415
+
+    api_host = "sandbox.zenodo.org" if sandbox else "zenodo.org"
 
     # Local file
     p = Path(source)
@@ -10720,24 +12164,14 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
         return p.read_text(encoding="utf-8")
 
     # URL
-    if source.startswith("http://") or source.startswith("https://"):
-        headers = {"User-Agent": "battinfo-client/1.0"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        req = urllib.request.Request(source, headers=headers)
-        with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
-            return resp.read().decode("utf-8")
+    scheme = urlparse(source).scheme.lower()
+    if scheme in ("http", "https"):
+        return _import_fetch(source, token=token, api_host=api_host, timeout=30)
 
     # Zenodo record ID (numeric string)
     if source.isdigit():
-        domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
-        api_url = f"https://{domain}/api/records/{source}/files"
-        headers = {"User-Agent": "battinfo-client/1.0"}
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
-        req = urllib.request.Request(api_url, headers=headers)
-        with urllib.request.urlopen(req, timeout=15) as resp:  # noqa: S310
-            files = json.loads(resp.read())
+        api_url = f"https://{api_host}/api/records/{source}/files"
+        files = json.loads(_import_fetch(api_url, token=token, api_host=api_host, timeout=15))
 
         # Find the linked-data document (current battinfo.json, or legacy battinfo.jsonld).
         entry = next(
@@ -10755,9 +12189,43 @@ def _import_resolve_source(source: str, *, sandbox: bool = False, token: str | N
                 f"({BATTINFO_LD_FILENAME} is the standard entry point for battinfo Zenodo deposits.)"
             )
         download_url = entry.get("links", {}).get("content") or entry.get("url", "")
-        return _import_resolve_source(download_url, token=token)
+        if not _import_web_url(download_url):
+            raise RuntimeError(
+                f"Zenodo record {source} links its {entry.get('key')} at {download_url!r}, which is "
+                "not an http(s) URL, so nothing was read from it."
+            )
+        return _import_fetch(download_url, token=token, api_host=api_host, timeout=30)
 
+    # A URL of any other scheme (a one-letter scheme is a Windows drive).
+    if len(scheme) > 1:
+        raise ValueError(
+            f"Cannot import from {source!r}: ws.import_() reads only http and https URLs. "
+            "Pass a Zenodo record ID, an http(s) URL, or the path of a local file."
+        )
     raise ValueError(f"Cannot resolve import source {source!r}. Pass a Zenodo record ID, a URL, or a local file path.")
+
+
+def _import_fetch(url: str, *, token: str | None, api_host: str, timeout: float) -> str:
+    """The text at the http(s) *url*, sent with *token* only where a Zenodo token may go.
+
+    The token goes along only when urllib will connect to *api_host* over
+    https. It is added as an unredirected header, which urllib leaves behind
+    when it follows a redirect: urllib copies every other header onto the
+    request it is redirected to, whatever host that request goes to.
+    """
+    import urllib.request  # noqa: PLC0415
+
+    request = urllib.request.Request(url, headers={"User-Agent": "battinfo-client/1.0"})
+    if token:
+        if request.type == "https" and request.host.lower() in (api_host, f"{api_host}:443"):
+            request.add_unredirected_header("Authorization", f"Bearer {token}")
+        else:
+            warnings.warn(
+                f"The Zenodo token was not sent to {url}: ws.import_() sends it only over https to {api_host}.",
+                stacklevel=4,
+            )
+    with urllib.request.urlopen(request, timeout=timeout) as resp:  # noqa: S310
+        return resp.read().decode("utf-8")
 
 
 def _test_kind_values() -> list[str]:

@@ -8,14 +8,13 @@ import time
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator
 
 from battinfo._fs_guard import check_relative_path, is_within, remove_temp_tree, remove_tree, require_within
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _now_iso, _sha256
+from battinfo._util import _as_path, _now_iso, _sha256, file_uri_to_path, is_file_uri
 from battinfo._workspace import Workspace
 from battinfo.bundle import Cell, CellSpec, Dataset, Test
 from battinfo.local_workspace import (
@@ -129,15 +128,8 @@ def _guess_media_type(path: str | None) -> str | None:
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
-    parsed = urlparse(uri)
-    if parsed.scheme != "file":
-        return None
-    path_text = unquote(parsed.path)
-    if parsed.netloc:
-        path_text = f"//{parsed.netloc}{path_text}"
-    if path_text.startswith("/") and len(path_text) > 2 and path_text[2] == ":":
-        path_text = path_text[1:]
-    return Path(path_text)
+    """The path a ``file:`` URI names (see :func:`battinfo._util.file_uri_to_path`), or ``None``."""
+    return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
 def _dir_size(path: Path) -> int:

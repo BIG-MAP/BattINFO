@@ -19,7 +19,7 @@
     },
     "profile": {
       "type": "string",
-      "description": "Name of the validation profile the document targets (e.g. 'batterypass')."
+      "description": "Name of the validation profile the document targets, for example 'base'."
     },
     "record": {
       "$ref": "#/$defs/Record",
