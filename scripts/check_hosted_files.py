@@ -19,6 +19,27 @@ that the hosted context still holds every term of the last release's v1
 context with the same value, so terms added on main since that release do not
 count; ``.github/workflows/hosted-files.yml`` runs that every day.
 
+The ontology, battinfo.ttl, is served from GitHub Pages, where
+.github/workflows/docs-deploy.sh puts it for each final release. w3id sends
+https://w3id.org/battinfo to the newest release's copy at the root of the site,
+https://w3id.org/battinfo/X.Y.Z to battinfo/versions/X.Y.Z/battinfo.ttl, and
+https://w3id.org/battinfo/latest to battinfo.ttl on main. The versionIRI,
+https://w3id.org/battinfo/X.Y.Z/battinfo, reaches the registry, which answers
+with a 303 to https://w3id.org/battinfo/X.Y.Z. Each request asks for
+``text/turtle`` and follows the redirects one at a time, so the report says
+where each IRI landed:
+
+* ``--ontology-routes`` checks that the root, /latest, /X.Y.Z and the
+  versionIRI of this checkout's battinfo.ttl land where w3id should send them.
+  Before the tag the release's files are not there yet, so a 404 in the right
+  place passes. With ``--served`` each must also answer with this checkout's
+  battinfo.ttl, which is the check after the tag.
+* ``--ontology`` checks that the root declares the last release's versionIRI
+  and imports, and that /X.Y.Z and the versionIRI serve that release's
+  battinfo.ttl. ``.github/workflows/hosted-files.yml`` runs it every day. It is
+  not part of release.yml, because the versionIRI resolves only after the
+  tag's own docs deploy, and it leaves /latest out, since that follows main.
+
 A request is tried again when the server is busy or does not answer, since the
 registry's host can take a minute to wake up.
 
@@ -26,6 +47,8 @@ Usage::
 
     python scripts/check_hosted_files.py [--summary FILE]
     python scripts/check_hosted_files.py --release-terms [--tag vX.Y.Z] [--summary FILE]
+    python scripts/check_hosted_files.py --ontology-routes [--served] [--summary FILE]
+    python scripts/check_hosted_files.py --ontology [--tag vX.Y.Z] [--summary FILE]
 
 The exit status is 0 when everything matches and 1 when anything differs or
 could not be fetched. Only the standard library is used, so it runs without
@@ -43,6 +66,7 @@ import subprocess
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
@@ -59,12 +83,25 @@ VOCABULARY_PATH = Path("assets/vocab/battinfo-records.ttl")
 # /vocab/battinfo-records.ttl, so this IRI stands for the vocabulary document.
 VOCABULARY_URL = "https://w3id.org/battinfo/sourceType"
 
+ONTOLOGY_PATH = Path("battinfo.ttl")
+ONTOLOGY_IRI = "https://w3id.org/battinfo"
+LATEST_IRI = "https://w3id.org/battinfo/latest"
+PAGES = "https://big-map.github.io/BattINFO"
+LATEST_FILE = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/main/battinfo.ttl"
+# docs-deploy.sh publishes the ontology from this release on; older releases
+# were published by hand, under other paths.
+FIRST_ONTOLOGY_RELEASE = (0, 8, 0)
+
 FINAL_RELEASE_TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 USER_AGENT = "battinfo-hosted-check (+https://github.com/BIG-MAP/BattINFO)"
 # Statuses that mean "busy or waking up, ask again"; any other is the answer.
 RETRY_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
+REDIRECT_STATUSES = frozenset({301, 302, 303, 307, 308})
 # How a hosted file can compare with the checkout's copy, in report order.
 STATUSES = ("same", "differs", "missing", "unreachable")
+# How an ontology IRI can come out, in report order. "routed" lands in the right
+# place (before the tag the file there may not exist yet); "misrouted" elsewhere.
+ONTOLOGY_STATUSES = ("same", "routed", "differs", "missing", "misrouted", "unreachable")
 
 
 @dataclass(frozen=True)
@@ -94,6 +131,36 @@ class FetchError(Exception):
 
 
 Fetch = Callable[[str, str], bytes]
+
+
+@dataclass(frozen=True)
+class Landing:
+    """Where a request ended: the first answer that is not a redirect, and the URLs on the way (*hops*)."""
+
+    url: str
+    status: int
+    body: bytes = b""
+    hops: tuple[str, ...] = ()
+
+
+Trace = Callable[[str, str], Landing]
+
+
+@dataclass(frozen=True)
+class OntologyFacts:
+    """What a battinfo.ttl declares: its ``owl:versionIRI``, ``owl:versionInfo`` and ``owl:imports``."""
+
+    version_iri: str | None
+    version: str | None
+    imports: frozenset[str]
+
+
+@dataclass(frozen=True)
+class Route:
+    """An ontology IRI, and the file on GitHub that w3id should send it to (*lands*)."""
+
+    iri: str
+    lands: str
 
 
 def hosted_files(root: Path = ROOT) -> list[HostedFile]:
@@ -147,6 +214,57 @@ def fetch(
             raise FetchError(f"no answer after {attempts} attempts ({problem})")
         sleep(wait * attempt)
     raise AssertionError("unreachable")  # pragma: no cover
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Hand each redirect back to :func:`trace`, which follows it and notes where it went."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001, ANN201
+        return None
+
+
+def trace(
+    url: str,
+    accept: str,
+    *,
+    attempts: int = 4,
+    wait: float = 10.0,
+    timeout: float = 90.0,
+    opener: Callable[..., Any] | None = None,
+    sleep: Callable[[float], None] = time.sleep,
+    max_hops: int = 10,
+) -> Landing:
+    """GET *url* and follow its redirects one at a time, asking for *accept* each time.
+
+    Return where the request landed: the first answer that is not a redirect,
+    whatever its status, so a 404 at the end is a result, not an error. Each
+    request is tried again as :func:`fetch` does. :class:`FetchError` is raised
+    when a server does not answer, or after *max_hops* redirects.
+    """
+    open_url = opener or urllib.request.build_opener(_NoRedirect).open
+    current = url
+    hops = [url]
+    for _hop in range(max_hops + 1):
+        request = urllib.request.Request(current, headers={"Accept": accept, "User-Agent": USER_AGENT})
+        for attempt in range(1, attempts + 1):
+            try:
+                with open_url(request, timeout=timeout) as response:
+                    return Landing(current, getattr(response, "status", 200), response.read(), tuple(hops))
+            except urllib.error.HTTPError as exc:
+                location = exc.headers.get("Location") if exc.headers is not None else None
+                if exc.code in REDIRECT_STATUSES and location:
+                    current = urllib.parse.urljoin(current, location)
+                    hops.append(current)
+                    break
+                if exc.code not in RETRY_STATUSES:
+                    return Landing(current, exc.code, b"", tuple(hops))
+                problem = f"HTTP {exc.code}"
+            except (urllib.error.URLError, http.client.HTTPException, OSError) as exc:
+                problem = str(getattr(exc, "reason", exc)) or type(exc).__name__
+            if attempt == attempts:
+                raise FetchError(f"no answer from {current} after {attempts} attempts ({problem})")
+            sleep(wait * attempt)
+    raise FetchError(f"more than {max_hops} redirects from {url}")
 
 
 def compare_files(files: Iterable[HostedFile], fetch_file: Fetch, root: Path = ROOT) -> list[Outcome]:
@@ -266,15 +384,180 @@ def check_release_terms(fetch_file: Fetch, tag: str | None, root: Path = ROOT) -
     return (1 if problems else 0), log, markdown
 
 
-def main(argv: list[str] | None = None, *, fetch_file: Fetch | None = None, root: Path = ROOT) -> int:
+_VERSION_IRI = re.compile(r"(?:owl:versionIRI|<http://www\.w3\.org/2002/07/owl#versionIRI>)\s+<([^>]+)>")
+_VERSION_INFO = re.compile(r'(?:owl:versionInfo|<http://www\.w3\.org/2002/07/owl#versionInfo>)\s+"([^"]*)"')
+_IMPORTS = re.compile(r"(?:owl:imports|<http://www\.w3\.org/2002/07/owl#imports>)\s+<([^>]+)>")
+
+
+def ontology_facts(turtle: bytes) -> OntologyFacts:
+    """Read the version IRI, the version and the imports from a battinfo.ttl laid out as this repository's."""
+    text = turtle.decode("utf-8", errors="replace")
+    version_iri = _VERSION_IRI.search(text)
+    version = _VERSION_INFO.search(text)
+    return OntologyFacts(
+        version_iri.group(1) if version_iri else None,
+        version.group(1) if version else None,
+        frozenset(_IMPORTS.findall(text)),
+    )
+
+
+def ontology_routes(facts: OntologyFacts, version: str, *, latest: bool) -> list[Route]:
+    """The ontology IRIs of release *version* and where w3id should send each one."""
+    versioned = f"{PAGES}/battinfo/versions/{version}/battinfo.ttl"
+    routes = [Route(ONTOLOGY_IRI, f"{PAGES}/battinfo.ttl")]
+    if latest:
+        routes.append(Route(LATEST_IRI, LATEST_FILE))
+    routes.append(Route(f"{ONTOLOGY_IRI}/{version}", versioned))
+    if facts.version_iri:
+        routes.append(Route(facts.version_iri, versioned))
+    return routes
+
+
+def _describe(facts: OntologyFacts) -> str:
+    return f"versionIRI {facts.version_iri}, imports {', '.join(sorted(facts.imports)) or 'none'}"
+
+
+def _ontology_outcome(route: Route, landing: Landing, expected: bytes, *, by_imports: bool, served: bool) -> Outcome:
+    """Compare where *route* landed, and what it served, with the *expected* battinfo.ttl."""
+    hosted_file = HostedFile(route.iri, "text/turtle", ONTOLOGY_PATH)
+    where = f"lands on {landing.url} (HTTP {landing.status})"
+    if landing.url != route.lands:
+        return Outcome(hosted_file, "misrouted", f"{where}, expected {route.lands}")
+    if landing.status != 200:
+        return Outcome(hosted_file, "missing" if served else "routed", where)
+    if by_imports:
+        hosted, wanted = ontology_facts(landing.body), ontology_facts(expected)
+        same = (hosted.version_iri, hosted.imports) == (wanted.version_iri, wanted.imports)
+        if not same:
+            return Outcome(hosted_file, "differs", f"{where}: {_describe(hosted)}; expected {_describe(wanted)}")
+        return Outcome(hosted_file, "same", where)
+    if normalised_sha256(landing.body) == normalised_sha256(expected):
+        return Outcome(hosted_file, "same", where)
+    if not served:
+        return Outcome(hosted_file, "routed", f"{where}, serving another battinfo.ttl")
+    detail = f"{where}: hosted sha256 {normalised_sha256(landing.body)}, expected {normalised_sha256(expected)}"
+    return Outcome(hosted_file, "differs", detail)
+
+
+def _report_ontology(outcomes: list[Outcome], head: str) -> tuple[list[str], list[str]]:
+    counts = {status: sum(1 for o in outcomes if o.status == status) for status in ONTOLOGY_STATUSES}
+    totals = ", ".join(f"{counts[status]} {status}" for status in ONTOLOGY_STATUSES if counts[status])
+    log = [head]
+    for outcome in outcomes:
+        detail = f"  ({outcome.detail})" if outcome.detail else ""
+        log.append(f"  {outcome.status:<12} {outcome.file.url}{detail}")
+    log.append(f"{len(outcomes)} IRIs: {totals}.")
+    markdown = ["### Hosted ontology", "", head, "", "| IRI | Result | Detail |", "|---|---|---|"]
+    markdown += [f"| {o.file.url} | {o.status} | {o.detail} |" for o in outcomes]
+    return log, markdown
+
+
+def _trace_routes(
+    trace_url: Trace, routes: list[Route], expected: bytes, *, served: bool, root_by_imports: bool
+) -> list[Outcome]:
+    outcomes = []
+    for route in routes:
+        try:
+            landing = trace_url(route.iri, "text/turtle")
+        except FetchError as exc:
+            outcomes.append(Outcome(HostedFile(route.iri, "text/turtle", ONTOLOGY_PATH), "unreachable", str(exc)))
+            continue
+        by_imports = root_by_imports and route.iri == ONTOLOGY_IRI
+        outcomes.append(_ontology_outcome(route, landing, expected, by_imports=by_imports, served=served))
+    return outcomes
+
+
+def check_ontology_routes(
+    trace_url: Trace, *, served: bool = False, root: Path = ROOT
+) -> tuple[int, list[str], list[str]]:
+    """Check where the ontology IRIs of this checkout's battinfo.ttl land, and with *served* what they serve."""
+    expected = (root / ONTOLOGY_PATH).read_bytes()
+    facts = ontology_facts(expected)
+    if not facts.version or not facts.version_iri:
+        message = f"{ONTOLOGY_PATH} declares no owl:versionInfo or owl:versionIRI."
+        return 1, [message], ["### Hosted ontology", "", message]
+    routes = ontology_routes(facts, facts.version, latest=True)
+    outcomes = _trace_routes(trace_url, routes, expected, served=served, root_by_imports=False)
+    passing = {"same"} if served else {"same", "routed"}
+    if served:
+        head = f"The w3id ontology IRIs, which must serve this checkout's battinfo.ttl ({facts.version}):"
+    else:
+        head = f"Where the w3id ontology IRIs of this checkout's battinfo.ttl ({facts.version}) land:"
+    log, markdown = _report_ontology(outcomes, head)
+    return (0 if all(o.status in passing for o in outcomes) else 1), log, markdown
+
+
+def check_ontology(trace_url: Trace, tag: str | None, root: Path = ROOT) -> tuple[int, list[str], list[str]]:
+    """Check that the ontology IRIs serve the battinfo.ttl of release *tag* (default: the newest final tag)."""
+    if tag is None:
+        listed = _git(root, "tag", "--list", "v*")
+        tag = latest_release(listed.stdout.decode().split()) if listed.returncode == 0 else None
+        if tag is None:
+            message = "No vX.Y.Z tag found in this checkout. Fetch the tags (actions/checkout with fetch-depth: 0)."
+            return 1, [message], ["### Hosted ontology", "", message]
+    match = FINAL_RELEASE_TAG.fullmatch(tag)
+    if match is None or _git(root, "rev-parse", "--verify", "--quiet", f"refs/tags/{tag}").returncode != 0:
+        message = f"There is no final release tag {tag} in this checkout."
+        return 1, [message], ["### Hosted ontology", "", message]
+    if tuple(int(part) for part in match.groups()) < FIRST_ONTOLOGY_RELEASE:
+        first = ".".join(str(part) for part in FIRST_ONTOLOGY_RELEASE)
+        message = (
+            f"{tag} predates {first}, the first release whose docs deploy published the ontology; nothing to check."
+        )
+        return 0, [message], ["### Hosted ontology", "", message]
+    shown = _git(root, "show", f"{tag}:{ONTOLOGY_PATH.as_posix()}")
+    if shown.returncode != 0:
+        message = f"{tag} has no {ONTOLOGY_PATH.as_posix()}."
+        return 1, [message], ["### Hosted ontology", "", message]
+    expected = shown.stdout
+    facts = ontology_facts(expected)
+    version = tag[1:]
+    routes = ontology_routes(facts, version, latest=False)
+    outcomes = _trace_routes(trace_url, routes, expected, served=True, root_by_imports=True)
+    problems = []
+    if facts.version != version or not facts.version_iri:
+        problems.append(f"{tag}'s own battinfo.ttl declares version {facts.version} and versionIRI {facts.version_iri}")
+    status = 0 if not problems and all(o.status == "same" for o in outcomes) else 1
+    if status == 0:
+        head = f"The w3id ontology IRIs serve the battinfo.ttl of {tag}."
+    else:
+        head = f"The w3id ontology IRIs do not all serve the battinfo.ttl of {tag}:"
+    log, markdown = _report_ontology(outcomes, head)
+    return status, [*problems, *log], [*markdown, *(f"- {problem}" for problem in problems)]
+
+
+def main(
+    argv: list[str] | None = None,
+    *,
+    fetch_file: Fetch | None = None,
+    trace_url: Trace | None = None,
+    root: Path = ROOT,
+) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument(
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
         "--release-terms",
         action="store_true",
         help="check that the hosted v1 context holds the last release's terms, instead of comparing every file",
     )
+    mode.add_argument(
+        "--ontology",
+        action="store_true",
+        help="check that the w3id ontology IRIs serve the last release's battinfo.ttl",
+    )
+    mode.add_argument(
+        "--ontology-routes",
+        action="store_true",
+        help="check where the w3id ontology IRIs of this checkout's battinfo.ttl land",
+    )
     parser.add_argument(
-        "--tag", help="with --release-terms: the release to check against (default: the newest vX.Y.Z tag)"
+        "--served",
+        action="store_true",
+        help="with --ontology-routes: each IRI must also serve this checkout's battinfo.ttl (after the tag)",
+    )
+    parser.add_argument(
+        "--tag",
+        help="with --release-terms or --ontology: the release to check against (default: the newest vX.Y.Z tag)",
     )
     parser.add_argument(
         "--summary", type=Path, help="append a Markdown summary to this file, such as $GITHUB_STEP_SUMMARY"
@@ -284,14 +567,27 @@ def main(argv: list[str] | None = None, *, fetch_file: Fetch | None = None, root
         "--wait", type=float, default=10.0, help="seconds before the second request; each later one waits longer"
     )
     args = parser.parse_args(argv)
+    if args.served and not args.ontology_routes:
+        parser.error("--served goes with --ontology-routes")
+    if args.tag and not (args.release_terms or args.ontology):
+        parser.error("--tag goes with --release-terms or --ontology")
 
     if fetch_file is None:
 
         def fetch_file(url: str, accept: str) -> bytes:
             return fetch(url, accept, attempts=args.attempts, wait=args.wait)
 
+    if trace_url is None:
+
+        def trace_url(url: str, accept: str) -> Landing:
+            return trace(url, accept, attempts=args.attempts, wait=args.wait)
+
     if args.release_terms:
         status, log, markdown = check_release_terms(fetch_file, args.tag, root)
+    elif args.ontology:
+        status, log, markdown = check_ontology(trace_url, args.tag, root)
+    elif args.ontology_routes:
+        status, log, markdown = check_ontology_routes(trace_url, served=args.served, root=root)
     else:
         status, log, markdown = check_files(fetch_file, root)
     print("\n".join(log))

@@ -5,11 +5,14 @@ records context, each JSON Schema at its $id, the record vocabulary) must have
 the sha256 of the checkout's copy, line endings aside. The scheduled workflow
 runs it with --release-terms: the hosted context must still hold the last
 release's terms with the same values, and terms added since do not count.
-Nothing here reaches the network: the fetches are answered from memory.
+The ontology IRIs are checked with --ontology-routes before a tag and with
+--ontology after it. Nothing here reaches the network: the fetches are
+answered from memory.
 """
 
 from __future__ import annotations
 
+import email.message
 import importlib.util
 import io
 import json
@@ -268,3 +271,268 @@ def test_without_tags_the_scheduled_check_fails_rather_than_pass_unchecked(tmp_p
     _git(tmp_path, "init", "-q")
     status, log, _markdown = check.check_release_terms(_serving(RELEASED), None, tmp_path)
     assert status == 1 and "No vX.Y.Z tag found" in log[0]
+
+
+# ── The ontology at its w3id IRIs ──
+#
+# docs-deploy.sh publishes battinfo.ttl on GitHub Pages for each final release:
+# at battinfo/versions/X.Y.Z/, where w3id sends https://w3id.org/battinfo/X.Y.Z,
+# and at the root, where w3id sends https://w3id.org/battinfo. The registry
+# answers the versionIRI, https://w3id.org/battinfo/X.Y.Z/battinfo, with a 303 to
+# https://w3id.org/battinfo/X.Y.Z. --ontology-routes checks where each IRI
+# leads, before the tag; --ontology checks, after it and every day, that they
+# serve the last release's battinfo.ttl.
+
+PAGES = "https://big-map.github.io/BattINFO"
+OLD_IMPORT = "https://w3id.org/emmo/domain/battery/0.13.0-beta/battery"
+IMPORTS = [
+    "https://w3id.org/emmo/domain/battery/0.21.0/battery",
+    "https://w3id.org/emmo/domain/electrochemistry/0.39.0/electrochemistry",
+]
+
+
+def _ontology(version: str, imports: list[str] = IMPORTS, version_iri: str | None = None) -> bytes:
+    """A battinfo.ttl laid out as the real one, declaring *version*."""
+    iri = version_iri or f"https://w3id.org/battinfo/{version}/battinfo"
+    lines = ["@prefix owl: <http://www.w3.org/2002/07/owl#> .", "@prefix battinfo: <https://w3id.org/battinfo#> .", ""]
+    lines += ["battinfo: a owl:Ontology ;", f"    owl:versionIRI <{iri}> ;"]
+    lines += [f"    owl:imports <{import_iri}> ;" for import_iri in imports]
+    lines += [f'    owl:versionInfo "{version}" .', ""]
+    return "\n".join(lines).encode("utf-8")
+
+
+def _landings(ttl: bytes, version: str) -> dict[str, object]:
+    """Where each ontology IRI lands once *version* is released and deployed, serving *ttl*."""
+    versioned = f"{PAGES}/battinfo/versions/{version}/battinfo.ttl"
+    return {
+        "https://w3id.org/battinfo": check.Landing(f"{PAGES}/battinfo.ttl", 200, ttl),
+        "https://w3id.org/battinfo/latest": check.Landing(check.LATEST_FILE, 200, ttl),
+        f"https://w3id.org/battinfo/{version}": check.Landing(versioned, 200, ttl),
+        f"https://w3id.org/battinfo/{version}/battinfo": check.Landing(versioned, 200, ttl),
+    }
+
+
+class _Traced:
+    """Answers each ontology IRI from a table of landings, and records what was asked."""
+
+    def __init__(self, landings: dict[str, object]) -> None:
+        self.landings = landings
+        self.requests: list[tuple[str, str]] = []
+
+    def __call__(self, url: str, accept: str) -> object:
+        self.requests.append((url, accept))
+        landing = self.landings[url]
+        if isinstance(landing, Exception):
+            raise landing
+        return landing
+
+
+def test_ontology_facts_read_the_version_iri_and_the_imports() -> None:
+    facts = check.ontology_facts((ROOT / "battinfo.ttl").read_bytes())
+    assert facts.version_iri == f"https://w3id.org/battinfo/{facts.version}/battinfo"
+    assert "https://w3id.org/emmo/domain/battery/0.21.0/battery" in facts.imports
+    assert len(facts.imports) == 3
+    old = check.ontology_facts(_ontology("0.8.0-beta", [OLD_IMPORT]).replace(b"\n", b"\r\n"))
+    assert old == check.OntologyFacts(
+        "https://w3id.org/battinfo/0.8.0-beta/battinfo", "0.8.0-beta", frozenset([OLD_IMPORT])
+    )
+
+
+@pytest.fixture()
+def ontology_releases(tmp_path: Path) -> Path:
+    """A repository whose v0.6.0 predates the ontology deploy and whose v0.8.0 has a battinfo.ttl for 0.8.0."""
+    if shutil.which("git") is None:
+        pytest.skip("needs git")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q")
+    (repo / "battinfo.ttl").write_bytes(_ontology("0.6.0", [OLD_IMPORT]))
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "0.6.0")
+    _git(repo, "tag", "v0.6.0")
+    (repo / "battinfo.ttl").write_bytes(_ontology("0.8.0"))
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "0.8.0")
+    _git(repo, "tag", "v0.8.0")
+    _git(repo, "tag", "v0.9.0rc1")  # a pre-release is never the last release
+    return repo
+
+
+def test_the_ontology_check_passes_when_every_iri_serves_the_last_release(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    traced = _Traced(_landings(_ontology("0.8.0"), "0.8.0"))
+    summary = tmp_path / "summary.md"
+    assert check.main(["--ontology", "--summary", str(summary)], trace_url=traced, root=ontology_releases) == 0
+    out = capsys.readouterr().out
+    assert "serve the battinfo.ttl of v0.8.0" in out
+    # Not /latest, which follows main rather than the release.
+    assert {url for url, _accept in traced.requests} == {
+        "https://w3id.org/battinfo",
+        "https://w3id.org/battinfo/0.8.0",
+        "https://w3id.org/battinfo/0.8.0/battinfo",
+    }
+    assert {accept for _url, accept in traced.requests} == {"text/turtle"}
+    assert "### Hosted ontology" in summary.read_text(encoding="utf-8")
+
+
+def test_a_root_that_still_serves_an_older_ontology_fails(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    stale = _ontology("0.8.0-beta", [OLD_IMPORT])
+    landings["https://w3id.org/battinfo"] = check.Landing(f"{PAGES}/battinfo.ttl", 200, stale)
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 1
+    out = capsys.readouterr().out
+    assert "differs      https://w3id.org/battinfo  (" in out
+    assert "0.8.0-beta" in out and OLD_IMPORT in out
+
+
+def test_a_version_iri_the_registry_does_not_route_yet_fails(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    registry = "https://battinfo-registry.onrender.com/w3id/0.8.0/battinfo"
+    landings["https://w3id.org/battinfo/0.8.0/battinfo"] = check.Landing(registry, 404)
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 1
+    out = capsys.readouterr().out
+    assert f"misrouted    https://w3id.org/battinfo/0.8.0/battinfo  (lands on {registry} (HTTP 404)" in out
+
+
+def test_a_version_folder_that_is_not_deployed_fails(ontology_releases: Path) -> None:
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    landings["https://w3id.org/battinfo/0.8.0"] = check.Landing(f"{PAGES}/battinfo/versions/0.8.0/battinfo.ttl", 404)
+    landings["https://w3id.org/battinfo/0.8.0/battinfo"] = check.FetchError("no answer after 4 attempts (timed out)")
+    status, log, _markdown = check.check_ontology(_Traced(landings), None, ontology_releases)
+    assert status == 1
+    text = "\n".join(log)
+    assert (
+        f"missing      https://w3id.org/battinfo/0.8.0  (lands on {PAGES}/battinfo/versions/0.8.0/battinfo.ttl (HTTP 404)"
+        in text
+    )
+    assert "unreachable  https://w3id.org/battinfo/0.8.0/battinfo  (no answer after 4 attempts" in text
+
+
+def test_a_release_before_the_ontology_deploy_has_nothing_to_check(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    traced = _Traced({})
+    assert check.main(["--ontology", "--tag", "v0.6.0"], trace_url=traced, root=ontology_releases) == 0
+    assert "v0.6.0 predates" in capsys.readouterr().out
+    assert traced.requests == []
+    assert check.main(["--ontology", "--tag", "v9.9.9"], trace_url=traced, root=ontology_releases) == 1
+
+
+def test_without_tags_the_ontology_check_fails_rather_than_pass_unchecked(tmp_path: Path) -> None:
+    if shutil.which("git") is None:
+        pytest.skip("needs git")
+    _git(tmp_path, "init", "-q")
+    status, log, _markdown = check.check_ontology(_Traced({}), None, tmp_path)
+    assert status == 1 and "No vX.Y.Z tag found" in log[0]
+
+
+def _before_the_tag() -> dict[str, object]:
+    """w3id routes every IRI right, but only the file at /latest is this release's yet."""
+    ttl = (ROOT / "battinfo.ttl").read_bytes()
+    version = check.ontology_facts(ttl).version
+    assert version
+    landings = _landings(ttl, version)
+    landings["https://w3id.org/battinfo"] = check.Landing(f"{PAGES}/battinfo.ttl", 200, _ontology("0.8.0-beta"))
+    for iri in (f"https://w3id.org/battinfo/{version}", f"https://w3id.org/battinfo/{version}/battinfo"):
+        landing = landings[iri]
+        assert isinstance(landing, check.Landing)
+        landings[iri] = check.Landing(landing.url, 404)
+    return landings
+
+
+def test_before_the_tag_the_routes_check_passes_when_each_iri_leads_where_w3id_should_send_it(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    traced = _Traced(_before_the_tag())
+    assert check.main(["--ontology-routes"], trace_url=traced) == 0
+    out = capsys.readouterr().out
+    assert f"https://w3id.org/battinfo/latest  (lands on {check.LATEST_FILE}" in out
+    assert len(traced.requests) == 4
+    # After the tag, every IRI must also serve the battinfo.ttl of the checkout.
+    assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(_before_the_tag())) == 1
+
+
+def test_a_route_that_leads_elsewhere_fails(capsys: pytest.CaptureFixture[str]) -> None:
+    landings = _before_the_tag()
+    master = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/master/battinfo.ttl"
+    landings["https://w3id.org/battinfo/latest"] = check.Landing(master, 200, _ontology("0.8.0-beta"))
+    assert check.main(["--ontology-routes"], trace_url=_Traced(landings)) == 1
+    assert f"misrouted    https://w3id.org/battinfo/latest  (lands on {master}" in capsys.readouterr().out
+
+
+def test_after_the_tag_every_route_serves_the_ontology_of_the_checkout() -> None:
+    ttl = (ROOT / "battinfo.ttl").read_bytes()
+    version = check.ontology_facts(ttl).version
+    assert version
+    assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(_landings(ttl, version))) == 0
+
+
+def test_served_belongs_to_the_routes_check() -> None:
+    with pytest.raises(SystemExit):
+        check.main(["--ontology", "--served"], trace_url=_Traced({}))
+
+
+class _Answer(io.BytesIO):
+    """A response to one request, as urlopen gives it."""
+
+    def __init__(self, body: bytes = b"", status: int = 200) -> None:
+        super().__init__(body)
+        self.status = status
+
+    def __enter__(self) -> _Answer:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.close()
+
+
+def _redirect(url: str, code: int, location: str) -> urllib.error.HTTPError:
+    headers = email.message.Message()
+    headers["Location"] = location
+    return urllib.error.HTTPError(url, code, "See Other", headers, io.BytesIO(b""))
+
+
+def test_trace_follows_each_redirect_and_reports_where_it_lands() -> None:
+    answers: dict[str, list[object]] = {
+        "https://w3id.org/battinfo": [_redirect("https://w3id.org/battinfo", 301, "/battinfo/")],
+        "https://w3id.org/battinfo/": [_redirect("https://w3id.org/battinfo/", 303, f"{PAGES}/battinfo.ttl")],
+        f"{PAGES}/battinfo.ttl": [_busy(f"{PAGES}/battinfo.ttl", 503), _Answer(b"@prefix owl: <x> .")],
+    }
+    asked: list[tuple[str, str]] = []
+    waits: list[float] = []
+
+    def opener(request, timeout):  # noqa: ANN001, ANN202
+        asked.append((request.full_url, request.get_header("Accept")))
+        answer = answers[request.full_url].pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+
+    landing = check.trace("https://w3id.org/battinfo", "text/turtle", opener=opener, wait=5, sleep=waits.append)
+    assert landing == check.Landing(
+        f"{PAGES}/battinfo.ttl",
+        200,
+        b"@prefix owl: <x> .",
+        ("https://w3id.org/battinfo", "https://w3id.org/battinfo/", f"{PAGES}/battinfo.ttl"),
+    )
+    assert {accept for _url, accept in asked} == {"text/turtle"}
+    assert waits == [5]
+
+
+def test_trace_lands_on_a_404_and_stops_a_redirect_loop() -> None:
+    def not_found(request, timeout):  # noqa: ANN001, ANN202
+        raise _busy(request.full_url, 404)
+
+    landing = check.trace(f"{PAGES}/battinfo/versions/0.8.0/battinfo.ttl", "text/turtle", opener=not_found)
+    assert landing.status == 404 and landing.body == b""
+
+    def loop(request, timeout):  # noqa: ANN001, ANN202
+        raise _redirect(request.full_url, 302, request.full_url)
+
+    with pytest.raises(check.FetchError, match="redirects"):
+        check.trace("https://w3id.org/battinfo/loop", "text/turtle", opener=loop, max_hops=3)

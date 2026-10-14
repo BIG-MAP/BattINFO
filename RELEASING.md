@@ -56,7 +56,7 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
    Only the battinfo wheel comes from TestPyPI. An install with `--extra-index-url` would also let a package on TestPyPI stand in for a PyPI dependency of the same name. Pin the exact version, such as `0.8.0rc1` or `0.8.0.dev1`: TestPyPI already holds a 0.8.0, built from an older commit, and it sorts above every 0.8.0 pre-release. An index never takes the same version twice, so each version can be rehearsed once.
 
 6. Open the pull request and merge it into `main`.
-7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first (`python scripts/set_version.py X.Y.Z --date <tag day>`). Then tag `main` and push the tag:
+7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first (`python scripts/set_version.py X.Y.Z --date <tag day>`). Check where the ontology IRIs lead, as [The ontology at its w3id IRIs](#the-ontology-at-its-w3id-iris) describes. Then tag `main` and push the tag:
 
    ```bash
    git switch main
@@ -69,11 +69,42 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
    The hosted check (`scripts/check_hosted_files.py`) compares the files w3id serves (the v1 records context, every JSON Schema at its `$id` and the record vocabulary) with the tag's copies. For a final tag a difference stops the upload: deploy the registry with the tag's copies, then use "Re-run failed jobs" on the same run. If the upload itself stops part-way, "Re-run failed jobs" finishes it, since files PyPI already has are skipped. After the release, a daily workflow (`hosted-files.yml`) checks that the hosted context still holds every term of the last release with the same value.
 
-   A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation of each tag in its own folder; only a final tag also updates `stable/` and the version switcher.
+   A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation of each tag in its own folder; only a final tag also updates `stable/` and the version switcher, and publishes the ontology.
 
 8. Review the draft release and publish it. Zenodo then archives it under the concept DOI and takes the metadata, authors included, from `CITATION.cff`. The README badge and citation use the concept DOI and need no change.
+9. Once the docs workflow has deployed the tag, check that the ontology IRIs serve the release's `battinfo.ttl` (next section), and that the next run of `hosted-files.yml` is green.
 
 Never delete a published tag or a PyPI release, because downstream users and the Zenodo archive refer to them. A bad release is fixed by publishing a patch release.
+
+## The ontology at its w3id IRIs
+
+`battinfo.ttl` is served from GitHub Pages. For a final tag `vX.Y.Z` the docs workflow (`.github/workflows/docs-deploy.sh`) copies it to `battinfo/versions/X.Y.Z/` on the `gh-pages` branch, and to the root of the site when the tag is the newest final release, each time with a short `battinfo.html` for browsers. A pre-release tag publishes no ontology. A tag whose `battinfo.ttl` declares another version deploys its documentation but not the ontology, and the deploy job fails.
+
+| IRI | Where it leads |
+|---|---|
+| `https://w3id.org/battinfo` | `battinfo.ttl` at the root of the site (`battinfo.html` for a browser) |
+| `https://w3id.org/battinfo/X.Y.Z` | `battinfo/versions/X.Y.Z/battinfo.ttl` (`battinfo.html` for a browser) |
+| `https://w3id.org/battinfo/X.Y.Z/battinfo`, the `owl:versionIRI` | the registry, which answers with a 303 to `https://w3id.org/battinfo/X.Y.Z` |
+| `https://w3id.org/battinfo/latest` | `battinfo.ttl` on `main` |
+
+The rules live in `battinfo/.htaccess` in [perma-id/w3id.org](https://github.com/perma-id/w3id.org); the versionIRI matches none of the ontology rules there and reaches the registry. `/latest` and its alias `/source` read the `master` branch until a perma-id pull request moves them to `main`, and the `raw/` rules in the same file read `master` still, so keep `master` when old branches are cleaned up.
+
+Before the tag, on the frozen `main` and after the registry deploy, check where each IRI leads:
+
+```bash
+python scripts/check_hosted_files.py --ontology-routes
+```
+
+It takes the version and the versionIRI from the checkout's `battinfo.ttl` and follows every redirect. It passes when each IRI lands where the table says, even where the file is not there yet: before the tag, `/X.Y.Z` and the versionIRI land on a 404 in `battinfo/versions/X.Y.Z/`, and the root still serves the last release. `/latest` already serves the frozen `main`.
+
+After the tag's docs deploy, from a checkout of the tag:
+
+```bash
+python scripts/check_hosted_files.py --ontology-routes --served
+python scripts/check_hosted_files.py --ontology --tag vX.Y.Z
+```
+
+The first wants all four IRIs to serve the tag's `battinfo.ttl`. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, and `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
 
 ## Zenodo sandbox run
 

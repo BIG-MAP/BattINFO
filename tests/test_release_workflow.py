@@ -399,8 +399,21 @@ def test_ci_lints_the_workflow_files_with_a_pinned_actionlint() -> None:
 def test_a_scheduled_job_checks_the_hosted_context_keeps_the_released_terms() -> None:
     workflow = _workflow("hosted-files.yml")
     assert _triggers(workflow)["schedule"]
-    [job] = workflow["jobs"].values()
+    job = workflow["jobs"]["release-terms"]
     assert _step(job, uses="actions/checkout@")["with"]["fetch-depth"] == 0  # the release tags
     run = _step(job, name="Compare the hosted v1 context with the last release's terms")["run"]
     assert run.startswith("python scripts/check_hosted_files.py --release-terms")
     assert "--attempts" in run
+
+
+def test_a_scheduled_job_checks_the_ontology_iris_serve_the_last_release() -> None:
+    # The versionIRI resolves only once the tag's own docs deploy has run, so
+    # this is checked after the release, never as a gate before the upload.
+    workflow = _workflow("hosted-files.yml")
+    job = workflow["jobs"]["ontology"]
+    assert _step(job, uses="actions/checkout@")["with"]["fetch-depth"] == 0  # the release tags
+    run = _step(job, name="Check that the w3id ontology IRIs serve the last release's battinfo.ttl")["run"]
+    assert run.startswith("python scripts/check_hosted_files.py --ontology ")
+    assert "--attempts" in run
+    release_runs = [str(step.get("run", "")) for job in _release()["jobs"].values() for step in job.get("steps", [])]
+    assert not [run for run in release_runs if "--ontology" in run]

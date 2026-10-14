@@ -2,7 +2,6 @@
 @prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
-@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix battinfo: <https://w3id.org/battinfo#> .
 @prefix schema:  <https://schema.org/> .
@@ -11,11 +10,12 @@
 # BattINFO application ontology
 #
 # ROLE (IDENTIFIER_POLICY.md section 14): this file is the EMMO import/pin
-# manifest for the BattINFO stack, plus a tiny local residue (currently only
-# the ConformanceStatus SKOS scheme below). It deliberately defines NO domain
-# terms: quantities and battery concepts live in the imported EMMO modules
+# manifest for the BattINFO stack. It deliberately defines NO terms of its
+# own: quantities and battery concepts live in the imported EMMO modules
 # (missing terms are added upstream, not minted here), and administrative
-# record predicates use dcterms/PROV/DCAT/schema.org/PAV.
+# record predicates use dcterms/PROV/DCAT/schema.org/PAV. w3id serves this
+# file at https://w3id.org/battinfo (the newest release) and at
+# https://w3id.org/battinfo/X.Y.Z for each release (RELEASING.md).
 #
 # Companions (slash namespace, record layer):
 #   assets/vocab/battinfo-records.ttl - the closed inventory of battinfo:
@@ -78,7 +78,7 @@ as Linked Data."""@en ;
     rdfs:seeAlso <https://w3id.org/battinfo/> ;
 
     rdfs:label "BattINFO application ontology"@en ;
-    rdfs:comment """Application ontology = EMMO import/pin manifest plus a tiny local residue (the ConformanceStatus scheme). No domain terms are defined here (IDENTIFIER_POLICY.md section 14): battery concepts come from the pinned EMMO imports; record-layer battinfo: placeholder terms are declared in assets/vocab/battinfo-records.ttl and human-readable labels for the EMMO terms the emitters use in assets/vocab/emmo-labels.ttl. EMMO dependency versions pinned in owl:imports; run .tools/quality/check_emmo_versions.py to check for upstream updates."""@en .
+    rdfs:comment """Application ontology = EMMO import/pin manifest. No terms are defined here (IDENTIFIER_POLICY.md section 14): battery concepts come from the pinned EMMO imports; record-layer battinfo: placeholder terms are declared in assets/vocab/battinfo-records.ttl and human-readable labels for the EMMO terms the emitters use in assets/vocab/emmo-labels.ttl. EMMO dependency versions pinned in owl:imports; run .tools/quality/check_emmo_versions.py to check for upstream updates."""@en .
 
 # ---------------------------------------------------------------------------
 # Annotation properties declared so OWL tools do not warn about unknown
@@ -93,46 +93,3 @@ dcterms:contributor a owl:AnnotationProperty .
 dcterms:license     a owl:AnnotationProperty .
 dcterms:rights      a owl:AnnotationProperty .
 dcterms:source      a owl:AnnotationProperty .
-
-# ---------------------------------------------------------------------------
-# ConformanceStatus controlled vocabulary
-#
-# A SKOS concept scheme expressing how closely a battery test followed its
-# test specification.  Used in JSON-LD exports via dqv:value and prov:used.
-# IRIs are under the /ConformanceStatus/ sub-path (slash namespace) because
-# concept schemes are published as independent Linked Data resources.
-# ---------------------------------------------------------------------------
-
-<https://w3id.org/battinfo/ConformanceStatus>
-    a skos:ConceptScheme ;
-    skos:prefLabel "Conformance Status"@en ;
-    skos:definition "A controlled vocabulary expressing how well a physical battery test followed its test specification."@en ;
-    dcterms:isPartOf battinfo: .
-
-<https://w3id.org/battinfo/ConformanceStatus/Conformant>
-    a skos:Concept ;
-    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:prefLabel "Conformant"@en ;
-    skos:definition "The test was carried out in full accordance with the test specification."@en .
-
-<https://w3id.org/battinfo/ConformanceStatus/PartialConformance>
-    a skos:Concept ;
-    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:prefLabel "Partial Conformance"@en ;
-    skos:definition "The test deviated from the specification in one or more steps but produced usable data."@en .
-
-<https://w3id.org/battinfo/ConformanceStatus/NonConformant>
-    a skos:Concept ;
-    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:prefLabel "Non-Conformant"@en ;
-    skos:definition "The test deviated from the specification to such a degree that the results are not considered reliable."@en .
-
-<https://w3id.org/battinfo/ConformanceStatus/ConformanceUnknown>
-    a skos:Concept ;
-    skos:inScheme <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:topConceptOf <https://w3id.org/battinfo/ConformanceStatus> ;
-    skos:prefLabel "Conformance Unknown"@en ;
-    skos:definition "It is not known whether the test conformed to the specification."@en .
