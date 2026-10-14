@@ -329,6 +329,53 @@ def test_zinc_manganese_dioxide_variants_are_told_apart() -> None:
     assert chemistry["alkaline"]["alias_of"] == "alkaline-zn-mno2"
 
 
+# ── electrode bases follow the chemistry (entity_type_map 0.7.0) ──────────────
+
+
+def _entity_sections() -> dict[str, dict[str, dict[str, Any]]]:
+    path = ROOT / "src" / "battinfo" / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
+    return _load_json(path)["mappings"]
+
+
+def test_every_electrode_basis_class_names_the_chemistry_it_belongs_to() -> None:
+    # The emitter adds a basis's battery classes only to a cell of that
+    # chemistry. A class with no chemistry would never be emitted.
+    sections = _entity_sections()
+    recommended = {key for key, entry in sections["chemistry"].items() if "alias_of" not in entry}
+    for field in ("positive_electrode_basis", "negative_electrode_basis"):
+        current = {entry.get("node_type") for entry in sections[field].values()}
+        for key, entry in sections[field].items():
+            belongs_to = entry.get("battery_types_chemistry")
+            if entry.get("battery_types"):
+                assert belongs_to in recommended, f"{field}.{key}: battery_types_chemistry {belongs_to!r}"
+            else:
+                assert belongs_to is None, f"{field}.{key} adds no class, so names no chemistry"
+            for former in entry.get("former_node_types", []):
+                assert former not in current, f"{field}.{key}: {former} is still emitted"
+
+
+def test_a_chemistry_names_its_negative_electrode_from_the_basis_vocabulary() -> None:
+    # Validation reads the field both ways: a lithium or zinc negative electrode
+    # makes a full cell one of these couples. A negative electrode other couples
+    # use as well (graphite, silicon) must never be named here, or every li-ion
+    # cell built with it would be refused.
+    sections = _entity_sections()
+    named = {
+        key: entry["negative_electrode_basis"]
+        for key, entry in sections["chemistry"].items()
+        if "negative_electrode_basis" in entry
+    }
+    assert named == {
+        "li-metal": "lithium",
+        "zn-mno2": "zinc",
+        "zn-air": "zinc",
+        "zn-hgo": "zinc",
+        "ni-zn": "zinc",
+        "zn-br-flow": "zinc",
+    }
+    assert set(named.values()) <= set(sections["negative_electrode_basis"])
+
+
 def test_every_property_mapping_names_a_class_the_ontology_publishes() -> None:
     # Two candidate entries once carried class IRIs that were never minted
     # (battery#nominalContinuousChargingCurrent). The emitter used their labels

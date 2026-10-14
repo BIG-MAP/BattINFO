@@ -191,19 +191,152 @@ def _normalize_term(value: Any) -> str | None:
     return normalized or None
 
 
-def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
+def _entity_key(field: str, value: Any) -> str | None:
+    """The ``entity_type_map.json`` key *value* names in *field*, or None."""
     key = _normalize_term(value)
     if key is None:
         return None
     field_map = _entity_type_map().get(field, {})
-    hit = field_map.get(key)
-    if hit is not None:
-        return hit
+    if key in field_map:
+        return key
     # The map keys use hyphens ("hard-carbon", "silicon-graphite", "li-metal");
     # accept the same term written with spaces, underscores, commas or slashes
     # ("hard carbon", "silicon, graphite", "silicon/graphite").
     variant = re.sub(r"[\s_,/]+", "-", key)
-    return field_map.get(variant) if variant != key else None
+    return variant if variant in field_map else None
+
+
+def _entity_mapping(field: str, value: Any) -> dict[str, Any] | None:
+    key = _entity_key(field, value)
+    return None if key is None else _entity_type_map()[field][key]
+
+
+def chemistry_lineage(value: Any) -> tuple[str, ...]:
+    """The chemistry label *value* names, then every label broader than it.
+
+    An older spelling (``alias_of``) stands for the label it points at, so
+    ``"Li-MnO2"`` gives ``("li-mno2", "li-metal")`` and ``"li-primary"`` gives
+    ``("li-metal",)``. A value outside the vocabulary gives ``()``: it declares
+    no chemistry class.
+    """
+    chemistry = _entity_type_map().get("chemistry", {})
+    key = _entity_key("chemistry", value)
+    if key is None:
+        return ()
+    alias_of = chemistry[key].get("alias_of")
+    if isinstance(alias_of, str) and alias_of in chemistry:
+        key = alias_of
+    lineage: list[str] = []
+    while key is not None and key not in lineage:
+        lineage.append(key)
+        broader = chemistry[key].get("broader")
+        key = broader if isinstance(broader, str) and broader in chemistry else None
+    return tuple(lineage)
+
+
+def electrode_basis_battery_types(cell: Mapping[str, Any]) -> list[str]:
+    """The battery classes the electrode bases of a cell add, positive first.
+
+    The declared chemistry decides. An electrode basis adds its ``battery_types``
+    only when its ``battery_types_chemistry`` label is the cell's chemistry, a
+    label broader than it or a label narrower than it. So graphite, LTO and the
+    lithium-ion positives add their classes to a li-ion cell only, a lithium
+    negative adds LithiumMetalBattery to li-metal and the couples under it, and
+    MnO2 adds LithiumManganeseDioxideBattery to li-mno2 and li-metal (li-primary
+    included), never to a zinc cell. A chemistry outside the vocabulary declares
+    no class, so the bases add none.
+
+    *cell* is a cell-spec body or a specification dict: both name the fields
+    ``chemistry``, ``positive_electrode_basis`` and ``negative_electrode_basis``.
+    """
+    lineage = chemistry_lineage(cell.get("chemistry"))
+    types: list[str] = []
+    if not lineage:
+        return types
+    for field in ("positive_electrode_basis", "negative_electrode_basis"):
+        entry = _entity_mapping(field, cell.get(field)) or {}
+        belongs_to = entry.get("battery_types_chemistry")
+        if not isinstance(belongs_to, str):
+            continue
+        if belongs_to not in lineage and lineage[0] not in chemistry_lineage(belongs_to):
+            continue
+        for battery_type in entry.get("battery_types", []):
+            if isinstance(battery_type, str) and battery_type not in types:
+                types.append(battery_type)
+    return types
+
+
+# A half cell or a three-electrode cell may use a metal as its counter or
+# reference electrode, whatever couple the cell is about.
+_COUNTER_ELECTRODE_CONFIGURATIONS = frozenset({"half-cell", "three-electrode", "three-electrode-cell"})
+
+
+def _join_labels(labels: list[str]) -> str:
+    return labels[0] if len(labels) == 1 else f"{', '.join(labels[:-1])} and {labels[-1]}"
+
+
+def chemistry_electrode_conflicts(cell: Mapping[str, Any]) -> list[str]:
+    """Where a cell's negative electrode basis contradicts its chemistry, as messages.
+
+    Judges what the record states, not the classes it emits. A couple defined by
+    its negative electrode names it on its chemistry entry
+    (``negative_electrode_basis``: lithium for li-metal, zinc for the zinc
+    couples), and narrower labels inherit it. Two statements disagree when
+
+    - the chemistry names a negative electrode and the record states another, or
+    - the record states a negative electrode that only those couples have, the
+      chemistry is not one of them, and the cell is not a half cell or a
+      three-electrode cell (where lithium can be the counter electrode).
+
+    A chemistry or a basis outside the vocabulary is not judged; the
+    controlled-value check reports those.
+    """
+    lineage = chemistry_lineage(cell.get("chemistry"))
+    stated = _entity_key("negative_electrode_basis", cell.get("negative_electrode_basis"))
+    if not lineage or stated is None:
+        return []
+    entity_map = _entity_type_map()
+    chemistries = entity_map.get("chemistry", {})
+    negatives = entity_map.get("negative_electrode_basis", {})
+
+    def electrode(key: str) -> str:
+        # lithium, lithium-metal and li-metal are spellings of one electrode.
+        node_type = negatives.get(key, {}).get("node_type")
+        return node_type if isinstance(node_type, str) else key
+
+    chemistry_text = str(cell.get("chemistry")).strip()
+    stated_text = str(cell.get("negative_electrode_basis")).strip()
+    required = next(
+        (
+            chemistries[label]["negative_electrode_basis"]
+            for label in lineage
+            if isinstance(chemistries[label].get("negative_electrode_basis"), str)
+        ),
+        None,
+    )
+    if required is not None:
+        if electrode(required) == electrode(stated):
+            return []
+        return [
+            f"chemistry '{chemistry_text}' is a couple whose negative electrode is {required}, "
+            f"but negative_electrode_basis is '{stated_text}'. Correct whichever of the two is wrong."
+        ]
+    owners = [
+        label
+        for label, entry in chemistries.items()
+        if "alias_of" not in entry
+        and isinstance(entry.get("negative_electrode_basis"), str)
+        and electrode(entry["negative_electrode_basis"]) == electrode(stated)
+    ]
+    if not owners or _cell_configuration_key(cell) in _COUNTER_ELECTRODE_CONFIGURATIONS:
+        return []
+    those = "that label" if len(owners) == 1 else "those labels"
+    return [
+        f"negative_electrode_basis '{stated_text}' is the negative electrode of {_join_labels(owners)} "
+        f"cells and the couples under {those}, but chemistry is '{chemistry_text}'. State the couple "
+        "the cell is, or set cell_configuration to half_cell or three_electrode_cell if the "
+        f"{stated_text} is a counter or reference electrode."
+    ]
 
 
 # Role-based electrode holders. A cell that is not a full cell has no polarity to
@@ -2208,13 +2341,8 @@ def _descriptor_specification_to_jsonld(specification: dict[str, Any]) -> dict[s
     if chemistry_mapping:
         battery_type_list.extend(chemistry_mapping.get("battery_types", []))
 
-    positive_electrode = _entity_mapping("positive_electrode_basis", specification.get("positive_electrode_basis"))
-    if positive_electrode:
-        battery_type_list.extend(positive_electrode.get("battery_types", []))
-
-    negative_electrode = _entity_mapping("negative_electrode_basis", specification.get("negative_electrode_basis"))
-    if negative_electrode:
-        battery_type_list.extend(negative_electrode.get("battery_types", []))
+    # The electrode bases add only the classes of the declared chemistry.
+    battery_type_list.extend(electrode_basis_battery_types(specification))
 
     battery_types_deduped = list(dict.fromkeys(battery_type_list))
     physical_type: str | list[str] = (

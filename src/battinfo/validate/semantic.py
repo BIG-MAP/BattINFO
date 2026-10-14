@@ -458,6 +458,40 @@ def _validate_controlled_values(
             )
 
 
+def _validate_chemistry_electrode_agreement(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> None:
+    """A cell spec's negative electrode basis must agree with its chemistry.
+
+    The rule reads what the record states, not the classes it emits: the
+    chemistry decides the battery classes, so the emitted stack of a li-ion cell
+    with a lithium-metal negative looks valid while the record contradicts
+    itself. A couple defined by its negative electrode (lithium metal for
+    li-metal and the couples under it, zinc for the zinc couples) must have
+    that electrode, and such an electrode makes a full cell one of those
+    couples. Lithium as the counter electrode of a half cell or a
+    three-electrode cell is no contradiction. The policy's hard severity: an
+    error under strict and publisher, a warning otherwise.
+    """
+    product = doc.get("cell_spec")
+    if not isinstance(product, Mapping):
+        return
+    from battinfo.transform.json_to_jsonld import chemistry_electrode_conflicts  # noqa: PLC0415
+
+    for message in chemistry_electrode_conflicts(product):
+        _append_issue(
+            issues,
+            code="semantic.chemistry_electrode_conflict",
+            severity=issue_severity,
+            path="cell_spec.negative_electrode_basis",
+            message=message,
+            resource_type=resource_type,
+        )
+
+
 # Electrode holders on a cell-spec, by family. The polarity holders describe a
 # full cell; the role holders describe a cell that has no polarity to assign.
 _POLARITY_ELECTRODE_FIELDS = ("positive_electrode", "negative_electrode")
@@ -1489,6 +1523,7 @@ def validate_semantic_report(
     _validate_schema_version(doc, issues)
     _validate_handle_kind_word(doc, issues)
     _validate_controlled_values(doc, issues, resource_type)
+    _validate_chemistry_electrode_agreement(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_role_coherence(doc, issues, resource_type)
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_kind(doc, issues, resource_type, hard_issue_severity)

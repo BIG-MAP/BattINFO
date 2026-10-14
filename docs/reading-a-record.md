@@ -85,4 +85,6 @@ conditions, and test spec records (a test keeps its protocol name, not its link 
 round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap is a
 tracked enhancement.)
 
+A cell spec's format, chemistry, IEC code and cell configuration come back from the classes of its described battery, and its electrode bases from the classes of its electrode nodes. The chemistry is the first class the chemistry vocabulary names, which is the declared chemistry's. A deposit written before 0.8.0 also carries classes its electrode bases added whatever the chemistry, such as `LithiumManganeseDioxideBattery` on an alkaline cell, and those are not read as its chemistry. A specific NMC grade comes back as `nmc`, since all grades share one electrode class. A chemistry written as free text names no class, so it cannot come back: when the class read in its place contradicts the negative electrode, the import prints a warning and the strict save refuses the record until the chemistry is set.
+
 A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.

@@ -230,6 +230,23 @@ Some labels are narrower than others: a `li-mno2` cell is also a
 so `Li-ion` and `li-ion` are the same label. A value that is not listed is
 kept as plain text and the record gets no battery class from it.
 
+The chemistry decides the battery classes. An electrode basis adds its
+class only where the class fits the chemistry: `graphite`, `lto` and the
+lithium-ion positives add theirs to a `li-ion` cell, a lithium negative
+adds LithiumMetalBattery to `li-metal` and the labels under it, and `mno2`
+adds LithiumManganeseDioxideBattery to `li-mno2` and `li-metal`. So an
+alkaline cell with an MnO2 positive stays an alkaline zinc cell, and a
+chemistry that is not listed gets no class from its electrodes either.
+
+Some couples are defined by their negative electrode: `li-metal` and the
+labels under it have a lithium negative; `zn-mno2`, `zn-air`, `zn-hgo`,
+`ni-zn` and `zn-br-flow` and the labels under them have a zinc negative. A
+full cell with one of those negatives needs one of those chemistries.
+Validation reports a record that breaks either rule as
+`semantic.chemistry_electrode_conflict`, an error under the strict and
+publisher policies. A half cell or a three-electrode cell may use lithium
+as its counter electrode under any chemistry.
+
 | Label | Narrower than | Battery class |
 |---|---|---|
 | `li-ion` |  | [LithiumIonBattery](https://w3id.org/emmo/domain/battery#battery_96addc62_ea04_449a_8237_4cd541dd8e5f) |

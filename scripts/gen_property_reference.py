@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -112,6 +113,15 @@ def build() -> str:
 
     canonical = {k: v for k, v in chemistry.items() if "alias_of" not in v}
     aliases = {k: v for k, v in chemistry.items() if "alias_of" in v}
+
+    def code_list(labels: list[str]) -> str:
+        quoted = [f"`{label}`" for label in labels]
+        return quoted[0] if len(quoted) == 1 else f"{', '.join(quoted[:-1])} and {quoted[-1]}"
+
+    defined_by_negative: dict[str, list[str]] = {}
+    for key, entry in canonical.items():
+        if entry.get("negative_electrode_basis"):
+            defined_by_negative.setdefault(entry["negative_electrode_basis"], []).append(key)
     lines += [
         "",
         f"## Chemistry labels ({len(canonical)})",
@@ -125,6 +135,28 @@ def build() -> str:
         "`li-metal` cell. State the narrowest one you know. Matching ignores case,",
         "so `Li-ion` and `li-ion` are the same label. A value that is not listed is",
         "kept as plain text and the record gets no battery class from it.",
+        "",
+        "The chemistry decides the battery classes. An electrode basis adds its",
+        "class only where the class fits the chemistry: `graphite`, `lto` and the",
+        "lithium-ion positives add theirs to a `li-ion` cell, a lithium negative",
+        "adds LithiumMetalBattery to `li-metal` and the labels under it, and `mno2`",
+        "adds LithiumManganeseDioxideBattery to `li-mno2` and `li-metal`. So an",
+        "alkaline cell with an MnO2 positive stays an alkaline zinc cell, and a",
+        "chemistry that is not listed gets no class from its electrodes either.",
+        "",
+        *textwrap.wrap(
+            "Some couples are defined by their negative electrode: "
+            + "; ".join(
+                f"{code_list(labels)} and the labels under {'it' if len(labels) == 1 else 'them'} "
+                f"have a {basis} negative"
+                for basis, labels in defined_by_negative.items()
+            )
+            + ". A full cell with one of those negatives needs one of those chemistries. Validation "
+            "reports a record that breaks either rule as `semantic.chemistry_electrode_conflict`, an "
+            "error under the strict and publisher policies. A half cell or a three-electrode cell may "
+            "use lithium as its counter electrode under any chemistry.",
+            width=74,
+        ),
         "",
         "| Label | Narrower than | Battery class |",
         "|---|---|---|",

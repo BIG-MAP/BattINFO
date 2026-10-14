@@ -137,9 +137,9 @@ def test_a_chemistry_basis_does_not_invent_a_polarity_electrode_for_a_half_cell(
     """The bases still type the CELL; they no longer type a polarity ELECTRODE.
 
     Half-cell records carry ``positive_electrode_basis`` / ``negative_electrode_basis``
-    as chemistry descriptors, and those keep stacking the battery classes. What
-    they must not do once the role holders say where the electrodes are is emit a
-    second, polarity-named electrode node beside them.
+    as chemistry descriptors, and those keep stacking the battery classes of the
+    declared chemistry. What they must not do once the role holders say where the
+    electrodes are is emit a second, polarity-named electrode node beside them.
     """
     node = record_to_jsonld(
         _half_cell(positive_electrode_basis="graphite", negative_electrode_basis="lithium").to_record(),
@@ -147,8 +147,10 @@ def test_a_chemistry_basis_does_not_invent_a_polarity_electrode_for_a_half_cell(
     )["isDescriptionFor"]
     assert "hasPositiveElectrode" not in node
     assert "hasNegativeElectrode" not in node
-    # The chemistry survives where it belongs: on the cell.
-    assert "LithiumMetalBattery" in node["@type"]
+    # The chemistry survives where it belongs: on the cell. It is the declared
+    # li-ion; a lithium counter electrode does not make it a lithium-metal cell.
+    assert "LithiumIonBattery" in node["@type"]
+    assert "LithiumMetalBattery" not in node["@type"]
 
 
 def test_an_authored_polarity_holder_is_never_dropped_by_the_configuration() -> None:

@@ -2241,7 +2241,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@type": [
       "BatteryCell",
       "CoinCell",
-      "LithiumManganeseDioxideBattery"
+      "AlkalineZincManganeseDioxideBattery"
     ],
     "@id": "https://w3id.org/battinfo/spec/jgyy-x3h5-drmv-5tn5#described",
     "skos:prefLabel": "EMPA COIN-ZNMNO2-ALK",
