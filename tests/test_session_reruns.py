@@ -253,3 +253,40 @@ def test_a_pinned_test_with_other_content_is_refused_and_leaves_nothing_behind(t
     with pytest.raises(ValueError, match="dataset_iris must name distinct datasets"):
         ws.add("test", type="eis", cell="C01", data="data/C01-b.csv", dataset_iris=[DATASET_PIN])
     assert (len(ws._ws.tests), len(ws._ws.datasets), len(ws._ws.test_specs)) == (1, 1, 0)
+
+
+def test_adding_many_runs_on_one_cell_compares_each_with_its_own_data_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Telling a repeat from a new run reads the data files first, so each add costs about the same.
+
+    An ageing campaign adds hundreds of check-ups to one cell. Only a test with
+    the same data files is compared in full (``Workspace._session_view``), so
+    the number of full comparisons grows with the runs added, not with their
+    square.
+    """
+    from battinfo._workspace import Workspace
+
+    root = tmp_path / "lab"
+    (root / "data").mkdir(parents=True)
+    runs = 40
+    for index in range(runs):
+        (root / "data" / f"run{index:03d}.csv").write_text("test_time_second,voltage_volt\n0,3.0\n", encoding="utf-8")
+    ws = battinfo.workspace(root, registry_url=None)
+    ws.add("cell", spec=battinfo.CellSpec(**{k: v for k, v in SPEC_DRAFT.items() if k != "id"}), serial_numbers=["C01"])
+
+    views = {"count": 0}
+    session_view = Workspace._session_view
+
+    def counted(self, entity, **kwargs):
+        views["count"] += 1
+        return session_view(self, entity, **kwargs)
+
+    monkeypatch.setattr(Workspace, "_session_view", counted)
+    for index in range(runs):
+        ws.add("test", type="cycling", cell="C01", data=f"data/run{index:03d}.csv")
+    (again,) = ws.add("test", type="cycling", cell="C01", data="data/run000.csv")
+
+    assert len(ws._ws.tests) == runs
+    assert again is ws._ws.tests[0]
+    assert views["count"] <= 2 * runs

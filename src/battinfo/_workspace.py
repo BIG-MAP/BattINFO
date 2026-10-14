@@ -301,7 +301,12 @@ def _repeat_key(entity: Any) -> tuple[Any, ...]:
     if isinstance(entity, TestSpec):
         return (entity.name, str(entity.test_type))
     if isinstance(entity, Test):
-        return (str(entity.test_type), _link_key(entity.cell, entity.cell_instance_id))
+        return (
+            str(entity.test_type),
+            _link_key(entity.cell, entity.cell_instance_id),
+            entity.instrument,
+            entity.started_at,
+        )
     if isinstance(entity, Cell):
         return (entity.serial_number, entity.batch_id)
     return ()
@@ -601,6 +606,9 @@ class Workspace:
         self.test_specs: list[TestSpec] = []
         self.tests: list[Test] = []
         self.datasets: list[Dataset] = []
+        # dataset_locator_seed resolves paths on disk; a dataset's locator depends only
+        # on its location fields and data_root, so it is computed once per location.
+        self._locators: dict[tuple[Any, ...], str] = {}
 
     @classmethod
     def open(cls, root: PathLike) -> "Workspace":
@@ -2551,15 +2559,29 @@ class Workspace:
         for dataset in self.datasets:
             if dataset.test is not test:
                 continue
+            locator = self._dataset_locator(dataset)
+            if locator:
+                return locator
+        return ""
+
+    def _dataset_locator(self, dataset: Dataset) -> str:
+        """The locator of *dataset*'s data (``entities.dataset_locator_seed``), ``""`` when it names none.
+
+        Computed once for each location: it depends only on the dataset's
+        location fields and the data root.
+        """
+        cache: dict[tuple[Any, ...], str] = self.__dict__.setdefault("_locators", {})
+        key = (dataset.access_url, dataset.download_url, dataset.dataset_path, self.data_root)
+        locator = cache.get(key)
+        if locator is None:
             locator = dataset_locator_seed(
                 access_url=dataset.access_url,
                 download_url=dataset.download_url,
                 dataset_path=dataset.dataset_path,
                 workspace_root=self.data_root,
             )
-            if locator:
-                return locator
-        return ""
+            cache[key] = locator
+        return locator
 
     def _hold_saved_iris(
         self,
@@ -2583,10 +2605,10 @@ class Workspace:
         record keeps its IRI whether or not a save ran before the record that
         collides with it was added. A record saved under a seed of before 0.8.0
         keeps that IRI too: *legacy_ids* holds, for each record, the IRI the
-        rule of before 0.8.0 ends with, and a record takes it when it is saved,
-        *is_legacy_record* says the saved body records this record, and nothing
-        is saved under the record's own IRI or another record has that one.
-        An IRI another record of the session has is never taken.
+        rule of before 0.8.0 ends with, and a record takes it when a record is
+        saved under it and *is_legacy_record* says that saved record is this
+        one. A record alone on an IRI that is saved already has its own record
+        and keeps it. An IRI another record of the session has is never taken.
         """
         held = list(assigned)
         roots = [Path(root) for root in record_roots]

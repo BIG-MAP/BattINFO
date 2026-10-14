@@ -10197,7 +10197,27 @@ class AuthoringWorkspace:
         apart from its link to the test, with every IRI *datasets* pin.
         """
         engine = self._ws
-        candidates = engine._repeats_in(test, engine.tests)
+        # The datasets of each test, read in one pass: by the test object, or by
+        # its IRI for a dataset that holds only that.
+        by_test: dict[int, builtins.list[Any]] = {}
+        by_iri: dict[str, builtins.list[Any]] = {}
+        for dataset in engine.datasets:
+            if dataset.test is not None:
+                by_test.setdefault(id(dataset.test), []).append(dataset)
+            elif dataset.test_id is not None:
+                by_iri.setdefault(dataset.test_id, []).append(dataset)
+
+        def data_of(other: Any) -> builtins.list[Any]:
+            return by_test.get(id(other), []) + (by_iri.get(other.id, []) if other.id is not None else [])
+
+        def places(items: Iterable[Any]) -> builtins.list[str]:
+            return sorted(engine._dataset_locator(item) for item in items)
+
+        # A repeat has the same data files, so only tests with them are compared
+        # in full; the session view is far dearer than the file's locator.
+        mine_places = places(datasets)
+        pool = [other for other in engine.tests if other is not test and places(data_of(other)) == mine_places]
+        candidates = engine._repeats_in(test, pool)
         if not candidates:
             return None
 
@@ -10206,11 +10226,7 @@ class AuthoringWorkspace:
 
         mine = views(datasets)
         for other in candidates:
-            theirs = views(
-                d
-                for d in engine.datasets
-                if d.test is other or (d.test is None and other.id is not None and d.test_id == other.id)
-            )
+            theirs = views(data_of(other))
             same_data = [view for view, _ in mine] == [view for view, _ in theirs]
             if same_data and all(not own or own == held for (_, own), (_, held) in zip(mine, theirs)):
                 return other
