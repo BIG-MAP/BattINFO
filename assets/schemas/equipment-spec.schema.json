@@ -190,7 +190,7 @@
         },
         "battinfo_version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+          "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
         }
       }
     }
