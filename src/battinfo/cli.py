@@ -203,7 +203,12 @@ library_app.add_typer(library_template_app, name="template")
 
 
 def _emit_json(data: Any) -> None:
-    typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    try:
+        typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    except UnicodeEncodeError:
+        # A terminal that cannot encode a character (a Windows console redirected to a
+        # file writes cp1252, which has no 'Ω') gets the same JSON with \u escapes.
+        typer.echo(json.dumps(data, indent=2))
 
 
 def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
@@ -223,7 +228,7 @@ def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
     typer.echo(header_line)
     typer.echo(sep_line)
     for row in rows:
-        typer.echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
+        _safe_echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
 
 
 def _parse_optional_bool(raw: str | None, option_name: str) -> bool | None:
@@ -4407,12 +4412,10 @@ def _all_specs_data() -> list[dict[str, Any]]:
     all_names = sorted(schema["$defs"]["SpecSet"]["properties"].keys())
     rows = []
     for name in all_names:
+        # The canonical symbols, as the unit map spells them ('mΩ', '°C', 'µm'); validation
+        # also accepts the usual alternatives ('mOhm', 'degC', 'um').
         units = SPEC_UNIT_COMPATIBILITY.get(name)
-        if units:
-            ascii_units = sorted(u for u in units if u.isascii())
-            display_units = ", ".join(ascii_units) if ascii_units else ", ".join(sorted(units))
-        else:
-            display_units = "any"
+        display_units = ", ".join(units) if units else "any"
         rows.append(
             {
                 "name": name,
@@ -4458,7 +4461,7 @@ def specs_show(
         raise typer.Exit(code=1)
 
     units = SPEC_UNIT_COMPATIBILITY.get(name)
-    canonical_unit = sorted(units)[0] if units else "<unit>"
+    canonical_unit = units[0] if units else "<unit>"  # the first symbol, with a unit IRI where one exists
     example = {"value": 0.0, "unit": canonical_unit}
 
     detail = {
@@ -4470,10 +4473,10 @@ def specs_show(
     if fmt == "json":
         _emit_json(detail)
         return
-    typer.echo(f"name:        {detail['name']}")
-    typer.echo(f"category:    {detail['category']}")
-    typer.echo(f"valid units: {detail['valid_units']}")
-    typer.echo(f"example:     {json.dumps(detail['example'])}")
+    _safe_echo(f"name:        {detail['name']}")
+    _safe_echo(f"category:    {detail['category']}")
+    _safe_echo(f"valid units: {detail['valid_units']}")
+    _safe_echo(f"example:     {json.dumps(detail['example'], ensure_ascii=False)}")
 
 
 @app.command("import-protocol")

@@ -11,10 +11,14 @@ normalization.
 from __future__ import annotations
 
 import hashlib
+import math
+import numbers
 import os
 import re
+from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
+from typing import Any
 from urllib.parse import quote, unquote, urlparse
 
 PathLike = str | Path
@@ -332,6 +336,57 @@ def _now_iso() -> str:
 
 def _now_unix() -> int:
     return int(datetime.now(timezone.utc).timestamp())
+
+
+def is_real_number(value: object) -> bool:
+    """True for a finite real number that is not a bool.
+
+    Python ints and floats count, and so does any other ``numbers.Real``
+    (numpy scalars among them), as JSON Schema's number type counts them.
+    These are the only values a quantity's ``value`` holds, and the only ones
+    the emitters write as ``hasNumberValue``. Text belongs in ``value_text``.
+    """
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        return False
+    if isinstance(value, numbers.Integral):
+        return True  # math.isfinite() overflows on an int too large for a float
+    return math.isfinite(value)
+
+
+# Plain decimal notation with ASCII digits, as JSON writes numbers, with an
+# optional sign and surrounding spaces. "2,5", "1_000", "0x10", "nan" and "inf" are text.
+_NUMBER_TEXT_RE = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", re.ASCII)
+
+
+def number_from_text(text: str) -> int | float | None:
+    """The number a numeric string spells, or None when the string is text.
+
+    ``"2.5"`` gives 2.5, ``" 3 "`` gives 3 (an int when there is no decimal
+    point or exponent) and ``"1e-3"`` gives 0.001. ``"2.5 V"``, ``"n/a"``,
+    ``"2,5"`` and a number too large for a float give None.
+    """
+    stripped = text.strip()
+    if not _NUMBER_TEXT_RE.fullmatch(stripped):
+        return None
+    try:
+        if not any(mark in stripped for mark in ".eE"):
+            return int(stripped)
+        number = float(stripped)
+    except ValueError:  # more digits than int() reads
+        return None
+    return number if math.isfinite(number) else None
+
+
+def jsonld_literal(value: Any) -> Any:
+    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
+    return value.get("@value") if isinstance(value, Mapping) else value
+
+
+def jsonld_text(value: Any) -> str | None:
+    """The text of a JSON-LD string value (plain, typed, or a list of them, joined by '; ')."""
+    items = value if isinstance(value, list) else [value]
+    texts = [text for item in items if isinstance(text := jsonld_literal(item), str) and text.strip()]
+    return "; ".join(texts) or None
 
 
 def is_dataset_series(additional_type: object) -> bool:

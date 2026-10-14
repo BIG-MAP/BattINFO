@@ -73,8 +73,8 @@ def _quantity_hint(path: str) -> str | None:
     from battinfo.validate.semantic import SPEC_UNIT_COMPATIBILITY  # noqa: PLC0415
 
     units = SPEC_UNIT_COMPATIBILITY.get(prop)
-    unit = sorted(units)[0] if units else "<unit>"
-    example = json.dumps({prop: {"value": 0.0, "unit": unit}})
+    unit = units[0] if units else "<unit>"  # the first symbol is the example, with a unit IRI where one exists
+    example = json.dumps({prop: {"value": 0.0, "unit": unit}}, ensure_ascii=False)
     hint = f"pass a quantity object, e.g. {example}"
     if units:
         hint += f"; run `battinfo properties show {prop}` for accepted units"
@@ -89,7 +89,9 @@ def render_issue(issue: ValidationIssue) -> str:
     kwarg = _authoring_kwarg(path)
     if kwarg:
         extras.append(f"authoring field: {kwarg}")
-    quantity = _quantity_hint(path)
+    # The quantity example answers a shape error. A semantic issue on a quantity (a unit
+    # of the wrong dimension, say) names the accepted units and the fix itself.
+    quantity = _quantity_hint(path) if issue.validator != "semantic" else None
     if quantity:
         extras.append(quantity)
     if issue.hint:

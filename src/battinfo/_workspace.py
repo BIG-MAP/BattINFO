@@ -87,16 +87,31 @@ def quantity(
     max_value: int | float | None = None,
     text: str | None = None,
 ) -> dict[str, Any]:
-    """Build a BattINFO quantity dict without hand-writing nested value/unit payloads."""
+    """Build a BattINFO quantity dict without hand-writing nested value/unit payloads.
+
+    The keys are the quantity schema's: ``value``, ``typical_value``,
+    ``min_value``, ``max_value``, ``value_text`` and ``unit``. Only the
+    arguments given are written.
+
+    Examples
+    --------
+    ::
+
+        quantity(3.6, "V")                          # {"value": 3.6, "unit": "V"}
+        quantity(min_value=2.5, max_value=4.2, unit="V")
+        # {"min_value": 2.5, "max_value": 4.2, "unit": "V"}
+        quantity(typical=2.5, unit="Ah")            # {"typical_value": 2.5, "unit": "Ah"}
+        quantity(text="5-8 at 1 kHz", unit="mΩ")    # {"value_text": "5-8 at 1 kHz", "unit": "mΩ"}
+    """
     payload: dict[str, Any] = {}
     if value is not None:
         payload["value"] = value
     if typical is not None:
-        payload["value_typical"] = typical
+        payload["typical_value"] = typical
     if min_value is not None:
-        payload["value_min"] = min_value
+        payload["min_value"] = min_value
     if max_value is not None:
-        payload["value_max"] = max_value
+        payload["max_value"] = max_value
     if text is not None:
         payload["value_text"] = text
     if unit is not None:

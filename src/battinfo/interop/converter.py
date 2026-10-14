@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Mapping
 
+from battinfo._util import is_real_number
 from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, ProvenanceInfo, Test, TestSpec
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
@@ -680,11 +681,22 @@ def _quantity_value(node: Mapping[str, Any]) -> Any:
     return None
 
 
-def _quantity_text(node: Mapping[str, Any]) -> dict[str, Any] | None:
+def _quantity_fields(node: Mapping[str, Any]) -> dict[str, Any] | None:
+    """A quantity node's value as record fields: a number in ``value``, text in ``value_text``.
+
+    A quantity's ``value`` holds a number only, so a string value
+    (``hasStringValue``) is kept as ``value_text``.
+    """
     value = _quantity_value(node)
-    if value is None:
+    if isinstance(value, str):
+        return {"value_text": value} if value.strip() else None
+    return {"value": value} if is_real_number(value) else None
+
+
+def _quantity_text(node: Mapping[str, Any]) -> dict[str, Any] | None:
+    quantity = _quantity_fields(node)
+    if quantity is None:
         return None
-    quantity: dict[str, Any] = {"value": value}
     unit = _map_unit(node.get("hasMeasurementUnit"))
     if unit is not None:
         quantity["unit"] = unit
@@ -704,10 +716,9 @@ def _mapped_properties(value: Any) -> dict[str, dict[str, Any]]:
             continue
         unit = _map_unit(item.get("hasMeasurementUnit"))
         property_name = _property_name(type_name, unit)
-        quantity_value = _quantity_value(item)
-        if property_name is None or quantity_value is None:
+        quantity = _quantity_fields(item)
+        if property_name is None or quantity is None:
             continue
-        quantity: dict[str, Any] = {"value": quantity_value}
         if unit is not None:
             quantity["unit"] = unit
         out[property_name] = quantity

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import copy
 import difflib
-from collections.abc import Iterable
+import warnings
+from collections.abc import Callable, Iterable
 from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any, ClassVar, Mapping, Self
@@ -11,8 +12,8 @@ from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field
 
 from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value
-from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value, jsonld_literal, jsonld_text
+from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
@@ -214,18 +215,33 @@ def _subclass_ref_ids(node: Mapping[str, Any]) -> list[str]:
     return _ref_ids(node.get(RDFS_SUBCLASS_OF_IRI)) + _ref_ids(node.get("rdfs:subClassOf"))
 
 
-def _unit_from_iri(value: Any) -> str | None:
-    if not isinstance(value, str):
-        return None
-    if value.endswith("MilliMetre"):
-        return "mm"
-    if value.endswith("Volt"):
-        return "V"
-    if value.endswith("AmpereHour"):
-        return "Ah"
-    if value.endswith("Gram"):
-        return "g"
-    return value
+def _unit_from_node(node: Mapping[str, Any], expand: Callable[[str], str] | None = None) -> str | None:
+    """The unit symbol of a quantity node, read back exactly as the emitter wrote it.
+
+    ``hasMeasurementUnit`` (a full or compact IRI, or ``{"@id": ...}``) goes
+    through the reverse of the emitters' unit tables, so ``MilliAmpereHour``
+    comes back as ``mAh``, never ``Ah``. An IRI no table names is kept whole,
+    with a warning. A node with no unit IRI gives its ``schema:unitText``.
+    *expand*, when given, first expands a compact IRI with the document's own
+    context. The publication-package reader and ``ws.import_`` both read
+    units this way.
+    """
+    from battinfo.jsonld import unit_symbol_for_iri  # noqa: PLC0415
+
+    iri = _ref_id(node.get("hasMeasurementUnit"))
+    if iri and expand is not None:
+        iri = expand(iri)
+    if iri:
+        symbol = unit_symbol_for_iri(iri)
+        if symbol is not None:
+            return symbol
+        warnings.warn(
+            f"Unit {iri!r} has no symbol in BattINFO's unit tables, so the property keeps the IRI as its unit.",
+            UserWarning,
+            stacklevel=4,
+        )
+        return iri
+    return jsonld_text(node.get("schema:unitText"))
 
 
 def _property_key_from_type(value: Any) -> str | None:
@@ -256,17 +272,35 @@ def _property_key_from_type(value: Any) -> str | None:
 
 
 def _extract_property_item(node: Mapping[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    """A property node of a publication package as ``(key, {value, unit})``.
+
+    A typed literal gives its ``@value``, and a ``hasStringValue`` beside the
+    number comes back as ``value_text``. A number written as text by an older
+    release comes back as the number; other text there moves to
+    ``value_text``, with a warning. A node with no number, or no unit, is skipped.
+    """
     key = _property_key_from_type(node.get("@type"))
     if key is None:
         return None
     numerical = node.get("hasNumericalPart")
     if not isinstance(numerical, Mapping):
         return None
-    value = numerical.get("hasNumberValue", numerical.get("hasNumericalValue"))
-    unit = _unit_from_iri(node.get("hasMeasurementUnit"))
+    value = jsonld_literal(numerical.get("hasNumberValue", numerical.get("hasNumericalValue")))
+    unit = _unit_from_node(node)
     if value is None or unit is None:
         return None
-    return key, {"value": value, "unit": unit}
+    item: dict[str, Any] = {"value": value}
+    if text := jsonld_text(node.get("hasStringValue")):
+        item["value_text"] = text
+    item["unit"] = unit
+    moved = migrate_quantity_values(item, f"properties.{key}")
+    if moved:
+        warnings.warn(
+            f"The publication package held text in a quantity's value, which takes a number only: {'; '.join(moved)}.",
+            UserWarning,
+            stacklevel=3,
+        )
+    return key, item
 
 
 def _citation_doi_value(citation: Any = None, citation_doi: Any = None) -> str | None:
@@ -1521,7 +1555,15 @@ class CellSpec(BundleJsonModel):
     negative_electrode_basis: str | None = Field(
         default=None, description="Primary active material basis of the negative electrode (e.g. 'graphite')."
     )
-    size_code: str | None = Field(default=None, description="Standardised size code (e.g. '18650', '21700', 'AA').")
+    size_code: str | None = Field(
+        default=None,
+        description=(
+            "Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: "
+            "'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example "
+            "'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' "
+            "or 'INR18650', goes in iec_code."
+        ),
+    )
     iec_code: str | None = Field(
         default=None, description="IEC 60086 or IEC 61960 code string (e.g. 'LR6', 'ICR18650')."
     )

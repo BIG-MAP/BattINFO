@@ -486,51 +486,93 @@ def _sig6(value: float) -> float:
     return float(f"{value:.6g}")
 
 
-def _scalar(props: Mapping[str, Any], key: str) -> tuple[float, str | None] | None:
-    """Return ``(value, unit)`` for a numeric quantity property, else ``None``."""
+_SPEC_ITEM_VALUE_KEYS = ("value", "typical_value", "min_value", "max_value", "value_text")
+
+
+def _spec_item_unit(q: Mapping[str, Any]) -> str | None:
+    """A cell-spec property's unit: ``unit``, else ``unit_text`` as a unit symbol, else ``None``."""
+    from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
+
+    unit = q.get("unit")
+    if isinstance(unit, str) and unit.strip():
+        return unit.strip()
+    text = q.get("unit_text")
+    if isinstance(text, str) and text.strip():
+        return normalize_unit_symbol(text) or text.strip()
+    return None
+
+
+def _scalar(props: Mapping[str, Any], key: str, warnings: list[str], lacking: list[str]) -> tuple[float, str] | None:
+    """``(value, unit)`` for a property the export can write, else ``None``.
+
+    The unit is the property's ``unit``, else its ``unit_text``. A property
+    that is present but has no single finite ``value`` (only a typical value,
+    a range or text), or no unit this export reads, is never taken as SI: it
+    is named in *warnings* and in *lacking*, the values the document lacks.
+    """
     q = props.get(key)
     if not isinstance(q, Mapping):
         return None
     value = q.get("value")
-    if not isinstance(value, (int, float)) or isinstance(value, bool):
-        return None
-    if not math.isfinite(value):
+    if not _finite_number(value):
         # NaN / +-inf would serialise to the bare tokens NaN/Infinity, which are
         # not valid JSON per RFC 8259 and crash strict (e.g. the bpx library's)
-        # parsers. Drop the value rather than emit an invalid .bpx.json.
+        # parsers, so they are left out like any other value BPX cannot take.
+        if any(name in q for name in _SPEC_ITEM_VALUE_KEYS):
+            warnings.append(
+                f"property '{key}' has no single value BPX can take (it gives a typical value, a range, "
+                "text or a number that is not finite); skipped."
+            )
+            lacking.append(f"property '{key}'")
         return None
-    unit = q.get("unit")
-    return float(value), (str(unit) if unit is not None else None)
-
-
-def _convert(value: float, unit: str | None, table: dict[str, float], warnings: list[str], key: str) -> float | None:
-    """Scale ``value`` to SI using ``table``; warn on an unrecognised unit."""
+    unit = _spec_item_unit(q)
     if unit is None:
-        return value  # assume already in the target unit
+        if q.get("unit_code"):
+            warnings.append(
+                f"property '{key}' gives its unit only as unit_code {q['unit_code']!r}, which this export "
+                "does not read; skipped. Give the unit as 'unit'."
+            )
+        else:
+            warnings.append(f"property '{key}' has no unit, so its value cannot be converted to SI; skipped.")
+        lacking.append(f"property '{key}'")
+        return None
+    return float(value), unit
+
+
+def _convert(
+    value: float, unit: str, table: dict[str, float], warnings: list[str], key: str, lacking: list[str]
+) -> float | None:
+    """Scale ``value`` to SI using ``table``; warn on a unit it has no factor for."""
+    from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
+
     scale = table.get(unit)
     if scale is None:
+        normalized = normalize_unit_symbol(unit)
+        scale = table.get(normalized) if normalized else None
+    if scale is None:
         warnings.append(f"property '{key}' has unit '{unit}' with no BPX conversion; skipped.")
+        lacking.append(f"property '{key}'")
         return None
     return value * scale
 
 
-def _length_m(props: Mapping[str, Any], key: str, warnings: list[str]) -> float | None:
-    got = _scalar(props, key)
+def _length_m(props: Mapping[str, Any], key: str, warnings: list[str], lacking: list[str]) -> float | None:
+    got = _scalar(props, key, warnings, lacking)
     if got is None:
         return None
     value, unit = got
-    return _convert(value, unit, _LEN_TO_M, warnings, key)
+    return _convert(value, unit, _LEN_TO_M, warnings, key, lacking)
 
 
 def _geometry(
-    props: Mapping[str, Any], cell_format: str | None, warnings: list[str]
+    props: Mapping[str, Any], cell_format: str | None, warnings: list[str], lacking: list[str]
 ) -> tuple[float | None, float | None]:
     """Best-effort (volume_m3, external_surface_area_m2) from spec dimensions."""
     fmt = (cell_format or "").lower()
-    diameter = _length_m(props, "diameter", warnings)
-    height = _length_m(props, "height", warnings)
-    width = _length_m(props, "width", warnings)
-    thickness = _length_m(props, "thickness", warnings)
+    diameter = _length_m(props, "diameter", warnings, lacking)
+    height = _length_m(props, "height", warnings, lacking)
+    width = _length_m(props, "width", warnings, lacking)
+    thickness = _length_m(props, "thickness", warnings, lacking)
 
     if fmt in _CYLINDRICAL_FORMATS and diameter and height:
         r = diameter / 2.0
@@ -578,8 +620,9 @@ class BpxExportResult:
         ``False`` when the document lacks a value its source held: for a
         parameter-file record, a value the import did not read
         (``not_imported``) or a claim this export could not write; for a
-        cell spec, a property in a unit with no BPX conversion. The source
-        file under the record's ``distributions`` is then the complete copy.
+        cell spec, a property BPX takes that has no single value, no unit,
+        or a unit with no BPX conversion. The source file under the record's
+        ``distributions`` is then the complete copy.
     """
 
     bpx: dict[str, Any]
@@ -647,7 +690,11 @@ def to_bpx(
     specification (nominal capacity, voltage cut-offs, electrode area, and,
     from the dimensions, volume, external surface area and density), plus
     the required physics parameters a spec cannot provide, reported rather
-    than invented.
+    than invented. A property's unit is its ``unit``, else its
+    ``unit_text``. A property with neither (or with only a ``unit_code``),
+    or with no single ``value`` (only a typical value, a range or text), is
+    never taken as SI: it is left out, named in the warnings, and the result
+    is not :attr:`~BpxExportResult.complete`.
 
     A registry resource JSON holding one such record (under
     ``semantic_payload.battinfo_records``) is unwrapped. Anything else
@@ -787,9 +834,6 @@ def _official_parser_rejection(document: Mapping[str, Any]) -> tuple[str | None,
     return (None, []) if passed else (detail, missing)
 
 
-_NO_CONVERSION = "with no BPX conversion; skipped."
-
-
 def _cell_spec_to_bpx(
     source: Any,
     *,
@@ -802,6 +846,7 @@ def _cell_spec_to_bpx(
 ) -> tuple[BpxExportResult, list[str]]:
     """A cell spec's ``Partial`` BPX document (see :func:`to_bpx`), and what it lacks."""
     warnings: list[str] = []
+    lacking: list[str] = []
     meta, props = _coerce_cell_spec(source)
 
     name = title or meta.get("name") or meta.get("model")
@@ -810,11 +855,11 @@ def _cell_spec_to_bpx(
 
     # 1. Direct scalar mappings (capacity, voltage cut-offs).
     for bi_key, (bpx_key, table, _required) in _BPX_EXPORT_DIRECT.items():
-        got = _scalar(props, bi_key)
+        got = _scalar(props, bi_key, warnings, lacking)
         if got is None:
             continue
         value, unit = got
-        si = _convert(value, unit, table, warnings, bi_key)
+        si = _convert(value, unit, table, warnings, bi_key, lacking)
         if si is None:
             continue
         cell[bpx_key] = _sig6(si)
@@ -822,7 +867,7 @@ def _cell_spec_to_bpx(
 
     # 2. Geometry-derived volume and surface area — fallback only: explicit
     # electrode_area/external_surface_area/volume properties (step 1) win.
-    volume, area = _geometry(props, meta.get("cell_format"), warnings)
+    volume, area = _geometry(props, meta.get("cell_format"), warnings, lacking)
     if volume is not None and "Volume [m3]" not in cell:
         cell["Volume [m3]"] = volume
         filled.append("Volume [m3]")
@@ -830,10 +875,11 @@ def _cell_spec_to_bpx(
         cell["External surface area [m2]"] = area
         filled.append("External surface area [m2]")
 
-    mass = _scalar(props, "mass")
+    # The mass is read only when there is a volume to divide it by.
     emitted_volume = cell.get("Volume [m3]")
+    mass = _scalar(props, "mass", warnings, lacking) if emitted_volume else None
     if mass is not None and emitted_volume:
-        mass_kg = _convert(mass[0], mass[1], _MASS_TO_KG, warnings, "mass")
+        mass_kg = _convert(mass[0], mass[1], _MASS_TO_KG, warnings, "mass", lacking)
         if mass_kg is not None:
             cell["Density [kg.m-3]"] = _sig6(mass_kg / emitted_volume)
             filled.append("Density [kg.m-3]")
@@ -898,7 +944,6 @@ def _cell_spec_to_bpx(
         # them: the same conversion upgrade_bpx makes.
         bpx_doc, changes = to_v1_layout(bpx_doc, resolved_version)
         _report_layout_changes(changes, resolved_version, warnings)
-    lacking = [w.split(" has unit ")[0] for w in warnings if w.endswith(_NO_CONVERSION)]
     return (
         BpxExportResult(bpx=bpx_doc, filled=filled, missing_required=missing_required, warnings=warnings),
         lacking,
@@ -1006,8 +1051,9 @@ def _claim_to_bpx_value(
     """One claim's value as BPX writes it, or ``ValueError`` saying why it cannot be.
 
     Values are written back exactly as the claim holds them when they are in
-    the unit BPX states; otherwise they are converted. A quantity without a
-    unit is in the parameter's canonical unit. A curve's x axis must
+    the unit BPX states; otherwise they are converted. The unit is the
+    quantity's ``unit``, else its ``unit_text``; a quantity with neither is
+    in the parameter's canonical unit. A curve's x axis must
     tabulate what the BPX field tabulates, in (or convertible to) the unit
     BPX uses for it.
     """
@@ -1019,6 +1065,8 @@ def _claim_to_bpx_value(
         if not _finite_number(value):
             raise ValueError(f"{label} has no finite numeric value for BPX {field_name!r}.")
         unit = quantity.get("unit")
+        if unit is None:
+            unit = quantity.get("unit_text")
         unit = str(unit) if unit is not None else str(entry.get("unit") or bpx_unit)
         return _converted([value], unit, bpx_unit, label, field_name)[0]
     curve = claim.get("curve")

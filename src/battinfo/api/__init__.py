@@ -264,7 +264,6 @@ from battinfo.api._shared import (
     _resolved_retrieved_at,
     _resolved_time,
     _short_id_from_iri,
-    _spec_numeric_value,
     _str_contains,
     _str_eq,
     _str_fuzzy_match,

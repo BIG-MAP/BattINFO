@@ -10,7 +10,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from battinfo._util import _citation_doi_from_url
+from battinfo._util import _citation_doi_from_url, is_real_number
 from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
@@ -487,10 +487,12 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     Canonical symbols pass through unchanged. Accepted alternative spellings are
     rewritten: ASCII exponents (``mg/cm^2`` -> ``mg/cm2``, ``g/cm³`` -> ``g/cm3``),
     ASCII micro prefixes (``um`` -> ``µm``), Ohm spellings (``mOhm`` / ``milliohm`` ->
-    ``mΩ``), product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius
-    spellings (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out
-    names (``percent`` -> ``%``, ``hour`` -> ``h``). Unknown strings are returned
-    trimmed, so the caller can still fall back to ``schema:unitText``.
+    ``mΩ``, and the ohm sign U+2126 -> ``Ω``), the kelvin sign U+212A -> ``K``,
+    product separators (``mPa*s`` / ``mPa·s`` -> ``mPa.s``), Celsius spellings
+    (``degC`` / ``deg C`` -> ``°C``), and a short list of spelled-out names
+    (``percent`` -> ``%``, ``hour`` -> ``h``). Case is kept, because it can change
+    magnitude (``mV`` is a millivolt, ``MV`` a megavolt). Unknown strings are
+    returned trimmed, so the caller can still fall back to ``schema:unitText``.
     """
     if not isinstance(unit, str):
         return None
@@ -506,6 +508,7 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     # A remaining interior space is a product separator ("mPa s").
     text = text.replace(" ", ".")
     text = text.replace("μ", "µ")  # Greek mu (U+03BC) -> micro sign (U+00B5)
+    text = text.replace("\u2126", "Ω").replace("\u212a", "K")  # ohm and kelvin signs -> the letters
     text = _MICRO_PREFIX_RE.sub("µ", text)
     text = _OHM_SUFFIX_RE.sub("Ω", text)
     return _UNIT_ALIASES.get(text, text)
@@ -773,6 +776,20 @@ def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] |
     return qualifier
 
 
+def _add_string_value(node: dict[str, Any], text: Any) -> None:
+    """Add non-blank *text* to the node's ``hasStringValue``, growing a list for a second one."""
+    if not isinstance(text, str) or not text.strip():
+        return
+    existing = node.get("hasStringValue")
+    if existing is None:
+        node["hasStringValue"] = text
+    elif isinstance(existing, list):
+        if text not in existing:
+            existing.append(text)
+    elif existing != text:
+        node["hasStringValue"] = [existing, text]
+
+
 def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str | None = None) -> dict[str, Any] | None:
     if not isinstance(quantity, dict):
         return None
@@ -797,12 +814,16 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     # represented as separate hasProperty entries with distinct EMMO property classes
     # (e.g. MinimumCapacity alongside NominalCapacity).  Min/max bounds are preserved
     # in the canonical JSON record and are available to JSON consumers.
-    primary = quantity.get("value") if quantity.get("value") is not None else quantity.get("typical_value")
+    # hasNumberValue carries a finite real number only. A dict that skipped
+    # validation may hold text in value: it goes out as hasStringValue, beside
+    # value_text, and is never coerced here.
+    value, typical = quantity.get("value"), quantity.get("typical_value")
+    primary = value if is_real_number(value) else typical if is_real_number(typical) else None
     if primary is not None:
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
 
-    if quantity.get("value_text"):
-        node["hasStringValue"] = quantity["value_text"]
+    for text in (quantity.get("value_text"), value, typical):
+        _add_string_value(node, text)
 
     unit = quantity.get("unit") or quantity.get("unit_text")
     iri = _unit_iri(unit)
@@ -1287,15 +1308,19 @@ def _converter_quantity_node(
     *,
     property_types: dict[str, str] | None = None,
 ) -> dict[str, Any] | None:
-    if not isinstance(quantity, dict) or quantity.get("value") is None:
+    if not isinstance(quantity, dict):
         return None
+    value = quantity.get("value")
     type_name = (property_types or CONVERTER_PROPERTY_TYPES).get(name)
     if type_name is None:
         return None
-    node: dict[str, Any] = {
-        "@type": type_name,
-        "hasNumericalPart": {"@type": "emmo:RealData", "hasNumberValue": quantity["value"]},
-    }
+    node: dict[str, Any] = {"@type": type_name}
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "emmo:RealData", "hasNumberValue": value}
+    elif isinstance(value, str) and value.strip():
+        node["hasStringValue"] = value
+    else:
+        return None
     unit_token = _converter_unit_token(str(quantity.get("unit") or quantity.get("unit_text") or ""))
     if unit_token is not None:
         node["hasMeasurementUnit"] = unit_token
@@ -1688,16 +1713,22 @@ def _emmo_quantity_node(
     quantity: dict[str, Any],
     unit_iri_override: str | None = None,
 ) -> dict[str, Any] | None:
-    """Build a ConventionalProperty node with an explicit EMMO type (bypasses the property map)."""
+    """Build a ConventionalProperty node with an explicit EMMO type (bypasses the property map).
+
+    A real number becomes ``hasNumberValue``; ``value_text``, and text in
+    ``value`` (from a dict that skipped validation), become ``hasStringValue``
+    and are not coerced. A quantity with neither gives no node.
+    """
     if not isinstance(quantity, dict):
         return None
     value = quantity.get("value")
-    if value is None:
+    node: dict[str, Any] = {"@type": [emmo_type, "ConventionalProperty"]}
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": value}
+    for text in (quantity.get("value_text"), value):
+        _add_string_value(node, text)
+    if "hasNumericalPart" not in node and "hasStringValue" not in node:
         return None
-    node: dict[str, Any] = {
-        "@type": [emmo_type, "ConventionalProperty"],
-        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
-    }
     unit = quantity.get("unit")
     iri = unit_iri_override or _unit_iri(unit)
     if iri:
@@ -1713,27 +1744,26 @@ def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[st
 
     When the stored unit is '%', the value is converted from the 0–100 percentage range to the
     [0, 1] range and hasMeasurementUnit is set to UnitOne (dimensionless).  Other units are passed
-    through to the standard unit map lookup.
+    through to the standard unit map lookup. ``value_text`` goes out as ``hasStringValue``, as
+    ``_emmo_quantity_node`` writes it, and is never scaled.
     """
     if not isinstance(quantity, dict):
         return None
     value = quantity.get("value")
-    if value is None:
-        return None
     unit = quantity.get("unit", "")
     if unit == "%":
-        try:
-            scaled = round(float(value) / 100, 6)
-        except (TypeError, ValueError):
-            # Non-numeric fraction (e.g. a string from CSV/spreadsheet ingestion):
-            # emit verbatim via the standard path rather than crashing the whole
-            # document transform on `value / 100`.
+        if not is_real_number(value):
+            # Text in value (a dict that skipped validation, e.g. "95" from a
+            # spreadsheet) is not scaled or coerced: the standard path emits it
+            # as hasStringValue, and value_text with it.
             return _emmo_quantity_node(emmo_type, quantity)
+        scaled = round(float(value) / 100, 6)
         node = {
             "@type": [emmo_type, "ConventionalProperty"],
             "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
             "hasMeasurementUnit": _UNIT_ONE_IRI,
         }
+        _add_string_value(node, quantity.get("value_text"))
         # A spread stated in % rescales with the value it qualifies, or the
         # emitted node would pair a [0,1] mean with a 0-100 deviation.
         rescaled = dict(quantity)

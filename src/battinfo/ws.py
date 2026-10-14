@@ -85,7 +85,10 @@ from battinfo._util import (
     url_segment,
 )
 from battinfo._util import file_uri_to_path as _file_uri_to_path
+from battinfo._util import jsonld_literal as _jsonld_literal
+from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
+from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
@@ -789,9 +792,17 @@ def _media_type_from_jsonld(value: Any) -> str:
     return "" if value.startswith(("http://", "https://")) else value
 
 
-def _jsonld_literal(value: Any) -> Any:
-    """The value of a typed JSON-LD literal (``{"@value": ..., "@type": ...}``), else *value*."""
-    return value.get("@value") if isinstance(value, Mapping) else value
+def _warn_text_moved(source: str, notes: Iterable[str]) -> None:
+    """Warn that text read from a quantity's ``value`` moved to ``value_text``.
+
+    *notes* come from ``migrate_quantity_values``; nothing is said when it is empty.
+    """
+    lines = list(notes)
+    if lines:
+        warnings.warn(
+            f"{source} held text in a quantity's value, which takes a number only from 0.8.0 on: {'; '.join(lines)}.",
+            stacklevel=3,
+        )
 
 
 def _typed_date(value: "str | int | float") -> dict:
@@ -2888,11 +2899,13 @@ class AuthoringWorkspace:
 
         The funding block is set when absent; each contributor (a ``Person``
         carrying the ORCID in ``same_as``) is appended if its ORCID is not already
-        listed; the workspace default license is set to reflect the current value.
+        listed; the workspace default license is set on a record that carries
+        none, and a license the record states itself is kept.
         All are idempotent and back-fill records authored before the
         project/contributor/license was set — a re-save whose stamped result is
         byte-identical is reported ``unchanged``, while changing the workspace
-        license re-stamps the new value (reported ``updated``).  Returns
+        license re-stamps the new value on the records that take the default
+        (reported ``updated``).  Returns
         ``(None, counters)`` when none of project/contributor/license is set.
         ``counters`` is updated as the callback runs so :meth:`save` can report
         how many records each stamp reached.
@@ -2926,16 +2939,14 @@ class AuthoringWorkspace:
             if lic:
                 # Datasets carry the license on the dataset body (the existing
                 # slot the emitter reads and where an explicit ws.add(license=)
-                # lands); other record types carry it at the top level. An
-                # explicit per-record dataset license is left untouched — the
-                # workspace default only back-fills records that have none.
+                # lands); other record types carry it at the top level. For
+                # every record type the workspace default only back-fills a
+                # record that has none: an explicit per-record license, such
+                # as ws.add("parameter_set", ..., license=...), is kept.
                 ds_body = doc.get("dataset")
-                if isinstance(ds_body, dict):
-                    if not ds_body.get("license"):
-                        ds_body["license"] = lic
-                        counters["license"] += 1
-                elif doc.get("license") != lic:
-                    doc["license"] = lic
+                holder = ds_body if isinstance(ds_body, dict) else doc
+                if not holder.get("license"):
+                    holder["license"] = lic
                     counters["license"] += 1
 
         return stamp, counters
@@ -3075,7 +3086,8 @@ class AuthoringWorkspace:
         Mirrors :meth:`contributor` and :meth:`project`: the value is persisted in
         ``.battinfo/workspace.json`` and stamped onto each record at ``save()``, so
         the license travels with the record itself (FAIR R1.1) rather than existing
-        only on the Zenodo deposit. Pass an SPDX license identifier (e.g.
+        only on the Zenodo deposit. It fills in a record that has no license of its
+        own; a record that states one keeps it. Pass an SPDX license identifier (e.g.
         ``"cc-by-4.0"``) or a license URL; a recognised identifier is normalised to
         canonical lower-case, anything else is kept verbatim with a warning.
 
@@ -3797,6 +3809,14 @@ class AuthoringWorkspace:
         A relative draft path resolves against the workspace root, not the
         current directory.
 
+        A quantity's ``value`` holds a number only. A cell-spec or
+        equipment-spec draft, or a found cell spec, written before 0.8.0 may
+        hold text there: a numeric string (``"2.5"``) is read as the number,
+        and other text moves to ``value_text`` with a warning. In a draft this
+        covers every quantity, those in the electrodes, electrolyte,
+        separator, housing and construction included. The equipment spec
+        given to ``ws.add("equipment", spec=...)`` is read the same way.
+
         Example::
 
             spec = ws.load("duracell.cell-spec.json")               # author new
@@ -3915,7 +3935,10 @@ class AuthoringWorkspace:
         ``spec`` accepts a canonical equipment-spec record dict, a path to one, or
         the IRI of one already saved in this workspace.  ``channels=N`` overrides
         the spec's ``channel_count``.  Re-running with the same inputs is
-        idempotent (deterministic equipment + channel IRIs).
+        idempotent (deterministic equipment + channel IRIs).  A spec saved
+        before 0.8.0 may hold text in a quantity's ``value``: a numeric string
+        is read as the number and other text moves to ``value_text``, with a
+        warning, and the saved spec is rewritten that way.
         """
         rt_key = str(record_type).strip().lower().replace("_", "-")
         if rt_key == "equipment":
@@ -4681,7 +4704,10 @@ class AuthoringWorkspace:
         Parses the JSON-LD `@graph`, reconstructs cell specs, cell instances,
         tests, and datasets, then populates this workspace ready for
         ``ws.save()`` and ``ws.submit()``.  All canonical IRIs from the source
-        document are preserved — no new IRIs are minted.
+        document are preserved — no new IRIs are minted. A deposit written
+        before 0.8.0 may carry text as a quantity's number: a numeric string
+        (``"2.5"``) is read as the number, and other text moves to
+        ``value_text`` with a warning.
 
         Parameters
         ----------
@@ -4755,7 +4781,7 @@ class AuthoringWorkspace:
             return term
 
         # ── 3. Build reverse lookup tables ────────────────────────────────────
-        from battinfo.jsonld import _UNIT_MAP
+        from battinfo.bundle import _unit_from_node  # noqa: PLC0415
 
         # Load prop map directly so we can keep only the FIRST key per IRI
         # (later aliases like "discharging_temperature_min" must not overwrite
@@ -4768,24 +4794,6 @@ class AuthoringWorkspace:
                 key = m.get("key", "")
                 if iri and key and iri not in rev_prop:  # first occurrence wins
                     rev_prop[iri] = key
-
-        rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
-        # The shared quantity-node builder resolves units through the curated /
-        # candidate unit maps as well, so reverse those too (first symbol wins;
-        # _UNIT_MAP symbols take precedence for stability with older files).
-        for _unit_file in ("unit_map.curated.json", "unit_map.candidates.json"):
-            _unit_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / _unit_file
-            if _unit_path.exists():
-                for m in json.loads(_unit_path.read_text(encoding="utf-8")).get("mappings", []):
-                    if m.get("unit_iri") and m.get("symbol"):
-                        rev_unit.setdefault(m["unit_iri"], m["symbol"])
-        from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS as _LEGACY_UNIT_IRIS
-        from battinfo.transform.json_to_jsonld import MANUAL_UNIT_TYPES as _MANUAL_UNIT_TYPES
-
-        for _sym, _iri in _MANUAL_UNIT_TYPES.items():
-            rev_unit.setdefault(_iri, _sym)
-        for _iri, _sym in _LEGACY_UNIT_IRIS.items():
-            rev_unit.setdefault(_iri, _sym)
 
         # Build chemistry value reverse map (IRI → original-case chemistry string)
         # so the reconstructed records match the source exactly.
@@ -4818,15 +4826,28 @@ class AuthoringWorkspace:
                 d.update(info)
             return d
 
-        def _specs_from_property_nodes(nodes: list) -> dict:
+        def _specs_from_property_nodes(nodes: list, where: str) -> dict:
             """Reverse EMMO hasProperty nodes → {key: {value, unit}}.
 
             Accepts both quantity-node generations: the legacy single-string
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
             shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
-            as a bare IRI string)."""
+            as a bare IRI string). Units are read back as the publication-package
+            reader reads them: an IRI goes through the emitters' unit tables, an
+            IRI no table names is kept whole with a warning, and a unit without
+            an IRI is read from ``schema:unitText``.
+
+            A deposit written before 0.8.0 may carry text in
+            ``hasNumberValue``: a numeric string comes back as the number, and
+            other text moves to ``value_text`` with a warning, so a strict
+            ``ws.save()`` accepts the record. A ``hasStringValue`` beside a
+            number comes back as ``value_text``; a property stated as text
+            alone is not read back."""
             specs: dict = {}
-            for node in nodes:
+            moved: builtins.list[str] = []
+            for node in nodes if isinstance(nodes, list) else [nodes]:
+                if not isinstance(node, Mapping):
+                    continue
                 type_raw = node.get("@type", "")
                 type_terms = (
                     [type_raw]
@@ -4841,20 +4862,19 @@ class AuthoringWorkspace:
                 )
                 if not prop_key:
                     continue
-                value = (node.get("hasNumericalPart") or {}).get(
-                    "hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue")
-                )
-                unit_raw = node.get("hasMeasurementUnit")
-                if isinstance(unit_raw, str):
-                    unit_term = unit_raw
-                elif isinstance(unit_raw, dict):
-                    unit_term = unit_raw.get("@id", "")
-                else:
-                    unit_term = ""
-                unit_iri = _expand(unit_term)
-                unit_sym = rev_unit.get(unit_iri, unit_term.split(":")[-1])
-                if value is not None:
-                    specs[prop_key] = {"value": value, "unit": unit_sym}
+                numerical = node.get("hasNumericalPart")
+                numerical = numerical if isinstance(numerical, Mapping) else {}
+                value = _jsonld_literal(numerical.get("hasNumberValue", numerical.get("hasNumericalValue")))
+                if value is None:
+                    continue
+                quantity: dict[str, Any] = {"value": value}
+                if text := _jsonld_text(node.get("hasStringValue")):
+                    quantity["value_text"] = text
+                if unit := _unit_from_node(node, _expand):
+                    quantity["unit"] = unit
+                moved.extend(migrate_quantity_values(quantity, f"properties.{prop_key}"))
+                specs[prop_key] = quantity
+            _warn_text_moved(where, moved)
             return specs
 
         # ── 4. Index graph nodes by type ───────────────────────────────────────
@@ -4918,7 +4938,9 @@ class AuthoringWorkspace:
             # Canonical shape: the physical payload (hasProperty, composition)
             # rides the described battery; older packages carried it on the
             # spec node - read both, described side first.
-            specs = _specs_from_property_nodes(phys.get("hasProperty") or node.get("hasProperty", []))
+            specs = _specs_from_property_nodes(
+                phys.get("hasProperty") or node.get("hasProperty") or [], f"cell spec {iri}"
+            )
 
             # size_code: the canonical shape emits it as schema:size; older
             # packages used schema:identifier. In the canonical shape
@@ -9815,6 +9837,14 @@ class AuthoringWorkspace:
         # CellSpec(nominal_voltage=...) reads it (it wins over both).
         flat = {key: fields.pop(key) for key in [key for key in fields if key in flat_names]}
         quantities = {**(fields.pop("specs", None) or {}), **(fields.pop("properties", None) or {}), **flat}
+        # A draft written before 0.8.0 may hold text in a quantity's value: a
+        # numeric string becomes the number, other text moves to value_text.
+        # The component holders (electrodes, electrolyte, separator, housing,
+        # construction) carry quantities too, so the rest of the draft is read
+        # the same way; only quantity-shaped objects are touched.
+        moved = migrate_quantity_values(quantities, "properties")
+        moved.extend(migrate_quantity_values(fields))
+        _warn_text_moved(path.name, moved)
         fields["properties"] = _filled_quantities(quantities, path)
         _merge_draft_alias(fields, "model_name", "model", path)
         comment = [*_draft_text_list(fields.pop("comment", None)), *_draft_text_list(fields.pop("notes", None))]
@@ -9991,8 +10021,19 @@ class AuthoringWorkspace:
 
         record = self._fetch_cell_spec_record(result) if result.get("source") == "api" else result.get("_record", {})
         product = record.get("cell_spec", {}) or {}
-        specs_raw = record.get("properties", {}) or {}
-        specs = {k: v for k, v in specs_raw.items() if isinstance(v, dict) and v.get("value") is not None}
+        # A copy, so the reference copy kept below stays as published. A spec
+        # saved before 0.8.0 may hold text in a quantity's value: it is read
+        # into value_text (a numeric string into the number).
+        specs_raw = copy.deepcopy(record.get("properties", {}) or {})
+        _warn_text_moved(
+            f"cell spec {result.get('id') or product.get('id') or ''}".strip(),
+            migrate_quantity_values(specs_raw, "properties"),
+        )
+        specs = {
+            k: v
+            for k, v in specs_raw.items()
+            if isinstance(v, dict) and any(v.get(field) is not None for field in _QUANTITY_VALUE_KEYS)
+        }
         mfr = product.get("manufacturer") or {}
         mfr_name = mfr.get("name", "") if isinstance(mfr, dict) else str(mfr)
         ct = CellSpec(
@@ -10376,6 +10417,10 @@ class AuthoringWorkspace:
             )
         pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
         uid = None if pinned else stable_uid("::".join(["equipment-spec", manufacturer or "", model or "", name]))
+        # A draft written before 0.8.0 may hold text in a quantity's value: a
+        # numeric string becomes the number, other text moves to value_text.
+        # The whole draft is read, so a quantity outside `property` is covered too.
+        _warn_text_moved(path.name, migrate_quantity_values(raw))
         # Drop template placeholders (null quantity fields) so the record stays valid.
         props: dict[str, dict] = {}
         for key, value in (raw.get("property") or {}).items():
@@ -10411,16 +10456,24 @@ class AuthoringWorkspace:
         print(f"  equipment-spec: {body['name']}  {body['id']}")
         return record
 
-    def _resolve_equipment_spec_arg(self, spec: Any) -> dict:
+    def _resolve_equipment_spec_arg(self, spec: Any) -> tuple[dict, Path | None, builtins.list[str]]:
         """Resolve ``spec=`` for ``ws.add('equipment', ...)`` to a canonical record.
 
         Accepts a canonical equipment-spec record dict, a path to one (a
         template draft is also accepted and lifted like ``ws.load`` would), or
         the IRI of a spec already saved in this workspace's records tree.
+
+        Returns the record, the file it was read from (None for a dict or a
+        draft) and the notes ``migrate_quantity_values`` gave on it. A record
+        saved before 0.8.0 may hold text in a quantity's value: it comes back
+        with a numeric string as the number and other text in ``value_text``,
+        and the caller warns with the notes. A dict passed in is copied, never
+        changed. A draft is migrated and warned about by ``_load_equipment_spec``.
         """
         if isinstance(spec, dict):
             if isinstance(spec.get("equipment_spec"), dict):
-                return spec
+                doc = copy.deepcopy(spec)
+                return doc, None, migrate_quantity_values(doc)
             raise TypeError(
                 "spec= must be a canonical equipment-spec record (a dict with an "
                 "'equipment_spec' key), a path to one, or its IRI. Author one with "
@@ -10435,7 +10488,7 @@ class AuthoringWorkspace:
                     continue
                 body = doc.get("equipment_spec") or {}
                 if body.get("id") == spec:
-                    return doc
+                    return doc, path, migrate_quantity_values(doc)
             raise ValueError(
                 f"No equipment-spec record with id {spec!r} in this workspace. "
                 "Pass the record dict (or a path to it) instead - "
@@ -10449,9 +10502,9 @@ class AuthoringWorkspace:
                 raise FileNotFoundError(f"equipment-spec file not found: {path}")
             doc = json.loads(path.read_text(encoding="utf-8"))
             if isinstance(doc.get("equipment_spec"), dict):
-                return doc
+                return doc, path, migrate_quantity_values(doc)
             # A template draft (no canonical envelope): lift it like ws.load would.
-            return self._load_equipment_spec(path)
+            return self._load_equipment_spec(path), None, []
         raise TypeError(
             "spec= must be a canonical equipment-spec record dict, a path to one, "
             "or its IRI (https://w3id.org/battinfo/spec/...)."
@@ -10493,7 +10546,7 @@ class AuthoringWorkspace:
                 "ws.add('equipment', ...) needs serial_number=... - it is the unit's "
                 "stable identity (the equipment IRI is minted from spec uid + serial number)."
             )
-        spec_record = self._resolve_equipment_spec_arg(spec)
+        spec_record, spec_read_from, spec_moved = self._resolve_equipment_spec_arg(spec)
         spec_body = spec_record["equipment_spec"]
         spec_id = spec_body["id"]
         spec_uid = spec_id.rsplit("/", 1)[-1]
@@ -10521,6 +10574,16 @@ class AuthoringWorkspace:
             return result
 
         spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))
+        # Text read out of the spec is reported once. When spec= named the
+        # saved copy itself (by IRI or path), the upsert finds that file
+        # unchanged, rewrites it and warns with the same notes.
+        rewrote_the_source = (
+            spec_read_from is not None
+            and not spec_result.get("content_changed")
+            and Path(spec_result["path"]).resolve() == spec_read_from.resolve()
+        )
+        if not rewrote_the_source:
+            _warn_text_moved(spec_read_from.name if spec_read_from else f"equipment spec {spec_id}", spec_moved)
 
         # Deterministic equipment identity: the same (spec, serial_number) always
         # mints the same equipment IRI - the seed mirrors the ratified channel
