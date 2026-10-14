@@ -1075,6 +1075,9 @@ def _validate_test_semantics(
 
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
+# The Unix times a date can be made of: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z.
+_EPOCH_FIRST = -62135596800
+_EPOCH_LAST = 253402300799
 
 
 def _walk_epoch_plausibility(
@@ -1082,12 +1085,19 @@ def _walk_epoch_plausibility(
     path: str,
     issues: list[ValidationIssue],
     resource_type: str | None,
+    hard_issue_severity: str = "warning",
 ) -> None:
     """Warn on any ``*_at`` epoch field outside 2000..2100.
 
     A 1970 timestamp on a citable record is always converter/import garbage
     (e.g. an epoch that was divided by 1000 upstream), yet it is schema-valid;
     this is the loud channel the red-team review found missing.
+
+    A time no date can be made of, most often one in milliseconds (past the
+    year 9999 as seconds), is ``semantic.timestamp_out_of_range`` instead, at
+    the policy's hard severity: an error under the strict and publisher
+    policies, so ``ws.save()`` stops it. A deposit graph would have to leave
+    such a time out.
     """
     if isinstance(value, Mapping):
         for key, item in value.items():
@@ -1098,8 +1108,23 @@ def _walk_epoch_plausibility(
                 and isinstance(item, (int, float))
                 and not isinstance(item, bool)
                 and item != 0
-                and not (_EPOCH_MIN <= float(item) <= _EPOCH_MAX)
+                # Compared as they are: float() of a very large int overflows.
+                and not (_EPOCH_MIN <= item <= _EPOCH_MAX)
             ):
+                if not (_EPOCH_FIRST <= item <= _EPOCH_LAST):
+                    _append_issue(
+                        issues,
+                        code="semantic.timestamp_out_of_range",
+                        severity=hard_issue_severity,
+                        path=child,
+                        message=(
+                            f"{key} = {item} cannot be a Unix time in seconds: it falls outside the "
+                            "years 1 to 9999, as a time in milliseconds does. Give it in seconds; a "
+                            "deposit graph leaves it out."
+                        ),
+                        resource_type=resource_type,
+                    )
+                    continue
                 _append_issue(
                     issues,
                     code="semantic.timestamp_implausible",
@@ -1113,10 +1138,10 @@ def _walk_epoch_plausibility(
                     resource_type=resource_type,
                 )
             else:
-                _walk_epoch_plausibility(item, child, issues, resource_type)
+                _walk_epoch_plausibility(item, child, issues, resource_type, hard_issue_severity)
     elif isinstance(value, list):
         for idx, item in enumerate(value):
-            _walk_epoch_plausibility(item, f"{path}[{idx}]", issues, resource_type)
+            _walk_epoch_plausibility(item, f"{path}[{idx}]", issues, resource_type, hard_issue_severity)
 
 
 def _walk_non_finite(
@@ -1461,7 +1486,7 @@ def validate_semantic_report(
     # whole doc so nested quantities (electrode coating, etc.) are caught, not just
     # flat specs.
     _walk_non_finite(doc, "", issues, resource_type)
-    _walk_epoch_plausibility(doc, "", issues, resource_type)
+    _walk_epoch_plausibility(doc, "", issues, resource_type, hard_issue_severity)
 
     specs = doc.get("properties")
     if isinstance(specs, Mapping):

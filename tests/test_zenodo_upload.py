@@ -435,7 +435,7 @@ class TestUploadZenodoPackage:
             patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
             patch("battinfo.zenodo._resolve_token", return_value="tok"),
         ):
-            result = upload_zenodo_package(staging, CREATORS, token="tok")
+            result = upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         assert result["deposit_id"] == 99999
         assert result["record_id"] == 12345
@@ -455,7 +455,7 @@ class TestUploadZenodoPackage:
             patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
             patch("battinfo.zenodo._resolve_token", return_value="tok"),
         ):
-            result = upload_zenodo_package(staging, CREATORS, token="tok", publish=True)
+            result = upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True, publish=True)
 
         assert result["published"] is True
         mock_client.publish_deposit.assert_called_once()
@@ -468,31 +468,33 @@ class TestUploadZenodoPackage:
             patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
             patch("battinfo.zenodo._resolve_token", return_value="tok"),
         ):
-            upload_zenodo_package(staging, CREATORS, token="tok")
+            upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         text = (staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8")
         assert "ZENODO_RECORD_ID" not in text
-        assert "88888" in text
+        assert "https://sandbox.zenodo.org/records/88888" in text
 
     def test_missing_bundle_raises(self, tmp_path: Path) -> None:
         staging = tmp_path / "empty_staging"
         staging.mkdir()
         with pytest.raises(FileNotFoundError, match="battinfo.bundle.json"):
-            upload_zenodo_package(staging, CREATORS, token="tok")
+            upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
     def test_empty_creators_raises(self, tmp_path: Path) -> None:
         staging = _staged_package(tmp_path)
         with pytest.raises(ValueError, match="creators"):
-            upload_zenodo_package(staging, [], token="tok")
+            upload_zenodo_package(staging, [], token="tok", sandbox=True)
 
-    def test_no_token_raises(self, tmp_path: Path) -> None:
+    def test_no_token_raises(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         staging = _staged_package(tmp_path)
         import os
 
+        # The sandbox token's last fallback is the config file: one in the test's folder, with none stored.
+        monkeypatch.setattr("battinfo.config.USER_CONFIG_PATH", tmp_path / "home" / ".battinfo" / "config.yaml")
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("ZENODO_API_TOKEN", None)
             with pytest.raises(ZenodoError, match="token"):
-                upload_zenodo_package(staging, CREATORS)
+                upload_zenodo_package(staging, CREATORS, sandbox=True)
 
     def test_sandbox_flag_passed_to_client(self, tmp_path: Path) -> None:
         staging = _staged_package(tmp_path)
@@ -506,6 +508,25 @@ class TestUploadZenodoPackage:
 
         MockCls.assert_called_once_with(token="tok", sandbox=True)
         assert result["sandbox"] is True
+
+    @pytest.mark.parametrize("kwargs", [{}, {"sandbox": False}, {"sandbox": False, "publish": True}])
+    def test_zenodo_org_is_refused_before_any_request(self, tmp_path: Path, kwargs: dict) -> None:
+        """The batch path uploads only to the sandbox in this release."""
+        staging = _staged_package(tmp_path)
+        before = {f.name: f.read_bytes() for f in staging.iterdir()}
+
+        with (
+            patch("battinfo.zenodo.ZenodoClient") as MockCls,
+            patch("urllib.request.urlopen", side_effect=AssertionError("no request may be made")) as mock_open,
+        ):
+            with pytest.raises(ValueError, match="only to the Zenodo sandbox") as excinfo:
+                upload_zenodo_package(staging, CREATORS, token="tok", **kwargs)
+
+        assert "later release" in str(excinfo.value)
+        assert "ws.zenodo()" in str(excinfo.value)
+        MockCls.assert_not_called()
+        mock_open.assert_not_called()
+        assert {f.name: f.read_bytes() for f in staging.iterdir()} == before
 
     def test_all_staged_files_uploaded(self, tmp_path: Path) -> None:
         staging = _staged_package(tmp_path, n=2)
@@ -522,7 +543,7 @@ class TestUploadZenodoPackage:
             patch("battinfo.zenodo.ZenodoClient", return_value=mock_client),
             patch("battinfo.zenodo._resolve_token", return_value="tok"),
         ):
-            upload_zenodo_package(staging, CREATORS, token="tok")
+            upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True)
 
         uploaded_names = {p.name for p in captured_files}
         assert DEFAULT_PUBLISH_FILENAME in uploaded_names
@@ -578,7 +599,7 @@ class TestZenodoOnlyPublicPath:
         rec_path = ds_dir / "dataset-7d9k.json"
         rec_path.write_text(json.dumps(record), encoding="utf-8")
 
-        n = ws._apply_zenodo_file_urls("https://zenodo.org/records/12345", {"run1.csv"})
+        n = ws._apply_zenodo_file_urls("https://zenodo.org/records/12345", ws._deposit_file_plan(ws._ws.source_root))
         assert n == 1
         patched = json.loads(rec_path.read_text(encoding="utf-8"))["dataset"]
         assert patched["access_url"] == "https://zenodo.org/records/12345/files/run1.csv"
@@ -587,8 +608,10 @@ class TestZenodoOnlyPublicPath:
 
     def test_files_not_in_deposit_are_untouched(self, tmp_path: Path) -> None:
         from battinfo import workspace
+        from battinfo._deposit_files import build_deposit_file_plan
 
         ws = workspace(root=tmp_path)
+        (tmp_path / "run1.csv").write_text("cycle,cap\n1,4.9\n", encoding="utf-8")
         ds_dir = ws._ws.source_root / "dataset"
         ds_dir.mkdir(parents=True)
         record = {
@@ -599,7 +622,8 @@ class TestZenodoOnlyPublicPath:
             },
         }
         (ds_dir / "d.json").write_text(json.dumps(record), encoding="utf-8")
-        assert ws._apply_zenodo_file_urls("https://zenodo.org/records/1", {"run1.csv"}) == 0
+        plan = build_deposit_file_plan([((tmp_path / "run1.csv").as_uri(), "other")], root=tmp_path)
+        assert ws._apply_zenodo_file_urls("https://zenodo.org/records/1", plan) == 0
 
     def test_r2_configured_reads_env(self, tmp_path: Path, monkeypatch) -> None:
         from battinfo import workspace
@@ -643,6 +667,7 @@ class _RecordingZenodo:
 
     def __init__(self) -> None:
         self.uploaded: dict[str, str] = {}
+        self.md5: dict[str, str] = {}
         self.metadata: dict = {}
         self.published = False
 
@@ -652,9 +677,13 @@ class _RecordingZenodo:
     def create_empty_deposit(self) -> dict:
         return {"id": 7, "record_id": 7, "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.7"}}}
 
-    def sync_files(self, deposit_id: int, upload_map: dict) -> dict:
+    def sync_files(self, deposit_id: int, upload_map: dict, *, keep: dict | None = None) -> dict:
         self.uploaded = {name: Path(path).read_text(encoding="utf-8") for path, name in upload_map.items()}
+        self.md5 = {name: _file_md5(Path(path)) for path, name in upload_map.items()}
         return {"uploaded": sorted(self.uploaded), "kept": [], "removed": []}
+
+    def list_files(self, deposit_id: int) -> list[dict]:
+        return [{"filename": name, "checksum": md5} for name, md5 in self.md5.items()]
 
     def update_metadata(self, deposit_id: int, metadata: dict) -> dict:
         self.metadata = metadata
@@ -688,7 +717,6 @@ class TestDepositTitle:
     def test_zenodo_without_a_title_names_the_catalog_as_the_metadata(
         self, tmp_path: Path, recording_zenodo: _RecordingZenodo
     ) -> None:
-        pytest.importorskip("pyshacl")  # the catalog-name rule is a SHACL shape
         ws = _titleless_workspace(tmp_path)
         result = ws.zenodo(publish=True, token="placeholder", creators=CREATORS)
 
@@ -715,16 +743,18 @@ class TestDepositTitle:
     def test_publish_to_zenodo_without_a_title_is_not_refused(
         self, tmp_path: Path, recording_zenodo: _RecordingZenodo, monkeypatch: pytest.MonkeyPatch
     ) -> None:
-        pytest.importorskip("pyshacl")
         # ws.publish() takes no token; give it a placeholder so the test never
         # depends on (or reads) a real token in the developer's environment.
         monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
         ws = _titleless_workspace(tmp_path)
         submitted: list[str | None] = []
         monkeypatch.setattr(ws, "submit", lambda **kwargs: submitted.append(kwargs.get("doi")) or [])
-        ws.publish(zenodo=True, note="title check")
+        ws.publish(zenodo=True, note="title check", creators=CREATORS)
 
-        assert recording_zenodo.published and submitted == ["10.5281/zenodo.7"]
+        # ws.submit() takes the DOI from the published record in .battinfo/zenodo.json.
+        assert recording_zenodo.published and submitted == [None]
+        state = json.loads((tmp_path / ".battinfo" / "zenodo.json").read_text(encoding="utf-8"))
+        assert state["published"] is True and state["doi"] == "10.5281/zenodo.7"
         graph = json.loads(recording_zenodo.uploaded["battinfo.json"])
         assert _catalog(graph)["schema:name"] == recording_zenodo.metadata["title"] == AUTO_TITLE
 
@@ -788,7 +818,7 @@ class TestDepositTitle:
             "metadata": {"prereserve_doi": {"doi": "10.5281/zenodo.9"}},
         }
         with patch("battinfo.zenodo.ZenodoClient", return_value=client):
-            upload_zenodo_package(staging, CREATORS, token="tok", title=title)
+            upload_zenodo_package(staging, CREATORS, token="tok", sandbox=True, title=title)
 
         [metadata] = [call.args[1] for call in client.update_metadata.call_args_list]
         expected = title or "Energizer CR2032 — BattINFO Reference Datasets"

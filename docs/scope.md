@@ -6,7 +6,7 @@ This page says what BattINFO covers and how mature each part is: what you can re
 
 BattINFO models the cell level and below. That means materials, electrodes, separators, current collectors, electrolytes and housings, the cells built from them, and the tests, test equipment and datasets around those cells. Modules and packs are on the roadmap; no schema or record type covers them yet.
 
-Tested runtime support is Python 3.11 and 3.12, on Linux and Windows.
+Tested runtime support is Python 3.11–3.14, on Linux and Windows. Python 3.15 is not supported yet; the known limitations below say why.
 
 ## Record types
 
@@ -111,9 +111,16 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 
 - The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
 
+### CLI batch path
+
+- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They send a sandbox token: `--token`, else `ZENODO_SANDBOX_TOKEN`, else `zenodo_sandbox_token` in the config file (`battinfo config set zenodo_sandbox_token <token>`). Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+- Run `battinfo batch package` again before you retry `battinfo batch upload`: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.
+
 ### Dependencies
 
 - The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.
+- `pyshacl`, which runs the SHACL shapes and is a core dependency, requires `rdflib` below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.
+- Python 3.15 is not supported yet. `requires-python` has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.
 
 ## Verification
 

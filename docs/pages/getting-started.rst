@@ -14,7 +14,7 @@ Working at the bench? The :doc:`how-to guides <howto>` map lab tasks, such as re
 Installation
 ------------
 
-BattINFO requires Python 3.11 or later. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
+BattINFO supports Python 3.11–3.14. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
 
 .. code-block:: bash
 

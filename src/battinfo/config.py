@@ -13,7 +13,7 @@ from battinfo._jsonio import write_private_text
 
 USER_CONFIG_PATH = Path.home() / ".battinfo" / "config.yaml"
 
-_USER_CONFIG_KEYS = {"creator", "license", "community", "zenodo_token"}
+_USER_CONFIG_KEYS = {"creator", "license", "community", "zenodo_token", "zenodo_sandbox_token"}
 
 _FIX_HINT = "Fix it by hand, or move it aside and set the values again with `battinfo config set`."
 
@@ -216,6 +216,25 @@ def resolve_zenodo_token(cli_token: str | None = None) -> str | None:
         return stored.strip()
     env = os.environ.get("ZENODO_API_TOKEN", "").strip()
     return env or None
+
+
+def resolve_zenodo_sandbox_token(cli_token: str | None = None) -> str | None:
+    """The Zenodo sandbox token, or ``None`` when none is set.
+
+    *cli_token*, else ``ZENODO_SANDBOX_TOKEN``, else ``zenodo_sandbox_token``
+    in the config file: the order ``ws.zenodo(sandbox=True)`` follows (the
+    argument, the environment, then a stored value). The zenodo.org token
+    (``zenodo_token``, ``ZENODO_API_TOKEN``) is never read, so it is never
+    sent to the sandbox.
+    """
+    if cli_token and cli_token.strip():
+        return cli_token.strip()
+    env = os.environ.get("ZENODO_SANDBOX_TOKEN", "").strip()
+    if env:
+        return env
+    stored = get_user_config_value("zenodo_sandbox_token")
+    text = str(stored).strip() if stored else ""
+    return text or None
 
 
 @dataclass(frozen=True)

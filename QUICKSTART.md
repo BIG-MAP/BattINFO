@@ -142,7 +142,7 @@ Validate the record you just created. Run this in the folder you ran step 1 in, 
 battinfo validate .battinfo/quickstart/examples/cell-spec/cell-spec-jv2y-hq4t-cjrv-1w16.json --source-root .battinfo/quickstart/examples --format json
 ```
 
-On a core install the output is:
+The output is:
 
 ```json
 {
@@ -151,26 +151,15 @@ On a core install the output is:
   "policy": "default",
   "profile": null,
   "source_root": ".battinfo/quickstart/examples",
-  "issue_count": 1,
+  "issue_count": 0,
   "error_count": 0,
-  "warning_count": 1,
+  "warning_count": 0,
   "errors": [],
-  "issues": [
-    {
-      "code": "shacl.unavailable",
-      "severity": "warning",
-      "path": "",
-      "message": "pyshacl is not installed; SHACL validation skipped. Install with: pip install pyshacl",
-      "hint": null,
-      "validator": "shacl",
-      "resource_type": null,
-      "profile": null
-    }
-  ]
+  "issues": []
 }
 ```
 
-The record is valid (`ok: true`, `error_count: 0`). The one warning says that the optional SHACL check was skipped because `pyshacl` is not installed. With `pyshacl` installed (`pip install pyshacl`, or the `dev` extra) the check runs, and `issue_count` and `warning_count` are 0. On Windows, `source_root` shows the path with backslashes.
+The record is valid (`ok: true`) and has no issues: it passes the JSON Schema, the semantic rules and the SHACL shapes for cell specs. A plain install runs all three, since `pyshacl`, which checks the SHACL shapes, is one of battinfo's dependencies. On Windows, `source_root` shows the path with backslashes.
 
 ---
 

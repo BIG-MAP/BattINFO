@@ -85,3 +85,5 @@ round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap
 tracked enhancement.)
 
 A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.
+
+The document may come from anyone, so `import_()` keeps only http(s) download URLs. A distribution whose download URL is a `file:` URL or a path, on this computer or another one, is left out with a warning, and a later `ws.zenodo()` of the workspace never reads a file the document named. A dataset left without a file keeps the http(s) page the deposit gives it as its `access_url`, and its notes say which URL was left out. A Zenodo token passed as `token=` goes only over https to the Zenodo host, never to another host and never on a redirect.

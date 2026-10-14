@@ -244,7 +244,7 @@ def test_zenodo_license_defaults_to_workspace_license(monkeypatch, tmp_path: Pat
     # Stop the flow right after license resolution — we only assert the value
     # wired downstream, not a real deposit.
     with pytest.raises(RuntimeError, match="stop after license resolution"):
-        ws.zenodo()
+        ws.zenodo(creators=[{"name": "Doe, Jane"}])
     assert captured.get("license") == "mit"
 
 
@@ -263,7 +263,7 @@ def test_zenodo_explicit_license_overrides_workspace_default(monkeypatch, tmp_pa
     monkeypatch.setattr(AuthoringWorkspace, "_build_zenodo_jsonld", _fake_build)
     monkeypatch.setenv("ZENODO_API_TOKEN", "x")
     with pytest.raises(RuntimeError):
-        ws.zenodo(license="cc-by-4.0")
+        ws.zenodo(license="cc-by-4.0", creators=[{"name": "Doe, Jane"}])
     assert captured.get("license") == "cc-by-4.0"
 
 

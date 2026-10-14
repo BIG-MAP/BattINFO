@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -12,13 +13,16 @@ from typer.testing import CliRunner
 
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
 from battinfo.cli import app
+from battinfo.config import resolve_zenodo_sandbox_token
 from battinfo.contribution import (
     _collect_data_files,
     _test_kind_from_path,
     init_batch,
     package_batch,
+    push_batch,
 )
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME
+from battinfo.zenodo import ZenodoError, upload_zenodo_package
 
 runner = CliRunner()
 
@@ -275,6 +279,50 @@ class TestPackageBatch:
         bdf_files = list(staging.glob("*.bdf.parquet"))
         assert len(bdf_files) >= 1
 
+    def test_packaged_batch_names_no_local_path(self, tmp_path: Path) -> None:
+        # The package goes to Zenodo: no file: URL, and no absolute path of the batch
+        # (which holds the user name), in any file it writes.
+        batch = _make_batch(tmp_path)
+        result = package_batch(batch, creators=CREATORS)
+        staging = Path(result["staging_dir"])
+        local = {
+            form
+            for path in (batch, batch.resolve())
+            for form in (str(path), path.as_posix(), json.dumps(str(path))[1:-1])
+        }
+        texts = {
+            name: (staging / name).read_text(encoding="utf-8")
+            for name in (ZENODO_CELL_RECORD_FILENAME, DEFAULT_PUBLISH_FILENAME, DEFAULT_RO_CRATE_METADATA_FILENAME)
+        }
+        for name, text in texts.items():
+            assert "file:" not in text.lower(), name
+            assert not [path for path in local if path in text], name
+
+        # Each dataset points at the Zenodo record instead, which the upload fills in.
+        bundle = json.loads(texts[ZENODO_CELL_RECORD_FILENAME])
+        for entry in bundle["datasets"]:
+            assert entry["dataset"]["dataset"]["access_url"] == "https://zenodo.org/records/ZENODO_RECORD_ID"
+
+    def test_dropping_the_local_urls_keeps_the_iris(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        # The dataset IRI is seeded from the folder's name, so the local URLs go only after
+        # the IRIs are minted: the same batch packaged with them kept gives the same IRIs.
+        import re
+
+        from battinfo import contribution
+
+        batch = _make_batch(tmp_path)
+
+        def iris(staging: Path) -> list[str]:
+            text = (staging / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
+            return sorted(set(re.findall(r"https://w3id\.org/battinfo/(?:cell|test|dataset)/[a-z0-9-]+", text)))
+
+        cleaned = iris(Path(package_batch(batch, tmp_path / "cleaned", creators=CREATORS)["staging_dir"]))
+        monkeypatch.setattr(contribution, "_without_local_urls", lambda record: record)
+        kept_staging = Path(package_batch(batch, tmp_path / "kept", creators=CREATORS)["staging_dir"])
+
+        assert "file:" in (kept_staging / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
+        assert cleaned and cleaned == iris(kept_staging)
+
 
 # ── CLI: batch package ─────────────────────────────────────────────────────────
 
@@ -376,3 +424,210 @@ class TestBatchPackageCli:
             ],
         )
         assert "batch upload" in result.output
+
+
+# ── Uploads go only to the Zenodo sandbox in this release ──────────────────────
+
+
+def _one_line(text: str) -> str:
+    return " ".join(text.split())
+
+
+class TestSandboxOnlyUploads:
+    def test_batch_upload_refuses_zenodo_org(self, tmp_path: Path) -> None:
+        staging = Path(package_batch(_make_batch(tmp_path), creators=CREATORS)["staging_dir"])
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            result = runner.invoke(
+                app,
+                [
+                    "batch",
+                    "upload",
+                    str(staging),
+                    "--token",
+                    "tok",
+                    "--creator",
+                    "Clark, Simon",
+                ],
+            )
+        assert result.exit_code == 1
+        assert "only to the Zenodo sandbox" in _one_line(result.output)
+        client.assert_not_called()
+        assert "ZENODO_RECORD_ID" in (staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8")
+
+    def test_push_refuses_zenodo_org_before_it_moves_a_file(self, tmp_path: Path) -> None:
+        folder = tmp_path / "flat"
+        folder.mkdir()
+        for n in (1, 2):
+            (folder / f"cell{n}_cycling.csv").write_text("time,voltage\n0,3.0\n", encoding="utf-8")
+        before = sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*"))
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            result = runner.invoke(
+                app,
+                [
+                    "push",
+                    str(folder),
+                    "--cell-spec",
+                    "Energizer CR2032",
+                    "--creator",
+                    "Clark, Simon",
+                    "--token",
+                    "tok",
+                    "--yes",
+                ],
+            )
+        assert result.exit_code == 1
+        assert "only to the Zenodo sandbox" in _one_line(result.output)
+        client.assert_not_called()
+        assert sorted(p.relative_to(folder).as_posix() for p in folder.rglob("*")) == before
+
+    def test_push_batch_refuses_zenodo_org_before_it_packages(self, tmp_path: Path) -> None:
+        batch = _make_batch(tmp_path)
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            with pytest.raises(ValueError, match="only to the Zenodo sandbox"):
+                push_batch(batch, creators=CREATORS, zenodo_token="tok")
+        client.assert_not_called()
+        assert not (batch / "staging").exists()
+
+    @pytest.mark.parametrize(
+        "args",
+        [
+            ["batch", "upload", "{folder}", "--token", "tok", "--creator", "Clark, Simon"],
+            ["push", "{folder}", "--cell-spec", "Energizer CR2032", "--creator", "Clark, Simon", "--token", "tok"],
+        ],
+        ids=["batch-upload", "push"],
+    )
+    def test_the_commands_refuse_zenodo_org_before_they_call_the_upload(
+        self, tmp_path: Path, user_config: Path, args: list[str]
+    ) -> None:
+        # upload_zenodo_package() and push_batch() refuse zenodo.org too. Patched out
+        # here, so the refusal must come from the commands' own check.
+        folder = tmp_path / "data"
+        folder.mkdir()
+        with (
+            patch("battinfo.zenodo.upload_zenodo_package") as upload,
+            patch("battinfo.contribution.push_batch") as push,
+        ):
+            result = runner.invoke(app, [arg.format(folder=folder) for arg in args])
+        assert result.exit_code == 1
+        assert "only to the Zenodo sandbox" in _one_line(result.output)
+        upload.assert_not_called()
+        push.assert_not_called()
+
+
+# ── The batch path sends a sandbox token to the sandbox ────────────────────────
+
+
+@pytest.fixture()
+def user_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """~/.battinfo/config.yaml in the test's folder (absent until written), with no Zenodo token exported."""
+    path = tmp_path / "home" / ".battinfo" / "config.yaml"
+    monkeypatch.setattr("battinfo.config.USER_CONFIG_PATH", path)
+    for name in ("ZENODO_API_TOKEN", "ZENODO_SANDBOX_TOKEN", "ZENODO_TOKEN"):
+        monkeypatch.delenv(name, raising=False)
+    return path
+
+
+def _store(path: Path, **values: str) -> None:
+    """Write *values* to the config file, as `battinfo config set` would."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(f"{key}: {value}\n" for key, value in values.items()), encoding="utf-8")
+
+
+UPLOADED = {"record_id": 1, "doi": "10.5072/zenodo.1", "deposit_url": "u", "uploaded_files": [], "published": False}
+PUSHED = {"status": "draft", "cells": 1, "files": 1, "staging_dir": "s", "zenodo_url": "u"}
+
+
+class TestSandboxToken:
+    """A zenodo.org token, stored with `battinfo config set zenodo_token` or exported, never goes to the sandbox."""
+
+    @pytest.mark.parametrize(
+        ("argument", "exported", "stored", "expected"),
+        [
+            ("sbx-arg", "sbx-env", "sbx-config", "sbx-arg"),
+            (None, "sbx-env", "sbx-config", "sbx-env"),
+            (None, None, "sbx-config", "sbx-config"),
+            (None, None, None, None),
+        ],
+        ids=["argument", "environment", "config", "none"],
+    )
+    def test_the_sandbox_token_comes_from_the_argument_then_the_environment_then_the_config(
+        self,
+        user_config: Path,
+        monkeypatch: pytest.MonkeyPatch,
+        argument: str | None,
+        exported: str | None,
+        stored: str | None,
+        expected: str | None,
+    ) -> None:
+        _store(user_config, zenodo_token="prod-config", **({"zenodo_sandbox_token": stored} if stored else {}))
+        monkeypatch.setenv("ZENODO_API_TOKEN", "prod-env")
+        if exported:
+            monkeypatch.setenv("ZENODO_SANDBOX_TOKEN", exported)
+        assert resolve_zenodo_sandbox_token(argument) == expected
+
+    @pytest.mark.parametrize("source", ["environment", "config"])
+    @pytest.mark.parametrize("command", ["batch-upload", "push"])
+    def test_the_commands_send_the_sandbox_token(
+        self, tmp_path: Path, user_config: Path, monkeypatch: pytest.MonkeyPatch, command: str, source: str
+    ) -> None:
+        _store(
+            user_config, zenodo_token="prod-config", **({"zenodo_sandbox_token": "sbx"} if source == "config" else {})
+        )
+        monkeypatch.setenv("ZENODO_API_TOKEN", "prod-env")
+        if source == "environment":
+            monkeypatch.setenv("ZENODO_SANDBOX_TOKEN", "sbx")
+        folder = tmp_path / "data"
+        folder.mkdir()
+        with (
+            patch("battinfo.zenodo.upload_zenodo_package", return_value=UPLOADED) as upload,
+            patch("battinfo.contribution.push_batch", return_value=PUSHED) as push,
+        ):
+            result = runner.invoke(app, _sandbox_command(command, folder))
+        assert result.exit_code == 0, result.output
+        if command == "batch-upload":
+            assert upload.call_args.kwargs["token"] == "sbx"
+        else:
+            assert push.call_args.kwargs["zenodo_token"] == "sbx"
+
+    @pytest.mark.parametrize("command", ["batch-upload", "push"])
+    def test_the_commands_stop_without_a_sandbox_token(
+        self, tmp_path: Path, user_config: Path, monkeypatch: pytest.MonkeyPatch, command: str
+    ) -> None:
+        _store(user_config, zenodo_token="prod-config")
+        monkeypatch.setenv("ZENODO_API_TOKEN", "prod-env")
+        folder = tmp_path / "data"
+        folder.mkdir()
+        with (
+            patch("battinfo.zenodo.upload_zenodo_package") as upload,
+            patch("battinfo.contribution.push_batch") as push,
+        ):
+            result = runner.invoke(app, _sandbox_command(command, folder))
+        assert result.exit_code == 1
+        text = _one_line(result.output)
+        assert "Zenodo sandbox token required" in text and "zenodo_sandbox_token" in text
+        assert "prod-" not in text
+        upload.assert_not_called()
+        push.assert_not_called()
+
+    def test_upload_zenodo_package_reads_the_sandbox_token(
+        self, tmp_path: Path, user_config: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setenv("ZENODO_API_TOKEN", "prod-env")
+        staging = tmp_path / "staging"
+        staging.mkdir()
+        with patch("battinfo.zenodo.ZenodoClient") as client:
+            with pytest.raises(ZenodoError, match="No Zenodo sandbox token"):
+                upload_zenodo_package(staging, CREATORS, sandbox=True)
+            client.assert_not_called()
+
+            monkeypatch.setenv("ZENODO_SANDBOX_TOKEN", "sbx-env")
+            with pytest.raises(FileNotFoundError):  # the staging folder holds no package
+                upload_zenodo_package(staging, CREATORS, sandbox=True)
+        client.assert_called_once_with(token="sbx-env", sandbox=True)
+
+
+def _sandbox_command(command: str, folder: Path) -> list[str]:
+    """A --sandbox run of *command* on *folder* that gives no --token."""
+    if command == "batch-upload":
+        return ["batch", "upload", str(folder), "--sandbox", "--creator", "Clark, Simon", "--json"]
+    return ["push", str(folder), "--cell-spec", "Energizer CR2032", "--creator", "Clark, Simon", "--sandbox", "--json"]

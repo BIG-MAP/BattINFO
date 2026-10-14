@@ -202,7 +202,7 @@ The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph wr
 - Reusable cell-spec library flows beyond the walkthrough fixtures.
 
 **In development (no stability promise)**
-- The folder-based batch path: `battinfo push` processes a folder of raw cycler files, packages it and deposits it on Zenodo, and `battinfo batch` runs the same steps one at a time.
+- The folder-based batch path: `battinfo push` processes a folder of raw cycler files, packages it and uploads it to the Zenodo sandbox, and `battinfo batch` runs the same steps one at a time. To publish on zenodo.org, use `ws.zenodo()`.
 - `battinfo dataset` is experimental: its init, process and publish flow cannot complete in 0.8.0, so publish a dataset with `ws.zenodo()` instead.
 - Registry administration (`battinfo registry bootstrap`).
 - Large-scale reference validation.
@@ -245,10 +245,7 @@ A shorter acceptance gate runs the acceptance tests, a smoke test of the install
 uv run python .tools/quality/run_verification.py
 ```
 
-CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
-[CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside
-[Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and
-[Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
+CI runs the same checks across Python 3.11–3.14 on Linux and Windows via the [CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside [Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and [Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
 
 ## Citation
 
@@ -273,7 +270,7 @@ each release also gets its own version DOI on Zenodo.
 
 ## License
 
-Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE).
+Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE). The package also includes EMMO-derived context files and labels under CC BY 4.0 and five BPX example parameter sets under MIT; [`NOTICE`](https://github.com/BIG-MAP/BattINFO/blob/main/NOTICE) says which files they are.
 
 ## Acknowledgements
 

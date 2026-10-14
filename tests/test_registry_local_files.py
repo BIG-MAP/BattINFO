@@ -24,6 +24,7 @@ from battinfo.ws import AuthoringWorkspace, SubmitError
 
 _CREDS = dict(registry_url="https://registry.example", api_key="k", workspace_id="w", publisher_id="p")
 CSV = "test_time_second,voltage_volt\n0,1.6\n3600,0.9\n"
+CREATORS = [{"name": "Doe, Jane"}]
 
 
 class _FakeRegistry:
@@ -117,7 +118,8 @@ def test_publish_registry_half_refuses_local_paths(
 def test_a_zenodo_deposit_points_every_location_at_https(tmp_path: Path, fake: _FakeRegistry) -> None:
     """After the deposit patches the records, the registry route accepts them."""
     ws = _workspace_with_local_data(tmp_path / "ws")
-    patched = ws._apply_zenodo_file_urls("https://zenodo.org/records/123", {"C1.bdf.csv"})
+    plan = ws._deposit_file_plan(ws._ws.source_root)
+    patched = ws._apply_zenodo_file_urls("https://zenodo.org/records/123", plan)
     assert patched == 1
     record_path = next((tmp_path / "ws" / ".battinfo" / "records" / "dataset").glob("*.json"))
     record = json.loads(record_path.read_text(encoding="utf-8"))
@@ -381,7 +383,13 @@ def _workspace_with_two_files(root: Path) -> AuthoringWorkspace:
 
 @pytest.fixture()
 def no_r2(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name, value in (("BATTINFO_API_KEY", "k"), ("BATTINFO_WORKSPACE_ID", "w"), ("BATTINFO_PUBLISHER_ID", "p")):
+    # ws.publish(zenodo=True) takes no token: it reads the placeholder set here.
+    for name, value in (
+        ("BATTINFO_API_KEY", "k"),
+        ("BATTINFO_WORKSPACE_ID", "w"),
+        ("BATTINFO_PUBLISHER_ID", "p"),
+        ("ZENODO_API_TOKEN", "placeholder"),
+    ):
         monkeypatch.setenv(name, value)
     monkeypatch.delenv("R2_ENDPOINT", raising=False)
     monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # two files would be zipped
@@ -402,7 +410,7 @@ def test_publish_to_zenodo_refuses_a_zipped_deposit_before_depositing(
     ws = _workspace_with_two_files(tmp_path / "ws")
     steps = _record_deposits(ws, monkeypatch)
     with pytest.raises(ValueError) as excinfo:
-        ws.publish(zenodo=True)
+        ws.publish(zenodo=True, creators=CREATORS)
     message = str(excinfo.value)
     assert "cannot yet point a record at a file inside an archive" in message
     assert "ws.zenodo(publish=True)" in message and "split the workspace" in message
@@ -414,7 +422,7 @@ def test_a_zipped_deposit_is_fine_for_a_local_test_registry(
 ) -> None:
     ws = _workspace_with_two_files(tmp_path / "ws")
     steps = _record_deposits(ws, monkeypatch)
-    outcomes = ws.publish(zenodo=True, allow_local_files=True)
+    outcomes = ws.publish(zenodo=True, allow_local_files=True, creators=CREATORS)
     assert steps == ["zenodo"] and outcomes and all(o["ok"] for o in outcomes)
 
 
@@ -426,5 +434,5 @@ def test_a_zipped_deposit_is_fine_with_r2_storage(
     ws = _workspace_with_two_files(tmp_path / "ws")
     steps = _record_deposits(ws, monkeypatch)
     with pytest.raises(SubmitError):  # the stub upload pointed nothing at R2
-        ws.publish(zenodo=True)
+        ws.publish(zenodo=True, creators=CREATORS, archive_hosted_files=True)
     assert steps == ["upload", "zenodo"]
