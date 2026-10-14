@@ -80,6 +80,7 @@ from battinfo._util import (
     _now_iso,
     is_dataset_series,
     is_local_location,
+    is_real_number,
     local_file_references,
     path_name,
     url_segment,
@@ -220,6 +221,18 @@ def _default_specs_for(format_: str, chemistry: str) -> dict[str, dict]:
     if chem in _PRIMARY_CHEMISTRIES:
         return dict(_CYLINDRICAL_PRIMARY_SPECS)
     return dict(_CYLINDRICAL_SECONDARY_SPECS)
+
+
+def _cell_spec_property_keys() -> frozenset[str]:
+    """The keys a cell spec's ``properties`` accept, read from its schema."""
+    from battinfo.validate.schema import schema_for_rel_path  # noqa: PLC0415
+
+    ref = schema_for_rel_path("cell-spec.schema.json")["properties"]["properties"]["$ref"]
+    file_name, _, pointer = ref.partition("#")
+    node: Any = schema_for_rel_path(file_name)
+    for part in pointer.strip("/").split("/"):
+        node = node[part]
+    return frozenset(node.get("properties", {}))
 
 
 def _short_id(name: str) -> str | None:
@@ -4709,6 +4722,13 @@ class AuthoringWorkspace:
         (``"2.5"``) is read as the number, and other text moves to
         ``value_text`` with a warning.
 
+        A cell spec's chemistry is the first class of its described battery
+        that the chemistry vocabulary names, which is the declared chemistry's;
+        its electrode bases come from the classes of its electrode nodes and
+        its cell configuration from the half-cell or three-electrode classes.
+        A deposit written before 0.8.0 also carries classes its electrodes
+        added whatever the chemistry, and those are not read as the chemistry.
+
         Parameters
         ----------
         source:
@@ -4785,49 +4805,137 @@ class AuthoringWorkspace:
 
         # Load prop map directly so we can keep only the FIRST key per IRI
         # (later aliases like "discharging_temperature_min" must not overwrite
-        # the canonical "minimum_discharging_temperature").
+        # the canonical "minimum_discharging_temperature"). The first key a cell
+        # spec's properties accept wins over any key listed before it: Mass
+        # reads back as mass, not as cap_assembly_weight, which the cell-spec
+        # schema refuses.
         _prop_map_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "property_map.curated.json"
         rev_prop: dict[str, str] = {}
+        # class IRI -> the bound the class names ("max" or "min"), from the
+        # curated ``bound`` flag the emitter reads too.
+        bound_of_class: dict[str, str] = {}
+        spec_keys = _cell_spec_property_keys()
         if _prop_map_path.exists():
             for m in json.loads(_prop_map_path.read_text(encoding="utf-8")).get("mappings", []):
                 iri = m.get("class_iri", "")
                 key = m.get("key", "")
-                if iri and key and iri not in rev_prop:  # first occurrence wins
+                accepted_first = key in spec_keys and rev_prop.get(iri) not in spec_keys
+                if iri and key and (iri not in rev_prop or accepted_first):
                     rev_prop[iri] = key
+                if iri and m.get("bound") in ("max", "min"):
+                    bound_of_class.setdefault(iri, m["bound"])
 
-        # Build chemistry value reverse map (IRI → original-case chemistry string)
-        # so the reconstructed records match the source exactly.
-        _chem_case: dict[str, str] = {}  # lower → canonical e.g. "zn-mno2" → "Zn-MnO2"
-        _entity_path2 = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
-        if _entity_path2.exists():
-            em2 = json.loads(_entity_path2.read_text(encoding="utf-8")).get("mappings", {})
-            for val in em2.get("chemistry") or {}:
-                _chem_case[val.lower()] = val  # keep as-is from map (already lowercase)
+        # entity_type_map reversed. An entry with alias_of is an older spelling:
+        # it still resolves, but is never the value to reconstruct.
+        from battinfo.bundle import CellConfiguration
+        from battinfo.transform.json_to_jsonld import chemistry_electrode_conflicts
 
-        # entity_type_map reverse: class_name → {field, value}
         _entity_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "entity_type_map.json"
+        em: dict = json.loads(_entity_path.read_text(encoding="utf-8")).get("mappings", {})
+
+        def _recommended(section: str) -> dict[str, dict]:
+            return {
+                value: entry
+                for value, entry in (em.get(section) or {}).items()
+                if isinstance(entry, dict) and "alias_of" not in entry
+            }
+
+        # class -> {"format": ...} / {"iec_code": ...}; a later class in the stack wins.
         _etype_rev: dict[str, dict] = {}  # "CylindricalBattery" → {"format": "cylindrical"}
-        if _entity_path.exists():
-            em = json.loads(_entity_path.read_text(encoding="utf-8")).get("mappings", {})
-            for field, entries in em.items():
-                if field not in ("format", "chemistry", "iec_code"):
-                    continue
-                for value, entry in entries.items():
-                    if "alias_of" in entry:
-                        continue  # an older spelling: never the value to reconstruct
-                    for cls in entry.get("battery_types", []):
-                        _etype_rev.setdefault(cls, {})[field] = value
+        for section in ("format", "iec_code"):
+            for value, entry in _recommended(section).items():
+                for cls in entry.get("battery_types", []):
+                    _etype_rev.setdefault(cls, {})[section] = value
+        # class -> chemistry label, from the chemistry section only: an electrode
+        # basis class (LithiumIonGraphiteBattery) never names a chemistry.
+        _chemistry_of: dict[str, str] = {}
+        for value, entry in _recommended("chemistry").items():
+            for cls in entry.get("battery_types", []):
+                _chemistry_of.setdefault(cls, value)
+        # class -> the cell-spec schema's cell_configuration value
+        _configurations = {member.value for member in CellConfiguration}
+        _configuration_of: dict[str, str] = {}
+        for value, entry in _recommended("cell_configuration").items():
+            if value.replace("-", "_") in _configurations:
+                for cls in entry.get("battery_types", []):
+                    _configuration_of.setdefault(cls, value.replace("-", "_"))
+        # electrode class -> basis, and battery class -> basis where only one basis
+        # of that side adds the class and no chemistry claims it (nca has no
+        # electrode class, so its battery class is all a deposit says of it).
+        # Where several bases share an electrode class, the first, most generic
+        # one is taken (all NMC grades come back as nmc).
+        _basis_of_electrode: dict[str, dict[str, str]] = {}
+        _basis_of_class: dict[str, dict[str, str]] = {}
+        for section in ("positive_electrode_basis", "negative_electrode_basis"):
+            by_electrode = _basis_of_electrode.setdefault(section, {})
+            claims: dict[str, list[str]] = {}
+            for value, entry in _recommended(section).items():
+                for node_type in (entry.get("node_type"), *(entry.get("former_node_types") or [])):
+                    if isinstance(node_type, str):
+                        by_electrode.setdefault(node_type, value)
+                for cls in entry.get("battery_types", []):
+                    claims.setdefault(cls, []).append(value)
+            _basis_of_class[section] = {
+                cls: values[0] for cls, values in claims.items() if len(values) == 1 and cls not in _chemistry_of
+            }
+
+        def _type_terms(value: Any) -> list[str]:
+            if isinstance(value, str):
+                return [value]
+            return [t for t in value if isinstance(t, str)] if isinstance(value, list) else []
 
         def _extract_descriptors(types: list[str]) -> dict:
-            """Extract format/chemistry/iec_code from a list of class names."""
+            """Format, IEC code, chemistry and cell configuration from a class stack.
+
+            The chemistry is the FIRST class the chemistry section names. The
+            declared chemistry's class comes before any electrode-basis class,
+            and deposits written before 0.8.0 carry basis classes of other
+            chemistries after it: an alkaline cell's stack ended in
+            LithiumManganeseDioxideBattery, which once made it come back li-mno2.
+            """
             d: dict = {}
             for t in types:
-                info = _etype_rev.get(t, {})
-                d.update(info)
+                d.update(_etype_rev.get(t, {}))
+            chemistry = next((_chemistry_of[t] for t in types if t in _chemistry_of), None)
+            if chemistry:
+                d["chemistry"] = chemistry
+            configuration = next((_configuration_of[t] for t in types if t in _configuration_of), None)
+            if configuration:
+                d["cell_configuration"] = configuration
             return d
 
+        def _electrode_bases(phys: dict, types: list[str]) -> dict[str, str]:
+            """The electrode bases, read from the described battery's electrode nodes.
+
+            An electrode class names its basis; an unrecognised basis was written
+            as a generic Electrode labelled with it. Failing both, a battery
+            class only one basis adds names it.
+            """
+            bases: dict[str, str] = {}
+            for section, relation in (
+                ("positive_electrode_basis", "hasPositiveElectrode"),
+                ("negative_electrode_basis", "hasNegativeElectrode"),
+            ):
+                electrode = phys.get(relation)
+                if isinstance(electrode, list):
+                    electrode = next((item for item in electrode if isinstance(item, dict)), None)
+                basis = None
+                if isinstance(electrode, dict):
+                    node_types = _type_terms(electrode.get("@type"))
+                    basis = next(
+                        (_basis_of_electrode[section][t] for t in node_types if t in _basis_of_electrode[section]), None
+                    )
+                    label = electrode.get("skos:prefLabel")
+                    if basis is None and node_types == ["Electrode"] and isinstance(label, str) and label.strip():
+                        basis = label.strip()
+                if basis is None:
+                    basis = next((_basis_of_class[section][t] for t in types if t in _basis_of_class[section]), None)
+                if basis:
+                    bases[section] = basis
+            return bases
+
         def _specs_from_property_nodes(nodes: list, where: str) -> dict:
-            """Reverse EMMO hasProperty nodes → {key: {value, unit}}.
+            """Reverse EMMO hasProperty nodes → {key: {value, min_value, max_value, value_text, unit}}.
 
             Accepts both quantity-node generations: the legacy single-string
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
@@ -4835,14 +4943,23 @@ class AuthoringWorkspace:
             as a bare IRI string). Units are read back as the publication-package
             reader reads them: an IRI goes through the emitters' unit tables, an
             IRI no table names is kept whole with a warning, and a unit without
-            an IRI is read from ``schema:unitText``.
+            an IRI is read from ``schema:unitText``. PercentUnit reads back as
+            wt% or vol% when the node also carries WeightPercent or
+            VolumePercent, and as % otherwise.
+
+            The bounds come from ``schema:minValue`` and ``schema:maxValue``.
+            The emitter writes a bound given alone as the number too, but only
+            on a class the curated map flags as that bound (``max_value`` on a
+            Maximum class, ``min_value`` on a Minimum class), so on such a class
+            a number equal to that only bound is read back as the bound alone.
+            On any other class the number stays.
 
             A deposit written before 0.8.0 may carry text in
             ``hasNumberValue``: a numeric string comes back as the number, and
             other text moves to ``value_text`` with a warning, so a strict
             ``ws.save()`` accepts the record. A ``hasStringValue`` beside a
-            number comes back as ``value_text``; a property stated as text
-            alone is not read back."""
+            number or a bound comes back as ``value_text``; a property stated
+            as text alone is not read back."""
             specs: dict = {}
             moved: builtins.list[str] = []
             for node in nodes if isinstance(nodes, list) else [nodes]:
@@ -4856,21 +4973,33 @@ class AuthoringWorkspace:
                     if isinstance(type_raw, list)
                     else []
                 )
-                prop_key = next(
-                    (key for term in type_terms if (key := rev_prop.get(_expand(term)))),
-                    None,
-                )
-                if not prop_key:
+                class_iri = next((expanded for term in type_terms if rev_prop.get(expanded := _expand(term))), None)
+                if class_iri is None:
                     continue
+                prop_key = rev_prop[class_iri]
                 numerical = node.get("hasNumericalPart")
                 numerical = numerical if isinstance(numerical, Mapping) else {}
                 value = _jsonld_literal(numerical.get("hasNumberValue", numerical.get("hasNumericalValue")))
-                if value is None:
+                bounds = {
+                    field: bound
+                    for field, term in (("min_value", "schema:minValue"), ("max_value", "schema:maxValue"))
+                    if is_real_number(bound := _jsonld_literal(node.get(term)))
+                }
+                named_bound = {"max": "max_value", "min": "min_value"}.get(bound_of_class.get(class_iri, ""))
+                if value is not None and named_bound is not None and bounds == {named_bound: value}:
+                    value = None
+                if value is None and not bounds:
                     continue
-                quantity: dict[str, Any] = {"value": value}
+                quantity: dict[str, Any] = {} if value is None else {"value": value}
+                quantity.update(bounds)
                 if text := _jsonld_text(node.get("hasStringValue")):
                     quantity["value_text"] = text
                 if unit := _unit_from_node(node, _expand):
+                    if unit == "%":
+                        # % and vol% share PercentUnit; the basis rides as a class of the node.
+                        unit = (
+                            "wt%" if "WeightPercent" in type_terms else "vol%" if "VolumePercent" in type_terms else "%"
+                        )
                     quantity["unit"] = unit
                 moved.extend(migrate_quantity_values(quantity, f"properties.{prop_key}"))
                 specs[prop_key] = quantity
@@ -4932,6 +5061,7 @@ class AuthoringWorkspace:
             if isinstance(phys_types, str):
                 phys_types = [phys_types]
             descriptors = _extract_descriptors(phys_types)
+            bases = _electrode_bases(phys, phys_types)
 
             mfr_node = node.get("schema:manufacturer", {})
             mfr_name = mfr_node.get("schema:name", "") if isinstance(mfr_node, dict) else str(mfr_node)
@@ -4958,12 +5088,30 @@ class AuthoringWorkspace:
                 chemistry=node.get("battinfo:chemistry") or descriptors.get("chemistry", ""),
                 iec_code=descriptors.get("iec_code") or node.get("schema:productID") or node.get("schema:gtin"),
                 size_code=node.get("schema:size") or _ident,
+                cell_configuration=descriptors.get("cell_configuration"),
+                positive_electrode_basis=bases.get("positive_electrode_basis"),
+                negative_electrode_basis=bases.get("negative_electrode_basis"),
                 specs=specs or None,
                 source_type="zenodo",
             )
             ct.id = iri
             spec_objects[iri] = ct
             print(f"  spec:     {node.get('schema:name', iri)}")
+            # A deposit whose chemistry was free text kept only the classes its
+            # electrode bases added, so the chemistry read back can be one the
+            # electrodes contradict. Say so here; the strict save refuses it.
+            for problem in chemistry_electrode_conflicts(
+                {
+                    "chemistry": ct.chemistry,
+                    "cell_configuration": descriptors.get("cell_configuration"),
+                    **bases,
+                }
+            ):
+                print(
+                    f"  WARNING: spec {iri}: {problem} The chemistry was read from the deposit's battery "
+                    "classes, and a deposit written before 0.8.0 also carries classes its electrodes "
+                    "added. Set the chemistry before saving."
+                )
 
         # ── 6. Import cell instances ───────────────────────────────────────────
         imported_cells = 0

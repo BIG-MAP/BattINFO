@@ -100,9 +100,10 @@ EMMO_OBJECT_PROPERTIES: dict[str, object] = {
     },
     # hasNumberValue is EMMO's canonical prefLabel (and what bmgen emits); we emit it.
     # hasNumericalValue is the altLabel for the SAME IRI — kept so older published
-    # documents that used it still resolve on read.
-    "hasNumberValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
-    "hasNumericalValue": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4",
+    # documents that used it still resolve on read. Both are typed xsd:double: an
+    # untyped 76.0 is xsd:integer under pyld 3 and xsd:double under pyld 2 and rdflib.
+    "hasNumberValue": {"@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4", "@type": "xsd:double"},
+    "hasNumericalValue": {"@id": "emmo:EMMO_faf79f53_749d_40b2_807c_d34244c192f4", "@type": "xsd:double"},
     "hasMeasurementUnit": {
         "@id": "emmo:EMMO_bed1d005_b04e_4a90_94cf_02bc678a8569",
         "@type": "@id",
@@ -115,12 +116,14 @@ EMMO_OBJECT_PROPERTIES: dict[str, object] = {
         "@id": "emmo:EMMO_c58c799e_cc6c_4310_a3f1_78da70705b2a",
         "@type": "@id",
     },
+    # The domain-electrochemistry relations the pinned domain-battery context
+    # names. domain-battery 0.21.0 also declares duplicates with no definition.
     "hasTestObject": {
-        "@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+        "@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
         "@type": "@id",
     },
     "hasTestEquipment": {
-        "@id": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+        "@id": "electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c",
         "@type": "@id",
     },
     "hasOutput": {
@@ -202,7 +205,7 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
     "contributor": "dcterms:contributor",
     "description": "dcterms:description",
     # Grant nodes carry a CORDIS IRI under "id"; the scoped "@id" keeps it a
-    # node identifier instead of the context's product-id reading of bare id.
+    # node identifier instead of the context's schema:identifier reading of bare id.
     "funding": {"@id": "schema:funding", "@context": {"id": "@id"}},
     "funder": "schema:funder",
     "acronym": "schema:alternateName",
@@ -272,7 +275,7 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
     "cell_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
     "material_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
     "electrode_spec_id": {"@id": "schema:isVariantOf", "@type": "@id"},
-    "cell_id": {"@id": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b", "@type": "@id"},
+    "cell_id": {"@id": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c", "@type": "@id"},
     "protocol_id": {"@id": "prov:used", "@type": "@id"},
     "working_electrode_id": {
         "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
@@ -282,8 +285,9 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
         "@id": "electrochemistry:electrochemistry_c76dbfeb_f3d9_44d4_9cbe_0946924f311f",
         "@type": "@id",
     },
+    # hasActiveMaterial, the relation; not the ActiveMaterial class.
     "active_material_spec_id": {
-        "@id": "electrochemistry:electrochemistry_79d1b273_58cd_4be6_a250_434817f7c261",
+        "@id": "electrochemistry:electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee",
         "@type": "@id",
     },
     "batch_id": "battinfo:batchId",
@@ -320,7 +324,7 @@ CANONICAL_RECORD_TERMS: dict[str, object] = {
             "deviations": "battinfo:deviation",
         },
     },
-    "ambient_temperature": "battinfo:ambientTemperature",
+    "ambient_temperature": "electrochemistry:electrochemistry_abd08921_6f3b_4a48_811e_7685c58aec0b",
     "voltage_reference": "battinfo:voltageReference",
     # Free-text annotations.
     "note": "schema:description",

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from collections.abc import Mapping
 from functools import lru_cache
 from pathlib import Path
@@ -27,7 +28,7 @@ from typing import Any, Callable
 
 from battinfo._util import is_dataset_series, is_real_number
 from battinfo.entities import kind_for_doc
-from battinfo.testmethod import _is_current_density_unit
+from battinfo.testmethod import _is_current_density_unit, _other_quantity_of_unit
 
 _DATA = Path(__file__).parent / "data"
 # Inline emission must expand identically to the hosted context the URL names,
@@ -62,10 +63,12 @@ def _load_entity_type_map() -> dict:
 
 def _load_test_method_vocab() -> dict:
     base = _DATA / "vocab" / "test-method"
+    termination = json.loads((base / "termination.json").read_text(encoding="utf-8"))
     return {
         "step_modes": json.loads((base / "step-modes.json").read_text(encoding="utf-8"))["modes"],
         "quantities": json.loads((base / "quantities.json").read_text(encoding="utf-8")),
-        "termination": json.loads((base / "termination.json").read_text(encoding="utf-8"))["terminations"],
+        "termination": termination["terminations"],
+        "termination_generic": termination["generic"],
     }
 
 
@@ -73,6 +76,24 @@ _PROP_MAP = _load_property_map()
 _UNIT_MAP = _load_unit_map()
 _ENTITY_MAP = _load_entity_type_map()
 _METHOD_VOCAB = _load_test_method_vocab()
+
+
+def _test_method_vocab_classes() -> list[str]:
+    """Every class the test-method vocabulary names (step processes, setpoint
+    and condition quantities, cutoff classes), in file order."""
+    found: list[str] = []
+
+    def walk(value: Any) -> None:
+        if isinstance(value, Mapping):
+            cls = value.get("emmo_class")
+            if isinstance(cls, str) and cls not in found:
+                found.append(cls)
+            for item in value.values():
+                walk(item)
+
+    for section in ("step_modes", "quantities", "termination", "termination_generic"):
+        walk(_METHOD_VOCAB[section])
+    return found
 
 
 def _load_test_method_context_terms() -> dict:
@@ -86,33 +107,11 @@ def _load_test_method_context_terms() -> dict:
         "hasControlParameter",
         "hasTerminationParameter",
         "hasProperty",
-        "ConstantCurrentCharging",
-        "ConstantCurrentDischarging",
-        "ConstantCurrentConstantVoltageCharging",
-        "ConstantCurrentConstantVoltageDischarging",
-        "ConstantPowerCharging",
-        "ConstantPowerDischarging",
-        "VoltageHold",
-        "OpenCircuitHold",
-        "IterativeWorkflow",
-        "ElectrochemicalImpedanceSpectroscopy",
-        "LinearScanVoltammetry",
-        "LowerVoltageLimit",
-        "UpperVoltageLimit",
-        "TerminationQuantity",
-        "StateOfCharge",  # SOC-based termination (the UCP/HPPC seam)
-        "CRate",
-        "ElectricCurrent",
-        "Voltage",
-        "Power",
-        "ElectricalResistance",
-        # Current densities: coin-cell protocols state their currents per area
-        # (0.1 mA/cm2), as setpoints and as cutoffs.
-        "ElectricCurrentDensity",
-        "LowerCurrentDensityLimit",
-        "UpperCurrentDensityLimit",
-        "Duration",
-        "ConventionalProperty",
+        # Every class data/vocab/test-method/ names, read from the vocabulary so
+        # a class added there reaches the contexts and the validator with no
+        # second list to keep in step. A name the bundled context lacks would be
+        # dropped here; tests/test_mapping_governance.py fails on one instead.
+        *_test_method_vocab_classes(),
         # Measurement-provenance subtree (as-run conditions emit typed
         # hasMeasurementParameter nodes on the test node itself) and the
         # metrological references the voltage_reference datum resolves to.
@@ -187,16 +186,64 @@ def test_method_class(kind: Any) -> str | None:
 
 
 def step_emmo_class(mode: str, direction: str | None) -> str | None:
-    """(mode, direction) → EMMO process class prefLabel for a method step @type."""
+    """(mode, direction) → EMMO process class prefLabel for a method step @type.
+
+    A step takes the vocabulary entry for its direction. A step with no
+    direction, or with one its mode does not list, takes the mode's ``none``
+    entry, so a cc step with no charge or discharge direction is a
+    ``CurrentControlledProcess``. Where EMMO has no class for a step, the entry
+    names a published parent (a constant-resistance discharge is a
+    ``Discharging``) or none: ``None`` is returned for a constant-resistance
+    charge, a cr or cccv step with no direction, and an unknown mode, and the
+    step is then emitted without a class (see :func:`unmapped_step_reason`).
+    """
     entry = _METHOD_VOCAB["step_modes"].get(mode)
     if not entry:
         return None
     dirs = entry.get("directions", {})
-    if direction and direction in dirs:
-        return dirs[direction]["emmo_class"]
-    if len(dirs) == 1:
-        return next(iter(dirs.values()))["emmo_class"]
-    return None
+    chosen = dirs.get(direction) if isinstance(direction, str) and direction in dirs else dirs.get("none")
+    return chosen.get("emmo_class") if isinstance(chosen, Mapping) else None
+
+
+def method_step_label(step: Mapping[str, Any]) -> str:
+    """How a step with no class is labelled: its mode, then its direction when
+    it states one (``"cr charge"``, ``"cccv"``)."""
+    parts = [str(step.get(key) or "") for key in ("mode", "direction")]
+    return " ".join(part for part in parts if part and part != "none") or "step"
+
+
+def unmapped_step_reason(step: Mapping[str, Any]) -> str | None:
+    """Why a leaf method step is emitted without a class, or ``None`` when the
+    vocabulary gives it one.
+
+    Shared by the emitter's warning and validation's
+    ``semantic.method_step_unmapped``, so both say the same thing.
+    """
+    mode = str(step.get("mode") or "")
+    direction = step.get("direction")
+    if mode == "group" or step_emmo_class(mode, direction):
+        return None
+    label = method_step_label(step)
+    reason = (
+        f"Step '{label}' has no EMMO process class, so the JSON-LD export emits it without a @type, "
+        "with its mode as skos:prefLabel."
+    )
+    entry = _METHOD_VOCAB["step_modes"].get(mode)
+    if not mode:
+        return f"{reason} The step names no mode."
+    if entry is None:
+        return f"{reason} The test-method vocabulary has no step mode '{mode}'."
+    dirs = entry.get("directions", {})
+    if direction in ("charge", "discharge"):
+        return f"{reason} EMMO publishes no class for a {entry.get('label', mode)} {direction} yet."
+    typed = [
+        f"a {mode} {key} types as {dirs[key]['emmo_class']}"
+        for key in ("charge", "discharge")
+        if isinstance(dirs.get(key), Mapping) and dirs[key].get("emmo_class")
+    ]
+    if typed:
+        return f"{reason} Give the step its direction: {', '.join(typed)}."
+    return reason
 
 
 def setpoint_emmo_class(quantity: str) -> str | None:
@@ -309,7 +356,9 @@ CONTEXT_UNIT_SYMBOLS: dict[str, str] = {
     # table, so a "C" -> Coulomb term here silently shadows the correct
     # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
     "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%": "emmo:Percent",
+    # PercentUnit, the only percent unit in the pinned closure. EMMO declares
+    # emmo:Percent in a units module the closure does not import.
+    "%": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
 }
 # Extra unit symbols not in the records context (CRate is current-per-capacity).
 TEST_CONDITION_UNIT_IRI: dict[str, str] = {
@@ -531,11 +580,18 @@ def _setpoint_class(key: str, unit: Any) -> str | None:
 
 
 def _termination_class(term: Mapping[str, Any]) -> str | None:
-    """The termination class of a step cutoff. A current cutoff stated per area
-    (0.05 mA/cm2) is a current-density limit, not a current limit."""
+    """The termination class of a step cutoff. A current cutoff is a
+    ``LowerCurrentLimit`` or ``UpperCurrentLimit``; stated per area (0.05
+    mA/cm2) it is a current-density limit instead. A current limit is an
+    electric current, so a current cutoff in a unit of another quantity (V, C,
+    Ah) keeps the generic termination class."""
     quantity = str(term.get("quantity") or "")
-    if quantity == "current" and _is_current_density_unit(term.get("unit")):
-        quantity = "current_density"
+    unit = term.get("unit")
+    if quantity == "current":
+        if _is_current_density_unit(unit):
+            quantity = "current_density"
+        elif isinstance(unit, str) and _other_quantity_of_unit(unit) is not None:
+            return _METHOD_VOCAB["termination_generic"]["emmo_class"]
     return termination_emmo_class(quantity, term.get("direction"))
 
 
@@ -544,7 +600,10 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
 
     Groups become an ``IterativeWorkflow`` with ``NumberOfIterations`` + nested
     ``hasTask``; leaf steps carry ``hasControlParameter`` /
-    ``hasTerminationParameter`` / ``hasProperty``.
+    ``hasTerminationParameter`` / ``hasProperty``. A step no published class
+    fits keeps its parameters and carries its mode as ``skos:prefLabel``
+    instead of a class, with a ``semantic.method_step_unmapped`` warning, as a
+    property key with no mapped class does.
     """
     mode = step.get("mode")
     if mode == "group":
@@ -555,7 +614,12 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
         gnode["hasTask"] = [method_step_node(s) for s in (step.get("steps") or []) if isinstance(s, Mapping)]
         return gnode
 
-    node: dict = {"@type": step_emmo_class(str(mode or ""), step.get("direction")) or "ElectrochemicalProcess"}
+    step_class = step_emmo_class(str(mode or ""), step.get("direction"))
+    if step_class:
+        node: dict = {"@type": step_class}
+    else:
+        node = {"skos:prefLabel": method_step_label(step)}
+        warnings.warn(f"semantic.method_step_unmapped: {unmapped_step_reason(step)}", UserWarning, stacklevel=2)
     if step.get("description"):
         node["rdfs:label"] = step["description"]
     controls: list = []
@@ -592,14 +656,16 @@ def protocol_property_value(name: str, value: Any, group: str = "") -> dict:
     """Labelled ``schema:PropertyValue`` fallback for anything outside the
     controlled condition vocabulary. ``group`` rides ``schema:propertyID`` so a
     consumer can still tell a safety limit from an ambient condition."""
+    from battinfo.transform.json_to_jsonld import schema_quantity_fields  # noqa: PLC0415
+
     node: dict = {"@type": "schema:PropertyValue", "schema:name": name}
     if group:
         node["schema:propertyID"] = group
     if isinstance(value, Mapping):
-        if value.get("value") is not None:
-            node["schema:value"] = value["value"]
-            if value.get("unit"):
-                node["schema:unitText"] = value["unit"]
+        fields = schema_quantity_fields(value)
+        if {"schema:value", "schema:minValue", "schema:maxValue"} & set(fields):
+            # A quantity, a range included: the value, bounds and unit as schema.org fields.
+            node.update(fields)
         else:
             node["schema:value"] = json.dumps(dict(value), ensure_ascii=False, sort_keys=True)
     else:
@@ -1182,6 +1248,7 @@ def test_to_jsonld(record: dict) -> dict:
             _MEASUREMENT_PARAMETER_TERMS,
             _descriptor_quantity_node,
             _voltage_reference_node,
+            schema_quantity_fields,
         )
 
         props: list[dict] = []
@@ -1203,10 +1270,8 @@ def test_to_jsonld(record: dict) -> dict:
                     props.append(ref_pv)
                     continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
-            if isinstance(value, Mapping) and "value" in value:
-                pv["schema:value"] = value.get("value")
-                if value.get("unit"):
-                    pv["schema:unitText"] = value["unit"]
+            if isinstance(value, Mapping):
+                pv.update(schema_quantity_fields(value))
             else:
                 pv["schema:value"] = value
             props.append(pv)
@@ -1670,8 +1735,15 @@ def _property_value_nodes(property_map: Any) -> list[dict]:
     Equipment quantities (voltage range, max current, ...) are lab-hardware
     facts outside the battery domain vocabulary, so they emit as honest named
     PropertyValues rather than through the EMMO property map (which would
-    warn on every key and mint battinfo: fallbacks).
+    warn on every key and mint battinfo: fallbacks). Every field a quantity
+    holds is kept (:func:`~battinfo.transform.json_to_jsonld.schema_quantity_fields`):
+    the value, else the typical value, else the text; the bounds as
+    ``schema:minValue`` and ``schema:maxValue``; the unit, else the unit text.
+    A quantity with none of value, typical value, bounds or text is left out
+    with the warning ``semantic.quantity_not_emitted``.
     """
+    from battinfo.transform.json_to_jsonld import schema_quantity_fields  # noqa: PLC0415
+
     out: list[dict] = []
     if not isinstance(property_map, Mapping):
         return out
@@ -1679,13 +1751,15 @@ def _property_value_nodes(property_map: Any) -> list[dict]:
         quantity = property_map[name]
         if not isinstance(quantity, Mapping):
             continue
-        value = quantity.get("value", quantity.get("value_text"))
-        if value is None:
+        fields = schema_quantity_fields(quantity)
+        if not {"schema:value", "schema:minValue", "schema:maxValue"} & set(fields):
+            warnings.warn(
+                f"semantic.quantity_not_emitted: '{name}' has no value, typical_value, min_value, "
+                "max_value or value_text that the JSON-LD export can carry, so it is left out.",
+                stacklevel=3,
+            )
             continue
-        node: dict = {"@type": "schema:PropertyValue", "schema:name": name, "schema:value": value}
-        if quantity.get("unit"):
-            node["schema:unitText"] = quantity["unit"]
-        out.append(node)
+        out.append({"@type": "schema:PropertyValue", "schema:name": name, **fields})
     return out
 
 
@@ -1827,12 +1901,18 @@ def _channel_to_jsonld(record: dict) -> dict:
         node["schema:position"] = body["index"]
     if body.get("equipment_id"):
         node["schema:isPartOf"] = {"@id": body["equipment_id"]}
+    properties = _property_value_nodes(body.get("property"))
     if body.get("status"):
-        node["schema:additionalProperty"] = {
-            "@type": "schema:PropertyValue",
-            "schema:name": "status",
-            "schema:value": body["status"],
-        }
+        properties.insert(
+            0,
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "status",
+                "schema:value": body["status"],
+            },
+        )
+    if properties:
+        node["schema:additionalProperty"] = properties[0] if len(properties) == 1 else properties
     if body.get("comment"):
         node["schema:description"] = body["comment"]
     if prov:
@@ -1922,6 +2002,13 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         A JSON-LD document with ``@context``, ``@id``, ``@type``, and
         semantically typed properties using EMMO/schema.org IRIs.
 
+    Raises
+    ------
+    ValueError
+        For an unknown ``record_type``, or when the document would carry a
+        bare ``@type`` that its own ``@context`` does not define as a class
+        (``jsonld.type_term_unknown``), for every record type.
+
     Example::
 
         import json
@@ -1973,6 +2060,16 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         # nodes carry a domain-battery context and are left as-is.
         ctx_value = _url_context_with_overrides(node["@context"], node)
         node = {"@context": ctx_value, **{k: v for k, v in node.items() if k != "@context"}}
+    # Every record kind: a bare @type must be a class the document's own
+    # context defines (the bundled v1 plus any local patch in "url" mode, the
+    # inline context in "inline" mode, the EMMO context of a material or
+    # component). Any other token would expand relative to wherever the file
+    # is read, so the document is refused here rather than published.
+    from battinfo.validate.jsonld import type_term_issues  # noqa: PLC0415
+
+    issues = type_term_issues(node)
+    if issues:
+        raise ValueError(f"json-ld validation failed: {'; '.join(issue.render() for issue in issues)}")
     return node
 
 

@@ -74,3 +74,45 @@ def test_unmapped_basis_gets_labeled_generic_electrode() -> None:
 @pytest.mark.parametrize("basis", ["unknown", "Unknown", "", "   "])
 def test_unknown_or_empty_basis_emits_no_electrode(basis: str) -> None:
     assert _negative_electrode(basis) is None
+
+
+def test_lnmo_electrode_types_as_a_metal_oxide_electrode() -> None:
+    """LithiumNickelManganeseOxideElectrode is deprecated upstream with no
+    replacement. MetalOxideElectrode, one of its own superclasses, is true of it;
+    the v1 context keeps the old term for documents that already use it."""
+    record = {
+        "schema_version": "0.1.0",
+        "cell_spec": {
+            "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+            "name": "X",
+            "model": "X",
+            "manufacturer": {"type": "Organization", "name": "A"},
+            "cell_format": "coin",
+            "chemistry": "Li-ion",
+            "positive_electrode_basis": "lnmo",
+            "negative_electrode_basis": "graphite",
+        },
+    }
+    described = to_jsonld(record, target="domain-battery")["@graph"][0]["isDescriptionFor"]
+    assert _types(described.get("hasPositiveElectrode")) == ["MetalOxideElectrode"]
+
+
+@pytest.mark.parametrize(
+    ("kind", "path"),
+    [
+        ("cell-spec", "cell-spec/cell-spec-venv-ff8p-nbk3-bxcn.json"),
+        ("electrode-spec", "electrode-spec/ntja-z7za-b92g-1qzh.json"),
+    ],
+)
+def test_packaged_lnmo_examples_emit_no_deprecated_electrode_class(kind: str, path: str) -> None:
+    import json
+    import warnings
+
+    from battinfo.jsonld import record_to_jsonld
+
+    record = json.loads((ROOT / "src" / "battinfo" / "data" / "examples" / path).read_text(encoding="utf-8"))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        text = json.dumps(record_to_jsonld(record, kind))
+    assert "LithiumNickelManganeseOxideElectrode" not in text
+    assert '"MetalOxideElectrode"' in text
