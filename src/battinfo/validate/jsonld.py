@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 import json
 import warnings
+from collections import ChainMap
+from collections.abc import Mapping
 from functools import lru_cache
 from importlib import resources
-from typing import Any
+from typing import Any, NamedTuple
 from urllib.request import Request, urlopen
 
 from battinfo.validate.core import (
@@ -50,214 +52,6 @@ _LOCAL_CONTEXT_FILES = {
     _BATTINFO_RECORDS_CONTEXT_URL: "records.context.v1.json",
 }
 
-_EXPLICIT_ALLOWED_TYPE_TERMS = {
-    "Battery",
-    "BatteryCell",
-    "BatteryTest",
-    "BatteryModule",
-    "BatteryPack",
-    "BatterySystem",
-    "CoinCell",
-    "ConventionalProperty",
-    "CylindricalBattery",
-    "GraphiteElectrode",
-    "HardCarbonElectrode",
-    "LithiumCobaltOxideElectrode",
-    "LithiumIonBattery",
-    "LithiumIonCobaltOxideBattery",
-    "LithiumIonGraphiteBattery",
-    "LithiumIonIronPhosphateBattery",
-    "LithiumIonNickelCobaltAluminiumOxideBattery",
-    "LithiumIonNickelManganeseCobaltOxideBattery",
-    "LithiumIronPhosphateElectrode",
-    "LithiumManganeseDioxideBattery",
-    "LithiumMetalBattery",
-    "PouchCell",
-    "PrismaticBattery",
-    "RatedEnergy",
-    "RealData",
-    "SiliconGraphiteElectrode",
-    "SodiumIonBattery",
-    "MaximumChargingTemperature",
-    "MinimumChargingTemperature",
-    "MaximumDischargingTemperature",
-    "MinimumDischargingTemperature",
-    "MaximumStorageTemperature",
-    "MinimumStorageTemperature",
-    # New in domain-electrochemistry 0.34.0 / domain-battery 0.18.8
-    "ACInternalResistance",
-    "CalendarLife",
-    "DCInternalResistance",
-    "InitialCoulombicEfficiency",
-    "NominalEnergy",
-    "SelfDischargeRate",
-    "StateOfHealth",
-    # Electrochemical process step types (test protocol step nodes)
-    "ConstantCurrentCharging",
-    "ConstantCurrentConstantVoltageCharging",
-    "ConstantCurrentConstantVoltageCycling",
-    "ConstantCurrentDischarging",
-    "ConstantVoltageCharging",
-    "ConstantVoltageDischarging",
-    "ElectrochemicalTestingProcedure",
-    "Resting",
-    # Rechargeability classes (from the cell-spec `rechargeable` flag; not part of
-    # the entity_type_map sections, so listed explicitly)
-    "PrimaryBattery",
-    "SecondaryBattery",
-    # EMMO's generic information-artifact class: the parent BatterySpecification
-    # subclasses, and the interim @type of specification records whose own
-    # class (ElectrodeSpecification, ...) is not published yet.
-    "Description",
-    # The housing assembly's interim class (a CellHousing class is an
-    # upstream ask): the published parent Case itself hangs from.
-    "ElectrochemicalComponent",
-    # Measurement-provenance subtree (conditions ride an isOutputOf node) and
-    # metrological references (the voltage_reference datum on quantities)
-    "BatteryMeasurement",
-    "MetrologicalReference",
-    "ReferenceElectrode",
-    "LithiumElectrode",
-    "SodiumBasedElectrode",
-    "StandardHydrogenElectrode",
-    "NormalHydrogenElectrode",
-    "ReversibleHydrogenElectrode",
-    "SaturatedCalomelElectrode",
-    "SilverChlorideElectrode",
-    "ZincElectrode",
-    # New in domain-battery 0.19.0
-    "BatterySpecification",
-    "BatteryCellSpecification",
-    "BatteryModuleSpecification",
-    "BatteryPackSpecification",
-    "BatterySystemSpecification",
-    # BatteryTest semantic model
-    "BatteryTestResult",
-    "BatteryCycler",
-    "Galvanostat",
-    "MeasuringInstrument",
-    "Potentiostat",
-    # Material-spec property + property-nature + measurement-parameter terms (Phase 1.5)
-    "SpecificCapacity",
-    "SpecificSurfaceArea",
-    "MolarMass",
-    "Voltage",
-    "MeasuredProperty",
-    "NominalProperty",
-    "CRate",
-    "ElectricCurrent",
-    "LowerVoltageLimit",
-    "UpperVoltageLimit",
-    # Electrode composition, electrolyte, separator (descriptor pipeline)
-    "ActiveMassLoading",
-    "ActiveMaterial",
-    "AmountConcentration",
-    "AqueousElectrolyte",
-    "AreicCapacity",
-    "Binder",
-    "CalenderedCoatingThickness",
-    "CalenderedDensity",
-    "CelsiusTemperature",
-    "Additive",
-    "ConductiveAdditive",
-    "D50ParticleSize",
-    "Density",
-    "Diameter",
-    "DischargingSpecificCapacity",
-    "DynamicViscosity",
-    "ElectrolyticConductivity",
-    "Mass",
-    "MassLoading",
-    # The EMMO process a material lot's `processing` block emits as.
-    "Manufacturing",
-    "NPRatio",
-    "TheoreticalCapacity",
-    "Tortuosity",
-    "Volume",
-    "CurrentCollector",
-    "CurrentCollectorTab",
-    "Electrode",
-    "ElectrodeCoating",
-    # Housing / hardware (E1).
-    "CoinCase",
-    "CylindricalCase",
-    "PouchCase",
-    "PrismaticCase",
-    "CellLid",
-    "CellCan",
-    "Terminal",
-    "Spring",
-    "Spacer",
-    "ElectrodeStack",
-    # Landed in domain-electrochemistry 0.36.0
-    "Seal",
-    "Gasket",
-    "SafetyVent",
-    "CurrentInterruptDevice",
-    "InsulatorRing",
-    "WaveSpring",
-    "CeramicCoating",
-    "WoundStack",
-    # JellyRoll / SwissRoll are WoundStack altLabels. Emitters use the prefLabel;
-    # kept so documents published before the flip still validate.
-    "JellyRoll",
-    # Quantity classes new in domain-electrochemistry 0.36.0
-    "DryCoatingThickness",
-    "MinimumOperatingTemperature",
-    "MaximumOperatingTemperature",
-    "TypicalCapacity",
-    # Quantity classes new in domain-electrochemistry 0.37.1. The six that back a
-    # schema slot arrive automatically via property_map.curated.json; these two
-    # have no save-gate key yet, so they are named here to keep imported and
-    # hand-authored documents that already use them valid.
-    "CapacityLoss",
-    "ChargeRecovery",
-    # PowerCapability / CapacityFadePerCycle are altLabels of MaximumPower /
-    # CapacityFadeRate. Emitters use the prefLabel; kept so documents written
-    # against the altLabel still validate.
-    "PowerCapability",
-    "CapacityFadePerCycle",
-    # Half-cell / three-electrode device classes. A battery half-cell types as
-    # BatteryHalfCell + HalfCellDevice, never as ElectrochemicalHalfCell.
-    "BatteryHalfCell",
-    "HalfCellDevice",
-    "ThreeElectrodeCellDevice",
-    # Electrode role classes, for the cells above: a cell with no polarity names
-    # its electrodes by role. The three are non-disjoint upstream, which is what
-    # lets a half cell's counter electrode also be its reference.
-    "WorkingElectrode",
-    "CounterElectrode",
-    "ReferenceElectrode",
-    "ElectrolyteAdditive",
-    "ElectrolyteSolution",
-    "ExpandedMesh",
-    "ElectrospunMesh",
-    "Foil",
-    "WovenMesh",
-    # Current-collector material classes (emitted from the foil/mesh name)
-    "Nickel",
-    "StainlessSteel",
-    "Titanium",
-    "Carbon",
-    "IonicLiquidElectrolyte",
-    "LiquidElectrolyte",
-    "MassFraction",
-    "OrganicElectrolyte",
-    "PerforatedFoil",
-    "PolymerElectrolyte",
-    "Porosity",
-    "PorousSeparator",
-    "Separator",
-    "SeparatorPorosity",
-    "SeparatorThickness",
-    "SolidElectrolyte",
-    "Solute",
-    "Solvent",
-    "Thickness",
-    "VolumeFraction",
-    "WovenMesh",
-}
-
 
 def _load_mapping_json(*parts: str) -> dict[str, Any]:
     path = resources.files("battinfo")
@@ -269,20 +63,6 @@ def _load_mapping_json(*parts: str) -> dict[str, Any]:
 
 def _is_absolute_or_compact_iri(value: str) -> bool:
     return "://" in value or ":" in value
-
-
-def _collect_bare_terms(value: Any, out: set[str]) -> None:
-    if isinstance(value, str):
-        if value and not _is_absolute_or_compact_iri(value):
-            out.add(value)
-        return
-    if isinstance(value, list):
-        for item in value:
-            _collect_bare_terms(item, out)
-        return
-    if isinstance(value, dict):
-        for item in value.values():
-            _collect_bare_terms(item, out)
 
 
 def _context_class_terms(context: dict[str, Any]) -> set[str]:
@@ -308,7 +88,7 @@ def _context_class_terms(context: dict[str, Any]) -> set[str]:
     return terms
 
 
-def _expand_compact_iri(value: str, context: dict[str, Any]) -> str:
+def _expand_compact_iri(value: str, context: Mapping[str, Any]) -> str:
     """``value`` with its prefix expanded by ``context`` (``emmo:Volt`` -> full IRI)."""
     prefix, sep, local = value.partition(":")
     base = context.get(prefix) if sep and not local.startswith("//") else None
@@ -327,107 +107,238 @@ def _context_unit_terms(context: dict[str, Any]) -> set[str]:
     """
     from battinfo.jsonld import CONTEXT_UNIT_SYMBOLS  # noqa: PLC0415
 
-    unit_iris = {_expand_compact_iri(iri, context) for iri in CONTEXT_UNIT_SYMBOLS.values()}
+    # Compact IRIs expand with the context's own prefixes first, then with the
+    # bundled v1 prefixes, so a context that binds full IRIs and declares no
+    # ``emmo`` prefix (the EMMO domain-battery context) is read the same way.
+    records = _local_context_document(_LOCAL_CONTEXT_FILES[_BATTINFO_RECORDS_CONTEXT_URL]).get("@context", {})
+    prefixes = ChainMap(context, records)
+    unit_iris = {_expand_compact_iri(iri, prefixes) for iri in CONTEXT_UNIT_SYMBOLS.values()}
     for filename in ("unit_map.curated.json", "unit_map.candidates.json"):
         for item in _load_mapping_json(filename).get("mappings", []):
             iri = item.get("unit_iri")
             if isinstance(iri, str) and iri:
-                unit_iris.add(_expand_compact_iri(iri, context))
+                unit_iris.add(_expand_compact_iri(iri, prefixes))
     terms: set[str] = set()
     for term, value in context.items():
         iri = value.get("@id") if isinstance(value, dict) else value
-        if isinstance(iri, str) and _expand_compact_iri(iri, context) in unit_iris:
+        if isinstance(iri, str) and _expand_compact_iri(iri, prefixes) in unit_iris:
             terms.add(term)
     return terms
 
 
-@lru_cache(maxsize=1)
-def _allowed_type_terms() -> set[str]:
-    allowed = set(_EXPLICIT_ALLOWED_TYPE_TERMS)
+# -- The @type check ----------------------------------------------------------
+#
+# A bare @type token expands through the context in force at its node. A token
+# that context does not define expands relative to wherever the document is read
+# (file:///.../coin), so each node is judged against its own active context: the
+# bundled copy of a known context URL, an inline object, a nested or
+# property-scoped context, and @context null, applied in order as a JSON-LD
+# processor applies them. A chain of local contexts is keyed by a tuple of their
+# canonical forms, so each distinct chain is processed once.
 
-    # Every class term of the bundled v1 records context. The emitters type
-    # their nodes with that context's terms (a housing whose format has no case
-    # class of its own gets the generic Case, for one), so whatever it defines
-    # is accepted here; a bare token defined nowhere is still rejected.
-    records_context = _local_context_document(_LOCAL_CONTEXT_FILES[_BATTINFO_RECORDS_CONTEXT_URL])
-    records_terms = records_context.get("@context", {})
-    allowed.update(_context_class_terms(records_terms))
-
-    # The test-spec method graph emits its vocabulary (workflow/process classes,
-    # control/termination quantities) straight from the bundled context via
-    # battinfo.jsonld.TEST_METHOD_CONTEXT_TERMS — the validator must accept what
-    # the library itself emits, and this shared source cannot drift.
-    from battinfo.jsonld import TEST_METHOD_CONTEXT_TERMS  # noqa: PLC0415
-
-    allowed.update(TEST_METHOD_CONTEXT_TERMS)
-
-    entity_map = _load_mapping_json("entity_type_map.json")
-    _collect_bare_terms(entity_map.get("mappings", {}), allowed)
-
-    for filename in ("property_map.candidates.json", "property_map.curated.json"):
-        property_map = _load_mapping_json(filename)
-        for item in property_map.get("mappings", []):
-            for key in ("class_pref_label", "class_label"):
-                value = item.get(key)
-                if isinstance(value, str) and value:
-                    allowed.add(value)
-
-    material_map = _load_mapping_json("material_map.json")
-    for item in material_map.get("mappings", []):
-        emmo_class = item.get("emmo_class")
-        if isinstance(emmo_class, str) and emmo_class:
-            allowed.add(emmo_class)
-
-    # A material-spec types itself from its kind's curated ``emmo`` class, so the
-    # kind vocabulary is a term source in its own right — reading it here means
-    # adding a kind cannot produce a document the validator then rejects.
-    from battinfo.materials import material_kinds  # noqa: PLC0415
-
-    for entry in material_kinds().get("kinds", {}).values():
-        emmo_class = entry.get("emmo")
-        if isinstance(emmo_class, str) and emmo_class:
-            allowed.add(emmo_class)
-
-    # An electrode-spec stacks its polarity class onto the chemistry class from
-    # the entity map above. Same argument as the kind vocabulary: read the ONE
-    # table the emitter uses, so the emitter cannot produce a type this rejects.
-    from battinfo.electrodes import ELECTRODE_POLARITY_TYPES  # noqa: PLC0415
-
-    allowed.update(ELECTRODE_POLARITY_TYPES.values())
-
-    # A measurement unit (V, Ah, MWh, ...) is the value of hasMeasurementUnit,
-    # never the type of a node, and the naming convention above cannot tell a
-    # unit term from a class term. Unit terms are taken out last, whichever
-    # source brought them in, so an emitter that types a node "V" is caught.
-    allowed -= _context_unit_terms(records_terms)
-
-    return allowed
+_ContextKey = tuple[str, ...]
 
 
-def _walk_relative_type_errors(node: Any, path: str, errors: list[str]) -> None:
-    if isinstance(node, dict):
-        for key, value in node.items():
-            next_path = f"{path}.{key}" if path else key
-            if key == "@context":
-                continue
-            if key == "@type":
-                values = [value] if isinstance(value, str) else value if isinstance(value, list) else []
-                for idx, item in enumerate(values):
-                    if not isinstance(item, str):
-                        continue
-                    if item.startswith("@"):
-                        continue
-                    if _is_absolute_or_compact_iri(item):
-                        continue
-                    if item not in _allowed_type_terms():
-                        item_path = next_path if isinstance(value, str) else f"{next_path}[{idx}]"
-                        errors.append(f"{item_path}: relative @type reference '{item}' is not in the allowed term set")
-            else:
-                _walk_relative_type_errors(value, next_path, errors)
-    elif isinstance(node, list):
+def _context_key_part(local: Any) -> str:
+    """One local context (a URL, an object, a list or null) in a hashable form."""
+    if isinstance(local, str):
+        return "url:" + local
+    return "json:" + json.dumps(local, sort_keys=True, ensure_ascii=False, default=str)
+
+
+def _context_from_key_part(part: str) -> Any:
+    return part[4:] if part.startswith("url:") else json.loads(part[5:])
+
+
+def _remote_context(url: str) -> Any:
+    """The ``@context`` value of the context document at ``url``.
+
+    Known URLs resolve to their bundled copies; any other URL goes through the
+    loader the URDNA2015 step uses. None when the document cannot be loaded or
+    holds no context; that step then reports the failure as an error.
+    """
+    document: Any = _resolve_local_context(url)
+    if document is None:
+        try:
+            document = _pyld_document_loader(url, {}).get("document")
+        except Exception:  # noqa: BLE001 - reported by the URDNA2015 step
+            return None
+        if isinstance(document, str):
+            try:
+                document = json.loads(document)
+            except ValueError:
+                return None
+    if not isinstance(document, dict) or "@context" not in document:
+        return None
+    return document["@context"]
+
+
+def _merge_local_context(
+    terms: dict[str, Any], vocab: str | None, local: Any, loading: frozenset[str]
+) -> tuple[dict[str, Any], str | None] | None:
+    """The term definitions and ``@vocab`` after applying ``local``.
+
+    Returns None when ``local`` holds a context that cannot be loaded or is
+    not a context at all. ``terms`` is never changed in place.
+    """
+    if local is None:
+        return {}, None
+    if isinstance(local, list):
+        for item in local:
+            merged = _merge_local_context(terms, vocab, item, loading)
+            if merged is None:
+                return None
+            terms, vocab = merged
+        return terms, vocab
+    if isinstance(local, str):
+        remote = _remote_context(local) if local not in loading else None
+        if remote is None:
+            return None
+        return _merge_local_context(terms, vocab, remote, loading | {local})
+    if not isinstance(local, dict):
+        return None
+    terms = dict(terms)
+    for term, value in local.items():
+        if term == "@vocab":
+            vocab = value if isinstance(value, str) and _is_absolute_or_compact_iri(value) else None
+        elif term.startswith("@"):
+            continue
+        elif value is None or (isinstance(value, dict) and "@id" in value and value["@id"] is None):
+            terms.pop(term, None)
+        else:
+            terms[term] = value
+    return terms, vocab
+
+
+@lru_cache(maxsize=64)
+def _active_context(key: _ContextKey) -> tuple[dict[str, Any], str | None] | None:
+    """The term definitions and ``@vocab`` after the local contexts ``key``
+    names, in order; None when one of them cannot be loaded. The result is
+    shared, so callers never change it."""
+    if not key:
+        return {}, None
+    local = _context_from_key_part(key[-1])
+    first = local[0] if isinstance(local, list) and local else local
+    # @context null starts again from the empty context, whatever came before.
+    parent = ({}, None) if first is None else _active_context(key[:-1])
+    if parent is None:
+        return None
+    return _merge_local_context(parent[0], parent[1], local, frozenset())
+
+
+class _TypeView(NamedTuple):
+    """What the @type check needs to know about one active context."""
+
+    defined: frozenset[str]
+    classes: frozenset[str]
+    vocab: str | None
+    type_aliases: frozenset[str]
+    scoped: dict[str, Any]
+
+
+@lru_cache(maxsize=64)
+def _type_view(key: _ContextKey) -> _TypeView | None:
+    active = _active_context(key)
+    if active is None:
+        return None
+    terms, vocab = active
+    aliases = frozenset(
+        term
+        for term, value in terms.items()
+        if value == "@type" or (isinstance(value, dict) and value.get("@id") == "@type")
+    )
+    scoped = {
+        term: value["@context"] for term, value in terms.items() if isinstance(value, dict) and "@context" in value
+    }
+    return _TypeView(
+        defined=frozenset(terms),
+        classes=frozenset(_context_class_terms(terms) - _context_unit_terms(terms)),
+        vocab=vocab,
+        type_aliases=aliases,
+        scoped=scoped,
+    )
+
+
+_RECORDS_CONTEXT_KEY: _ContextKey = (_context_key_part(_BATTINFO_RECORDS_CONTEXT_URL),)
+
+
+def _allowed_type_terms() -> frozenset[str]:
+    """The bare @type tokens a document whose ``@context`` is the hosted v1 URL
+    may use: every class term of the bundled v1 context, less its unit terms.
+
+    A document with another context is judged against that context instead
+    (see :func:`type_term_issues`).
+    """
+    view = _type_view(_RECORDS_CONTEXT_KEY)
+    return view.classes if view is not None else frozenset()
+
+
+def _walk_relative_type_errors(node: Any, path: str, errors: list[str], key: _ContextKey = ()) -> None:
+    if isinstance(node, list):
         for idx, item in enumerate(node):
             next_path = f"{path}[{idx}]" if path else f"[{idx}]"
-            _walk_relative_type_errors(item, next_path, errors)
+            _walk_relative_type_errors(item, next_path, errors, key)
+        return
+    if not isinstance(node, dict):
+        return
+    if "@context" in node:
+        key = (*key, _context_key_part(node["@context"]))
+    # None: a context in force here could not be loaded, so the check cannot
+    # judge this node's types; the URDNA2015 step reports that context.
+    view = _type_view(key)
+    for name, value in node.items():
+        if name == "@context":
+            continue
+        next_path = f"{path}.{name}" if path else name
+        if name == "@type" or (view is not None and name in view.type_aliases):
+            if view is not None:
+                _check_type_values(value, next_path, view, errors)
+            continue
+        child_key = key
+        if view is not None and name in view.scoped:
+            child_key = (*key, _context_key_part(view.scoped[name]))
+        _walk_relative_type_errors(value, next_path, errors, child_key)
+
+
+def _check_type_values(value: Any, path: str, view: _TypeView, errors: list[str]) -> None:
+    values = [value] if isinstance(value, str) else value if isinstance(value, list) else []
+    for idx, item in enumerate(values):
+        if not isinstance(item, str) or item.startswith("@") or _is_absolute_or_compact_iri(item):
+            continue
+        if item in view.classes:
+            continue
+        if view.vocab is not None and item not in view.defined:
+            continue  # expands through @vocab to an absolute IRI
+        item_path = path if isinstance(value, str) else f"{path}[{idx}]"
+        errors.append(f"{item_path}: relative @type reference '{item}' is not a class the document's @context defines")
+
+
+def type_term_issues(data: Any) -> list[ValidationIssue]:
+    """A ``jsonld.type_term_unknown`` error for every bare @type in ``data``
+    that the context in force at its node does not define as a class.
+
+    Prefixed and absolute IRIs and keywords are not judged. A unit term (``V``,
+    ``Volt``) is never a node's type, so it is reported too. Types under a
+    context that cannot be loaded are left to the URDNA2015 step, which
+    reports the context. ``record_to_jsonld`` raises on any of these, and
+    :func:`validate_jsonld_report` reports them as errors under every policy.
+    """
+    errors: list[str] = []
+    _walk_relative_type_errors(data, "", errors)
+    issues: list[ValidationIssue] = []
+    for rendered in errors:
+        path, _, message = rendered.partition(": ")
+        issues.append(
+            ValidationIssue(
+                code="jsonld.type_term_unknown",
+                severity="error",
+                path=path if _ else "",
+                message=message if _ else rendered,
+                validator="@type",
+                resource_type="jsonld",
+            )
+        )
+    return issues
 
 
 def _is_bare_relative_id(value: str) -> bool:
@@ -650,21 +561,9 @@ def validate_jsonld_report(
     policy: ValidationPolicy | str = DEFAULT_POLICY,
 ) -> ValidationReport:
     resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
-    errors: list[str] = []
-    _walk_relative_type_errors(data, "", errors)
-    issues = []
-    for rendered in errors:
-        path, _, message = rendered.partition(": ")
-        issues.append(
-            ValidationIssue(
-                code="jsonld.type_term_unknown",
-                severity="error",
-                path=path if _ else "",
-                message=message if _ else rendered,
-                validator="@type",
-                resource_type="jsonld",
-            )
-        )
+    # An undefined @type is an error under every policy: the RDF it gives
+    # carries a machine-local IRI, whatever stage the document is at.
+    issues = type_term_issues(data)
     # @id portability is enforced only for publication: mid-pipeline authoring and staging forms
     # legitimately carry local ids and file:// staging links that are rewritten to their final
     # w3id/Zenodo IRIs before a record is published. At publish time (publisher policy) any such

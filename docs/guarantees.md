@@ -155,6 +155,7 @@ Representative issue codes:
 - `semantic.method_step_unmapped` (a warning under every policy: no published EMMO process class fits a test-protocol step, such as a constant-resistance charge or a cr or cccv step with no direction, so the JSON-LD export gives it none; see [Tests](records/tests.md))
 - `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
 - `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)
+- `jsonld.type_term_unknown` (an error under every policy: a bare `@type` that the document's own `@context` does not define as a class, so it would expand to a machine-local IRI; `record_to_jsonld` raises on it for every record type)
 - `publication.distribution_url_invalid`
 - `publication.jsonld_parse_error`
 

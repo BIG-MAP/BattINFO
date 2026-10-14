@@ -1913,6 +1913,13 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         A JSON-LD document with ``@context``, ``@id``, ``@type``, and
         semantically typed properties using EMMO/schema.org IRIs.
 
+    Raises
+    ------
+    ValueError
+        For an unknown ``record_type``, or when the document would carry a
+        bare ``@type`` that its own ``@context`` does not define as a class
+        (``jsonld.type_term_unknown``), for every record type.
+
     Example::
 
         import json
@@ -1964,6 +1971,16 @@ def record_to_jsonld(record: dict, record_type: str, *, context: str = "url") ->
         # nodes carry a domain-battery context and are left as-is.
         ctx_value = _url_context_with_overrides(node["@context"], node)
         node = {"@context": ctx_value, **{k: v for k, v in node.items() if k != "@context"}}
+    # Every record kind: a bare @type must be a class the document's own
+    # context defines (the bundled v1 plus any local patch in "url" mode, the
+    # inline context in "inline" mode, the EMMO context of a material or
+    # component). Any other token would expand relative to wherever the file
+    # is read, so the document is refused here rather than published.
+    from battinfo.validate.jsonld import type_term_issues  # noqa: PLC0415
+
+    issues = type_term_issues(node)
+    if issues:
+        raise ValueError(f"json-ld validation failed: {'; '.join(issue.render() for issue in issues)}")
     return node
 
 
