@@ -278,7 +278,13 @@ def _record_from_channel(
 
 
 def create_equipment_spec(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical equipment-spec document (the model, e.g. a cycler model)."""
+    """Create a canonical equipment-spec document (the model, e.g. a cycler model).
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4). ``ws.add("equipment", spec=...)`` mints the spec from
+    its manufacturer, model and name instead.
+    """
     record = _record_from_equipment_spec(**fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
@@ -290,6 +296,11 @@ def create_equipment(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
 
     ``spec_id=`` is the authoring kwarg for the equipment-spec reference; the
     prefixed ``equipment_spec_id=`` spelling is accepted too.
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4). ``ws.add("equipment", ...)`` mints the unit from its
+    spec and serial number instead.
     """
     shorthand = fields.pop("spec_id", None)
     if shorthand is not None:

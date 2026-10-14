@@ -1450,7 +1450,13 @@ def _record_from_component_instance(
 
 
 def create_component_spec(component_family: str, *, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical component-spec document for a component family (electrode, separator, …)."""
+    """Create a canonical component-spec document for a component family (separator, electrolyte, …).
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
+    derived from the part's natural key for a record you will save.
+    """
     record = _record_from_component_spec(component_family, **fields)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
@@ -1462,6 +1468,11 @@ def create_component_instance(component_family: str, *, validate: bool = True, *
 
     ``spec_id=`` is the authoring kwarg (the record stores the canonical
     ``<component_family>_spec_id`` key); the prefixed spelling is accepted too.
+
+    Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
+    call, which nothing can derive again: it is outside the identity contract
+    (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
+    derived from the part's natural key for a record you will save.
     """
     prefixed = fields.pop(f"{component_family}_spec_id", None)
     if prefixed is not None:
@@ -1633,9 +1644,10 @@ def template_component_spec(family: str, *, name: str | None = None, uid: str | 
     """Build a starter component-spec document for a family.
 
     The document has no ``id`` unless *uid* is given. A component spec has no
-    natural key to mint its IRI from, so pass *uid* for a record you will save:
-    a save without an id is refused rather than given a random IRI, which would
-    turn every re-run into a duplicate.
+    natural key to mint its IRI from yet, so pass *uid* for a record you will
+    save: a save of this document without an id is refused. ``create_component_spec``
+    is different: without ``uid=`` or ``id=`` it gives the record a random IRI, a
+    new one on every call, so saving its output again saves a second record.
     """
     record = _record_from_component_spec(
         family,
@@ -1655,8 +1667,10 @@ def template_component_instance(
     """Build a starter component (instance) document for a family.
 
     The document has no ``id`` unless *uid* is given and no ``<family>_spec_id``
-    unless *spec_id* is. A component has no natural key to mint its IRI from, so
-    pass *uid* for a record you will save: a save without an id is refused.
+    unless *spec_id* is. A component has no natural key to mint its IRI from yet,
+    so pass *uid* for a record you will save: a save of this document without an
+    id is refused. ``create_component_instance`` without ``uid=`` or ``id=`` gives
+    a random IRI instead, a new one on every call.
     """
     record = _record_from_component_instance(
         family,
