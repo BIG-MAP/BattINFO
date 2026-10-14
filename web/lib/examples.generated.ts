@@ -26,8 +26,6 @@ export const cellSpecCanonical = {
     "positive_electrode_basis": "LFP",
     "negative_electrode_basis": "unknown",
     "size_code": "R26650",
-    "iec_code": "IFpR26650",
-    "country_of_origin": "United States",
     "year": 2012
   },
   "properties": {
@@ -58,7 +56,7 @@ export const cellSpecCanonical = {
         "confidence": 0.8
       }
     },
-    "internal_resistance": {
+    "ac_internal_resistance": {
       "value": 6,
       "unit": "mΩ",
       "raw": {
@@ -94,16 +92,16 @@ export const cellSpecCanonical = {
         "confidence": 0.8
       }
     },
-    "pulse_charging_current": {
-      "value": 10,
-      "unit": "A",
+    "charging_voltage": {
+      "value": 3.6,
+      "unit": "V",
       "raw": {
-        "text": "Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min",
+        "text": "Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min",
         "page": 1,
         "confidence": 0.8
       }
     },
-    "maximum_continuous_charging_current": {
+    "nominal_continuous_charging_current": {
       "value": 2.5,
       "unit": "A",
       "raw": {
@@ -121,7 +119,22 @@ export const cellSpecCanonical = {
         "confidence": 0.8
       }
     },
-    "minimum_discharging_temperature": {
+    "maximum_pulse_discharging_current": {
+      "value": 120,
+      "unit": "A",
+      "conditions": {
+        "duration": {
+          "value": 10,
+          "unit": "s"
+        }
+      },
+      "raw": {
+        "text": "Maximum Pulse Discharge (10 seconds) 120A",
+        "page": 1,
+        "confidence": 0.8
+      }
+    },
+    "operating_temperature_min": {
       "value": -30,
       "unit": "°C",
       "raw": {
@@ -130,7 +143,7 @@ export const cellSpecCanonical = {
         "confidence": 0.8
       }
     },
-    "maximum_discharging_temperature": {
+    "operating_temperature_max": {
       "value": 55,
       "unit": "°C",
       "raw": {
@@ -167,6 +180,9 @@ export const cellSpecCanonical = {
       }
     }
   },
+  "notes": [
+    "Recommended fast charge to 80% SOC: 10 A to 3.6 V CC, 12 min (data sheet). Kept as a note: the data sheet gives no maximum continuous or pulse charging current."
+  ],
   "provenance": {
     "source_type": "datasheet",
     "source_file": "A123__ANR26650M1-B.pdf",

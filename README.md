@@ -105,7 +105,7 @@ result = publish(
         model="NCR18650B",
         format="cylindrical",
         chemistry="Li-ion",
-        nominal_capacity={"value": 3.4, "unit": "Ah"},
+        nominal_capacity={"value": 3.2, "unit": "Ah"},
     ),
     destination="local",
     root=".battinfo/my-library",

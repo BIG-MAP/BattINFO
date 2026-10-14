@@ -375,6 +375,31 @@ def test_load_cell_specification_from_library_record() -> None:
     )
 
     assert spec.model == "ANR26650M1-B"
+    assert spec.name == "A123 ANR26650M1-B"
+    assert spec.properties["maximum_pulse_discharging_current"]["value"] == 120.0
+
+
+def test_load_cell_specification_from_library_record_with_internals(tmp_path: Path) -> None:
+    # The packaged A123 library record holds datasheet values only, so the
+    # nested electrode, electrolyte and separator blocks come from the
+    # research example, moved into the library format.
+    library = json.loads(
+        (ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    research = json.loads(
+        (ROOT / "examples" / "cell-spec" / "research" / "a123-anr26650m1-b.detailed.example.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for block in ("positive_electrode", "negative_electrode", "electrolyte", "separator"):
+        library["specification"][block] = research[block]
+    path = tmp_path / "with-internals.json"
+    path.write_text(json.dumps(library), encoding="utf-8")
+
+    spec = load_cell_specification(path)
+
     assert spec.positive_electrode is not None
     assert spec.negative_electrode is not None
     assert spec.electrolyte is not None
@@ -395,11 +420,77 @@ def test_derive_cell_spec_from_library_record_mapping() -> None:
 
     cell_spec = derive_cell_spec(spec_record)
 
+    assert cell_spec.name == "A123 ANR26650M1-B"
     assert cell_spec.id == "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw"
     assert cell_spec.model == "ANR26650M1-B"
     assert cell_spec.positive_electrode_basis == "LFP"
-    assert cell_spec.negative_electrode_basis == "graphite"
+    assert cell_spec.negative_electrode_basis == "unknown"
     assert cell_spec.properties["nominal_voltage"]["value"] == 3.3
+
+
+def test_library_record_keeps_its_name_through_load_and_save() -> None:
+    record = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw",
+            "name": "Lab name for this cell",
+            "manufacturer": "A123",
+            "model": "ANR26650M1-B",
+            "format": "cylindrical",
+            "chemistry": "Li-ion",
+        },
+        "provenance": {"source_type": "manual"},
+    }
+
+    spec = CellSpec.from_library_record(record)
+
+    assert spec.name == "Lab name for this cell"
+    assert spec.to_library_record()["specification"]["name"] == "Lab name for this cell"
+
+
+def test_library_record_keeps_rechargeable_through_load_and_save() -> None:
+    # A primary cell in the library says so: the chemistry key alone (li-mno2)
+    # does not, and the canonical record has a rechargeable field for it.
+    record = {
+        "schema_version": "1.0.0",
+        "specification": {
+            "id": "https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
+            "manufacturer": "Energizer",
+            "model": "CR2032",
+            "format": "coin",
+            "chemistry": "li-mno2",
+            "rechargeable": False,
+        },
+        "provenance": {"source_type": "manual"},
+    }
+
+    spec = CellSpec.from_library_record(record)
+
+    assert spec.rechargeable is False
+    assert spec.to_record()["cell_spec"]["rechargeable"] is False
+    assert spec.to_library_record()["specification"]["rechargeable"] is False
+    del record["specification"]["rechargeable"]
+    assert "rechargeable" not in CellSpec.from_library_record(record).to_library_record()["specification"]
+
+
+def test_a_canonical_cell_spec_saved_to_the_library_keeps_name_and_rechargeable() -> None:
+    from battinfo.api._records import _cell_spec_record_to_library_format
+
+    record = CellSpec(
+        id="https://w3id.org/battinfo/spec/7r2m-4q8v-k6nt-c3pj",
+        name="Energizer CR2032",
+        manufacturer="Energizer",
+        model="CR2032",
+        format="coin",
+        chemistry="li-mno2",
+        rechargeable=False,
+    ).to_record()
+
+    specification = _cell_spec_record_to_library_format(record)["specification"]
+
+    assert specification["name"] == "Energizer CR2032"
+    assert specification["rechargeable"] is False
+    assert CellSpec.from_library_record({"specification": specification}).rechargeable is False
 
 
 def test_cell_specification_accepts_nested_objects() -> None:

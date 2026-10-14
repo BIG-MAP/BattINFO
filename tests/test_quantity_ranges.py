@@ -153,8 +153,23 @@ def _expanded_quantities(doc: dict) -> list[dict]:
     return found
 
 
-def test_the_a123_pulse_currents_are_published_with_their_numbers() -> None:
-    record = json.loads((RESEARCH / "a123-anr26650m1-b.detailed.example.json").read_text(encoding="utf-8"))
+def test_pulse_current_maxima_are_published_with_their_numbers() -> None:
+    # Built inline: the A123 example no longer states pulse charging limits
+    # (its data sheet gives none), so it cannot carry this check any more.
+    record = {
+        "schema_version": "0.2.0",
+        "cell_spec": {
+            "name": "Pulse-rated cylindrical cell",
+            "model": "PULSE-1",
+            "manufacturer": {"type": "Organization", "name": "Example"},
+            "cell_format": "cylindrical",
+            "chemistry": "Li-ion",
+        },
+        "properties": {
+            "maximum_pulse_charging_current": {"max_value": 10.0, "unit": "A"},
+            "maximum_pulse_discharging_current": {"max_value": 120.0, "unit": "A"},
+        },
+    }
     doc = _quiet(record_to_jsonld, record, "cell-spec")
     by_class = {
         cls: node

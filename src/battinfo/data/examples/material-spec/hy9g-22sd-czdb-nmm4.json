@@ -20,10 +20,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740346
   },
   "notes": [
-    "Ethyl methyl carbonate; linear carbonate solvent."
+    "Ethyl methyl carbonate; linear carbonate solvent.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

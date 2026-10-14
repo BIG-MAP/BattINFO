@@ -16,7 +16,7 @@
   },
   "properties": {
     "nominal_capacity": {
-      "value": 0.04,
+      "value": 0.004,
       "unit": "Ah"
     },
     "nominal_voltage": {

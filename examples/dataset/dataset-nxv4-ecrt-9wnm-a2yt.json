@@ -7,6 +7,10 @@
     "name": "NMC811 powder XRD pattern",
     "access_url": "https://example.org/dataset/nxv4-ecrt-9wnm-a2yt",
     "description": "X-ray diffraction pattern of an NMC811 cathode powder lot.",
+    "about": [
+      "https://w3id.org/battinfo/material/syzh-8sbd-ygb1-kfgg",
+      "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"
+    ],
     "license": "https://creativecommons.org/licenses/by/4.0/",
     "measurement_techniques": [
       "X-ray diffraction"

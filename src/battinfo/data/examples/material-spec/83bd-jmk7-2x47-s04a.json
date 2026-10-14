@@ -12,7 +12,6 @@
       "specific_capacity": {
         "value": 140,
         "unit": "mAh/g",
-        "value_basis": "Measured",
         "conditions": {
           "discharging_c_rate": {
             "value": 0.1,
@@ -37,15 +36,21 @@
       },
       "average_voltage": {
         "value": 4.7,
-        "unit": "V"
+        "unit": "V",
+        "conditions": {
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
       }
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "High-voltage spinel cathode active material (synthetic reference example)."
+    "High-voltage spinel cathode active material (synthetic reference example).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

@@ -48,4 +48,5 @@ jobs:
             tests/test_quickstart_recipe.py \
             tests/test_lab_p1_traps.py \
             tests/test_authoring_ws.py \
+            tests/test_processing_artifacts.py \
             tests/test_web_snippets.py

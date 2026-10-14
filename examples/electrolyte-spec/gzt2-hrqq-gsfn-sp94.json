@@ -26,10 +26,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Aqueous alkaline electrolyte, 7M KOH in water (e.g. Zn-MnO2 / Zn-air)."
+    "Aqueous alkaline electrolyte, 7M KOH in water (e.g. Zn-MnO2 / Zn-air).",
+    "Illustrative example: values typical of this electrolyte, not taken from a datasheet or measured."
   ]
 }

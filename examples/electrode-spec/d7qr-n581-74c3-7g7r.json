@@ -72,10 +72,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781742522
   },
   "notes": [
-    "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells."
+    "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells.",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }

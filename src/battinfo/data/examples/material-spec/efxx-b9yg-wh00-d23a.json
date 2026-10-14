@@ -20,10 +20,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740346
   },
   "notes": [
-    "Ethylene carbonate; cyclic carbonate solvent."
+    "Ethylene carbonate; cyclic carbonate solvent.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

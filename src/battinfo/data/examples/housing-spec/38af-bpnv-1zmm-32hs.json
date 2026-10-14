@@ -37,10 +37,11 @@
     ]
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "CR2032 coin-cell housing (case + spring + 1.0 mm spacer). Discovery-Benchmark coin-cell hardware."
+    "CR2032 coin-cell housing (case + spring + 1.0 mm spacer). Discovery-Benchmark coin-cell hardware.",
+    "Illustrative example: values typical of this housing, not taken from a datasheet or measured."
   ]
 }

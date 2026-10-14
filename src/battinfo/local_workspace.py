@@ -271,6 +271,7 @@ class CellSpecificationAuthoring(BaseModel):
     model: str
     format: str
     chemistry: str
+    rechargeable: bool | None = None
     size_code: str | None = None
     positive_electrode_basis: str | None = None
     negative_electrode_basis: str | None = None
@@ -461,7 +462,8 @@ class LocalWorkspace:
                 manufacturer="Energizer",
                 model="CR2032",
                 format="coin",
-                chemistry="Li-primary",
+                chemistry="li-mno2",
+                rechargeable=False,
                 size_code="R2032",
                 positive_electrode_basis="MnO2",
                 negative_electrode_basis="Li-metal",
@@ -472,7 +474,8 @@ class LocalWorkspace:
                 },
                 provenance=ProvenanceInfo(
                     type="datasheet",
-                    file="energizer-cr2032-datasheet.pdf",
+                    name="Energizer CR2032 product datasheet, form no. 2032NA0618",
+                    url="https://data.energizer.com/pdfs/cr2032.pdf",
                     retrieved_at=1773201600,
                 ),
                 comment=["Commercial reference cell type for the DigiBatt MVP workspace example."],
@@ -731,6 +734,7 @@ class LocalWorkspace:
                 model=cell_design.model,
                 format=cell_design.format,
                 chemistry=cell_design.chemistry,
+                rechargeable=cell_design.rechargeable,
                 size_code=cell_design.size_code,
                 positive_electrode_basis=cell_design.positive_electrode_basis,
                 negative_electrode_basis=cell_design.negative_electrode_basis,
@@ -896,6 +900,7 @@ class LocalWorkspace:
             model=cell_doc.cell_spec.model,
             format=cell_doc.cell_spec.format,
             chemistry=cell_doc.cell_spec.chemistry,
+            rechargeable=cell_doc.cell_spec.rechargeable,
             size_code=cell_doc.cell_spec.size_code,
             positive_electrode_basis=cell_doc.cell_spec.positive_electrode_basis,
             negative_electrode_basis=cell_doc.cell_spec.negative_electrode_basis,
@@ -1320,6 +1325,7 @@ class LocalWorkspace:
             model=cell_doc.cell_spec.model,
             format=cell_doc.cell_spec.format,
             chemistry=cell_doc.cell_spec.chemistry,
+            rechargeable=cell_doc.cell_spec.rechargeable,
             size_code=cell_doc.cell_spec.size_code,
             positive_electrode_basis=cell_doc.cell_spec.positive_electrode_basis,
             negative_electrode_basis=cell_doc.cell_spec.negative_electrode_basis,

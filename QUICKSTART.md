@@ -54,7 +54,7 @@ cell_spec = CellSpec(
     format="cylindrical",
     chemistry="li-ion",
     size_code="R18650",
-    nominal_capacity={"value": 3.4, "unit": "Ah"},
+    nominal_capacity={"value": 3.2, "unit": "Ah"},
     nominal_voltage={"value": 3.6, "unit": "V"},
     mass={"value": 48.0, "unit": "g"},
 )

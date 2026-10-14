@@ -39,8 +39,11 @@
     ]
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1789040331,
     "battinfo_version": "0.7.0"
-  }
+  },
+  "notes": [
+    "Illustrative example: values typical of this housing, not taken from a datasheet or measured."
+  ]
 }

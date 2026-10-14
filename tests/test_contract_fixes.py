@@ -91,9 +91,16 @@ def test_query_cell_specs_reads_a_typical_value(tmp_path: Path) -> None:
 def test_derive_cell_spec_keeps_the_range_keys_and_validates() -> None:
     from battinfo.publication import derive_cell_spec
 
+    # The library record states plain values from its data sheet, so the
+    # range keys are set on a copy: a typical capacity and a charging-pulse
+    # maximum, the two forms derive_cell_spec has to carry through.
+    record = _load(LIBRARY_A123)
+    properties = record["specification"]["property"]
+    properties["nominal_capacity"] = {"typical_value": 2.5, "unit": "Ah"}
+    properties["pulse_charging_current"] = {"max_value": 5.0, "unit": "A"}
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        cell_spec = derive_cell_spec(_load(LIBRARY_A123))
+        cell_spec = derive_cell_spec(record)
     assert cell_spec.properties["nominal_capacity"] == {"typical_value": 2.5, "unit": "Ah"}
     assert cell_spec.properties["pulse_charging_current"] == {"max_value": 5.0, "unit": "A"}
     report = validate_record_report(cell_spec.to_record(), policy="strict")

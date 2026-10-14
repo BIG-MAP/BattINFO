@@ -1,0 +1,16 @@
+{
+  "schema_version": "0.2.0",
+  "separator_spec": {
+    "id": "https://w3id.org/battinfo/spec/nqex-73kg-ptgm-6hq0",
+    "short_id": "nqex73",
+    "name": "Cellulose non-woven separator for alkaline cells",
+    "material": "cellulose"
+  },
+  "provenance": {
+    "source_type": "manual",
+    "retrieved_at": 1781768181
+  },
+  "notes": [
+    "Illustrative separator for the alkaline Zn-MnO2 example cell. Cellulose takes up the aqueous KOH electrolyte; plain polypropylene such as Celgard 2400 is hydrophobic and does not wet with it. No measured properties."
+  ]
+}

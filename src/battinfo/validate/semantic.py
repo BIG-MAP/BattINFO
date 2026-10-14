@@ -224,6 +224,9 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
 
 CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
 CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/spec/"  # cell specs use the spec/ namespace
+# A material dataset (powder XRD, say) is about a material lot or its material
+# spec rather than a cell; material specs share the spec/ namespace.
+MATERIAL_IRI_PREFIX = "https://w3id.org/battinfo/material/"
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-spec": ("cell_spec", "cell_spec"),
@@ -1290,7 +1293,7 @@ def _validate_dataset_semantics(
     has_battery_link = False
     if isinstance(about, list):
         has_battery_link = any(
-            isinstance(item, str) and (item.startswith(CELL_IRI_PREFIX) or item.startswith(CELL_TYPE_IRI_PREFIX))
+            isinstance(item, str) and item.startswith((CELL_IRI_PREFIX, CELL_TYPE_IRI_PREFIX, MATERIAL_IRI_PREFIX))
             for item in about
         )
     elif isinstance(related_entities, Mapping):
@@ -1307,7 +1310,7 @@ def _validate_dataset_semantics(
             code="semantic.dataset_missing_cell_link",
             severity=issue_severity,
             path="dataset.about",
-            message="dataset must reference at least one BattINFO cell or cell_spec IRI.",
+            message="dataset must reference at least one BattINFO cell, material or spec IRI in about.",
             resource_type=resource_type,
         )
 
