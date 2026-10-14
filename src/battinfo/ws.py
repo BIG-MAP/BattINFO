@@ -4715,6 +4715,10 @@ class AuthoringWorkspace:
         imported_tests = imported_datasets = 0
         skipped_tests: builtins.list[dict] = []
         skipped_datasets: builtins.list[dict] = []
+        # A dataset that several tests name as an output is one record: the first
+        # test that names it is its test, and each other one a related test.
+        datasets_here: dict[str, Any] = {}
+        made_datasets: builtins.list[Any] = []
         for test_iri, tnode in sorted(test_nodes_by_iri.items()):
             # prov:used may now be a list (cell + spec); hasTestObject is preferred.
             cell_iri = _first_id(tnode.get("hasTestObject")) or _first_id(tnode.get("prov:used"))
@@ -4800,6 +4804,12 @@ class AuthoringWorkspace:
                     )
                     test.id = test_iri
                     test = _held_or_new(test, engine.tests, "test")
+                shared = datasets_here.get(ds_iri) if ds_iri else None
+                if shared is not None:
+                    primary = shared.test.id if shared.test is not None else shared.test_id
+                    if test_iri != primary and test_iri not in shared.related_test_ids:
+                        shared.related_test_ids.append(test_iri)
+                    continue
                 dataset = self._ws.dataset(
                     test_cell,
                     title=f"{test_cell.name or test_cell.serial_number or 'cell'} {kind} dataset",
@@ -4811,13 +4821,18 @@ class AuthoringWorkspace:
                 )
                 if ds_iri:
                     dataset.id = ds_iri
-                _held_or_new(dataset, engine.datasets, "dataset")
+                    datasets_here[ds_iri] = dataset
+                made_datasets.append(dataset)
                 imported_datasets += 1
                 print(f"  test:     {fname}")
             if test is not None:
                 imported_tests += 1
             else:
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
+
+        # Compared once every test has named its outputs, related tests included.
+        for dataset in made_datasets:
+            _held_or_new(dataset, engine.datasets, "dataset")
 
         if clashes:
             for collection, items in zip(collections, held_before):

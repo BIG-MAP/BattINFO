@@ -176,6 +176,22 @@ def test_a_test_with_two_datasets_imports_as_one_test_under_its_iri(tmp_path: Pa
     assert all(source_test["test"]["id"] in record["dataset"]["about"] for record in datasets)
 
 
+def test_a_dataset_two_tests_name_imports_once_under_its_iri(tmp_path: Path, source: tuple[Path, dict]) -> None:
+    """A dataset several deposit tests list as an output is one dataset; the other tests are related to it."""
+    _, graph = source
+    shared = copy.deepcopy(graph)
+    first, second = sorted((n for n in shared["@graph"] if "BatteryTest" in n.get("@type", [])), key=lambda n: n["@id"])
+    [first_output] = [output["@id"] for output in first["hasOutput"]]
+    second["hasOutput"] = [*second["hasOutput"], {"@id": first_output}]
+
+    dst, counts = _import(tmp_path, shared)
+    assert (counts["tests"], counts["datasets"]) == (2, 2)
+    assert {record["test"]["id"] for record in _saved(dst, "test")} == {first["@id"], second["@id"]}
+    datasets = {record["dataset"]["id"]: record["dataset"] for record in _saved(dst, "dataset")}
+    assert first_output in datasets
+    assert datasets[first_output]["about"][1:] == [first["@id"], second["@id"]]
+
+
 def test_importing_the_same_deposit_twice_adds_nothing(tmp_path: Path, source: tuple[Path, dict]) -> None:
     _, graph = source
     path = tmp_path / "battinfo.json"
