@@ -641,7 +641,7 @@ lands on the same files instead of duplicating them.</p>
 <p>The canonical JSON Schemas (draft 2020-12) live in
 <code class="docutils literal notranslate"><span class="pre">src/battinfo/data/schemas/</span></code> and are enforced in three places, each with a CI
 drift gate: this package (<code class="docutils literal notranslate"><span class="pre">validate/</span></code> — schema, then semantic rules,
-cross-record references, and optional SHACL), the registry’s publish gate
+cross-record references, and SHACL), the registry’s publish gate
 (vendored copy), and the browser validator at battinfo.org/validate (vendored
 copy compiled with Ajv). Same record, same verdict, everywhere. Details in
 <a class="reference internal" href="guarantees.html#the-infrastructure-contract"><span class="std std-ref">the infrastructure contract</span></a>.</p>

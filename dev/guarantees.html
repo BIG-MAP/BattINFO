@@ -719,7 +719,7 @@ expiring shims are swept at each release.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">default</span></code>: schema and references are errors; semantic issues default to warnings.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">strict</span></code>: schema, references, and semantic issues are errors.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">publisher</span></code>: publisher-oriented validation with semantic and publication checks as errors.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publisher</span></code>: publisher-oriented validation with semantic and publication checks as errors. A deposit graph that the SHACL publication shapes could not check is an error too, so it is never published unchecked.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ingest</span></code>: schema remains strict while semantic and reference issues can remain warnings during staged cleanup.</p></li>
 </ul>
 </section>
@@ -759,6 +759,7 @@ cell configuration — see <a class="reference internal" href="records/half-cell
 <li><p><code class="docutils literal notranslate"><span class="pre">semantic.timestamp_implausible</span></code> (a warning under every policy: a <code class="docutils literal notranslate"><span class="pre">*_at</span></code> Unix time outside 2000 to 2100) and <code class="docutils literal notranslate"><span class="pre">semantic.timestamp_out_of_range</span></code> (a <code class="docutils literal notranslate"><span class="pre">*_at</span></code> number that cannot be a Unix time in seconds, because it falls outside the years 1 to 9999 as a time in milliseconds does; an error under the strict and publisher policies, a warning under the others)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publication.distribution_url_invalid</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">publication.jsonld_parse_error</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publication.shacl_unavailable</span></code>, <code class="docutils literal notranslate"><span class="pre">publication.shapes_not_found</span></code> and <code class="docutils literal notranslate"><span class="pre">publication.shacl_runtime_error</span></code> (the SHACL publication shapes could not check a deposit graph because pyshacl could not be imported, the shapes file is missing or pyshacl failed: an error under the <code class="docutils literal notranslate"><span class="pre">publisher</span></code> policy, which <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> applies before it mints a DOI, and a warning under the others)</p></li>
 </ul>
 </section>
 <section id="cli-contract">
