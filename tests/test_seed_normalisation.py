@@ -90,6 +90,38 @@ def test_chemistry_seeds_as_its_vocabulary_key(value: str, key: str) -> None:
     assert chemistry_seed_key(value) == key
 
 
+# The chemistry table the cell-spec seed reads (entities.CHEMISTRY_SEED_KEYS), as
+# JSON with sorted keys, hashed. It is frozen with 0.8.0: a key or alias added to it
+# moves the IRI of every cell spec spelled that way, so a change to it is a seed
+# change (IDENTIFIER_POLICY 5.5) that needs a lookup under the old table, and only
+# then a new digest here.
+CHEMISTRY_TABLE_SHA256 = "d7e6844d8695ed7542ef01f75916fb0a156aae785bd8c5d8e46063a90fbf47b4"
+
+
+def test_the_chemistry_seed_table_is_frozen() -> None:
+    import hashlib
+
+    from battinfo.entities import CHEMISTRY_SEED_KEYS
+
+    text = json.dumps(dict(CHEMISTRY_SEED_KEYS), sort_keys=True)
+    assert hashlib.sha256(text.encode("utf-8")).hexdigest() == CHEMISTRY_TABLE_SHA256, (
+        "The chemistry seed table changed. That moves cell-spec IRIs: keep the old table "
+        "findable through a legacy-seed lookup (IDENTIFIER_POLICY 5.5) before updating the digest."
+    )
+
+
+def test_a_chemistry_key_the_vocabulary_gains_later_does_not_change_a_seed(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The seed never reads the vendored vocabulary, which grows when the ontology mappings are vendored again."""
+    from importlib import resources
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("the chemistry seed read the vendored vocabulary")
+
+    monkeypatch.setattr(resources, "files", refuse)
+    assert chemistry_seed_key("Zn-ion") == "Zn-ion"
+    assert chemistry_seed_key("LI-ION") == "li-ion"
+
+
 def test_cell_seed_normalises_serial_batch_and_name() -> None:
     spec_iri = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
     clean = cell_instance_identity_seed(cell_spec_id=spec_iri, serial_number="C01", batch_id="B7")

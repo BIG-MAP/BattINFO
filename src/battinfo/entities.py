@@ -16,13 +16,12 @@ copy-pasted across ``api.py``, ``validate/record.py``, ``validate/references.py`
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from functools import lru_cache
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any, Mapping, Optional
 
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
@@ -106,41 +105,70 @@ def _stripped(value: object) -> str:
     return (value if isinstance(value, str) else str(value)).strip()
 
 
-@lru_cache(maxsize=1)
-def _chemistry_seed_keys() -> dict[str, str]:
-    """Each chemistry key and alias of ``entity_type_map.json``, case-folded, to the key it seeds as."""
-    from importlib import resources  # noqa: PLC0415
-
-    path = resources.files("battinfo")
-    for part in ("data", "mappings", "domain-battery", "entity_type_map.json"):
-        path = path.joinpath(part)  # single-arg joinpath: multi-arg is Python 3.11+
-    with path.open("r", encoding="utf-8") as handle:
-        entries = json.load(handle).get("mappings", {}).get("chemistry", {})
-    keys: dict[str, str] = {}
-    for name in entries:
-        target, seen = str(name), set()
-        # An alias seeds as the key it is an alias of (alias_of is one level today).
-        while isinstance(entries.get(target), Mapping) and isinstance(entries[target].get("alias_of"), str):
-            if target in seen:
-                break
-            seen.add(target)
-            target = entries[target]["alias_of"]
-        keys[str(name).casefold()] = target
-    return keys
+#: The chemistry part of a cell-spec seed, frozen with 0.8.0: each key and alias
+#: of the chemistry vocabulary (``entity_type_map.json``) as it stood then,
+#: case-folded, to the key it seeds as, an alias resolved. The vocabulary grows
+#: when the ontology mappings are vendored again; this table does not follow it,
+#: because a new key or alias would change the seed of every cell spec spelled
+#: that way and move its IRI, and the IRIs of its cells, tests and datasets.
+#: Changing it is a seed change (IDENTIFIER_POLICY 5.5), which needs a lookup
+#: under the old table; ``tests/test_seed_normalisation.py`` fails when it changes.
+CHEMISTRY_SEED_KEYS: Mapping[str, str] = MappingProxyType(
+    {
+        "al-air": "al-air",
+        "alkaline": "alkaline-zn-mno2",
+        "alkaline-zn-mno2": "alkaline-zn-mno2",
+        "ca-ion": "ca-ion",
+        "fe-air": "fe-air",
+        "fe-flow": "fe-flow",
+        "k-ion": "k-ion",
+        "lead-acid": "lead-acid",
+        "leclanche": "leclanche",
+        "li-air": "li-air",
+        "li-cfx": "li-cfx",
+        "li-cuo": "li-cuo",
+        "li-fes2": "li-fes2",
+        "li-ion": "li-ion",
+        "li-metal": "li-metal",
+        "li-mno2": "li-mno2",
+        "li-primary": "li-metal",
+        "li-s": "li-s",
+        "li-socl2": "li-socl2",
+        "mg-air": "mg-air",
+        "mg-ion": "mg-ion",
+        "na-air": "na-air",
+        "na-ion": "na-ion",
+        "ni-cd": "ni-cd",
+        "ni-fe": "ni-fe",
+        "ni-mh": "ni-mh",
+        "ni-zn": "ni-zn",
+        "si-air": "si-air",
+        "vanadium-flow": "vanadium-flow",
+        "zinc-carbon": "zinc-carbon",
+        "zinc-chloride": "zinc-chloride",
+        "zn-air": "zn-air",
+        "zn-br-flow": "zn-br-flow",
+        "zn-hgo": "zn-hgo",
+        "zn-mno2": "zn-mno2",
+        "znmno2": "zn-mno2",
+    }
+)
 
 
 def chemistry_seed_key(value: object) -> str:
     """The chemistry part of a cell-spec identity seed: its vocabulary key.
 
-    A value that matches a key or an alias of the chemistry vocabulary
-    (``entity_type_map.json``) after case-folding seeds as that key, with the
-    alias resolved: ``Li-ion``, ``li-ion`` and ``LI-ION`` give ``li-ion``, and
-    the alias ``li-primary`` gives ``li-metal``. A narrower couple keeps its
-    own key (``li-mno2`` is not seeded as its broader ``li-metal``). Any other
-    value is seeded as normalised free text (:func:`seed_text`), its case kept.
+    A value that matches a key or an alias of the chemistry vocabulary after
+    case-folding seeds as that key, with the alias resolved: ``Li-ion``,
+    ``li-ion`` and ``LI-ION`` give ``li-ion``, and the alias ``li-primary``
+    gives ``li-metal``. A narrower couple keeps its own key (``li-mno2`` is
+    not seeded as its broader ``li-metal``). Any other value is seeded as
+    normalised free text (:func:`seed_text`), its case kept. The vocabulary
+    read is the one frozen with 0.8.0 (:data:`CHEMISTRY_SEED_KEYS`), so a key
+    added to the vocabulary later does not move an IRI.
     """
     text = seed_text(value)
-    return _chemistry_seed_keys().get(text.casefold(), text)
+    return CHEMISTRY_SEED_KEYS.get(text.casefold(), text)
 
 
 def cell_spec_identity_seed(
