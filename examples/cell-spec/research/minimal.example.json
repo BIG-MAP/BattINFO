@@ -11,9 +11,12 @@
     "cell_format": "cylindrical",
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
-    "negative_electrode_basis": "unknown"
+    "negative_electrode_basis": "graphite"
   },
   "provenance": {
     "source_type": "manual"
-  }
+  },
+  "notes": [
+    "Minimal example of the cell header. The data sheet does not name the negative electrode: the graphite basis in the header belongs to the illustrative internals of the research examples, as in extended.example.json."
+  ]
 }
