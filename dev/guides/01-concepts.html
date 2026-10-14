@@ -574,7 +574,7 @@
 <h2>The data model<a class="headerlink" href="#The-data-model" title="Link to this heading">#</a></h2>
 <p>Every battery experiment generates four kinds of record. BattINFO formalises them as a provenance chain:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>CellSpec  ─────────────────────────────────
-  │  &quot;Panasonic NCR18650B is a cylindrical Li-ion cell, 3.4 Ah&quot;
+  │  &quot;Panasonic NCR18650B is a cylindrical Li-ion cell, 3.2 Ah&quot;
   │
   └─► Cell  ───────────────────────────────
         │  &quot;This specific cell, serial number LAB-001&quot;
@@ -612,7 +612,7 @@
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;schema_version&#39;, &#39;cell_spec&#39;, &#39;properties&#39;, &#39;provenance&#39;]
+[&#39;schema_version&#39;, &#39;cell_spec&#39;, &#39;properties&#39;, &#39;notes&#39;, &#39;provenance&#39;]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -645,8 +645,6 @@
  &#39;positive_electrode_basis&#39;: &#39;LFP&#39;,
  &#39;negative_electrode_basis&#39;: &#39;unknown&#39;,
  &#39;size_code&#39;: &#39;R26650&#39;,
- &#39;iec_code&#39;: &#39;IFpR26650&#39;,
- &#39;country_of_origin&#39;: &#39;United States&#39;,
  &#39;year&#39;: 2012}
 </pre></div></div>
 </div>
@@ -678,7 +676,7 @@
  &#39;nominal_voltage&#39;: {&#39;value&#39;: 3.3,
   &#39;unit&#39;: &#39;V&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Voltage (nominal) 3.3V&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
- &#39;internal_resistance&#39;: {&#39;value&#39;: 6.0,
+ &#39;ac_internal_resistance&#39;: {&#39;value&#39;: 6.0,
   &#39;unit&#39;: &#39;mΩ&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Internal Impedance (1kHz AC typical) 6mΩ&#39;,
    &#39;page&#39;: 1,
@@ -692,12 +690,12 @@
  &#39;height&#39;: {&#39;value&#39;: 65.0,
   &#39;unit&#39;: &#39;mm&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Cell Dimensions 26 x 65 mm&#39;, &#39;page&#39;: 1, &#39;confidence&#39;: 0.8}},
- &#39;pulse_charging_current&#39;: {&#39;value&#39;: 10.0,
-  &#39;unit&#39;: &#39;A&#39;,
-  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min&#39;,
+ &#39;charging_voltage&#39;: {&#39;value&#39;: 3.6,
+  &#39;unit&#39;: &#39;V&#39;,
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
    &#39;page&#39;: 1,
    &#39;confidence&#39;: 0.8}},
- &#39;maximum_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
+ &#39;nominal_continuous_charging_current&#39;: {&#39;value&#39;: 2.5,
   &#39;unit&#39;: &#39;A&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min&#39;,
    &#39;page&#39;: 1,
@@ -707,12 +705,18 @@
   &#39;raw&#39;: {&#39;text&#39;: &#39;Maximum Continuous Discharge 50A&#39;,
    &#39;page&#39;: 1,
    &#39;confidence&#39;: 0.8}},
- &#39;minimum_discharging_temperature&#39;: {&#39;value&#39;: -30,
+ &#39;maximum_pulse_discharging_current&#39;: {&#39;value&#39;: 120.0,
+  &#39;unit&#39;: &#39;A&#39;,
+  &#39;conditions&#39;: {&#39;duration&#39;: {&#39;value&#39;: 10, &#39;unit&#39;: &#39;s&#39;}},
+  &#39;raw&#39;: {&#39;text&#39;: &#39;Maximum Pulse Discharge (10 seconds) 120A&#39;,
+   &#39;page&#39;: 1,
+   &#39;confidence&#39;: 0.8}},
+ &#39;operating_temperature_min&#39;: {&#39;value&#39;: -30,
   &#39;unit&#39;: &#39;°C&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Operating Temperature -30°C to 55°C&#39;,
    &#39;page&#39;: 1,
    &#39;confidence&#39;: 0.8}},
- &#39;maximum_discharging_temperature&#39;: {&#39;value&#39;: 55,
+ &#39;operating_temperature_max&#39;: {&#39;value&#39;: 55,
   &#39;unit&#39;: &#39;°C&#39;,
   &#39;raw&#39;: {&#39;text&#39;: &#39;Operating Temperature -30°C to 55°C&#39;,
    &#39;page&#39;: 1,
@@ -978,7 +982,7 @@ JSON-LD exported to: &lt;repo&gt;\docs\guides\_scratch\guide-01\resolver\spec\5j
   &#34;dcterms:source&#34;: {
     &#34;@type&#34;: &#34;prov:Entity&#34;,
     &#34;dcterms:type&#34;: &#34;datasheet&#34;,
-    &#34;prov:generatedAtTime&#34;: &#34;2026-10-14T12:38:35+00:00&#34;
+    &#34;prov:generatedAtTime&#34;: &#34;2026-10-14T15:44:17+00:00&#34;
   }
 }
 </pre></div></div>

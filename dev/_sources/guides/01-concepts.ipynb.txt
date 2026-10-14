@@ -25,10 +25,10 @@
    "id": "d1bde660",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:34.213412Z",
-     "iopub.status.busy": "2026-10-14T12:38:34.212404Z",
-     "iopub.status.idle": "2026-10-14T12:38:34.228998Z",
-     "shell.execute_reply": "2026-10-14T12:38:34.225988Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.453135Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.453135Z",
+     "iopub.status.idle": "2026-10-14T15:44:17.464803Z",
+     "shell.execute_reply": "2026-10-14T15:44:17.464803Z"
     }
    },
    "outputs": [],
@@ -53,7 +53,7 @@
     "\n",
     "```\n",
     "CellSpec  ─────────────────────────────────\n",
-    "  │  \"Panasonic NCR18650B is a cylindrical Li-ion cell, 3.4 Ah\"\n",
+    "  │  \"Panasonic NCR18650B is a cylindrical Li-ion cell, 3.2 Ah\"\n",
     "  │\n",
     "  └─► Cell  ───────────────────────────────\n",
     "        │  \"This specific cell, serial number LAB-001\"\n",
@@ -82,17 +82,17 @@
    "id": "af9f7f36",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:34.235036Z",
-     "iopub.status.busy": "2026-10-14T12:38:34.235036Z",
-     "iopub.status.idle": "2026-10-14T12:38:35.786396Z",
-     "shell.execute_reply": "2026-10-14T12:38:35.783845Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.464803Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.464803Z",
+     "iopub.status.idle": "2026-10-14T15:44:17.889031Z",
+     "shell.execute_reply": "2026-10-14T15:44:17.887511Z"
     }
    },
    "outputs": [
     {
      "data": {
       "text/plain": [
-       "['schema_version', 'cell_spec', 'properties', 'provenance']"
+       "['schema_version', 'cell_spec', 'properties', 'notes', 'provenance']"
       ]
      },
      "execution_count": 2,
@@ -118,10 +118,10 @@
    "id": "2876af4e",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:35.792423Z",
-     "iopub.status.busy": "2026-10-14T12:38:35.791914Z",
-     "iopub.status.idle": "2026-10-14T12:38:35.811570Z",
-     "shell.execute_reply": "2026-10-14T12:38:35.806016Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.892547Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.890797Z",
+     "iopub.status.idle": "2026-10-14T15:44:17.899169Z",
+     "shell.execute_reply": "2026-10-14T15:44:17.899169Z"
     }
    },
    "outputs": [
@@ -143,8 +143,6 @@
        " 'positive_electrode_basis': 'LFP',\n",
        " 'negative_electrode_basis': 'unknown',\n",
        " 'size_code': 'R26650',\n",
-       " 'iec_code': 'IFpR26650',\n",
-       " 'country_of_origin': 'United States',\n",
        " 'year': 2012}"
       ]
      },
@@ -164,10 +162,10 @@
    "id": "8d47a257",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:35.817909Z",
-     "iopub.status.busy": "2026-10-14T12:38:35.816899Z",
-     "iopub.status.idle": "2026-10-14T12:38:35.850126Z",
-     "shell.execute_reply": "2026-10-14T12:38:35.845077Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.903000Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.903000Z",
+     "iopub.status.idle": "2026-10-14T15:44:17.910113Z",
+     "shell.execute_reply": "2026-10-14T15:44:17.910113Z"
     }
    },
    "outputs": [
@@ -187,7 +185,7 @@
        " 'nominal_voltage': {'value': 3.3,\n",
        "  'unit': 'V',\n",
        "  'raw': {'text': 'Voltage (nominal) 3.3V', 'page': 1, 'confidence': 0.8}},\n",
-       " 'internal_resistance': {'value': 6.0,\n",
+       " 'ac_internal_resistance': {'value': 6.0,\n",
        "  'unit': 'mΩ',\n",
        "  'raw': {'text': 'Internal Impedance (1kHz AC typical) 6mΩ',\n",
        "   'page': 1,\n",
@@ -201,12 +199,12 @@
        " 'height': {'value': 65.0,\n",
        "  'unit': 'mm',\n",
        "  'raw': {'text': 'Cell Dimensions 26 x 65 mm', 'page': 1, 'confidence': 0.8}},\n",
-       " 'pulse_charging_current': {'value': 10.0,\n",
-       "  'unit': 'A',\n",
-       "  'raw': {'text': 'Recommended Fast Charge Method to 80% SOC 10A to 3.6V CC, 12 min',\n",
+       " 'charging_voltage': {'value': 3.6,\n",
+       "  'unit': 'V',\n",
+       "  'raw': {'text': 'Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min',\n",
        "   'page': 1,\n",
        "   'confidence': 0.8}},\n",
-       " 'maximum_continuous_charging_current': {'value': 2.5,\n",
+       " 'nominal_continuous_charging_current': {'value': 2.5,\n",
        "  'unit': 'A',\n",
        "  'raw': {'text': 'Recommended Standard Charge Method 2.5A to 3.6V CCCV, 60 min',\n",
        "   'page': 1,\n",
@@ -216,12 +214,18 @@
        "  'raw': {'text': 'Maximum Continuous Discharge 50A',\n",
        "   'page': 1,\n",
        "   'confidence': 0.8}},\n",
-       " 'minimum_discharging_temperature': {'value': -30,\n",
+       " 'maximum_pulse_discharging_current': {'value': 120.0,\n",
+       "  'unit': 'A',\n",
+       "  'conditions': {'duration': {'value': 10, 'unit': 's'}},\n",
+       "  'raw': {'text': 'Maximum Pulse Discharge (10 seconds) 120A',\n",
+       "   'page': 1,\n",
+       "   'confidence': 0.8}},\n",
+       " 'operating_temperature_min': {'value': -30,\n",
        "  'unit': '°C',\n",
        "  'raw': {'text': 'Operating Temperature -30°C to 55°C',\n",
        "   'page': 1,\n",
        "   'confidence': 0.8}},\n",
-       " 'maximum_discharging_temperature': {'value': 55,\n",
+       " 'operating_temperature_max': {'value': 55,\n",
        "  'unit': '°C',\n",
        "  'raw': {'text': 'Operating Temperature -30°C to 55°C',\n",
        "   'page': 1,\n",
@@ -300,10 +304,10 @@
    "id": "e85e0b8a",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:35.857167Z",
-     "iopub.status.busy": "2026-10-14T12:38:35.856169Z",
-     "iopub.status.idle": "2026-10-14T12:38:35.870086Z",
-     "shell.execute_reply": "2026-10-14T12:38:35.866553Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.915169Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.913145Z",
+     "iopub.status.idle": "2026-10-14T15:44:17.919317Z",
+     "shell.execute_reply": "2026-10-14T15:44:17.919317Z"
     }
    },
    "outputs": [
@@ -353,10 +357,10 @@
    "id": "e670cfbb",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:35.877629Z",
-     "iopub.status.busy": "2026-10-14T12:38:35.875619Z",
-     "iopub.status.idle": "2026-10-14T12:38:38.249824Z",
-     "shell.execute_reply": "2026-10-14T12:38:38.247804Z"
+     "iopub.execute_input": "2026-10-14T15:44:17.923040Z",
+     "iopub.status.busy": "2026-10-14T15:44:17.923040Z",
+     "iopub.status.idle": "2026-10-14T15:44:18.340771Z",
+     "shell.execute_reply": "2026-10-14T15:44:18.340771Z"
     }
    },
    "outputs": [
@@ -394,10 +398,10 @@
    "id": "0f9bd621",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:38.255356Z",
-     "iopub.status.busy": "2026-10-14T12:38:38.255356Z",
-     "iopub.status.idle": "2026-10-14T12:38:39.621765Z",
-     "shell.execute_reply": "2026-10-14T12:38:39.619754Z"
+     "iopub.execute_input": "2026-10-14T15:44:18.340771Z",
+     "iopub.status.busy": "2026-10-14T15:44:18.340771Z",
+     "iopub.status.idle": "2026-10-14T15:44:18.787622Z",
+     "shell.execute_reply": "2026-10-14T15:44:18.787622Z"
     }
    },
    "outputs": [
@@ -434,10 +438,10 @@
    "id": "50971f8b",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:39.627298Z",
-     "iopub.status.busy": "2026-10-14T12:38:39.626298Z",
-     "iopub.status.idle": "2026-10-14T12:38:39.645241Z",
-     "shell.execute_reply": "2026-10-14T12:38:39.642722Z"
+     "iopub.execute_input": "2026-10-14T15:44:18.787622Z",
+     "iopub.status.busy": "2026-10-14T15:44:18.787622Z",
+     "iopub.status.idle": "2026-10-14T15:44:18.794992Z",
+     "shell.execute_reply": "2026-10-14T15:44:18.794992Z"
     }
    },
    "outputs": [
@@ -479,10 +483,10 @@
    "id": "4bb41daf",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:39.657819Z",
-     "iopub.status.busy": "2026-10-14T12:38:39.657819Z",
-     "iopub.status.idle": "2026-10-14T12:38:39.677755Z",
-     "shell.execute_reply": "2026-10-14T12:38:39.671219Z"
+     "iopub.execute_input": "2026-10-14T15:44:18.798520Z",
+     "iopub.status.busy": "2026-10-14T15:44:18.798520Z",
+     "iopub.status.idle": "2026-10-14T15:44:18.802444Z",
+     "shell.execute_reply": "2026-10-14T15:44:18.802444Z"
     }
    },
    "outputs": [
@@ -563,7 +567,7 @@
       "  \"dcterms:source\": {\n",
       "    \"@type\": \"prov:Entity\",\n",
       "    \"dcterms:type\": \"datasheet\",\n",
-      "    \"prov:generatedAtTime\": \"2026-10-14T12:38:35+00:00\"\n",
+      "    \"prov:generatedAtTime\": \"2026-10-14T15:44:17+00:00\"\n",
       "  }\n",
       "}\n"
      ]
@@ -596,10 +600,10 @@
    "id": "bfc0b477",
    "metadata": {
     "execution": {
-     "iopub.execute_input": "2026-10-14T12:38:39.684282Z",
-     "iopub.status.busy": "2026-10-14T12:38:39.683283Z",
-     "iopub.status.idle": "2026-10-14T12:38:39.756714Z",
-     "shell.execute_reply": "2026-10-14T12:38:39.753195Z"
+     "iopub.execute_input": "2026-10-14T15:44:18.802444Z",
+     "iopub.status.busy": "2026-10-14T15:44:18.802444Z",
+     "iopub.status.idle": "2026-10-14T15:44:18.829861Z",
+     "shell.execute_reply": "2026-10-14T15:44:18.829861Z"
     }
    },
    "outputs": [
