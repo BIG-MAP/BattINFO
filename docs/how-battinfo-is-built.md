@@ -41,16 +41,16 @@ Every record type is one entry in a single registry
 on-disk folder, its IRI namespace. Adding a record type means adding one entry
 there — every dispatch table in the package derives from it.
 
-**2. The pydantic models are the single source of truth.** There is no
-separate "input DTO" layer: `CellSpec`, `Cell`, `Test`,
-`TestSpec`, and `Dataset` (in `src/battinfo/bundle.py`) are simultaneously
+**2. The JSON Schema is the contract, and the pydantic models are how you write to it.** There is no separate "input DTO" layer: `CellSpec`, `Cell`, `Test`, `TestSpec`, and `Dataset`, written by hand in `src/battinfo/bundle.py`, are at once
 
 - the **authoring input** — construct them with flat datasheet-style kwargs
   (`manufacturer=`, `nominal_capacity={"value": 2.5, "unit": "Ah"}`),
 - the **validator** — `extra="forbid"` plus did-you-mean errors, so a typo'd
   field teaches instead of disappearing,
 - the **serializer** — `to_record()` / `from_record()` convert to and from the
-  canonical JSON shape, losslessly.
+  canonical JSON shape.
+
+Every save then validates the record against the JSON Schema in `src/battinfo/data/schemas/`, which is the save-time contract, and `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps.
 
 If you know pydantic, you already know the core of BattINFO.
 
@@ -103,9 +103,7 @@ deterministic output from those tables, which is why the website can show
 [real before/after pairs](https://battinfo.org/examples) generated at build
 time.
 
-Two files carry the EMMO annotations in Python: `bundle_generated.py` is
-generated from LinkML schemas and holds IRI metadata; application code never
-imports it directly — `bundle_adapter.py` is the one crossing point.
+Two files carry the EMMO annotations in Python. `bundle_generated.py` holds the IRI metadata. It was generated from the LinkML schema once and has been edited by hand since, so do not regenerate it; regenerating or retiring it is planned for 0.9. Most code reaches it through `bundle_adapter.py`.
 
 ### Getting data in and out — `interop/` and BDF
 
@@ -146,7 +144,7 @@ src/battinfo/
 ├── cli.py               typer CLI over the same api functions
 ├── data/schemas/        the canonical JSON Schemas (the contract)
 ├── data/examples/       packaged canonical example records
-└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
+└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated once, edited by hand since)
 ```
 
 Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_fs_guard.py` (the

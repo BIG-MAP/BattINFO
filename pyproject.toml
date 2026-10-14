@@ -30,7 +30,6 @@ keywords = [
   "linked data",
   "JSON-LD",
   "FAIR data",
-  "Battery Pass",
   "semantic web",
 ]
 classifiers = [

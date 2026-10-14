@@ -63,9 +63,7 @@ existing registry record instead (reused, never re-published).
 
 ## Record classes
 
-`CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as
-pydantic classes — the single source of truth for authoring and for what is on
-disk. For a standalone cell-spec record, `publish` is the shortcut:
+`CellSpec`, `Cell`, `TestSpec`, `Test`, and `Dataset` are the record types as pydantic classes, written by hand in `bundle.py`. You author records with them, and every save validates the record against the JSON Schema, which is the save-time contract. For a standalone cell-spec record, `publish` is the shortcut:
 
 ```python
 from battinfo import CellSpec, publish

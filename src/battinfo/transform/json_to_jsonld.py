@@ -3391,9 +3391,12 @@ def _unrouted_document_error(data: dict[str, Any]) -> ValueError:
     hint = f"battinfo.record_to_jsonld(record, {_record_to_jsonld_type(kind)!r})"
     if kind.record_key in _DOMAIN_BATTERY_RECORD_KEYS:
         # A kind this target emits, without the schema_version that routes it.
-        return ValueError(
-            f"to_jsonld maps a {kind.entity_type} record only when it has a schema_version; add one, or use {hint}."
-        )
+        # record_to_jsonld has its own emitter for a cell spec, but hands the
+        # other kinds back to to_jsonld, so only a cell spec gets the hint.
+        message = f"to_jsonld maps {kind.entity_type} records only when they have a schema_version; add one"
+        if kind.record_key == "cell_spec":
+            return ValueError(f"{message}, or use {hint}.")
+        return ValueError(f"{message}.")
     return ValueError(f"to_jsonld does not emit {kind.entity_type} records; use {hint}.")
 
 

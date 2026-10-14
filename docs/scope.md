@@ -109,7 +109,7 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 
 ### Tutorials
 
-- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in the notebook first, as [Getting started](pages/getting-started.rst) describes; tutorial 6 also needs the `processing` extra.
+- The tutorials have no "Open in Colab" link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the `%pip` line that [Getting started](pages/getting-started.rst) gives; tutorial 6 needs the one with the `processing` extra.
 
 ### Dependencies
 

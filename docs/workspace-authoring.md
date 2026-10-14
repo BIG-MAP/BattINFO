@@ -115,10 +115,7 @@ commands for materials or components.
   finalizes ids and provenance, and writes the canonical records. The authoring
   workspace delegates to it; script against it directly when you are building
   pipelines rather than working interactively.
-- **The record models** (`CellSpec`, `Cell`, `Test`, `TestSpec`,
-  `Dataset`) are both the canonical source of truth and the authoring input — every
-  field carries a description (`help(battinfo.CellSpec)`), and misspelled
-  arguments get a did-you-mean.
+- **The record models** (`CellSpec`, `Cell`, `Test`, `TestSpec`, `Dataset`) are the authoring input, and every save validates their records against the JSON Schema, which is the save-time contract. Every field carries a description (`help(battinfo.CellSpec)`), and misspelled arguments get a did-you-mean.
 - **`battinfo.publish(...)`** takes one `CellSpec` and saves its canonical
   record without a workspace, or saves and submits it to a registry. A `Cell`,
   `TestSpec`, `Test` or `Dataset` is saved with `save_cell_instance`,

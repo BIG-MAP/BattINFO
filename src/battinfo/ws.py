@@ -8114,7 +8114,7 @@ class AuthoringWorkspace:
         fmt: str = "json-ld",
         output_dir: str | Path | None = None,
     ) -> builtins.list[Path]:
-        """Export all workspace records as RDF.
+        """Export the workspace's saved cell specs, cells, test specs, tests and datasets as RDF.
 
         Converts each record to JSON-LD, loads it into an RDF graph, then
         serializes to the requested format.  Requires ``ws.save()`` first.

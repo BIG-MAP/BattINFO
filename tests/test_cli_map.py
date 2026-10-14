@@ -11,6 +11,7 @@ exits 2 with a message that names `battinfo.record_to_jsonld`.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -157,6 +158,39 @@ def test_to_jsonld_names_schema_version_for_a_descriptor_without_one() -> None:
     descriptor = {"specification": {"manufacturer": "A123", "model": "ANR26650M1-B", "format": "cylindrical"}}
     with pytest.raises(ValueError, match="cell descriptor only when it has a schema_version"):
         to_jsonld(descriptor, target="domain-battery")
+
+
+def test_to_jsonld_tells_an_electrode_without_schema_version_to_add_one() -> None:
+    """record_to_jsonld hands an electrode to to_jsonld, so naming it would send the user round in a circle."""
+    record = _load(EXAMPLE_BY_KIND["electrode"])
+    del record["schema_version"]
+    for emit in (lambda: to_jsonld(record, target="domain-battery"), lambda: record_to_jsonld(record, "electrode")):
+        with pytest.raises(ValueError) as raised:
+            emit()
+        message = str(raised.value)
+        assert "maps electrode records only when they have a schema_version; add one." in message
+        assert "record_to_jsonld" not in message
+
+
+@pytest.mark.filterwarnings("ignore:semantic.value_text_only")
+@pytest.mark.parametrize("entity_type", [kind.entity_type for kind in ENTITY_KINDS])
+def test_the_record_to_jsonld_call_an_error_names_works(entity_type: str) -> None:
+    """Without schema_version a record is invalid, but the call its error suggests must still emit it."""
+    record = _load(EXAMPLE_BY_KIND[entity_type])
+    record.pop("schema_version", None)
+    kind = kind_for_doc(record)
+    assert kind is not None
+    try:
+        to_jsonld(record, target="domain-battery")
+    except ValueError as exc:
+        message = str(exc)
+    else:
+        return
+    named = re.search(r"battinfo\.record_to_jsonld\(record, '([^']+)'\)", message)
+    if named is None:
+        assert "schema_version" in message, message
+        return
+    assert record[kind.record_key]["id"] in _node_ids(record_to_jsonld(record, named.group(1)))
 
 
 def test_to_jsonld_lists_the_targets_it_has() -> None:

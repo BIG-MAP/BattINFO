@@ -48,7 +48,7 @@ BattINFO provides a Python library, a CLI, and a canonical asset suite — JSON
 Schemas, ontology mappings, profiles, and examples — that make it straightforward
 to describe batteries as **valid, machine-readable Linked Data**.
 
-Every record gets a persistent `https://w3id.org/battinfo/` IRI. The JSON-LD that BattINFO writes for a record (`battinfo.record_to_jsonld`), for a workspace's saved records (`ws.export`) and for a Zenodo deposit is valid RDF, typed against EMMO domain-battery and ready to query with SPARQL. What a record's IRI serves from the registry is not yet that model; the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) say what it serves instead.
+Every record gets a persistent `https://w3id.org/battinfo/` IRI. The JSON-LD that BattINFO writes for a record (`battinfo.record_to_jsonld`), for a workspace's saved cell specs, cells, test specs, tests and datasets (`ws.export`) and for a Zenodo deposit is valid RDF, typed against EMMO domain-battery and ready to query with SPARQL. What a record's IRI serves from the registry is not yet that model; the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) say what it serves instead.
 
 ## Table of contents
 

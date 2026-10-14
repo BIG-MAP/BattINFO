@@ -12,6 +12,7 @@ import json
 import re
 import shlex
 import sys
+import tomllib
 from pathlib import Path
 from types import ModuleType
 
@@ -69,6 +70,54 @@ def test_readme_promises_no_battery_pass_output() -> None:
         assert claim not in readme, f"the README still claims {claim!r} output"
     acknowledgements = readme.partition("## Acknowledgements")[2]
     assert "thebatterypass.eu" in acknowledgements, "the Battery Pass acknowledgement stays"
+
+
+def test_package_and_citation_keywords_leave_out_battery_pass() -> None:
+    """The keywords go into the wheel's metadata and, through CITATION.cff, into the Zenodo record."""
+    keywords = {
+        "pyproject.toml": tomllib.loads(_read("pyproject.toml"))["project"]["keywords"],
+        "CITATION.cff": yaml.safe_load(_read("CITATION.cff"))["keywords"],
+    }
+    for rel, words in keywords.items():
+        assert words, f"{rel} lists no keywords"
+        assert not [word for word in words if "battery pass" in word.lower()], f"{rel} still lists Battery Pass"
+
+
+# What the README says ws.export writes, mapped to the folder each record type is saved in.
+_README_EXPORT_WORDS = {
+    "cell specs": "cell-spec",
+    "cells": "cell-instance",
+    "test specs": "test-protocol",
+    "tests": "test",
+    "datasets": "dataset",
+}
+
+
+@pytest.mark.filterwarnings("ignore:semantic.value_text_only")
+def test_readme_names_the_record_types_ws_export_writes(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    from battinfo.entities import ENTITY_KINDS, kind_for_doc
+
+    records = tmp_path / ".battinfo" / "records"
+    for path in sorted((ROOT / "examples").rglob("*.json")):
+        record = json.loads(path.read_text(encoding="utf-8"))
+        kind = kind_for_doc(record)
+        if kind is None or (records / kind.subdir).exists():
+            continue
+        (records / kind.subdir).mkdir(parents=True)
+        (records / kind.subdir / path.name).write_text(json.dumps(record), encoding="utf-8")
+    assert len(list(records.iterdir())) == len(ENTITY_KINDS), "save one record of every kind"
+
+    written = battinfo.workspace(str(tmp_path)).export(output_dir=tmp_path / "rdf")
+    exported = {path.parent.name for path in written}
+    assert "WARNING" not in capsys.readouterr().out
+
+    line = next(ln for ln in _read("README.md").splitlines() if "(`ws.export`)" in ln)
+    claim = re.search(r"for a workspace's saved (.+?) \(`ws\.export`\)", line)
+    assert claim, f"say which records ws.export writes: {line}"
+    words = re.split(r", | and ", claim.group(1))
+    assert {_README_EXPORT_WORDS.get(word, word) for word in words} == exported, (
+        f"the README names {words}; ws.export writes the folders {sorted(exported)}"
+    )
 
 
 @pytest.mark.parametrize(
@@ -197,6 +246,29 @@ def test_contribution_template_gives_only_commands_that_exist() -> None:
 # ── Generated layer ───────────────────────────────────────────────────────────
 
 
+@pytest.mark.parametrize(
+    "rel",
+    [
+        "README.md",
+        "CONTRIBUTING.md",
+        "docs/how-battinfo-is-built.md",
+        "docs/python-api.md",
+        "docs/workspace-authoring.md",
+        "docs/pages/api-reference.rst",
+    ],
+)
+def test_docs_say_the_schema_is_the_contract_and_the_models_are_hand_written(rel: str) -> None:
+    """A page that calls bundle_generated.py generated, without more, invites a regeneration that loses hand edits."""
+    for paragraph in re.split(r"\n\s*\n", _read(rel)):
+        flat = " ".join(paragraph.split())
+        assert not re.search(r"(single|canonical) source of truth", flat, re.IGNORECASE), (
+            f"{rel}: the JSON Schema is the save-time contract and the models are the authoring surface: {flat[:200]}"
+        )
+        assert not re.search(r"pydantic models are generated", flat, re.IGNORECASE), f"{rel}: {flat[:200]}"
+        if re.search(r"\bgenerated\b", flat.replace("bundle_generated", "")) and "bundle_generated" in flat:
+            assert "by hand" in flat, f"{rel} says bundle_generated.py is generated but not that it is edited by hand"
+
+
 def test_makefile_leaves_bundle_generated_alone() -> None:
     assert "bundle_generated.py" not in _read("Makefile"), (
         "bundle_generated.py has been edited by hand since it was generated, and the locked linkml "
@@ -298,3 +370,20 @@ def test_colab_links_open_a_release_tag_with_an_install_cell(rel: str) -> None:
         notebook = json.loads(_read(pinned.group(1)))
         code = ["".join(cell["source"]) for cell in notebook["cells"] if cell["cell_type"] == "code"]
         assert any("pip install" in source for source in code), f"{pinned.group(1)} has no install cell for Colab"
+
+
+def test_getting_started_gives_the_lines_that_install_battinfo_in_a_notebook() -> None:
+    """The Tutorials known limitation sends hosted-notebook users there for a line that runs in a cell."""
+    lines = [line.strip() for line in _read("docs/pages/getting-started.rst").splitlines()]
+    shell = {line.split("#")[0].strip() for line in lines if line.startswith("pip install ")}
+    notebook = [line for line in lines if line.startswith("%pip install ")]
+    assert any("[processing]" in line for line in notebook), "tutorial 6 needs the processing extra"
+    assert any("[" not in line for line in notebook), "give the core line as well"
+    for line in notebook:
+        # The same requirement as a shell line on the page, so the stamp at the tag switches both to PyPI.
+        assert line.removeprefix("%") in shell, f"{line} installs something no shell line on the page installs"
+
+    scope = _read("docs/scope.md")
+    start = scope.index("\n### Tutorials")
+    entry = scope[start : scope.index("\n### ", start + 1)]
+    assert "%pip" in entry and "pages/getting-started.rst" in entry, entry
