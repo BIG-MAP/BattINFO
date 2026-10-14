@@ -302,7 +302,7 @@ Both are frozen from the `v0.8.0` tag of BattINFO, its first release on PyPI. Co
 
 The `v1` records context is append-only from the tag. It defines 705 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
 
-- A term in that file MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed. `scripts/gen_context.py` refuses to write such a change, and `tests/test_context_v1_freeze.py` fails on one. The pre-release corrections in that script (`PRE_RELEASE_CORRECTIONS`) can no longer change a frozen term.
+- A term that `v1` defines in a release MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed, and `v1` MUST NOT gain a JSON-LD keyword such as `@vocab`, which would change how every document expands. For the terms of 0.8.0, `scripts/gen_context.py` refuses to write such a change and `tests/test_context_v1_freeze.py` fails on one. For the terms of later releases, the same test compares `v1` with the copy at each release tag. `PRE_RELEASE_CORRECTIONS`, the table in that script that corrected terms before the tag, is closed and no longer applied.
 - A release MAY add terms. A release whose records use a new term ships only after the registry serves the context that defines it.
 - A term found to be wrong stays as it is. Where an emitter chooses the term, as for a class in `@type`, it can switch to a new, correct term; records published with the old one keep their old meaning. A record key whose expansion is wrong waits for a `v2` context at a new URL (`context/records/v2.json`).
 
@@ -311,6 +311,8 @@ The 0.8.0 schemas are frozen from the same tag. Each schema served under `https:
 - An edit that cannot change whether any document validates, to a `description`, `title`, `$comment` or `examples`, MAY be made in place.
 - Any other change, whether it tightens a rule, widens one or adds an optional property, MUST be published as a new schema at a new, versioned URL (`schema/.../v2/...`), while the old URL keeps serving the old content.
 - A schema for a new record type MAY be added at its own URL at any time.
+
+`tests/test_schema_freeze.py` compares each schema with its copy at every release tag from `v0.8.0` on, setting those four annotations aside.
 
 So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descriptions, but it cannot correct a `v1` term or change what a 0.8.0 schema accepts at its URL. How versioned schema URLs are laid out, and what a record's `schema_version` then says about the schemas it was written against, are to be defined in 0.9. Existing versioned URLs remain served and unchanged, so records that reference them keep resolving to the exact document they were written against.
 
@@ -366,7 +368,7 @@ These changes can make a record that validated before fail now:
 - An electrode's `tab` is checked (8 September, PR #388). In `electrode-spec.schema.json` and `modules/components/electrode.schema.json` it took any object; it now allows `material`, `manufacturer`, `supplier`, `product_id`, `comment` and the dimensions under `property` only.
 - The provenance block of electrode-spec and electrode records lost `comment`, `curated_by`, `file_hash` and `workflow_version` (8 September, PR #388), which it had accepted from 14 August.
 - `modules/components/specification.schema.json` requires `name` and `cell_format` instead of `format`, `positive_electrode_basis` and `negative_electrode_basis`, and its `id` must be a `spec/` IRI, no longer a `cell/` one (8 September, PR #388). `cell-spec.schema.json` uses only its `separator`, so cell-spec records are not affected; a document validated against the module as a whole may be.
-- Parameter sets lost `members` and `set_id` (11 October, PRs #421 and #436), which were served from 4 October. A parameter set is now either a claim batch (`claims` and exactly one target, as in August) or one parameter file (`parts`, `parameters_sha256` and exactly one cell link). For one day, from 11 to 12 October, `id` took only a `dataset/` IRI; it now takes a `dataset/` IRI, or a `spec/` IRI for a record minted before (section 6.3).
+- Parameter sets lost `members` and `set_id` (11 October, PRs #421 and #436), which were served from 4 October. A parameter set is now either a claim batch (`claims` and exactly one target, as in August) or one parameter file (`parts`, `parameters_sha256` and exactly one cell link).
 
 These changes only accept more, so a record that validated before still does:
 
@@ -374,6 +376,7 @@ These changes only accept more, so a record that validated before still does:
 - `material_spec_id` in the material-component, current-collector and electrolyte modules, and `electrode_spec_id` in the electrode module, take the superseded `material-spec/` and `electrode-spec/` IRIs as well as `spec/` (0.8.0).
 - A quantity that gives only `value_text` needs no unit (8 September), and an inline electrode may consist of its `electrode_spec_id` alone (14 August).
 - A cell spec's `reference_electrode` takes an inline electrode as well as a string, and a parameter set no longer needs `claims` (4 October).
+- A parameter set's `id` and `supersedes` take a `dataset/` IRI as well as a `spec/` one (12 October, PR #436). New parameter sets mint under `dataset/`, and a `spec/` IRI remains valid for a record minted before (section 6.3).
 - Enumerations gained values: the housing part type `vent` (31 July), the material classes `thickener` and `dispersant` (8 September), the test and test-protocol kinds `pitt` and `cyclic_voltammetry`, and the termination quantity `soc` (4 October).
 - Optional properties were added to most schemas, `license` and `handle` among them. A record written before uses none of them. The 0.8.0 changelog describes each.
 

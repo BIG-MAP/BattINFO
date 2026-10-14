@@ -15,7 +15,7 @@ It needs Python 3.11 to 3.14 and is tested on Linux and Windows. `pip install ba
 
 ### Highlights
 
-- **IRIs come from what a record is.** A record's IRI is hashed from its identity fields, so saving the same thing again, from any folder, gives the same IRI, and 0.8.0 settles those rules before the first public release. Free text in an identity is normalised (whitespace, Unicode NFC), a cell spec's chemistry enters as its vocabulary key, a test is one run of a cell, kind and protocol, and the batch path mints cells as the workspace does. An IRI a record already has is never minted again, and a later change to a seed keeps every IRI minted under the old one findable.
+- **IRIs come from what a record is.** A record's IRI is hashed from its identity fields, so saving the same thing again, from any folder, gives the same IRI, and 0.8.0 settles those rules before the first public release. Free text in an identity is normalised (whitespace, Unicode NFC), a cell spec's chemistry enters as its vocabulary key, a test is one run of a cell, kind and protocol, and the batch path mints a cell that has a serial number and no batch id as the workspace does. An IRI a record already has is never minted again, and a later change to a seed keeps every IRI minted under the old one findable.
 - **Publishing checks before it sends.** `ws.zenodo()` leaves a draft unless `publish=True`, and checks a draft's deposit graph, data files and SHACL shapes before anything reaches Zenodo. pyshacl is a core dependency, and the publisher policy fails closed when the shapes cannot run. A deposit keeps same-named files apart, states each file's checksum, keeps the sandbox and production apart and takes its creators from the workspace. `ws.submit()` sends records to the registry review queue, and reports an IRI that another publisher holds instead of retrying it.
 - **JSON-LD with defined classes and units.** `record_to_jsonld` checks every `@type` against the document's own context, for every record type. Numbers are typed `xsd:double` in documents that use the records context, percentages use the `PercentUnit` unit, specific and areal capacities, conductivities and pressures get EMMO unit IRIs, and the declared chemistry decides a cell's battery classes. The v1 records context was checked term by term against the pinned ontologies (domain-battery 0.21.0, domain-electrochemistry 0.39.0, EMMO 1.0.2) and corrected before release.
 - **The record contract is frozen.** From this release the v1 records context only grows: no term changes or disappears, which `scripts/gen_context.py` and a snapshot test enforce. A served schema changes in place only in its descriptions. What changed in place before the release is listed in [the erratum to section 11.1 of IDENTIFIER_POLICY.md](https://github.com/BIG-MAP/BattINFO/blob/v0.8.0/IDENTIFIER_POLICY.md#erratum-changes-made-in-place-before-080).
@@ -29,11 +29,12 @@ It needs Python 3.11 to 3.14 and is tested on Linux and Windows. `pip install ba
 ### Upgrading from 0.7.x
 
 - **Install from PyPI.** `pip install battinfo` on Python 3.11 to 3.14, with `battinfo[tabular]` for data files or `battinfo[processing]` to convert cycler files. pandas, pyarrow, openpyxl and rocrate moved out of the core into the `tabular` and `publish` extras, and pyshacl and PyYAML moved in.
-- **Use the new names.** The record classes are `CellSpec`, `Cell`, `TestSpec`, `Test` and `Dataset`, and they replace the `*Input` classes. `battinfo.Workspace` gives way to `battinfo.workspace()`, and names that left the top level import from their own module (`from battinfo.api import build_index`). The old names still import, with a `DeprecationWarning`, until 0.9.0.
+- **Use the new names.** The record classes are `CellSpec`, `Cell`, `TestSpec`, `Test` and `Dataset`. `CellSpecification` and `BatteryCellSpecification` are now `CellSpec`, `CellInstance` and `BatteryCell` are now `Cell`, `TestProtocol` is now `TestSpec`, and the five classes replace the `*Input` classes. `battinfo.Workspace` gives way to `battinfo.workspace()`, and names that left the top level import from their own module (`from battinfo.api import build_index`). The old names still import, with a `DeprecationWarning`, until 0.9.0.
 - **Save your records again.** Older keys such as `co_type` and `solvent_mixture` still load and are written in their new form. Text in a quantity's `value` moves to `value_text` when `ws.load()`, `ws.import_()` or an upsert reads it. Material, electrode and the other component specs mint under `spec/`, and the old `material-spec/` and `electrode-spec/` IRIs are still accepted as references. Strict validation now also refuses a unit in the wrong case where it changes the magnitude (`MV` for `mV`) and a current given in `C`, the C-rate.
 - **Pin the IRIs you have published.** Some identity seeds changed, as listed under the next heading. A cell spec or test already saved in the folder you save to keeps its IRI; anywhere else, pass the published IRI: `iris=[...]` on `ws.add("cell")`, `iri=` or `uid=` and `dataset_iris=[...]` on `ws.add("test")`, `id=` or `uid=` on the `create_*` builders, an `id` in a draft, or `--iris` on `battinfo batch init`.
 - **Read credentials through the workspace.** Opening a workspace no longer copies `.battinfo/credentials` into `os.environ`. Ask `ws.has_credential(...)` or `ws.credentials_status()`, and export the values yourself for code outside the workspace, such as `battinfo.registry.Registry()`.
 - **Publish single records with their own function.** `battinfo.publish()` takes a `CellSpec`. Save a `Cell`, `TestSpec`, `Test` or `Dataset` with `save_cell_instance`, `save_test_spec`, `save_test` or `save_dataset`, or through the workspace.
+- **Upload batches to the Zenodo sandbox, or publish through the workspace.** `battinfo batch upload` and `battinfo push` now upload to the Zenodo sandbox only, so they need `--sandbox` and a sandbox token. Publish to zenodo.org with `ws.zenodo()`; uploads to zenodo.org from the batch path return in 0.8.1.
 - **Get JSON-LD from `battinfo.record_to_jsonld`.** `battinfo.transform.to_jsonld` and `battinfo map` refuse the record types they never mapped, and `battinfo map` defaults to the `domain-battery` target now that the Battery Pass target is gone.
 
 ### Breaking and behaviour changes
@@ -59,7 +60,7 @@ It needs Python 3.11 to 3.14 and is tested on Linux and Windows. `pip install ba
 Each of these warns with a `DeprecationWarning` that names its replacement and says it is removed in 0.9.0.
 
 - **`battinfo.Workspace`.** Use `battinfo.workspace()`.
-- **The retired class names.** `CellSpecificationInput`, `CellInstanceInput`, `TestInput`, `DatasetInput`, `TestSpecInput` and `TestProtocolInput`, and the aliases `BatteryCell` and `TestProtocol`, resolve to `CellSpec`, `Cell`, `Test`, `Dataset` and `TestSpec`.
+- **The retired class names.** `CellSpecification`, `BatteryCellSpecification` and `CellSpecificationInput` resolve to `CellSpec`; `CellInstance`, `BatteryCell` and `CellInstanceInput` to `Cell`; `TestProtocol`, `TestSpecInput` and `TestProtocolInput` to `TestSpec`; `TestInput` to `Test`; and `DatasetInput` to `Dataset`.
 - **Names off the curated top level.** Functions and classes such as `battinfo.build_index`, `battinfo.load_publication`, `battinfo.ValidationReport`, `battinfo.SpecValue` and the per-family component builders still resolve at the top level; import them from the module the warning names.
 - **The keyword form `publish(cell_spec=..., cell_instance=..., test=..., dataset=...)`.** Call `battinfo.publish_publication_package(...)` instead.
 
@@ -1279,12 +1280,13 @@ Every change in this release is described in detail in the [changelog](https://g
   term here shadows the correct mapping).
 
 - **Regenerating `records.context.v1.json` only appends.** `gen_context.py`
-  merges every source with `setdefault` on top of what is already published, so
-  regenerating can add a term but can never rewrite one. That did not stop a hand
-  edit or an entry in `PRE_RELEASE_CORRECTIONS`, and terms were corrected in place
-  before 0.8.0, as [the erratum to section 11.1 of IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md#erratum-changes-made-in-place-before-080)
-  lists. From 0.8.0 `gen_context.py` and a snapshot test refuse any change to a
-  released term, and a new meaning needs a new term or a v2 context.
+  merges its source tables with `setdefault` on top of what is already published,
+  so a source table can add a term but cannot rewrite one. A hand edit of v1 could,
+  and so could `PRE_RELEASE_CORRECTIONS`, which every regeneration applied until
+  0.8.0; terms were corrected in place that way, as [the erratum to section 11.1 of IDENTIFIER_POLICY.md](IDENTIFIER_POLICY.md#erratum-changes-made-in-place-before-080)
+  lists. From 0.8.0 the table is closed and no longer applied, `gen_context.py` and
+  a snapshot test refuse any change to a released term, and a new meaning needs a
+  new term or a v2 context.
 
 - **The records-context freshness check is a hard CI gate**, alongside a new one
   for the hosted v1 context.

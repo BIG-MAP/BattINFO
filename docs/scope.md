@@ -117,20 +117,20 @@ These gaps were known when 0.8.0 was released. Each is planned for a 0.8.x relea
 
 ### Records and the Python API
 
-- A record model drops the fields it does not represent when it reads a record and writes it again (`from_record()`, then `to_record()`), such as a cell spec's `brand` and `battery_category`, and nothing warns. Edit such a record as JSON instead. Planned for 0.8.1.
-- A tuple, set, generator or NumPy array passed to a list field of a record model, such as `links`, `keywords`, `notes` or `creators`, becomes an empty list. Pass a list; a single string is kept. Planned for 0.8.1.
+- A record model drops the fields it does not represent when it reads a record and writes it again (`from_record()`, then `to_record()`), such as a cell spec's `brand` and `battery_category`, and nothing warns. Edit such a record as JSON instead. Planned for 0.8.1; only fields the model has no attribute for are lost, and only when the model writes the record back.
+- A tuple, set, generator or NumPy array passed to a list field of a record model, such as `links`, `keywords`, `notes` or `creators`, becomes an empty list. Pass a list; a single string is kept. Planned for 0.8.1; a list, the form the documentation uses, is kept as given.
 - `ws.convert()` skips a second input file whose output would have the same name as another's in the same run, links the wrong raw file to that output, and keeps a truncated output when run again. It prints a `skip (exists)` line for the second file; rename one of the two inputs. Planned for 0.8.1.
-- A cell spec with a `reference_electrode` and no `cell_configuration` is published as a `HalfCellDevice` with two reference electrodes. State `cell_configuration` (`full_cell`, `half_cell` or `three_electrode_cell`) to avoid it. Planned for 0.8.1.
-- `ws.import_()` leaves out a property that a deposit states as text only, with `hasStringValue` and no number. Planned for 0.8.1.
+- A cell spec with a `reference_electrode` and no `cell_configuration` is published as a `HalfCellDevice` with two reference electrodes. State `cell_configuration` (`full_cell`, `half_cell` or `three_electrode_cell`) to avoid it. Planned for 0.8.1; every place that infers a half cell does so only when `cell_configuration` is empty, so stating it is enough.
+- `ws.import_()` leaves out a property that a deposit states as text only, with `hasStringValue` and no number. Planned for 0.8.1; only the records rebuilt from a deposit lack the value, and the deposit itself keeps it.
 - `battinfo.interop.import_bmgen_jsonld` reads steps only from a flat `@graph`, which bmgen does not write, so a real bmgen file imports as a test spec with no steps. Planned for 0.8.1; the importers are in preview.
-- `load_publication_package()` recognises seven property classes and reads a cell spec's chemistry back as `unknown`.
+- `load_publication_package()` recognises seven property classes and reads a cell spec's chemistry back as `unknown`. Planned for 0.8.1; the package's JSON-LD keeps every value, and only the objects rebuilt from it lose them.
 - BattINFO writes its progress messages with `print()` rather than the `logging` module and raises built-in exception types, so a caller cannot silence its output through logging or catch its errors by one exception class. Both change in 0.9, since they touch every module.
 - `battinfo.bundle_generated`, the model layer generated from the LinkML schema, has been edited by hand since it was generated, and nothing regenerates it; the record models in `battinfo` are the authoring surface. 0.9 regenerates it or retires it.
 
 ### Vocabularies and classes
 
 - Material specs for sodium, sulfur, solid electrolytes such as LLZO and LPSCl, and other materials beyond Li-ion fail validation: `material_kinds.json` has no kind for them, and `semantic.material_kind_unknown` is an error under every policy. So Na-ion, Li-S and solid-state cells cannot be described down to their materials yet. Planned for 0.8.1, which adds the kinds the pinned ontologies already have classes for; the registry validates against the same vocabulary, so its copy is updated before that release.
-- `typical_energy` is typed `StoredEnergy`, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed `MetalOxideElectrode`, because its own class is deprecated upstream with no replacement. Both change once domain-electrochemistry publishes the classes.
+- `typical_energy` is typed `StoredEnergy`, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed `MetalOxideElectrode`, because its own class is deprecated upstream with no replacement. The electrode's `@type` can move to a new class term once domain-electrochemistry publishes the class. `typical_energy` keeps `StoredEnergy`, because the v1 records context is frozen, until a v2 context.
 - No property key holds a maximum C-rate. Give a current in A, or state a C-rate as `charging_c_rate` or `discharging_c_rate` in the conditions of the value it applies to.
 - In the JSON-LD of materials and components, which uses the EMMO domain-battery context, numbers carry no datatype, so JSON-LD processors disagree on whether 76.0 is an integer or a double. Records under the v1 records context type them `xsd:double`.
 
