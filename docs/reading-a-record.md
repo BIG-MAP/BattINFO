@@ -47,7 +47,9 @@ Every quantity (capacity, voltage, …) uses **one** EMMO encoding in this graph
                   "hasMeasurementUnit": { "@id": "emmo:Volt" } }]
 ```
 
-Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`, `W/L`) use QUDT.
+Every unit IRI is an EMMO or domain-electrochemistry class from the pinned closure, compound units such as `W/kg` included. A unit with no IRI in the unit map is kept as text in `schema:unitText`.
+
+The records contexts type `hasNumberValue` as `xsd:double`, so it only ever holds a number. A `value` written as a string that is not a number, such as `"about 500"`, is published as text in `hasStringValue`, as `value_text` is; when the quantity has a `value_text` as well, only the `value_text` is published. A quantity given as a range keeps both bounds on the same node, as `schema:minValue` and `schema:maxValue`. Where the class names a bound, such as `MaximumPulseChargingCurrent`, a bound given alone is also the `hasNumberValue`. Every percent spelling is the unit `PercentUnit`; `wt%` and `vol%` add `WeightPercent` or `VolumePercent` as an extra class of the node, and a porosity or a mass or volume fraction is a fraction of 1 with `UnitOne`.
 
 A unit with no IRI in the unit map, such as `years` for a calendar life, is written as text only, as `schema:unitText` with no `hasMeasurementUnit`. Validation warns `semantic.unit_unmapped` when this happens in a record's `properties` or in the `property` map of a material, material-spec, electrode or electrode-spec record. Units elsewhere, such as those of test conditions, `conditions` maps and the components of a cell spec, are not checked for an IRI.
 
@@ -86,6 +88,8 @@ deviations), the catalog's creators/publisher/keywords/version, the structured t
 conditions, and test spec records (a test keeps its protocol name, not its link to the spec). Treat `battinfo.bundle.json` (the `ZenodoCellRecord`) as the lossless
 round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap is a
 tracked enhancement.)
+
+A cell spec's format, chemistry, IEC code and cell configuration come back from the classes of its described battery, and its electrode bases from the classes of its electrode nodes. The chemistry is the first class the chemistry vocabulary names, which is the declared chemistry's. A deposit written before 0.8.0 also carries classes its electrode bases added whatever the chemistry, such as `LithiumManganeseDioxideBattery` on an alkaline cell, and those are not read as its chemistry. A specific NMC grade comes back as `nmc`, since all grades share one electrode class. A property's bounds come back as `min_value` and `max_value`, and a percent unit as `wt%` or `vol%` when its node carries `WeightPercent` or `VolumePercent`. A chemistry written as free text names no class, so it cannot come back: when the class read in its place contradicts the negative electrode, the import prints a warning and the strict save refuses the record until the chemistry is set.
 
 A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.
 

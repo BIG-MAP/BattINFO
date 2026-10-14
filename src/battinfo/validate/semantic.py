@@ -732,6 +732,40 @@ def _validate_controlled_values(
             )
 
 
+def _validate_chemistry_electrode_agreement(
+    doc: dict[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    issue_severity: str,
+) -> None:
+    """A cell spec's negative electrode basis must agree with its chemistry.
+
+    The rule reads what the record states, not the classes it emits: the
+    chemistry decides the battery classes, so the emitted stack of a li-ion cell
+    with a lithium-metal negative looks valid while the record contradicts
+    itself. A couple defined by its negative electrode (lithium metal for
+    li-metal and the couples under it, zinc for the zinc couples) must have
+    that electrode, and such an electrode makes a full cell one of those
+    couples. Lithium as the counter electrode of a half cell or a
+    three-electrode cell is no contradiction. The policy's hard severity: an
+    error under strict and publisher, a warning otherwise.
+    """
+    product = doc.get("cell_spec")
+    if not isinstance(product, Mapping):
+        return
+    from battinfo.transform.json_to_jsonld import chemistry_electrode_conflicts  # noqa: PLC0415
+
+    for message in chemistry_electrode_conflicts(product):
+        _append_issue(
+            issues,
+            code="semantic.chemistry_electrode_conflict",
+            severity=issue_severity,
+            path="cell_spec.negative_electrode_basis",
+            message=message,
+            resource_type=resource_type,
+        )
+
+
 # Electrode holders on a cell-spec, by family. The polarity holders describe a
 # full cell; the role holders describe a cell that has no polarity to assign.
 _POLARITY_ELECTRODE_FIELDS = ("positive_electrode", "negative_electrode")
@@ -1101,9 +1135,9 @@ def _validate_property_mappability(
         if class_iri is None:
             from battinfo.transform.json_to_jsonld import _property_type_term
 
-            candidate = _property_type_term(str(key))
-            if candidate:
-                outcome = f"the JSON-LD export types it with the unreviewed candidate class '{candidate}'."
+            hand_kept = _property_type_term(str(key))
+            if hand_kept:
+                outcome = f"the JSON-LD export types it with the hand-kept class '{hand_kept}'."
             else:
                 outcome = (
                     "the JSON-LD export gives it no quantity class, only its "
@@ -1345,6 +1379,84 @@ def _validate_test_semantics(
         )
 
 
+# Kelvin spellings, compared without case ('K', 'Kelvin', 'KEL'); "kel" is the
+# UN/CEFACT code.
+_KELVIN_UNITS = frozenset({"k", "kelvin", "kel"})
+
+
+def _validate_ambient_temperature_unit(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn when an ambient temperature is given in kelvin.
+
+    The records context types ``ambient_temperature`` as AmbientCelsiusTemperature,
+    so a value in kelvin would be published as a Celsius temperature. A test
+    protocol plans its conditions at the top level, a test records them as run.
+    """
+    test = doc.get("test")
+    holders = [("conditions", doc.get("conditions"))]
+    if isinstance(test, Mapping):
+        holders.append(("test.conditions", test.get("conditions")))
+    for prefix, conditions in holders:
+        quantity = conditions.get("ambient_temperature") if isinstance(conditions, Mapping) else None
+        unit = _unit_token(quantity) if isinstance(quantity, Mapping) else None
+        if unit is None or unit.casefold() not in _KELVIN_UNITS:
+            continue
+        _append_issue(
+            issues,
+            code="semantic.ambient_temperature_kelvin",
+            severity="warning",
+            path=f"{prefix}.ambient_temperature",
+            message=(
+                "ambient_temperature is given in kelvin, but the records context types it as "
+                "AmbientCelsiusTemperature, a Celsius temperature. Give the value in degC."
+            ),
+            resource_type=resource_type,
+        )
+
+
+def _validate_method_step_classes(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a test-protocol step will be emitted without a class.
+
+    EMMO has no class for some steps: a constant-resistance charge, and a cr or
+    cccv step with no charge or discharge direction. The JSON-LD export keeps
+    such a step with its parameters and its mode as a label, but gives it no
+    ``@type``, as it does for a property key with no mapped class
+    (``semantic.property_unmapped``). Steps inside a repeated group are checked
+    too.
+    """
+    from battinfo.jsonld import unmapped_step_reason
+
+    def walk(steps: Any, prefix: str) -> None:
+        if not isinstance(steps, list):
+            return
+        for idx, step in enumerate(steps):
+            if not isinstance(step, Mapping):
+                continue
+            path = f"{prefix}[{idx}]"
+            if step.get("mode") == "group":
+                walk(step.get("steps"), f"{path}.steps")
+                continue
+            reason = unmapped_step_reason(step)
+            if reason:
+                _append_issue(
+                    issues,
+                    code="semantic.method_step_unmapped",
+                    severity="warning",
+                    path=path,
+                    message=reason,
+                    resource_type=resource_type,
+                )
+
+    walk(doc.get("method"), "method")
+
+
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
 # The Unix times a date can be made of: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z.
@@ -1447,6 +1559,41 @@ def _walk_non_finite(
     elif isinstance(value, (list, tuple)):
         for index, sub in enumerate(value):
             _walk_non_finite(sub, f"{path}[{index}]", issues, resource_type)
+
+
+def _walk_percent_basis(
+    value: Any,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a fraction's percent unit states the other basis.
+
+    ``mass_fraction`` is by mass, ``volume_fraction`` and ``porosity`` by
+    volume, wherever they sit in the record. ``vol%`` on a mass fraction or
+    ``wt%`` on a volume fraction contradicts the key; the JSON-LD export
+    publishes the value on [0, 1] and drops the stated basis. A warning under
+    every policy, from the same check the emitter warns with.
+    """
+    from battinfo.transform.json_to_jsonld import percent_basis_conflict  # noqa: PLC0415
+
+    if isinstance(value, Mapping):
+        for key, sub in value.items():
+            sub_path = f"{path}.{key}" if path else str(key)
+            problem = percent_basis_conflict(str(key), sub)
+            if problem:
+                _append_issue(
+                    issues,
+                    code="semantic.percent_basis_mismatch",
+                    severity="warning",
+                    path=sub_path,
+                    message=problem,
+                    resource_type=resource_type,
+                )
+            _walk_percent_basis(sub, sub_path, issues, resource_type)
+    elif isinstance(value, (list, tuple)):
+        for index, sub in enumerate(value):
+            _walk_percent_basis(sub, f"{path}[{index}]", issues, resource_type)
 
 
 def _validate_substance_resolution(
@@ -1749,6 +1896,7 @@ def validate_semantic_report(
     _validate_schema_version(doc, issues)
     _validate_handle_kind_word(doc, issues)
     _validate_controlled_values(doc, issues, resource_type)
+    _validate_chemistry_electrode_agreement(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_role_coherence(doc, issues, resource_type)
     _validate_material_kind(doc, issues, resource_type, hard_issue_severity)
     _validate_electrode_kind(doc, issues, resource_type, hard_issue_severity)
@@ -1759,6 +1907,7 @@ def validate_semantic_report(
     # flat specs.
     _walk_non_finite(doc, "", issues, resource_type)
     _walk_epoch_plausibility(doc, "", issues, resource_type, hard_issue_severity)
+    _walk_percent_basis(doc, "", issues, resource_type)
 
     specs = doc.get("properties")
     if isinstance(specs, Mapping):
@@ -1850,6 +1999,8 @@ def validate_semantic_report(
     test = doc.get("test")
     if isinstance(test, Mapping):
         _validate_test_semantics(test, issues, resource_type, hard_issue_severity)
+    _validate_ambient_temperature_unit(doc, issues, resource_type)
+    _validate_method_step_classes(doc, issues, resource_type)
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 

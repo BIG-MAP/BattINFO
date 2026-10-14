@@ -40,7 +40,7 @@ classes:
 slots:
 
   ts_id:
-    slot_uri: schema:productID
+    slot_uri: schema:identifier
     identifier: true
     range: SpecIri
     description: Canonical IRI for this test specification.

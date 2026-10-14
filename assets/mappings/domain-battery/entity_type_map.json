@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0",
+  "version": "0.7.0",
   "status": "curated",
   "source_ontology": "https://w3id.org/emmo/domain/battery/inferred",
   "notes": [
@@ -9,7 +9,8 @@
     "0.3.0: added zn-mno2/alkaline chemistry entries and iec_code section.",
     "0.4.0: added the cell_configuration section. A battery half-cell types as the DEVICE classes BatteryHalfCell (domain-battery, a BatteryCell) and HalfCellDevice (domain-electrochemistry) - never as ElectrochemicalHalfCell, which upstream annotates with an explicit warning against that conflation (it is one electrode plus one electrolyte, not an experimental setup).",
     "0.4.1: cell_configuration gained the three-electrode-cell key, the normalized form of the cell-spec schema's three_electrode_cell enum value; three-electrode stays as the tolerant-import spelling.",
-    "0.6.0: chemistry became a two-level vocabulary of electrochemical couples. An entry may name a 'broader' value (li-mno2 is a li-metal system; leclanche is a zinc-carbon system, which is a zn-mno2 system); a record stating the narrower value is also a member of the broader one. Rechargeability stays in the cell-spec 'rechargeable' field and electrode pairing in the electrode basis fields. Entries with 'alias_of' are older spellings that keep resolving but are never recommended. Corrections: zn-mno2 mapped to the alkaline class, which is one of its three variants, and now maps to ZincBattery because domain-battery 0.20.2 has no neutral zinc manganese dioxide class (ZincCarbonBattery is published as the parent of the alkaline class); zinc-carbon mapped to AlkalineCell and now maps to ZincCarbonBattery."
+    "0.6.0: chemistry became a two-level vocabulary of electrochemical couples. An entry may name a 'broader' value (li-mno2 is a li-metal system; leclanche is a zinc-carbon system, which is a zn-mno2 system); a record stating the narrower value is also a member of the broader one. Rechargeability stays in the cell-spec 'rechargeable' field and electrode pairing in the electrode basis fields. Entries with 'alias_of' are older spellings that keep resolving but are never recommended. Corrections: zn-mno2 mapped to the alkaline class, which is one of its three variants, and now maps to ZincBattery because domain-battery 0.20.2 has no neutral zinc manganese dioxide class (ZincCarbonBattery is published as the parent of the alkaline class); zinc-carbon mapped to AlkalineCell and now maps to ZincCarbonBattery.",
+    "0.7.0: the declared chemistry decides the battery classes. An electrode basis entry names in 'battery_types_chemistry' the chemistry label its battery_types belong to, and adds them only when the cell's chemistry is that label, one broader than it or one narrower than it: graphite, LTO and the lithium-ion positives add their classes to li-ion cells, a lithium negative adds LithiumMetalBattery to li-metal and the couples under it, and MnO2 adds LithiumManganeseDioxideBattery to li-mno2 and li-metal. A chemistry outside the vocabulary declares no class, so the electrode bases add none. Before 0.7.0 every basis added its classes whatever the chemistry, so a zinc cell with an MnO2 positive was typed as a lithium battery. A chemistry entry may name the 'negative_electrode_basis' its couple always has (lithium for li-metal, zinc for the zinc couples); narrower labels inherit it. Validation reports a negative electrode basis that contradicts it, and a lithium or zinc negative electrode under a chemistry that does not name it, unless the cell is a half cell or a three-electrode cell. Name one only for a negative electrode no other couple uses. 'former_node_types' lists electrode classes an entry used to emit, so deposits written with them import to the same basis."
   ],
   "mappings": {
     "format": {
@@ -78,7 +79,8 @@
       "li-metal": {
         "battery_types": [
           "LithiumMetalBattery"
-        ]
+        ],
+        "negative_electrode_basis": "lithium"
       },
       "li-mno2": {
         "battery_types": [
@@ -145,7 +147,8 @@
       "zn-mno2": {
         "battery_types": [
           "ZincBattery"
-        ]
+        ],
+        "negative_electrode_basis": "zinc"
       },
       "alkaline-zn-mno2": {
         "battery_types": [
@@ -174,12 +177,14 @@
       "zn-air": {
         "battery_types": [
           "ZincAirBattery"
-        ]
+        ],
+        "negative_electrode_basis": "zinc"
       },
       "zn-hgo": {
         "battery_types": [
           "MercuryBattery"
-        ]
+        ],
+        "negative_electrode_basis": "zinc"
       },
       "ni-mh": {
         "battery_types": [
@@ -199,7 +204,8 @@
       "ni-zn": {
         "battery_types": [
           "NickelZincBattery"
-        ]
+        ],
+        "negative_electrode_basis": "zinc"
       },
       "lead-acid": {
         "battery_types": [
@@ -239,7 +245,8 @@
       "zn-br-flow": {
         "battery_types": [
           "ZincBromineFlowBattery"
-        ]
+        ],
+        "negative_electrode_basis": "zinc"
       },
       "fe-flow": {
         "battery_types": [
@@ -337,88 +344,103 @@
         "node_type": "LithiumIronPhosphateElectrode",
         "battery_types": [
           "LithiumIonIronPhosphateBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmc": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nca": {
         "relation": "hasPositiveElectrode",
         "battery_types": [
           "LithiumIonNickelCobaltAluminiumOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "lco": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "mno2": {
         "relation": "hasPositiveElectrode",
         "node_type": "ManganeseDioxideElectrode",
         "battery_types": [
           "LithiumManganeseDioxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-mno2"
       },
       "lmfp": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumManganeseIronPhosphateElectrode",
         "battery_types": [
           "LithiumIonManganeseIronPhosphateBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "lmo": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumManganeseOxideElectrode",
         "battery_types": [
           "LithiumIonManganeseOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmc811": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmca": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmc111": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmc532": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "nmc622": {
         "relation": "hasPositiveElectrode",
         "node_type": "LithiumNickelManganeseCobaltOxideElectrode",
         "battery_types": [
           "LithiumIonNickelManganeseCobaltOxideBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "lnmo": {
         "relation": "hasPositiveElectrode",
-        "node_type": "LithiumNickelManganeseOxideElectrode",
-        "battery_types": []
+        "node_type": "MetalOxideElectrode",
+        "battery_types": [],
+        "former_node_types": [
+          "LithiumNickelManganeseOxideElectrode"
+        ]
       }
     },
     "negative_electrode_basis": {
@@ -427,7 +449,8 @@
         "node_type": "GraphiteElectrode",
         "battery_types": [
           "LithiumIonGraphiteBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "silicon-graphite": {
         "relation": "hasNegativeElectrode",
@@ -454,28 +477,32 @@
         "node_type": "LithiumElectrode",
         "battery_types": [
           "LithiumMetalBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-metal"
       },
       "lithium-metal": {
         "relation": "hasNegativeElectrode",
         "node_type": "LithiumElectrode",
         "battery_types": [
           "LithiumMetalBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-metal"
       },
       "lto": {
         "relation": "hasNegativeElectrode",
         "node_type": "LithiumTitanateElectrode",
         "battery_types": [
           "LithiumIonTitanateBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-ion"
       },
       "li-metal": {
         "relation": "hasNegativeElectrode",
         "node_type": "LithiumElectrode",
         "battery_types": [
           "LithiumMetalBattery"
-        ]
+        ],
+        "battery_types_chemistry": "li-metal"
       },
       "zinc": {
         "relation": "hasNegativeElectrode",

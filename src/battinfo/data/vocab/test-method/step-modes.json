@@ -1,61 +1,68 @@
 {
-  "$comment": "Controlled vocabulary mapping a descriptive method step (mode + direction) to the EMMO domain-electrochemistry process class used as the step's JSON-LD @type. prefLabels are resolved against the remote EMMO battery @context (https://w3id.org/emmo/domain/battery/context); no compact IRI is hand-maintained here. Entries marked best_effort have not yet been verified against the published ontology and should be confirmed before relied upon downstream.",
-  "version": "1.0.0",
+  "$comment": "Controlled vocabulary mapping a descriptive method step (mode + direction) to the EMMO process class used as the step's JSON-LD @type. A step takes the entry for its direction; a step with no direction, or with one its mode does not list, takes the 'none' entry. Every emmo_class resolves in the v1 records context and in the bundled EMMO context (tests/test_mapping_governance.py). Where EMMO has no class for a step, the entry names a published parent (a constant-resistance discharge is a Discharging) or none at all (emmo_class null), and missing_class names the class that is asked for upstream in docs/internal/ontology-additions-needed.md. A step with no class is emitted without a @type, labelled with its mode and direction, and validation warns semantic.method_step_unmapped.",
+  "version": "1.1.0",
   "modes": {
     "cc": {
       "label": "constant current",
       "directions": {
         "charge":    {"emmo_class": "ConstantCurrentCharging"},
-        "discharge": {"emmo_class": "ConstantCurrentDischarging"}
+        "discharge": {"emmo_class": "ConstantCurrentDischarging"},
+        "none":      {"emmo_class": "CurrentControlledProcess"}
       }
     },
     "cv": {
       "label": "constant voltage (hold)",
       "directions": {
-        "hold":      {"emmo_class": "VoltageHold"}
+        "charge":    {"emmo_class": "ConstantVoltageCharging"},
+        "discharge": {"emmo_class": "ConstantVoltageDischarging"},
+        "hold":      {"emmo_class": "VoltageHold"},
+        "none":      {"emmo_class": "VoltageHold"}
       }
     },
     "cccv": {
       "label": "constant current, constant voltage",
       "directions": {
         "charge":    {"emmo_class": "ConstantCurrentConstantVoltageCharging"},
-        "discharge": {"emmo_class": "ConstantCurrentConstantVoltageDischarging"}
+        "discharge": {"emmo_class": "Discharging", "missing_class": "ConstantCurrentConstantVoltageDischarging"},
+        "none":      {"emmo_class": null, "note": "A CC-CV step charges or discharges; with no direction no published class fits."}
       }
     },
     "cp": {
       "label": "constant power",
-      "best_effort": true,
       "directions": {
         "charge":    {"emmo_class": "ConstantPowerCharging"},
-        "discharge": {"emmo_class": "ConstantPowerDischarging"}
+        "discharge": {"emmo_class": "ConstantPowerDischarging"},
+        "none":      {"emmo_class": "PowerControlledProcess"}
       }
     },
     "cr": {
       "label": "constant resistance",
-      "best_effort": true,
       "directions": {
-        "charge":    {"emmo_class": "ConstantResistanceCharging"},
-        "discharge": {"emmo_class": "ConstantResistanceDischarging"}
+        "charge":    {"emmo_class": null, "missing_class": "ConstantResistanceCharging"},
+        "discharge": {"emmo_class": "Discharging", "missing_class": "ConstantResistanceDischarging"},
+        "none":      {"emmo_class": null, "missing_class": "ResistanceControlledProcess"}
       }
     },
     "rest": {
       "label": "rest / open-circuit hold",
       "directions": {
-        "rest":      {"emmo_class": "OpenCircuitHold"}
+        "rest":      {"emmo_class": "OpenCircuitHold"},
+        "none":      {"emmo_class": "OpenCircuitHold"}
       }
     },
     "eis": {
       "label": "electrochemical impedance spectroscopy",
       "directions": {
-        "hold":      {"emmo_class": "ElectrochemicalImpedanceSpectroscopy"}
+        "hold":      {"emmo_class": "ElectrochemicalImpedanceSpectroscopy"},
+        "none":      {"emmo_class": "ElectrochemicalImpedanceSpectroscopy"}
       }
     },
     "scan": {
       "label": "voltage scan / linear sweep voltammetry",
-      "best_effort": true,
       "directions": {
         "charge":    {"emmo_class": "LinearScanVoltammetry"},
-        "discharge": {"emmo_class": "LinearScanVoltammetry"}
+        "discharge": {"emmo_class": "LinearScanVoltammetry"},
+        "none":      {"emmo_class": "LinearScanVoltammetry"}
       }
     },
     "group": {

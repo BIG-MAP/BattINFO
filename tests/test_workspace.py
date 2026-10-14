@@ -652,8 +652,8 @@ def test_workspace_publish_stages_file_backed_dataset(tmp_path: Path) -> None:
         for entry in cell_spec_node.get("isDescriptionFor", {}).get("hasProperty", [])
         if isinstance(entry, dict)
     }
-    # rated_energy maps to NominalEnergy (no distinct RatedEnergy class in EMMO).
-    assert "NominalEnergy" in property_types
+    # rated_energy types as RatedEnergy (domain-electrochemistry 0.39.0), not NominalEnergy.
+    assert "RatedEnergy" in property_types
     assert ro_crate_payload["@graph"][0]["@id"] == "ro-crate-metadata.json"
     assert datacite_payload["types"]["resourceTypeGeneral"] == "Dataset"
     assert datacite_payload["titles"][0]["title"] == "Energizer CR2032 capacity dataset"

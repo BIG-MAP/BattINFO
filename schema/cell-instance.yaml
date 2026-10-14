@@ -37,7 +37,7 @@ classes:
 slots:
 
   ci_id:
-    slot_uri: schema:productID
+    slot_uri: schema:identifier
     identifier: true
     required: true
     range: CellIri

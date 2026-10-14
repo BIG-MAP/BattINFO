@@ -472,7 +472,7 @@ class CellSpecification(ConfiguredBaseModel):
     id: str = Field(
         default=...,
         description="""Canonical IRI for this cell-spec record.""",
-        json_schema_extra={"linkml_meta": {"domain_of": ["CellSpecification"], "slot_uri": "schema:productID"}},
+        json_schema_extra={"linkml_meta": {"domain_of": ["CellSpecification"], "slot_uri": "schema:identifier"}},
     )
     ct_name: Optional[str] = Field(
         default=None,
@@ -799,7 +799,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Nominal continuous charging current [A]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_39d8a6ee_cd55_4855_8b5b_d42bef95ac78",
+                "slot_uri": "electrochemistry:electrochemistry_79551e01_4bc6_4292_916e_08fe28a84600",
             }
         },
     )
@@ -832,7 +832,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Nominal continuous discharging current [A]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_ba7ac581_0e13_4815_b888_013c378932f5",
+                "slot_uri": "electrochemistry:electrochemistry_e4d666ee_d637_45cd_a904_dc33941ead4f",
             }
         },
     )
@@ -887,7 +887,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Typical energy [Wh]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+                "slot_uri": "electrochemistry:electrochemistry_46376e5d_9627_4514_9881_9e62083625c3",
             }
         },
     )
@@ -898,7 +898,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Rated energy [Wh]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+                "slot_uri": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
             }
         },
     )
@@ -909,7 +909,7 @@ class SpecSet(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["Certified usable energy [Wh]"],
                 "domain_of": ["SpecSet"],
-                "slot_uri": "electrochemistry:electrochemistry_19e27aa3_0970_43a6_86d3_e3cdd956134d",
+                "slot_uri": "electrochemistry:electrochemistry_da215d1a_196a_465f_9de8_89f6fbb76982",
             }
         },
     )
@@ -1357,7 +1357,7 @@ class CellInstance(ConfiguredBaseModel):
         default=...,
         description="""Canonical IRI for this cell instance.""",
         json_schema_extra={
-            "linkml_meta": {"aliases": ["id"], "domain_of": ["CellInstance"], "slot_uri": "schema:productID"}
+            "linkml_meta": {"aliases": ["id"], "domain_of": ["CellInstance"], "slot_uri": "schema:identifier"}
         },
     )
     ci_type_id: str = Field(
@@ -1480,7 +1480,7 @@ class TestSpec(ConfiguredBaseModel):
         default=...,
         description="""Canonical IRI for this test specification.""",
         json_schema_extra={
-            "linkml_meta": {"aliases": ["id"], "domain_of": ["TestSpec"], "slot_uri": "schema:productID"}
+            "linkml_meta": {"aliases": ["id"], "domain_of": ["TestSpec"], "slot_uri": "schema:identifier"}
         },
     )
     ts_name: str = Field(
@@ -1591,7 +1591,7 @@ class Test(ConfiguredBaseModel):
     t_id: str = Field(
         default=...,
         description="""Canonical IRI for this test execution.""",
-        json_schema_extra={"linkml_meta": {"aliases": ["id"], "domain_of": ["Test"], "slot_uri": "schema:productID"}},
+        json_schema_extra={"linkml_meta": {"aliases": ["id"], "domain_of": ["Test"], "slot_uri": "schema:identifier"}},
     )
     t_name: str = Field(
         default=...,
@@ -1612,7 +1612,7 @@ class Test(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["cell_id"],
                 "domain_of": ["Test"],
-                "slot_uri": "battery:battery_da3b3f28_aaad_4d67_b674_df47e109fb8b",
+                "slot_uri": "electrochemistry:electrochemistry_5998f7c1_d8e3_4c55_8170_c358e1b0c93c",
             }
         },
     )
@@ -1649,7 +1649,7 @@ class Test(ConfiguredBaseModel):
             "linkml_meta": {
                 "aliases": ["instrument"],
                 "domain_of": ["Test"],
-                "slot_uri": "battery:battery_df4ff8f1_2cf2_444a_9498_23f533bd295c",
+                "slot_uri": "electrochemistry:electrochemistry_52702560_2034_4369_ab7f_28e8bb32680c",
             }
         },
     )
