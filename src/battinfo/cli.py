@@ -970,11 +970,25 @@ def notebook_recover(
 @app.command()
 def map(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    target: str = typer.Option("batterypass", help="Mapping target ('domain-battery' or 'batterypass')."),
+    target: str = typer.Option(
+        "domain-battery", help="Mapping target: 'domain-battery', or 'converter-compatible' for a cell descriptor."
+    ),
     out: Path = typer.Option(..., help="Output JSON-LD path."),
 ) -> None:
-    """Map canonical JSON to JSON-LD for a target."""
-    data = json.loads(input_path.read_text(encoding="utf-8"))
+    """Map a record to JSON-LD.
+
+    Maps cell-spec, material, electrode, separator, current-collector,
+    electrolyte, housing and parameter-set records. Other record types exit
+    with an error; emit them in Python with battinfo.record_to_jsonld.
+    """
+    try:
+        data = json.loads(input_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        typer.echo(f"{input_path} is not valid JSON: {exc}")
+        raise typer.Exit(code=2) from exc
+    if not isinstance(data, dict):
+        typer.echo(f"{input_path} does not hold a JSON object.")
+        raise typer.Exit(code=2)
     try:
         mapped = run_mapping(data, target=target)
     except ValueError as exc:

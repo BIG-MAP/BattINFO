@@ -16,7 +16,7 @@ $ battinfo [OPTIONS] COMMAND [ARGS]...
 
 * `validate`: Validate a BattINFO record (JSON Schema +...
 * `init`: Create a minimal workspace scaffold with...
-* `map`: Map canonical JSON to JSON-LD for a target.
+* `map`: Map a record to JSON-LD.
 * `push`: Publish battery data to Zenodo in one...
 * `import-protocol`: One-liner protocol import: executable file...
 * `query`: Query BattINFO resources.
@@ -81,7 +81,11 @@ $ battinfo init [OPTIONS] {workspace_dir}
 
 ## `battinfo map`
 
-Map canonical JSON to JSON-LD for a target.
+Map a record to JSON-LD.
+
+Maps cell-spec, material, electrode, separator, current-collector,
+electrolyte, housing and parameter-set records. Other record types exit
+with an error; emit them in Python with battinfo.record_to_jsonld.
 
 **Usage**:
 
@@ -95,7 +99,7 @@ $ battinfo map [OPTIONS] {input_path}
 
 **Options**:
 
-* `--target <str>`: Mapping target (&#x27;domain-battery&#x27; or &#x27;batterypass&#x27;).  [default: batterypass]
+* `--target <str>`: Mapping target: &#x27;domain-battery&#x27;, or &#x27;converter-compatible&#x27; for a cell descriptor.  [default: domain-battery]
 * `--out <path>`: Output JSON-LD path.  [required]
 * `--help`: Show this message and exit.
 

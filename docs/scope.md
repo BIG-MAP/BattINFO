@@ -64,6 +64,7 @@ Present but with no stability promise:
 - datasheet tooling under `.tools/datasheets/`, which is maintainer-only and has no public contract
 - semantic mapping candidate generation and review (`.tools/semantic/`)
 - reference validation for corpora larger than a repository-scale source tree
+- a Battery Pass crosswalk, from cell records to the Battery Pass Data Model. 0.8.0 has none: the draft `batterypass` mapping target and validation profile are removed, and the draft profile schema stays at its URL, marked withdrawn
 
 ## Known limitations in 0.8.0
 

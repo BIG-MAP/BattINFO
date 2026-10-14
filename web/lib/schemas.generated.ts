@@ -26,7 +26,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "profile": {
           "type": "string",
-          "description": "Name of the validation profile the document targets (e.g. 'batterypass')."
+          "description": "Name of the validation profile the document targets, for example 'base'."
         },
         "record": {
           "$ref": "#/$defs/Record",
@@ -10386,7 +10386,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://w3id.org/battinfo/schema/profiles/batterypass.schema.json",
       "title": "BattINFO Battery Pass Profile",
-      "description": "First-draft profile for mapping BattINFO canonical JSON to Battery Pass JSON-LD (pinned to v1.2.0).",
+      "description": "Withdrawn in BattINFO 0.8.0, which neither validates against this first-draft Battery Pass profile (pinned to v1.2.0) nor writes Battery Pass JSON-LD. Kept at this URL so that references to it still resolve.",
       "allOf": [
         {
           "$ref": "../battinfo.base.schema.json"
@@ -10437,7 +10437,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           ]
         }
       ],
-      "$comment": "This first draft captures BattINFO-side required fields for Battery Pass mapping and will be tightened as mapping coverage expands."
+      "$comment": "This first draft listed the BattINFO-side fields a Battery Pass mapping would need. It is withdrawn and will not be tightened."
     }
   },
   {
