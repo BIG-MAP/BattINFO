@@ -9,6 +9,7 @@ physically distinct records must never silently dedup.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -100,6 +101,18 @@ def test_explicit_uid_still_wins(tmp_path: Path) -> None:
 
 
 CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
+
+
+def _spec_in_the_local_library(folder: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Save the cell spec in ``<folder>/.battinfo/library/cell-spec`` and work from *folder*.
+
+    The batch path reads its cell spec from the packaged library or the local one.
+    """
+    library = folder / ".battinfo" / "library" / "cell-spec"
+    library.mkdir(parents=True)
+    record = {"specification": {"id": CELL_SPEC_IRI, **SPEC_FIELDS}}
+    (library / "spec.json").write_text(json.dumps(record), encoding="utf-8")
+    monkeypatch.chdir(folder)
 
 
 def test_cell_seed_takes_the_serial_before_the_name() -> None:
@@ -328,7 +341,7 @@ def _publication_cell_iri(root: Path, **fields: str) -> str:
 
 
 @pytest.mark.parametrize("case", sorted(CELL_IDENTITIES))
-def test_every_path_mints_one_cell_iri(case: str, tmp_path: Path) -> None:
+def test_every_path_mints_one_cell_iri(case: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import battinfo
     from battinfo.bundle import CellSpec
 
@@ -358,6 +371,7 @@ def test_every_path_mints_one_cell_iri(case: str, tmp_path: Path) -> None:
     if "serial_number" in fields:  # `battinfo batch init` names a cell by its serial; without one it mints randomly
         from battinfo.contribution import init_batch
 
+        _spec_in_the_local_library(tmp_path, monkeypatch)
         (made,) = init_batch(
             tmp_path / "batch",
             CELL_SPEC_IRI,
@@ -451,10 +465,10 @@ def test_every_path_mints_one_test_iri(case: str, tmp_path: Path) -> None:
     assert len(set(iris.values())) == 1, iris
 
 
-def test_a_test_with_data_mints_one_iri_in_the_workspace_the_engine_and_the_batch_package(tmp_path: Path) -> None:
+def test_a_test_with_data_mints_one_iri_in_the_workspace_the_engine_and_the_batch_package(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """The run is told apart by its first data file's location in the workspace (or cell) folder."""
-    import json
-
     import battinfo
     from battinfo.bundle import CellSpec
     from battinfo.contribution import init_batch, package_batch
@@ -478,6 +492,7 @@ def test_a_test_with_data_mints_one_iri_in_the_workspace_the_engine_and_the_batc
 
     # `battinfo batch package` reads the run from the file's place in the cell folder,
     # and the kind from its name.
+    _spec_in_the_local_library(tmp_path, monkeypatch)
     (made,) = init_batch(tmp_path / "batch", CELL_SPEC_IRI, 1, serial_numbers=["S1"])["cells"]
     write_data(tmp_path / "batch" / made["folder"])
     package = package_batch(tmp_path / "batch", creators=[{"name": "Clark, Simon", "affiliation": "SINTEF"}])

@@ -26,8 +26,20 @@ from battinfo.contribution import CONTRIBUTION_MANIFEST, add_to_batch, init_batc
 from battinfo.entities import stable_uid  # noqa: E402
 
 CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
+OTHER_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-eeee"
 SPEC_FIELDS = {"manufacturer": "Energizer", "model": "CR2032", "format": "coin", "chemistry": "li-metal"}
 CREATORS = [{"name": "Clark, Simon", "affiliation": "SINTEF"}]
+
+
+@pytest.fixture(autouse=True)
+def _specs_in_the_local_library(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The batch path reads its cell spec from a library, so both specs go in ``./.battinfo/library/cell-spec``."""
+    library = tmp_path / ".battinfo" / "library" / "cell-spec"
+    library.mkdir(parents=True)
+    for n, iri in enumerate((CELL_SPEC_IRI, OTHER_SPEC_IRI)):
+        record = {"specification": {"id": iri, **SPEC_FIELDS}}
+        (library / f"spec-{n}.json").write_text(json.dumps(record), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
 
 
 def _iris(result: dict) -> list[str]:
@@ -113,8 +125,7 @@ def test_a_forced_re_init_keeps_an_iri_recorded_before_0_8_0(tmp_path: Path) -> 
 def test_a_forced_re_init_with_another_spec_mints_its_own_iris(tmp_path: Path) -> None:
     batch = tmp_path / "batch"
     first = init_batch(batch, CELL_SPEC_IRI, 1, serial_numbers=["S1"])
-    other_spec = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-eeee"
-    again = init_batch(batch, other_spec, 1, serial_numbers=["S1"], overwrite=True)
+    again = init_batch(batch, OTHER_SPEC_IRI, 1, serial_numbers=["S1"], overwrite=True)
     assert _iris(again) != _iris(first)
 
 

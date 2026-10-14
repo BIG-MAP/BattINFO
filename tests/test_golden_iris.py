@@ -29,7 +29,7 @@ import io
 import json
 import sys
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -85,6 +85,12 @@ BATCH_CELL = (
     "battinfo.yaml, never one from its place in the batch."
 )
 TEST_ON_A_BATCH_CELL = TEST_RUN + " Its cell moved as well: " + BATCH_CELL
+BATCH_LIBRARY = (
+    "The batch path refuses a cell spec that no cell-spec library holds, so the case saves its cell spec "
+    "in the local library first. At 057b66a0 it packaged a cell spec with only its IRI and a blank name, "
+    "and a dataset's title, which its seed includes, now carries the spec's name. With the blank name the "
+    "case mints t11a-1q7d-hw1j-an2v, the move the test seed alone gives."
+)
 
 #: Cases whose IRI moved since 057b66a0: case id -> (what it mints now, why it moved).
 MOVED: dict[str, tuple[str, str]] = {
@@ -167,8 +173,8 @@ MOVED: dict[str, tuple[str, str]] = {
         PUBLICATION_SERIAL_FIRST,
     ),
     "dataset | batch | data file": (
-        "https://w3id.org/battinfo/dataset/t11a-1q7d-hw1j-an2v",
-        DATASET_OF_MOVED_TEST,
+        "https://w3id.org/battinfo/dataset/nkrg-hajk-8p2a-ajex",
+        DATASET_OF_MOVED_TEST + " " + BATCH_LIBRARY,
     ),
     "dataset | engine | local file": (
         "https://w3id.org/battinfo/dataset/sn2k-65ds-d0p7-sw6m",
@@ -498,6 +504,22 @@ def _publication(root: Path, **parts: Any) -> Any:
     return bundle
 
 
+@contextlib.contextmanager
+def _batch_library(root: Path, spec_iri: str) -> Iterator[None]:
+    """Run the batch path from *root*, with :data:`SPEC` saved under *spec_iri* in its local cell-spec library.
+
+    The batch path refuses a cell spec that neither the packaged library nor
+    ``./.battinfo/library/cell-spec`` holds; at 057b66a0 it went on with a cell
+    spec that had only its IRI.
+    """
+    library = root / ".battinfo" / "library" / "cell-spec"
+    library.mkdir(parents=True, exist_ok=True)
+    record = {"schema_version": SCHEMA_VERSION, "specification": {"id": spec_iri, **SPEC}}
+    (library / "golden.json").write_text(json.dumps(record), encoding="utf-8")
+    with contextlib.chdir(root):
+        yield
+
+
 def _workspace(root: Path) -> Any:
     root.mkdir(parents=True, exist_ok=True)
     return battinfo.workspace(root, registry_url=None)
@@ -599,10 +621,11 @@ def _cells(root: Path) -> dict[str, str]:
         ]
         return _random_or(*runs)
 
-    rows["cell | batch | serial"] = batch_iris("serial", 1, serial_numbers=["C01"])
-    rows["cell | batch | serial and batch"] = batch_iris("serial-batch", 1, batch_id="B7", serial_numbers=["C03"])
-    rows["cell | batch | folder index"] = batch_iris("index", 2)
-    rows["cell | batch | batch and folder index"] = batch_iris("batch-index", 1, batch_id="B7")
+    with _batch_library(root, spec_iri):
+        rows["cell | batch | serial"] = batch_iris("serial", 1, serial_numbers=["C01"])
+        rows["cell | batch | serial and batch"] = batch_iris("serial-batch", 1, batch_id="B7", serial_numbers=["C03"])
+        rows["cell | batch | folder index"] = batch_iris("index", 2)
+        rows["cell | batch | batch and folder index"] = batch_iris("batch-index", 1, batch_id="B7")
     return rows
 
 
@@ -611,11 +634,12 @@ def _batch_packages(root: Path) -> dict[str, str]:
     from battinfo.contribution import init_batch, package_batch  # noqa: PLC0415
 
     spec_iri = _engine_spec_iri(root / "engine")
-    made = init_batch(root / "batch", cell_spec=spec_iri, count=1, serial_numbers=["C01"])
-    data = root / "batch" / made["cells"][0]["folder"] / "data" / "C01_cycling.csv"
-    data.parent.mkdir(parents=True, exist_ok=True)
-    data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
-    result = package_batch(root / "batch", creators=[{"name": "Clark, Simon", "affiliation": "SINTEF"}])
+    with _batch_library(root, spec_iri):
+        made = init_batch(root / "batch", cell_spec=spec_iri, count=1, serial_numbers=["C01"])
+        data = root / "batch" / made["cells"][0]["folder"] / "data" / "C01_cycling.csv"
+        data.parent.mkdir(parents=True, exist_ok=True)
+        data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
+        result = package_batch(root / "batch", creators=[{"name": "Clark, Simon", "affiliation": "SINTEF"}])
     entry = json.loads(Path(result["bundle_path"]).read_text(encoding="utf-8"))["datasets"][0]
     return {
         "test | batch | data file": entry["test"]["test"]["id"],
