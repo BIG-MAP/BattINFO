@@ -115,6 +115,7 @@ These paths mint IRIs that no other path reproduces. The [identifier policy](htt
 ### Linked data at record IRIs
 
 - A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:identifier` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. The record body is not normative, and a future v2 context drops it. Serving the EMMO model at record IRIs is planned for 0.9, since it changes what the registry returns for every published record.
+- The registry serves a record as it was stored. Several hundred cell specs and `organization` records published in April 2026 were stored with camelCase keys, such as `cellFormat` and `sameAs`, and keep serving them until they are published again in snake_case under the same IRIs, after the registry update for 0.8.0.
 
 ### Command line
 
