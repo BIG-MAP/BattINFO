@@ -463,7 +463,11 @@ ELECTRODE_SPEC_CASES: dict[str, dict[str, Any]] = {
 
 CLAIMS = [{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}, "provenance_class": "fitted"}]
 
-EXTENDED_EXAMPLE = ROOT / "examples" / "cell-spec" / "research" / "extended.example.json"
+# A frozen copy of examples/cell-spec/research/extended.example.json as it was
+# when the golden table was written (unchanged from 057b66a0 to 1c21957c). The
+# example itself has since been corrected (its invented Al2O3 additive is gone),
+# and a correction to an example must not drop or move a golden case.
+EXTENDED_EXAMPLE = ROOT / "tests" / "fixtures" / "identity" / "extended.example.json"
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
