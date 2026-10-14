@@ -77,6 +77,7 @@ handled by the BattINFO registry deployment.
 
 `import_()` reconstructs the **structural core** — cell specs, cell instances, tests
 (kind, protocol name, instrument), datasets and distributions — losslessly.
+Every record keeps the IRI it was published under, and a test that produced several data files comes back as one test with one dataset per file.
 
 **Not restored on import** (the published graph is the source of truth; re-importing then
 re-publishing would drop these): conformance/quality annotations (`dqv`/`earl` +

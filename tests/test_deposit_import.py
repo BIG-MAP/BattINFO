@@ -142,6 +142,40 @@ def test_a_deposit_in_the_older_string_form_still_imports(tmp_path: Path, source
     assert {t["test"]["kind"] for t in _saved(dst, "test")} == {"cycling"}
 
 
+def test_a_test_with_two_datasets_imports_as_one_test_under_its_iri(tmp_path: Path) -> None:
+    """One deposit test with two data files comes back as one test that links both, under its own IRI."""
+    root = tmp_path / "source"
+    root.mkdir()
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    ws.license("cc-by-4.0")
+    spec = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="li-ion")
+    ws.add("cell", spec=spec, serial_numbers=["C01"])
+    for name, voltage in (("C01a.bdf.csv", "3.5"), ("C01b.bdf.csv", "3.6")):
+        (root / name).write_text(DATA.replace("3.5", voltage), encoding="utf-8")
+    ws.add("test", type="cycling", cell="C01", data=["C01a.bdf.csv", "C01b.bdf.csv"])
+    ws.save()
+    graph = ws._build_zenodo_jsonld(
+        zenodo_record_id=1,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url=RECORD_URL,
+        data_filenames=["C01a.bdf.csv", "C01b.bdf.csv"],
+        title="Two files, one test",
+        creators=[{"name": "Doe, Jane"}],
+    )
+    [source_test] = _saved(root, "test")
+    source_datasets = {record["dataset"]["id"] for record in _saved(root, "dataset")}
+    assert len(source_datasets) == 2
+
+    dst, counts = _import(tmp_path, graph)
+    assert (counts["tests"], counts["datasets"]) == (1, 2)
+    [test] = _saved(dst, "test")
+    assert test["test"]["id"] == source_test["test"]["id"]
+    assert set(test["test"]["dataset_ids"]) == source_datasets
+    datasets = _saved(dst, "dataset")
+    assert {record["dataset"]["id"] for record in datasets} == source_datasets
+    assert all(source_test["test"]["id"] in record["dataset"]["about"] for record in datasets)
+
+
 @pytest.mark.parametrize(
     "value,expected",
     [

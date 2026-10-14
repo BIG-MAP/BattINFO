@@ -4378,7 +4378,8 @@ class AuthoringWorkspace:
         Parses the JSON-LD `@graph`, reconstructs cell specs, cell instances,
         tests, and datasets, then populates this workspace ready for
         ``ws.save()`` and ``ws.submit()``.  All canonical IRIs from the source
-        document are preserved — no new IRIs are minted.
+        document are preserved — no new IRIs are minted. A test that produced
+        several data files comes back as one test, with one dataset per file.
 
         Parameters
         ----------
@@ -4714,7 +4715,11 @@ class AuthoringWorkspace:
             if not isinstance(kind, str) or not kind.strip():
                 kind = _import_test_kind_from_technique(protocol)
 
-            test_imported = False
+            # One engine test per BatteryTest node, made when its first output
+            # resolves and kept under the deposit's IRI; each output becomes one
+            # of its datasets, under its own IRI. (One test per output would put
+            # several tests on one IRI, which ws.save() refuses.)
+            test = None
             for output in outputs:
                 ds_iri = output.get("@id", "")
                 # Find the distribution for this dataset: its own file the test
@@ -4743,27 +4748,30 @@ class AuthoringWorkspace:
                 fmt = _media_type_from_jsonld(dist.get("dcat:mediaType"))
                 fname = dist.get("schema:name", dl_url.split("/")[-1])
 
-                self._ws.record_test(
+                if test is None:
+                    test = self._ws.test(
+                        test_cell,
+                        kind=kind,
+                        name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
+                        protocol=protocol or kind.replace("_", " "),
+                        instrument=instrument,
+                        status="completed",
+                    )
+                    test.id = test_iri
+                dataset = self._ws.dataset(
                     test_cell,
-                    kind=kind,
-                    name=f"{test_cell.serial_number or cell_iri.split('/')[-1]} {protocol}",
-                    protocol=protocol,
-                    instrument=instrument,
-                    status="completed",
+                    title=f"{test_cell.name or test_cell.serial_number or 'cell'} {kind} dataset",
+                    test=test,
                     access_url=dl_url,
                     format=fmt or None,
                     checksum_algorithm=_spdx_algorithm_name(cs),
                     checksum_value=cs.get("spdx:checksumValue") or None,
                 )
-                # Preserve the test IRI and the dataset IRI from the JSON-LD
-                if self._ws.tests:
-                    self._ws.tests[-1].id = test_iri
-                if self._ws.datasets and ds_iri:
-                    self._ws.datasets[-1].id = ds_iri
-                test_imported = True
+                if ds_iri:
+                    dataset.id = ds_iri
                 imported_datasets += 1
                 print(f"  test:     {fname}")
-            if test_imported:
+            if test is not None:
                 imported_tests += 1
             else:
                 skipped_tests.append({"test": test_iri, "cell": cell_iri, "reason": "no distribution"})
