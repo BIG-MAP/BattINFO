@@ -93,14 +93,18 @@ ws.convert("*.csv")   # or force generic CSV exports`,
 spec = hits[0] if hits else battinfo.CellSpec(
     manufacturer="Molicel", model="INR21700-P45B",
     format="cylindrical", chemistry="Li-ion")
-ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])`,
+# The serials printed on your cells, or labels only your lab uses:
+# a cell's IRI comes from its spec and serial, so "S1" is every lab's S1.
+ws.add("cell", spec=spec,
+       serial_numbers=["MYLAB-P45B-001", "MYLAB-P45B-002", "MYLAB-P45B-003"])`,
     produces: "Cell records for the physical cells you tested, linked to a shared cell spec with a persistent IRI.",
     why: "Your measurements are about specific physical cells. Naming them once gives every test and dataset an unambiguous subject — the start of the provenance chain.",
   },
   {
     stage: "Link",
     verb: "ws.add(\"test\")",
-    code: `ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")`,
+    code: `ws.add("test", type="cycling", cell="MYLAB-P45B-001",
+       data="bdf/MYLAB-P45B-001.bdf.csv")`,
     produces: "A test record tied to the cell, plus a dataset record pointing at the converted data file.",
     why: "Data without its test conditions is trivia. The link cell → test → dataset is what makes the numbers reusable by someone who wasn't in the lab.",
   },

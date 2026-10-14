@@ -112,7 +112,7 @@ BattINFO mints a record's uid on the machine that writes the record, offline and
 
 ### 5.2 Identity seeds
 
-A seed is built from what identifies the record, its natural key, by the seed builders in `battinfo.entities`, so one identity gives one uid on every path, and saving a record again updates it instead of adding a copy. A cell spec is seeded from its manufacturer, model, format, chemistry and size code; a cell from its spec's IRI, its serial number and batch, and its name when it has no serial number; a test from its cell's IRI, its kind, its protocol (the protocol's IRI when it has one, else its name) and its run (the location of its first data file, else a start time the caller gives, else a name the caller gives, never a title BattINFO generates). Free-text fields go through one normaliser, `entities.seed_text`, which applies Unicode NFC, strips the text and turns each run of whitespace into one space. Cell specs, cells and tests keep the case of the text, and a cell spec's chemistry enters as its key in the chemistry vocabulary as it stood in 0.8.0 (5.5); material and electrode specs lower-case their fields. Locators get NFC alone, and hashes and content seeds enter as they are. Display text, such as a test's title, never enters a seed.
+A seed is built from what identifies the record, its natural key, by the seed builders in `battinfo.entities`, so one identity gives one uid on every path that sees that identity (5.4 names the paths that see less of it), and saving a record again updates it instead of adding a copy. A cell spec is seeded from its manufacturer, model, format, chemistry and size code; a cell from its spec's IRI, its serial number and batch, and its name when it has no serial number; a test from its cell's IRI, its kind, its protocol (the protocol's IRI when it has one, else its name) and its run (the location of its first data file, else a start time the caller gives, else a name the caller gives, never a title BattINFO generates). Free-text fields go through one normaliser, `entities.seed_text`, which applies Unicode NFC, strips the text and turns each run of whitespace into one space. Cell specs, cells and tests keep the case of the text, and a cell spec's chemistry enters as its key in the chemistry vocabulary as it stood in 0.8.0 (5.5); material and electrode specs lower-case their fields. Locators get NFC alone, and hashes and content seeds enter as they are. Some seeds take a name: a cell without a serial number is seeded from its name, a test protocol from its name and version, and a dataset from its title, which `ws.add("test")` builds from the test's name, so renaming a test moves the IRIs of its datasets (pin them with `dataset_iris=`). A test's own title enters only when the caller gave it to a test with no data file and no start time, and a title BattINFO generates (`C01 cycling`) never does.
 
 On every path that mints through `battinfo.entities`:
 
@@ -133,6 +133,7 @@ The uids below are as permanent as any other once published, but no other path r
 
 - Random uids. `create_component_spec` and `create_component_instance`, with their per-family wrappers for separators, current collectors, electrolytes and housings, and `create_equipment_spec` and `create_equipment` give a record without `uid=` or `id=` a random uid, a new one on every call. On the batch path, a cell without a serial number gets a random uid, recorded in its `battinfo.yaml`, where `battinfo batch package` reads it. Pass a uid derived from the record's natural key, or keep the file that records it. These builders get natural-key seeds in 0.9.
 - The interop importers. The BattInfoConverter importer (`battinfo.interop.converter`, which hashes its own seeds with SHA-1, and its component helper `_converter_components._uid`), the solid-state database importer (`solid_state_db._uid_from_seed`), the Discovery importer (`discovery._uid`) and the Battery Data Commons bridge (`battery_data_commons._uid`) seed from their source's own keys. Importing the same source again gives the same IRIs, but their seeds are not those of `battinfo.entities`, so a cell imported from two sources, or imported and also authored in the workspace, gets two IRIs. They are unstable until 0.9, which moves every minting path onto `battinfo.entities`; 5.5 keeps the IRIs they minted findable then.
+- Paths that see less of a record. They mint through `battinfo.entities`, but from fewer of the record's identity fields, so the same record gets another IRI there than in the workspace. `save_test()` and a save of a test without an id never see a data file, so a test with data files is seeded there from its start time or name instead of its first file; they also know a cell's labels only from a `Cell` object, so a title such as `C01 cycling` given there counts as the caller's name. A save of a dataset without an id leaves its cell and test out of its seed, because its `about` list does not say which are its own, so only a dataset with neither, such as a collection, gets the IRI `save_dataset` gives it. The publication package and `battinfo batch package` seed a dataset from its folder and title, not its file, and the publication package takes the dataset folder as the run of a test with data; `battinfo batch package` takes a raw file's path in the cell folder as the run, which matches the workspace only when the workspace's data file has the same path in the workspace folder. `battinfo batch init --batch-id` seeds a cell from its serial number and its batch, and `ws.add("cell")` takes no batch, so the two agree only for a cell without a batch id. Pin the IRI on the path that differs (`iri=`, `dataset_iris=`, `id=` or `--iris`).
 
 ### 5.5 Changing a seed
 
@@ -325,8 +326,10 @@ This policy applies to:
 
 ## 13. Security and Audit Requirements
 
-- Issuance events MUST be logged in append-only form with timestamp, issuer, entity-type, UID, and status.
-- Access to minting authority MUST be authenticated and auditable.
+These apply to the registry. BattINFO mints uids on the machine that writes a record (5.1), with no issuing authority to log or guard; what the registry audits is what it accepts.
+
+- The records the registry accepts, and the IRIs its fallback minter issues (5.3), MUST be logged in append-only form with timestamp, publisher, entity type, IRI and status.
+- Access to the registry's submission endpoints and its fallback minter MUST be authenticated and auditable.
 - Bulk imports MUST run duplicate detection before commit.
 - Registry backups SHOULD support disaster recovery without identifier reassignment.
 
@@ -384,7 +387,7 @@ The BattINFO identifier system is designed to be:
 
 The 16-character Base32 UID:
 
-- Provides 80 bits of entropy
+- Holds 80 bits. A uid hashed from a seed (5.1) is 80 bits of a SHA-256 digest, so two different seeds share a uid about as rarely as two random 80-bit values do
 - Offers extremely low collision probability at BattINFO scale
 - Is shorter and cleaner than UUID
 - Is readable when grouped as 4-4-4-4

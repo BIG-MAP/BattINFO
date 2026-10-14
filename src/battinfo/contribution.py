@@ -735,8 +735,10 @@ def init_batch(
                    serial's folder by its name, and the folders of cells
                    without a serial in folder order.
 
-    A cell with a serial number gets the IRI every other path gives it,
-    from its spec, serial and batch.  A cell without one gets a random IRI,
+    A cell with a serial number gets the IRI it gets on every path that
+    takes its spec, serial and batch (``save_cell_instance``,
+    ``create_cell_instance``, the engine; ``ws.add("cell")``, which takes no
+    batch, only without ``batch_id``).  A cell without one gets a random IRI,
     recorded in its ``battinfo.yaml``; keep that file, because nothing else
     can give the cell its IRI again.
 
@@ -857,9 +859,10 @@ def add_to_batch(
     Reads ``batch.yaml`` to inherit cell spec, lab, operator, project and
     current count.  Any keyword argument that is not None overrides the
     corresponding value from ``batch.yaml`` for the new cells only.  As in
-    ``init_batch``, a new cell with a serial number gets the IRI every other
-    path gives it, and one without gets a random IRI recorded in its
-    ``battinfo.yaml``; the cell count never enters an IRI.
+    ``init_batch``, a new cell with a serial number gets the IRI the paths
+    that take its spec, serial and batch give it, and one without gets a
+    random IRI recorded in its ``battinfo.yaml``; the cell count never
+    enters an IRI.
 
     Updates ``count`` in ``batch.yaml`` after creating the new folders.
 

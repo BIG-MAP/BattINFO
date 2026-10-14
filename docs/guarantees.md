@@ -57,7 +57,7 @@ spec. Consequences you can rely on:
 - running the same `ws.load()` or `ws.add()` call again in one session, as a notebook does when a cell is re-run, reuses the record the session already holds instead of adding a copy;
 - an IRI a record already has (pinned, imported, or given by an earlier save, in this session or an earlier one in the same folder) never moves when a record with the same identity fields joins: the newcomer is minted from its content. A record saved by an earlier session is recognised by its content, so one you edit in the same save in which such a newcomer joins is minted from its content too; pin it;
 - a test's IRI names one run on one cell, told apart by its protocol and its first data file (or, for a test without data, a start time you pass, else the name you give it), so a later run with its own data, start time or name never takes an earlier run's IRI, and renaming a test with data or a start time keeps its IRI; a title BattINFO generates (`C01 cycling`) never enters, and a save refuses to let a test with none of these replace a saved run with another instrument or time window;
-- the workspace, its engine, a save without an id, and the `save_*` and `create_*` functions for cell specs, cells, test specs, tests, materials, electrodes, channels, parameter sets and organizations mint **identical IRIs** for identical identities, and so do the publication package for cell specs and cells and the batch path for a cell with a serial number and its tests (`tests/test_idempotent_minting.py`); `tests/test_golden_iris.py` fails if any path's IRI moves without a changelog entry;
+- the workspace, its engine, a save without an id, and the `save_*` and `create_*` functions for cell specs, cells, test specs, tests without data files, materials, electrodes, channels, parameter sets and organizations mint **identical IRIs** for identical identities, and so do the workspace, its engine and `save_dataset` for datasets, the publication package for cell specs and cells, and the batch path for a cell with a serial number (with `ws.add("cell")` only when the batch cell has no batch id) (`tests/test_idempotent_minting.py`); `tests/test_golden_iris.py` fails if any path's IRI moves without a changelog entry;
 - records with no distinguishing identity still mint randomly — two anonymous
   but physically distinct cells never silently merge.
 
@@ -78,7 +78,13 @@ of the identifier policy):
 - the publication package and `battinfo batch package` seed a dataset from its
   folder and title, not its file, so its dataset IRI differs from the
   workspace's, and the publication package does the same for the run of a
-  test with data.
+  test with data;
+- `battinfo batch package` seeds a test from its raw file's path in the cell
+  folder, so it matches the workspace's test only when the workspace's data
+  file has that path in the workspace folder;
+- `save_test()` and a save without an id never see a data file, so they give
+  a test with data another IRI than the workspace does, and a save without an
+  id leaves a dataset's cell and test out of its seed.
 
 The [known limitations](scope.md#identifiers) say what to do on each of these
 paths.

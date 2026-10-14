@@ -1981,9 +1981,11 @@ After running this command:
   3. Process each cell:  battinfo dataset process &lt;cell-folder&gt;
 
 
-A cell given a serial (--serials) gets the IRI any other BattINFO path
-gives that cell. A cell without one gets a random IRI, recorded in its
-battinfo.yaml: keep that file, nothing else can give the cell its IRI again.
+A cell given a serial (--serials) gets the IRI save_cell_instance and
+create_cell_instance give that serial and batch, and without --batch-id
+the one ws.add(&quot;cell&quot;) gives it. A cell without a serial gets a random IRI,
+recorded in its battinfo.yaml: keep that file, nothing else can give the
+cell its IRI again.
 
 **Usage**:
 
