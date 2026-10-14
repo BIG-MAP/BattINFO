@@ -48,9 +48,9 @@ record and SHACL validation alike:
                   "hasMeasurementUnit": { "@id": "emmo:Volt" } }]
 ```
 
-Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`) use QUDT.
+Every unit IRI is an EMMO or domain-electrochemistry class from the pinned closure, compound units such as `W/kg` included. A unit with no IRI in the unit map is kept as text in `schema:unitText`.
 
-A quantity given as a range keeps both bounds on the same node, as `schema:minValue` and `schema:maxValue`. Where the class names a bound, such as `MaximumPulseChargingCurrent`, a bound given alone is also the `hasNumberValue`. Every percent spelling is the unit `PercentUnit`; `wt%` and `vol%` add `WeightPercent` or `VolumePercent` as an extra class of the node, and a porosity or a mass or volume fraction is a fraction of 1 with `UnitOne`.
+The records contexts type `hasNumberValue` as `xsd:double`, so it only ever holds a number. A `value` written as a string that is not a number, such as `"about 500"`, is published as text in `hasStringValue`, as `value_text` is. A quantity given as a range keeps both bounds on the same node, as `schema:minValue` and `schema:maxValue`. Where the class names a bound, such as `MaximumPulseChargingCurrent`, a bound given alone is also the `hasNumberValue`. Every percent spelling is the unit `PercentUnit`; `wt%` and `vol%` add `WeightPercent` or `VolumePercent` as an extra class of the node, and a porosity or a mass or volume fraction is a fraction of 1 with `UnitOne`.
 
 ## Structured test conditions
 

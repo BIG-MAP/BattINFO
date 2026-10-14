@@ -235,6 +235,13 @@ def round_trip(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]:
         properties={
             "nominal_voltage": {"value": 3.6, "unit": "V"},
             "maximum_pulse_charging_current": {"max_value": 10.0, "unit": "A"},
+            # A number equal to its only bound, on classes that name no bound
+            # and on a Maximum class given the other bound: the number stays.
+            "nominal_capacity": {"value": 3.0, "max_value": 3.0, "unit": "Ah"},
+            "nominal_energy": {"value": 10.8, "min_value": 10.8, "unit": "Wh"},
+            "continuous_discharging_current": {"value": 20.0, "min_value": 20.0, "unit": "A"},
+            # On the Maximum class it names, the bound is the number.
+            "continuous_charging_current": {"value": 5.0, "max_value": 5.0, "unit": "A"},
             "height": {"min_value": 64.8, "max_value": 65.2, "unit": "mm"},
             "capacity_fade": {"value": 20.0, "unit": "pct"},
             "state_of_health": {"value": 95.0, "unit": "%"},
@@ -275,6 +282,41 @@ def test_save_preview_import_save_keeps_the_bounds(round_trip: dict[str, Any]) -
     # pct is one of the plain percent spellings; it comes back as %.
     assert properties["capacity_fade"] == {"value": 20.0, "unit": "%"}
     assert properties["state_of_health"] == {"value": 95.0, "unit": "%"}
+
+
+def test_a_number_equal_to_its_only_bound_survives_the_round_trip(round_trip: dict[str, Any]) -> None:
+    """The import collapses a number into its bound only where the emitter
+    derives the number from that bound: on a class flagged as that bound."""
+    properties = round_trip["imported"]["properties"]
+    assert properties["nominal_capacity"] == {"value": 3.0, "max_value": 3.0, "unit": "Ah"}
+    assert properties["nominal_energy"] == {"value": 10.8, "min_value": 10.8, "unit": "Wh"}
+    assert properties["continuous_discharging_current"] == {"value": 20.0, "min_value": 20.0, "unit": "A"}
+    assert properties["continuous_charging_current"] == {"max_value": 5.0, "unit": "A"}
+
+
+def test_the_re_saved_record_publishes_the_same_numbers(round_trip: dict[str, Any], tmp_path: Path) -> None:
+    """The second deposit carries every number and bound the first one did."""
+    workspace = AuthoringWorkspace(root=round_trip["base"] / "imported", registry_url=None)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        second = json.loads(Path(workspace.preview_jsonld(tmp_path / "second.battinfo.json")).read_text("utf-8"))
+
+    def numbers(deposit: dict[str, Any]) -> dict[str, tuple[Any, Any, Any]]:
+        return {
+            node["skos:prefLabel"]: (
+                (node.get("hasNumericalPart") or {}).get("hasNumberValue"),
+                node.get("schema:minValue"),
+                node.get("schema:maxValue"),
+            )
+            for node in _spec_node(deposit)["isDescriptionFor"]["hasProperty"]
+        }
+
+    first = numbers(round_trip["deposit"])
+    assert numbers(second) == first
+    assert first["NominalCapacity"] == (3.0, None, 3.0)
+    assert first["NominalEnergy"] == (10.8, 10.8, None)
+    assert first["MaximumContinuousDischargingCurrent"] == (20.0, 20.0, None)
+    assert first["MaximumContinuousChargingCurrent"] == (5.0, None, 5.0)
 
 
 def test_import_reads_a_stated_basis_and_an_old_percent_unit_back(round_trip: dict[str, Any]) -> None:

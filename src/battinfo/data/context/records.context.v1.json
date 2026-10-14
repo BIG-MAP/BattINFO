@@ -866,6 +866,8 @@
     "ConstantVoltageDischarging": "electrochemistry:electrochemistry_9865e4f9_756d_4d94_a6fd_4102ab795f9e",
     "Mesh": "electrochemistry:electrochemistry_18f2199b_c50c_49ec_bd17_a37626ca5e63",
     "Foam": "emmo:EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018",
-    "PercentUnit": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+    "PercentUnit": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
+    "LithiumTitanate": "https://w3id.org/emmo/domain/chemical-substance#substance_acdb232f_8041_4e11_8a11_5db2d2baae4d",
+    "LithiumManganeseOxide": "https://w3id.org/emmo/domain/chemical-substance#substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827"
   }
 }

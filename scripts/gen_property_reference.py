@@ -156,8 +156,10 @@ def build() -> str:
         "lithium-ion positives add theirs to a `li-ion` cell, a lithium negative",
         "adds LithiumMetalBattery to `li-metal` and the labels under it, and `mno2`",
         "adds LithiumManganeseDioxideBattery to `li-mno2` and `li-metal`. So an",
-        "alkaline cell with an MnO2 positive stays an alkaline zinc cell, and a",
-        "chemistry that is not listed gets no class from its electrodes either.",
+        "alkaline cell with an MnO2 positive stays an alkaline zinc cell. A",
+        "chemistry that is not listed gets no class from its electrodes either,",
+        "with one exception: a full cell with an `mno2` positive and a lithium",
+        "negative is a LithiumManganeseDioxideBattery whatever its chemistry text.",
         "",
         *textwrap.wrap(
             "Some couples are defined by their negative electrode: "

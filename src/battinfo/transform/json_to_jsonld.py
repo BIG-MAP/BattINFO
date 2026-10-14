@@ -249,8 +249,16 @@ def electrode_basis_battery_types(cell: Mapping[str, Any]) -> list[str]:
     lithium-ion positives add their classes to a li-ion cell only, a lithium
     negative adds LithiumMetalBattery to li-metal and the couples under it, and
     MnO2 adds LithiumManganeseDioxideBattery to li-mno2 and li-metal (li-primary
-    included), never to a zinc cell. A chemistry outside the vocabulary declares
-    no class, so the bases add none.
+    included), never to a zinc cell.
+
+    A chemistry outside the vocabulary declares no class. Then only the stated
+    electrodes can say what the cell is: a positive basis adds its classes when
+    its couple fixes the negative electrode and the cell is a full cell with
+    that negative. So an MnO2 positive with a lithium negative adds
+    LithiumManganeseDioxideBattery, since li-mno2 sits under li-metal, whose
+    negative is lithium. Nothing else is added, and a half cell or a
+    three-electrode cell, where lithium is the counter or reference electrode,
+    gets none.
 
     *cell* is a cell-spec body or a specification dict: both name the fields
     ``chemistry``, ``positive_electrode_basis`` and ``negative_electrode_basis``.
@@ -258,6 +266,9 @@ def electrode_basis_battery_types(cell: Mapping[str, Any]) -> list[str]:
     lineage = chemistry_lineage(cell.get("chemistry"))
     types: list[str] = []
     if not lineage:
+        for battery_type in _basis_types_from_the_negative(cell):
+            if battery_type not in types:
+                types.append(battery_type)
         return types
     for field in ("positive_electrode_basis", "negative_electrode_basis"):
         entry = _entity_mapping(field, cell.get(field)) or {}
@@ -270,6 +281,42 @@ def electrode_basis_battery_types(cell: Mapping[str, Any]) -> list[str]:
             if isinstance(battery_type, str) and battery_type not in types:
                 types.append(battery_type)
     return types
+
+
+def _negative_electrode_node(key: str | None) -> str | None:
+    """The electrode a negative basis names: lithium, lithium-metal and li-metal are one."""
+    if key is None:
+        return None
+    node_type = _entity_type_map().get("negative_electrode_basis", {}).get(key, {}).get("node_type")
+    return node_type if isinstance(node_type, str) else key
+
+
+def _basis_types_from_the_negative(cell: Mapping[str, Any]) -> list[str]:
+    """The positive basis's battery classes for a cell whose chemistry declares none.
+
+    Added only when the positive's couple (``battery_types_chemistry``, or a
+    label broader than it) names a negative electrode on its chemistry entry,
+    the record states that negative, and the cell is a full cell.
+    """
+    if _cell_configuration_key(cell) in _COUNTER_ELECTRODE_CONFIGURATIONS:
+        return []
+    stated = _negative_electrode_node(_entity_key("negative_electrode_basis", cell.get("negative_electrode_basis")))
+    entry = _entity_mapping("positive_electrode_basis", cell.get("positive_electrode_basis")) or {}
+    belongs_to = entry.get("battery_types_chemistry")
+    if stated is None or not isinstance(belongs_to, str):
+        return []
+    chemistries = _entity_type_map().get("chemistry", {})
+    required = next(
+        (
+            chemistries[label]["negative_electrode_basis"]
+            for label in chemistry_lineage(belongs_to)
+            if isinstance(chemistries[label].get("negative_electrode_basis"), str)
+        ),
+        None,
+    )
+    if required is None or _negative_electrode_node(required) != stated:
+        return []
+    return [battery_type for battery_type in entry.get("battery_types", []) if isinstance(battery_type, str)]
 
 
 # A half cell or a three-electrode cell may use a metal as its counter or
@@ -301,15 +348,8 @@ def chemistry_electrode_conflicts(cell: Mapping[str, Any]) -> list[str]:
     stated = _entity_key("negative_electrode_basis", cell.get("negative_electrode_basis"))
     if not lineage or stated is None:
         return []
-    entity_map = _entity_type_map()
-    chemistries = entity_map.get("chemistry", {})
-    negatives = entity_map.get("negative_electrode_basis", {})
-
-    def electrode(key: str) -> str:
-        # lithium, lithium-metal and li-metal are spellings of one electrode.
-        node_type = negatives.get(key, {}).get("node_type")
-        return node_type if isinstance(node_type, str) else key
-
+    chemistries = _entity_type_map().get("chemistry", {})
+    electrode = _negative_electrode_node
     chemistry_text = str(cell.get("chemistry")).strip()
     stated_text = str(cell.get("negative_electrode_basis")).strip()
     required = next(
@@ -1052,6 +1092,27 @@ def _bound_value(value: Any) -> int | float | None:
     return value
 
 
+def _number_value(value: Any) -> int | float | None:
+    """A ``value`` or ``typical_value`` that can be published as ``hasNumberValue``.
+
+    The records contexts type ``hasNumberValue`` as ``xsd:double``, so only a
+    number qualifies: a JSON number, or a string that reads as a finite one
+    (``"3.6"`` gives 3.6). Any other string, such as ``"about 500"``, would be
+    an ill-typed literal and gives ``None``; the caller publishes it as text.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value if math.isfinite(value) else None
+    if isinstance(value, str):
+        try:
+            number = float(value.strip())
+        except ValueError:
+            return None
+        return number if math.isfinite(number) else None
+    return None
+
+
 def _bound_as_number(term: str | None, lower: Any, upper: Any) -> int | float | None:
     """The single bound that is the quantity's number, or ``None``.
 
@@ -1078,7 +1139,11 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     unit, bounds, text, sample statistics and conditions.
 
     The number is ``value``, else ``typical_value``, else the one bound the
-    class names (:func:`_bound_as_number`). ``min_value`` and ``max_value`` are
+    class names (:func:`_bound_as_number`). ``hasNumberValue`` is
+    ``xsd:double``, so a ``value`` that is a string reading as a number is
+    published as that number, and any other string as ``hasStringValue`` (when
+    there is no ``value_text``), with a ``semantic.value_text_only`` warning.
+    ``min_value`` and ``max_value`` are
     always kept, as ``schema:minValue`` and ``schema:maxValue``. A percent unit
     in any spelling is PercentUnit; on a key that is not a fraction, a spelling
     that states a basis (``wt%``, ``vol%``) adds WeightPercent or VolumePercent
@@ -1113,8 +1178,10 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
 
     lower = _bound_value(quantity.get("min_value"))
     upper = _bound_value(quantity.get("max_value"))
-    primary = quantity.get("value") if quantity.get("value") is not None else quantity.get("typical_value")
-    if primary is None:
+    stated = [quantity.get(field) for field in ("value", "typical_value") if quantity.get(field) is not None]
+    primary = next((number for number in map(_number_value, stated) if number is not None), None)
+    text = next((str(item).strip() for item in stated if _number_value(item) is None and str(item).strip()), None)
+    if not stated:
         primary = _bound_as_number(resolved_term, lower, upper)
     if primary is not None:
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
@@ -1123,8 +1190,17 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     if upper is not None:
         node["schema:maxValue"] = upper
 
+    if text is not None:
+        warnings.warn(
+            f"semantic.value_text_only: '{name}' value '{text}' is not a number - the JSON-LD "
+            "export carries it as text (hasStringValue), not as a number. Put the number in "
+            "value and the wording in value_text.",
+            stacklevel=2,
+        )
     if quantity.get("value_text"):
         node["hasStringValue"] = quantity["value_text"]
+    elif text is not None:
+        node["hasStringValue"] = text
 
     unit = quantity.get("unit") or quantity.get("unit_text")
     iri = _unit_iri(unit)

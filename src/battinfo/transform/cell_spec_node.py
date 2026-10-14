@@ -236,8 +236,10 @@ def label_to_compact() -> dict[str, Any]:
 
     Combines (in order): the static core-class table, curated property-class
     prefLabels, curated unit prefLabels, every ``entity_type_map.json``
-    ``battery_types`` class resolvable in the bundled domain-battery context, and
-    the quantity-node structure terms (``RealData`` etc.).
+    ``battery_types`` class resolvable in the bundled domain-battery context,
+    the quantity-node structure terms (``RealData`` etc.), the classes of the
+    composition emitters' lookup tables and the ``emmo`` class of every
+    material kind in ``material_kinds.json``.
 
     Used both to extend the inline publication context and as the "is this class
     context-mappable?" filter for :func:`physical_type_stack`.
@@ -299,6 +301,13 @@ def label_to_compact() -> dict[str, Any]:
         for value in mapping.values():
             if isinstance(value, str):
                 _resolve(value)
+    # The class of every material kind: a material node and a parameter set's
+    # material_kind target are typed with it, in either context.
+    from battinfo.materials import material_kinds
+
+    for entry in material_kinds().get("kinds", {}).values():
+        if isinstance(entry, Mapping) and isinstance(entry.get("emmo"), str):
+            _resolve(entry["emmo"])
     return table
 
 

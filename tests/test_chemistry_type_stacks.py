@@ -247,9 +247,16 @@ def test_the_descriptor_path_agrees_with_the_canonical_builder(model: str) -> No
         # Lithium-ion positives and graphite add their classes to li-ion cells only.
         ("li-metal", "lfp", "lithium", "LithiumMetalBattery", "LithiumIonIronPhosphateBattery"),
         ("na-ion", "lfp", "graphite", "SodiumIonBattery", "LithiumIonGraphiteBattery"),
-        # A chemistry outside the vocabulary declares no class, so the bases add none.
+        # A chemistry outside the vocabulary declares no class, so the bases add none,
         ("Zn-MnO2 alkaline", "mno2", "zinc", "CoinCell", "LithiumManganeseDioxideBattery"),
         ("Li-ion polymer", "lfp", "graphite", "CoinCell", "LithiumIonIronPhosphateBattery"),
+        ("Li-ion polymer", "lfp", "lithium", "CoinCell", "LithiumIonIronPhosphateBattery"),
+        ("Li coin (vendor text)", None, "lithium", "CoinCell", "LithiumMetalBattery"),
+        # except that an MnO2 positive with a lithium negative is a Li-MnO2 cell
+        # (li-mno2 sits under li-metal, whose negative is lithium).
+        ("Li/MnO2 coin (vendor text)", "MnO2", "lithium", "LithiumManganeseDioxideBattery", "LithiumMetalBattery"),
+        ("Li/MnO2 coin (vendor text)", "mno2", "li-metal", "LithiumManganeseDioxideBattery", None),
+        ("Li/MnO2 coin (vendor text)", "mno2", "zinc", "CoinCell", "LithiumManganeseDioxideBattery"),
     ],
 )
 def test_an_electrode_basis_class_must_belong_to_the_declared_chemistry(
@@ -264,6 +271,30 @@ def test_an_electrode_basis_class_must_belong_to_the_declared_chemistry(
     assert added in stack, stack
     if absent:
         assert absent not in stack, stack
+
+
+@pytest.mark.parametrize("configuration", [{"cell_configuration": "half_cell"}, {"reference_electrode": "lithium"}])
+def test_a_lithium_counter_electrode_does_not_make_a_free_text_mno2_cell_li_mno2(configuration: dict) -> None:
+    cell = {
+        "cell_format": "coin",
+        "chemistry": "MnO2 half cell (vendor text)",
+        "positive_electrode_basis": "mno2",
+        "negative_electrode_basis": "lithium",
+        **configuration,
+    }
+    assert "LithiumManganeseDioxideBattery" not in physical_type_stack(cell)
+
+
+def test_the_descriptor_path_types_a_free_text_mno2_lithium_cell_as_li_mno2() -> None:
+    fields = {
+        "format": "coin",
+        "chemistry": "Li/MnO2 coin (vendor text)",
+        "positive_electrode_basis": "mno2",
+        "negative_electrode_basis": "lithium",
+    }
+    node = _descriptor_specification_to_jsonld(dict(fields))
+    assert "LithiumManganeseDioxideBattery" in _types(node["isDescriptionFor"]["@type"])
+    assert physical_type_stack(_cell_body(fields)) == _types(node["isDescriptionFor"]["@type"])
 
 
 def test_the_packaged_alkaline_example_is_an_alkaline_zinc_cell() -> None:

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pyld import jsonld as _jsonld
 
 from battinfo import jsonld as jsonld_module
 from battinfo.jsonld import record_to_jsonld
@@ -23,6 +24,7 @@ from battinfo.validate.jsonld import (
     _allowed_type_terms,
     _context_class_terms,
     _context_unit_terms,
+    _inline_local_contexts,
     type_term_issues,
     validate_jsonld_report,
 )
@@ -70,7 +72,7 @@ def test_allowed_type_terms_are_the_class_terms_of_bundled_v1() -> None:
         "lithium",
         # labels the mapping tables name but v1 does not define
         "Capacity",
-        "LithiumTitanate",
+        "Steel",
         "JellyRoll",
         "PowerCapability",
     ],
@@ -93,7 +95,7 @@ def test_a_v1_class_is_accepted_in_a_v1_document(token: str) -> None:
 # -- the document's own context decides --------------------------------------------
 
 
-@pytest.mark.parametrize("token", ["Capacity", "LithiumTitanate", "Additive"])
+@pytest.mark.parametrize("token", ["Capacity", "Acetonitrile", "Additive"])
 def test_a_class_only_the_emmo_context_defines_is_accepted_in_an_emmo_document(token: str) -> None:
     assert token in _emmo_terms() and token not in _v1_terms()
     assert not _unknown_terms(_doc([EMMO_URL, {"schema": "https://schema.org/"}], token))
@@ -259,6 +261,40 @@ def test_record_to_jsonld_checks_a_material_against_its_emmo_context(monkeypatch
         record_to_jsonld(material, "material-spec")
     for mode in ("url", "inline"):
         assert record_to_jsonld(cell, "cell-spec", context=mode)["hasPart"] == {"@type": "Grant"}
+
+
+@pytest.mark.parametrize("mode", ["url", "inline"])
+@pytest.mark.parametrize(
+    ("kind", "label", "iri"),
+    [
+        ("lto", "LithiumTitanate", "substance_acdb232f_8041_4e11_8a11_5db2d2baae4d"),
+        ("lmo", "LithiumManganeseOxide", "substance_e8fafdc8_6cd3_4dd0_9630_10ca8e3f1827"),
+    ],
+)
+def test_a_parameter_set_about_a_material_kind_is_typed_with_its_class(
+    kind: str, label: str, iri: str, mode: str
+) -> None:
+    """The target of a parameter set about a material kind is typed with the
+    kind's class in a v1 document, so v1 must define every kind's class."""
+    record = json.loads((EXAMPLES / "parameter-set" / "parameter-set-6bpa-4qet-046r-1zzk.json").read_text("utf-8"))
+
+    def retarget(node: Any) -> int:
+        count = 0
+        if isinstance(node, dict):
+            if "material_kind" in node:
+                node["material_kind"] = kind
+                count += 1
+            count += sum(retarget(value) for value in node.values())
+        elif isinstance(node, list):
+            count += sum(retarget(value) for value in node)
+        return count
+
+    assert retarget(record) >= 1
+    out = record_to_jsonld(record, "parameter-set", context=mode)
+    assert type_term_issues(out) == []
+    expanded = json.dumps(_jsonld.expand(_inline_local_contexts(out)))
+    assert f"https://w3id.org/emmo/domain/chemical-substance#{iri}" in expanded
+    assert f"/{label}" not in expanded
 
 
 # -- the packaged corpus emits only defined terms ----------------------------------

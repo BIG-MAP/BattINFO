@@ -609,6 +609,21 @@ def test_every_current_collector_class_resolves_in_v1_and_the_bundled_context() 
     assert not _unresolved_classes(targets)
 
 
+def test_every_material_kind_class_resolves_in_v1_and_the_bundled_context() -> None:
+    """A parameter set about a material kind types its target with the kind's
+    class in a v1 document. LithiumTitanate (lto) and LithiumManganeseOxide
+    (lmo) were missing from v1, so record_to_jsonld refused such a record."""
+    from battinfo.materials import material_kinds
+    from battinfo.validate.jsonld import _allowed_type_terms
+
+    kinds = material_kinds()["kinds"]
+    targets = {f"kind:{key}": entry["emmo"] for key, entry in kinds.items() if entry.get("emmo")}
+    assert {"LithiumTitanate", "LithiumManganeseOxide"} <= set(targets.values())
+    assert len(targets) > 30, "the inventory of material kinds looks broken"
+    assert not _unresolved_classes(targets)
+    assert set(targets.values()) <= _allowed_type_terms()
+
+
 def test_electrode_open_circuit_potential_is_not_typed_as_a_cell_voltage() -> None:
     """domain-electrochemistry 0.39.0 split the two quantities.
 

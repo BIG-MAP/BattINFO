@@ -250,8 +250,10 @@ class only where the class fits the chemistry: `graphite`, `lto` and the
 lithium-ion positives add theirs to a `li-ion` cell, a lithium negative
 adds LithiumMetalBattery to `li-metal` and the labels under it, and `mno2`
 adds LithiumManganeseDioxideBattery to `li-mno2` and `li-metal`. So an
-alkaline cell with an MnO2 positive stays an alkaline zinc cell, and a
-chemistry that is not listed gets no class from its electrodes either.
+alkaline cell with an MnO2 positive stays an alkaline zinc cell. A
+chemistry that is not listed gets no class from its electrodes either,
+with one exception: a full cell with an `mno2` positive and a lithium
+negative is a LithiumManganeseDioxideBattery whatever its chemistry text.
 
 Some couples are defined by their negative electrode: `li-metal` and the
 labels under it have a lithium negative; `zn-mno2`, `zn-air`, `zn-hgo`,

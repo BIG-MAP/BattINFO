@@ -4452,12 +4452,17 @@ class AuthoringWorkspace:
         # the canonical "minimum_discharging_temperature").
         _prop_map_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "property_map.curated.json"
         rev_prop: dict[str, str] = {}
+        # class IRI -> the bound the class names ("max" or "min"), from the
+        # curated ``bound`` flag the emitter reads too.
+        bound_of_class: dict[str, str] = {}
         if _prop_map_path.exists():
             for m in json.loads(_prop_map_path.read_text(encoding="utf-8")).get("mappings", []):
                 iri = m.get("class_iri", "")
                 key = m.get("key", "")
                 if iri and key and iri not in rev_prop:  # first occurrence wins
                     rev_prop[iri] = key
+                if iri and m.get("bound") in ("max", "min"):
+                    bound_of_class.setdefault(iri, m["bound"])
 
         rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
         # % and vol% share PercentUnit; the basis rides as a class of the node.
@@ -4595,9 +4600,11 @@ class AuthoringWorkspace:
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
             shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
             as a bare IRI string). The bounds come from ``schema:minValue`` and
-            ``schema:maxValue``; a number equal to the only bound given is that
-            bound, which the emitter also writes as the number of a Maximum or
-            Minimum class, so it is read back as the bound alone. PercentUnit
+            ``schema:maxValue``. The emitter writes a bound given alone as the
+            number too, but only on a class the curated map flags as that bound
+            (``max_value`` on a Maximum class, ``min_value`` on a Minimum class),
+            so on such a class a number equal to that only bound is read back as
+            the bound alone. On any other class the number stays. PercentUnit
             reads back as wt% or vol% when the node also carries WeightPercent
             or VolumePercent, and as % otherwise."""
             specs: dict = {}
@@ -4610,12 +4617,10 @@ class AuthoringWorkspace:
                     if isinstance(type_raw, list)
                     else []
                 )
-                prop_key = next(
-                    (key for term in type_terms if (key := rev_prop.get(_expand(term)))),
-                    None,
-                )
-                if not prop_key:
+                class_iri = next((expanded for term in type_terms if rev_prop.get(expanded := _expand(term))), None)
+                if class_iri is None:
                     continue
+                prop_key = rev_prop[class_iri]
                 value = (node.get("hasNumericalPart") or {}).get(
                     "hasNumberValue", (node.get("hasNumericalPart") or {}).get("hasNumericalValue")
                 )
@@ -4637,7 +4642,8 @@ class AuthoringWorkspace:
                     for field, term in (("min_value", "schema:minValue"), ("max_value", "schema:maxValue"))
                     if isinstance(node.get(term), (int, float)) and not isinstance(node.get(term), bool)
                 }
-                if value is not None and list(bounds.values()) == [value]:
+                named_bound = {"max": "max_value", "min": "min_value"}.get(bound_of_class.get(class_iri, ""))
+                if value is not None and named_bound is not None and bounds == {named_bound: value}:
                     value = None
                 if value is None and not bounds:
                     continue
