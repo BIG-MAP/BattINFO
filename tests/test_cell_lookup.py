@@ -255,7 +255,10 @@ def test_a_converted_file_named_after_a_serial_binds_only_that_serial(tmp_path: 
     tests = ws.add("test", type="cycling", datasets="bdf/*.csv")
 
     assert [test.cell.serial_number for test in tests] == ["LAB-2025-000002"]
-    assert "NO MATCH  LAB-2024-000001.bdf.csv" in capsys.readouterr().out
+    out = capsys.readouterr().out
+    assert "NO MATCH  LAB-2024-000001.bdf.csv" in out
+    # The hint searches for the serial the file is named after, not the name with .bdf.
+    assert "serials=['LAB-2024-000001']" in out
 
 
 def test_converted_files_of_cells_whose_serials_share_a_tail_each_bind_their_own_cell(tmp_path: Path) -> None:
@@ -271,6 +274,39 @@ def test_converted_files_of_cells_whose_serials_share_a_tail_each_bind_their_own
     for test in tests:
         (dataset,) = [d for d in ws._ws.datasets if d.test is test]
         assert Path(dataset.dataset_path).name == f"{test.cell.serial_number}.bdf.csv"
+
+
+@pytest.mark.parametrize(
+    ("name", "stems"),
+    [
+        ("C01.csv", ["C01.csv", "C01"]),
+        ("LAB-2024-000001.bdf.csv", ["LAB-2024-000001.bdf.csv", "LAB-2024-000001.bdf", "LAB-2024-000001"]),
+        ("C01.cycler-export", ["C01.cycler-export", "C01"]),
+        ("S1.6.csv", ["S1.6.csv", "S1.6"]),
+        ("S1.5.bdf.csv", ["S1.5.bdf.csv", "S1.5.bdf", "S1.5"]),
+        ("S1.6", ["S1.6"]),
+        ("C01.cycle1.csv", ["C01.cycle1.csv", "C01.cycle1"]),
+    ],
+)
+def test_a_data_file_name_loses_only_its_extension_and_data_format_suffixes(name: str, stems: list[str]) -> None:
+    from battinfo.ws import _data_file_stems
+
+    assert _data_file_stems(name) == stems
+
+
+def test_a_data_file_for_a_dotted_serial_never_binds_the_serial_it_starts_with(tmp_path: Path, capsys) -> None:
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("cell", spec=SPEC, serial_numbers=["S1.5", "S1"])
+    for name in ("S1.5.bdf.csv", "S1.6.csv", "S1.bdf.csv"):
+        _data(tmp_path / "bdf" / name)
+
+    tests = ws.add("test", type="cycling", datasets="bdf/*.csv")
+
+    bound = {Path(d.dataset_path).name: d.test.cell.serial_number for d in ws._ws.datasets}
+    assert len(tests) == 2 and bound == {"S1.5.bdf.csv": "S1.5", "S1.bdf.csv": "S1"}
+    out = capsys.readouterr().out
+    assert "NO MATCH  S1.6.csv" in out
+    assert "serials=['S1.6']" in out
 
 
 def test_reading_the_saved_cells_back_leaves_an_unsaved_session_cell_unambiguous(tmp_path: Path) -> None:

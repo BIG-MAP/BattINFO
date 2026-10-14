@@ -193,6 +193,62 @@ def _is_short_id(token: str) -> bool:
     return _BARE_SHORT_ID_RE.fullmatch(token) is not None
 
 
+# Data-format suffixes a data file's name can carry before its extension, such
+# as the .bdf in the <serial>.bdf.csv files ws.convert() writes. Only these come
+# off after the extension when a file is matched to a cell, so a dot that is
+# part of a serial number (S1.5.bdf.csv) stays.
+_DATA_FILE_SUFFIXES = frozenset(
+    {
+        ".arrow",
+        ".bdf",
+        ".csv",
+        ".dat",
+        ".feather",
+        ".gz",
+        ".h5",
+        ".hdf5",
+        ".json",
+        ".jsonld",
+        ".mat",
+        ".mpr",
+        ".mpt",
+        ".nda",
+        ".ndax",
+        ".parquet",
+        ".res",
+        ".tar",
+        ".tsv",
+        ".txt",
+        ".xls",
+        ".xlsx",
+        ".zip",
+    }
+)
+
+
+def _data_file_stems(name: str) -> builtins.list[str]:
+    """The names a data file called *name* can name a cell by, longest first.
+
+    The file name itself, then the name without its extension (the last
+    suffix, when it has a letter in it), then without each data-format suffix
+    before that (:data:`_DATA_FILE_SUFFIXES`), one at a time. So
+    ``LAB-01.bdf.csv`` gives ``LAB-01.bdf`` and ``LAB-01``, while ``S1.6.csv``
+    stops at ``S1.6`` and never gives ``S1``.
+    """
+    stems = [name]
+    current = name
+    while True:
+        stem, dot, suffix = current.rpartition(".")
+        if not dot or not stem.strip("."):
+            return stems
+        suffix = f".{suffix}".lower()
+        is_extension = len(stems) == 1 and any(char.isalpha() for char in suffix)
+        if not is_extension and suffix not in _DATA_FILE_SUFFIXES:
+            return stems
+        current = stem
+        stems.append(current)
+
+
 def _iri_short_id(iri: str | None) -> str | None:
     """The short ID of a record IRI: the first six characters of its UID."""
     tail = (iri or "").rstrip("/").rsplit("/", 1)[-1]
@@ -10387,21 +10443,19 @@ class AuthoringWorkspace:
     def _cells_for_data_file(self, path: Path) -> tuple[builtins.list[Any], str | None, bool]:
         """The cells a data file's name names, the part of the name that named them, and whether it was a label.
 
-        The name with its suffixes taken off one at a time (``LAB-01.bdf.csv``
-        gives ``LAB-01.bdf``, then ``LAB-01``) is matched against every cell's
-        serial number and name exactly; the first that matches a cell decides.
-        Only when none does is a short ID tried. A name that is a short ID on
-        its own (``gm6pmr.bdf.csv``) finds a cell whose IRI or label carries
-        it. A short ID a name ends in (``cycling-gm6pmr.csv``) finds only the
-        cell whose IRI it is the short ID of, because a serial number such as
-        ``LAB-2024-000001`` ends in six characters another serial can share.
+        The name, then the name with its extension and data-format suffixes
+        taken off one at a time (``LAB-01.bdf.csv`` gives ``LAB-01.bdf``, then
+        ``LAB-01``; see :func:`_data_file_stems`), is matched against every
+        cell's serial number and name exactly; the first that matches a cell
+        decides. A dot that is part of a serial stays, so ``S1.6.csv`` never
+        names the cell ``S1``. Only when no cell matches is a short ID tried. A
+        name that is a short ID on its own (``gm6pmr.bdf.csv``) finds a cell
+        whose IRI or label carries it. A short ID a name ends in
+        (``cycling-gm6pmr.csv``) finds only the cell whose IRI it is the short
+        ID of, because a serial number such as ``LAB-2024-000001`` ends in six
+        characters another serial can share.
         """
-        stems: builtins.list[str] = []
-        name = path.name
-        while "." in name.strip("."):
-            name = name.rsplit(".", 1)[0]
-            stems.append(name)
-        stems = stems or [path.name]
+        stems = _data_file_stems(path.name)
         for stem in stems:
             exact = [cell for cell, labels in self._indexed_cells if stem in labels]
             if exact:
@@ -10517,7 +10571,7 @@ class AuthoringWorkspace:
             print(f"\n  {len(unmatched)} file(s) had no matching cell instance:")
             for f in unmatched:
                 print(f"    {f.name}")
-            stems = ", ".join(repr(f.stem) for f in unmatched[:5])
+            stems = ", ".join(repr(_data_file_stems(f.name)[-1]) for f in unmatched[:5])
             print("  Reference the missing cells (e.g. registered at manufacture), then re-run:")
             print(f"      ws.load(ws.search(type='cell', serials=[{stems}]))")
             print("  ...or pass them explicitly: ws.add('test', cell='<serial>', data='<file>').")
