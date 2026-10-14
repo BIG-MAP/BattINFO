@@ -121,8 +121,18 @@ def file_uri_to_path(url: str) -> Path:
     letter, and percent-escapes are decoded. Anything else is taken as a path.
     Nothing here touches the file system.
     """
-    text = url.strip()
-    return Path(_file_uri_path_text(text)) if is_file_uri(text) else Path(text)
+    return Path(location_text(url))
+
+
+def location_text(location: str) -> str:
+    """The path a ``file:`` URI, or a plain path string, names, as text, before :mod:`pathlib` reads it.
+
+    Pathlib's reading of a run of separators at the start differs between
+    Python versions (3.11 on Windows folds three into one), so a check that
+    must not depend on it, such as :func:`network_host`, reads this text.
+    """
+    text = location.strip()
+    return _file_uri_path_text(text) if is_file_uri(text) else text
 
 
 #: Characters a URL path segment may carry as they are, besides letters,

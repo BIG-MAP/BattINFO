@@ -68,6 +68,7 @@ from battinfo._util import (
     is_local_location,
     lexical_key,
     lexically_within,
+    location_text,
     network_host,
     path_tail,
     url_segment,
@@ -134,9 +135,11 @@ def location_path(location: str, root: Path, *, registered: Collection[str] = fr
     if not text or not is_local_location(text):
         return None
     written = file_uri_to_path(text)
-    # Read from the path as written: on Linux and macOS a \\server\share path
-    # is a relative name, but it names another computer all the same.
-    host = network_host(written)
+    # Read from the text, before pathlib parses it: on Linux and macOS a
+    # \\server\share path is a relative name, and Python 3.11's pathlib on
+    # Windows folds a run of three separators into one, but either names
+    # another computer all the same.
+    host = network_host(location_text(text))
     path = written if written.is_absolute() else root / written
     if has_parent_reference(path):
         raise UnsafeLocation(text, "goes up a folder with '..'")
