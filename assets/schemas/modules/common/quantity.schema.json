@@ -78,7 +78,7 @@
     },
     "conditions": {
       "type": "object",
-      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions emit as hasMeasurementParameter on a measurement node the quantity isOutputOf; the voltage_reference key instead emits as hasMetrologicalReference on the quantity itself.",
+      "description": "Measurement parameters or conditions under which this quantity holds, as a map of condition name to quantity (e.g. discharging_c_rate, lower_voltage_limit, upper_voltage_limit, temperature, cycle_number, voltage_reference). A qualitative condition may carry value_text alone, with no unit. In JSON-LD, conditions on a measured value emit as hasMeasurementParameter on a measurement node the quantity isOutputOf, and conditions on a declared value (Conventional, Rated or Nominal) become named schema:valueReference qualifiers on the quantity. The voltage_reference key emits under schema:valueReference either way, as a node typed with the reference electrode's classes.",
       "patternProperties": {
         "^[a-z][a-z0-9_]*$": {
           "$ref": "#"

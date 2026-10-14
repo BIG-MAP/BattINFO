@@ -47,10 +47,11 @@
     ]
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Prismatic Al housing with Al/Cu terminals and PP seals. Cell_Design_Tool LFP 100 Ah prismatic."
+    "Prismatic Al housing with Al/Cu terminals and PP seals. Cell_Design_Tool LFP 100 Ah prismatic.",
+    "Illustrative example: values typical of this housing, not taken from a datasheet or measured."
   ]
 }

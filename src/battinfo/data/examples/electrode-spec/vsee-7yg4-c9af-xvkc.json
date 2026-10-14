@@ -69,10 +69,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "LMFP cathode (96/2/2 LMFP/PVDF/carbon black on Al foil)."
+    "LMFP cathode (96/2/2 LMFP/PVDF/carbon black on Al foil).",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }

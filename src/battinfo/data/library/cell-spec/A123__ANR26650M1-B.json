@@ -8,7 +8,7 @@
     "format": "cylindrical",
     "chemistry": "Li-ion",
     "positive_electrode_basis": "LFP",
-    "negative_electrode_basis": "graphite",
+    "negative_electrode_basis": "unknown",
     "size_code": "R26650",
     "property": {
       "nominal_capacity": {

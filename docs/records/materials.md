@@ -372,7 +372,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm#described",
     "skos:prefLabel": "NMC811"
   },
-  "schema:comment": "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells."
+  "schema:comment": [
+    "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -553,7 +556,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/5ms1-9jv8-hr54-mn4e#described",
     "skos:prefLabel": "LFP"
   },
-  "schema:comment": "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells."
+  "schema:comment": [
+    "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -727,7 +733,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/gwck-k5kf-ae1f-gfgc#described",
     "skos:prefLabel": "Graphite"
   },
-  "schema:comment": "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode)."
+  "schema:comment": [
+    "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -954,7 +963,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/83bd-jmk7-2x47-s04a#described",
     "skos:prefLabel": "LNMO"
   },
-  "schema:comment": "High-voltage spinel cathode active material (synthetic reference example)."
+  "schema:comment": [
+    "High-voltage spinel cathode active material (synthetic reference example).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -1041,7 +1053,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/bkrw-7shb-tzbm-j664#described",
     "skos:prefLabel": "PVDF"
   },
-  "schema:comment": "Polyvinylidene fluoride binder."
+  "schema:comment": [
+    "Polyvinylidene fluoride binder.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -1128,7 +1143,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/r5xt-4hrh-jm2k-yg4m#described",
     "skos:prefLabel": "Carbon black"
   },
-  "schema:comment": "Conductive carbon additive (e.g. Super P-grade)."
+  "schema:comment": [
+    "Conductive carbon additive (e.g. Super P-grade).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -1216,7 +1234,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/fpeg-3wg8-e6cs-2vn1#described",
     "skos:prefLabel": "LiPF6"
   },
-  "schema:comment": "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC."
+  "schema:comment": [
+    "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -1311,7 +1332,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "@id": "https://w3id.org/battinfo/spec/efxx-b9yg-wh00-d23a#described",
     "skos:prefLabel": "EC"
   },
-  "schema:comment": "Ethylene carbonate; cyclic carbonate solvent."
+  "schema:comment": [
+    "Ethylene carbonate; cyclic carbonate solvent.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::

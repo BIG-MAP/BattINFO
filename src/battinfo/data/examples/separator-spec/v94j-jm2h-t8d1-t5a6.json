@@ -19,10 +19,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781768181
   },
   "notes": [
-    "Ceramic (Al2O3) coated PE separator for higher thermal stability."
+    "Ceramic (Al2O3) coated PE separator for higher thermal stability.",
+    "Illustrative example: values typical of this separator, not taken from a datasheet or measured."
   ]
 }

@@ -21,6 +21,7 @@ from battinfo.validate import ValidationPolicy, validate_record_report
 ROOT = Path(__file__).resolve().parents[1]
 FLAGSHIP = ROOT / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
 RESEARCH = ROOT / "examples" / "cell-spec" / "research" / "a123-anr26650m1-b.detailed.example.json"
+EXTENDED = ROOT / "examples" / "cell-spec" / "research" / "extended.example.json"
 LIBRARY = ROOT / "src" / "battinfo" / "data" / "library" / "cell-spec" / "A123__ANR26650M1-B.json"
 
 STRICT = ValidationPolicy(name="strict", semantic="error")
@@ -137,12 +138,12 @@ def test_flagship_jsonld_claims_no_2_5_a_charging_maximum_and_a_120_a_pulse() ->
     assert not _typed(document, "PulseChargingCurrent")
 
 
-@pytest.mark.parametrize("path", [RESEARCH, LIBRARY], ids=["research", "library"])
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED, LIBRARY], ids=["research", "extended", "library"])
 def test_copy_has_no_alumina_additive(path: Path) -> None:
     assert "Al2O3" not in path.read_text(encoding="utf-8")
 
 
-@pytest.mark.parametrize("path", [RESEARCH, LIBRARY], ids=["research", "library"])
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED, LIBRARY], ids=["research", "extended", "library"])
 def test_copy_aluminium_foil_areal_mass_is_physical(path: Path) -> None:
     for node in _nodes(_load(path)):
         collector = node.get("current_collector")
@@ -166,8 +167,12 @@ def test_library_copy_carries_no_unsourced_internals() -> None:
 
 @pytest.mark.parametrize(
     ("path", "properties"),
-    [(RESEARCH, lambda record: record["properties"]), (LIBRARY, _library_properties)],
-    ids=["research", "library"],
+    [
+        (RESEARCH, lambda record: record["properties"]),
+        (EXTENDED, lambda record: record["properties"]),
+        (LIBRARY, _library_properties),
+    ],
+    ids=["research", "extended", "library"],
 )
 def test_copy_properties_agree_with_the_flagship(path: Path, properties) -> None:
     flagship = _load(FLAGSHIP)["properties"]
@@ -177,8 +182,61 @@ def test_copy_properties_agree_with_the_flagship(path: Path, properties) -> None
         assert _number(quantity) == _number(flagship[key]), key
 
 
-def test_research_copy_marks_its_internals_as_illustrative() -> None:
-    record = _load(RESEARCH)
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED], ids=["research", "extended"])
+def test_research_copy_marks_its_internals_as_illustrative(path: Path) -> None:
+    record = _load(path)
     for block in ("positive_electrode", "negative_electrode", "electrolyte", "separator"):
         comment = record[block].get("comment", "")
         assert "Illustrative" in comment, block
+
+
+HEADER_KEYS = ("chemistry", "positive_electrode_basis", "negative_electrode_basis", "size_code")
+
+
+def test_library_copy_header_agrees_with_the_flagship() -> None:
+    flagship = _load(FLAGSHIP)["cell_spec"]
+    specification = _load(LIBRARY)["specification"]
+    for key in HEADER_KEYS:
+        assert specification.get(key) == flagship.get(key), key
+    assert specification.get("format") == flagship.get("cell_format")
+
+
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED], ids=["research", "extended"])
+def test_research_copy_header_agrees_with_the_flagship_or_says_why_not(path: Path) -> None:
+    flagship = _load(FLAGSHIP)["cell_spec"]
+    record = _load(path)
+    header = record["cell_spec"]
+    notes = " ".join(record.get("notes", []))
+    for key in HEADER_KEYS:
+        if header.get(key) == flagship.get(key):
+            continue
+        # The data sheet names no negative electrode. A copy whose illustrative
+        # internals use graphite may say so in its header, but only if its notes
+        # tell the reader where that basis comes from.
+        assert key == "negative_electrode_basis", key
+        assert "graphite basis in the header belongs to the illustrative internals" in notes
+
+
+@pytest.mark.parametrize("path", [RESEARCH, EXTENDED], ids=["research", "extended"])
+def test_research_copy_electrode_coatings_add_up(path: Path) -> None:
+    # Loading divided by coating thickness is the coating density. Where an
+    # electrode also states a compaction density, the two must agree.
+    record = _load(path)
+    for block in ("positive_electrode", "negative_electrode"):
+        electrode = record[block]
+        density = electrode.get("property", {}).get("compaction_density")
+        coating = electrode["coating"]["property"]
+        if density is None or "loading" not in coating or "thickness" not in coating:
+            continue
+        from_loading = coating["loading"]["value"] / (coating["thickness"]["value"] * 1e-4) / 1000
+        assert from_loading == pytest.approx(density["value"], rel=0.03), block
+
+
+def test_extended_copy_fractions_sum_to_one() -> None:
+    components = _load(EXTENDED)["positive_electrode"]["coating"]["component"]
+    total = sum(
+        item["property"]["mass_fraction"]["value"]
+        for group in ("active_material", "binder", "additive")
+        for item in components.get(group, [])
+    )
+    assert total == pytest.approx(1.0)

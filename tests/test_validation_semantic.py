@@ -107,6 +107,23 @@ def test_semantic_validation_rejects_dataset_without_cell_link() -> None:
     assert any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.errors)
 
 
+@pytest.mark.parametrize(
+    "about",
+    [
+        ["https://w3id.org/battinfo/material/syzh-8sbd-ygb1-kfgg"],
+        ["https://w3id.org/battinfo/spec/npa4-0dnw-evyh-hhdm"],
+    ],
+    ids=["material-lot", "material-spec"],
+)
+def test_semantic_validation_allows_a_material_dataset(about: list[str]) -> None:
+    # A powder XRD dataset measures a material, not a cell: its material lot or
+    # that lot's material spec is a valid subject on its own.
+    doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    doc["dataset"]["about"] = about
+    report = validate_semantic_report(doc, policy=STRICT_SEMANTIC)
+    assert not any(issue.code == "semantic.dataset_missing_cell_link" for issue in report.issues)
+
+
 def test_semantic_validation_allows_dataset_with_cell_spec_link_only() -> None:
     doc = _load_json("src/battinfo/data/examples/dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
     doc["dataset"]["about"] = ["https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"]

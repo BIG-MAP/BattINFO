@@ -31,10 +31,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "Manganese dioxide cathode active material for alkaline Zn-MnO2 cells (synthetic reference)."
+    "Manganese dioxide cathode active material for alkaline Zn-MnO2 cells (synthetic reference).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

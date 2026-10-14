@@ -69,10 +69,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "LNMO cathode (96/2/2 LNMO/PVDF/carbon black on Al foil)."
+    "LNMO cathode (96/2/2 LNMO/PVDF/carbon black on Al foil).",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }

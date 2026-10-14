@@ -424,7 +424,7 @@ def test_derive_cell_spec_from_library_record_mapping() -> None:
     assert cell_spec.id == "https://w3id.org/battinfo/spec/9qfb-4wrn-ynwc-ayjw"
     assert cell_spec.model == "ANR26650M1-B"
     assert cell_spec.positive_electrode_basis == "LFP"
-    assert cell_spec.negative_electrode_basis == "graphite"
+    assert cell_spec.negative_electrode_basis == "unknown"
     assert cell_spec.properties["nominal_voltage"]["value"] == 3.3
 
 

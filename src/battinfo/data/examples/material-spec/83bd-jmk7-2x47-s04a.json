@@ -47,10 +47,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "High-voltage spinel cathode active material (synthetic reference example)."
+    "High-voltage spinel cathode active material (synthetic reference example).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

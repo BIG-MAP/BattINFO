@@ -21,10 +21,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740346
   },
   "notes": [
-    "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC."
+    "Lithium hexafluorophosphate; conducting salt for organic Li-ion electrolytes. Discovery-Benchmark 1M LiPF6 EC:EMC.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

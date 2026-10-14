@@ -73,3 +73,20 @@ def test_the_pages_say_where_voltage_reference_goes() -> None:
         assert "hasMetrologicalReference" not in text, f"docs/records/{name} names hasMetrologicalReference"
     intro = gen.render_all()["cells.md"].split("## Fields", 1)[1]
     assert "`voltage_reference` key goes under `schema:valueReference`" in intro
+
+
+def test_the_schemas_say_where_voltage_reference_goes() -> None:
+    # The conditions description in the JSON Schemas (and every copy of them
+    # that ships or is hosted) made the same hasMetrologicalReference claim.
+    root = Path(__file__).resolve().parents[1]
+    paths = [
+        *sorted((root / "assets" / "schemas").rglob("*.json")),
+        *sorted((root / "src" / "battinfo" / "data" / "schemas").rglob("*.json")),
+        *sorted((root / "src" / "battinfo" / "data" / "profiles").rglob("*.json")),
+        root / "web" / "lib" / "schemas.generated.ts",
+    ]
+    for path in paths:
+        text = path.read_text(encoding="utf-8")
+        assert "hasMetrologicalReference" not in text, path.relative_to(root).as_posix()
+    quantity = (root / "assets" / "schemas" / "modules" / "common" / "quantity.schema.json").read_text(encoding="utf-8")
+    assert "The voltage_reference key emits under schema:valueReference" in quantity

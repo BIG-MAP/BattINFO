@@ -245,9 +245,10 @@ def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
         return out_path
 
     try:
-        # Tolerant conversion: bdf.read auto-detects the format (raising if no
-        # reader matches) and validate=False keeps partially-conformant files
-        # convertible — the interop policy is "express what you can".
+        # bdf.read auto-detects the format (raising if no reader matches), and
+        # validate=False lets it read a partially-conformant file. The save
+        # still validates, as ws.convert() does, so a file that lacks a
+        # required BDF column such as current is not converted.
         df, _meta = _read_bdf_pandas(csv_path, validate=False)
         _save_bdf(df, out_path)
         return out_path
@@ -330,6 +331,8 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
             # Suppress any diagnostic prints from batterydf plugins
             with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
                 df, _meta = _read_bdf_pandas(raw_path, validate=False)
+            # The read is tolerant; the save validates, so a file without a
+            # required BDF column ends in (None, None) here.
             _save_bdf(df, out_path)
         return out_path, _infer_test_type_from_df(df)
     except Exception:

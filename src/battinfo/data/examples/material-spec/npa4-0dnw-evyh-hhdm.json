@@ -56,10 +56,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells."
+    "Nickel-rich layered oxide cathode. Discovery-Benchmark NMC811-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

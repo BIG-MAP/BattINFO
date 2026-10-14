@@ -46,10 +46,11 @@
     "polarity": "positive"
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781772766
   },
   "notes": [
-    "MnO2 cathode for alkaline Zn-MnO2 cells."
+    "MnO2 cathode for alkaline Zn-MnO2 cells.",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
   ]
 }

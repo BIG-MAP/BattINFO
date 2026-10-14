@@ -243,6 +243,29 @@ class TestACellSpecNeitherLibraryHolds:
         [cell_result] = payload["cells"]
         assert len(cell_result["errors"]) == 1 and cell_result["errors"][0].startswith(expected), payload
 
+    @pytest.mark.parametrize(
+        ("text", "expected"),
+        [
+            ('cell_spec_iri: "unterminated\ncell_name: [one\n', "is not valid YAML"),
+            ("- cell_spec_iri\n- cell_name\n", "must hold key: value pairs"),
+        ],
+        ids=["yaml-syntax-error", "top-level-list"],
+    )
+    def test_a_malformed_manifest_is_a_json_error_not_a_traceback(
+        self, tmp_path: Path, monkeypatch, text: str, expected: str
+    ) -> None:
+        monkeypatch.chdir(tmp_path)
+        batch_dir = tmp_path / "batch"
+        cell = _cell_with_data(batch_dir, init_batch(batch_dir, "Energizer CR2032", 1, lab="SINTEF"))
+        (cell / CONTRIBUTION_MANIFEST).write_text(text, encoding="utf-8")
+
+        result = runner.invoke(app, ["dataset", "process", str(batch_dir), "--json"])
+        assert result.exit_code == 1, result.output
+        payload = json.loads(result.stdout)
+        assert (payload["ok"], payload["fail_count"]) == (False, 1)
+        [cell_result] = payload["cells"]
+        assert len(cell_result["errors"]) == 1 and expected in cell_result["errors"][0], payload
+
 
 # ── The local library ─────────────────────────────────────────────────────────
 

@@ -452,7 +452,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "@id": "https://w3id.org/battinfo/spec/qfjh-7xyr-ga1k-tjez",
   "schema:name": "NMC811 cathode",
-  "schema:comment": "NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells."
+  "schema:comment": [
+    "NMC811 cathode (96/2/2 NMC811/PVDF/carbon black on Al foil). Discovery-Benchmark NMC811-Graphite cells.",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -622,7 +625,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "@id": "https://w3id.org/battinfo/spec/d7qr-n581-74c3-7g7r",
   "schema:name": "Graphite anode",
-  "schema:comment": "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells."
+  "schema:comment": [
+    "Graphite anode (95/4/1 graphite/CMC-SBR/carbon black on Cu foil). Discovery-Benchmark cells.",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::
@@ -784,7 +790,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "@id": "https://w3id.org/battinfo/spec/m6y0-tkfg-sn40-q10p",
   "schema:name": "LFP cathode",
-  "schema:comment": "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil)."
+  "schema:comment": [
+    "LFP cathode (96/2/2 LFP/PVDF/carbon black on Al foil).",
+    "Illustrative example: values typical of this electrode, not taken from a datasheet or measured."
+  ]
 }
 ```
 ::::

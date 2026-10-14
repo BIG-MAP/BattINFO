@@ -133,11 +133,11 @@
           "unit": "mg/cm^2"
         },
         "porosity": {
-          "value": 0.35,
+          "value": 0.31,
           "unit": "1"
         },
         "thickness": {
-          "value": 66.0,
+          "value": 85.0,
           "unit": "um"
         }
       },
@@ -325,10 +325,10 @@
     "source_file": null,
     "source_url": null,
     "retrieved_at": 1772556000,
-    "comment": "Hand-written review example. The cell header and properties follow the data sheet; the electrode, electrolyte and separator blocks are illustrative."
+    "comment": "Hand-written review example. The cell header and properties follow the data sheet, except the graphite negative electrode basis; the electrode, electrolyte and separator blocks are illustrative."
   },
   "notes": [
-    "The cell header and the properties are from the A123 ANR26650M1-B data sheet, MD100113-02 (2012), as in the flagship record examples/cell-spec/A123__ANR26650M1-B.json.",
+    "The cell header and the properties are from the A123 ANR26650M1-B data sheet, MD100113-02 (2012), as in the flagship record examples/cell-spec/A123__ANR26650M1-B.json. The data sheet does not name the negative electrode: the graphite basis in the header belongs to the illustrative internals.",
     "The electrode, electrolyte and separator blocks are illustrative values that exercise the descriptor structure. A123 does not publish these values, and they were not measured on this cell.",
     "This is the primary end-to-end review file for battery descriptor changes.",
     "Update this file whenever schema or mapping decisions change."

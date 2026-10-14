@@ -56,10 +56,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells."
+    "Lithium iron phosphate cathode active material. Discovery-Benchmark LFP-Graphite cells.",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }

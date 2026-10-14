@@ -262,10 +262,16 @@ def test_design_tool_cells_name_an_example_lab_and_a_manual_source(uid: str, mod
     assert doc["provenance"]["source_type"] == "manual"
 
 
-def test_no_example_cell_spec_claims_an_unnamed_datasheet() -> None:
+def test_no_example_claims_an_unnamed_datasheet() -> None:
     # A datasheet source says which datasheet: its name, its URL or its hash.
-    for path in sorted((EXAMPLES / "cell-spec").rglob("*.json")):
-        provenance = _load(path).get("provenance", {})
+    # This covers every kind of example, not only cell specs.
+    for path in sorted(EXAMPLES.rglob("*.json")):
+        record = _load(path)
+        if not isinstance(record, dict):
+            continue
+        provenance = record.get("provenance") or {}
+        if not isinstance(provenance, dict):
+            continue
         if provenance.get("source_type") != "datasheet":
             continue
         named = provenance.get("source_name") or provenance.get("source_url") or provenance.get("file_hash")

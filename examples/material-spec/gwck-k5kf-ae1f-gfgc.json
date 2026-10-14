@@ -51,10 +51,11 @@
     }
   },
   "provenance": {
-    "source_type": "datasheet",
+    "source_type": "manual",
     "retrieved_at": 1781740345
   },
   "notes": [
-    "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode)."
+    "Graphite anode active material. Grounded in the DIGIBAT Discovery-Benchmark coin-cell builds (Canrud anode).",
+    "Illustrative example: values typical of this material, not taken from a datasheet or measured."
   ]
 }
