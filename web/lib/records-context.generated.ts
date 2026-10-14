@@ -871,6 +871,7 @@ export const recordsContext: Record<string, unknown> = {
     "ConstantVoltageCharging": "electrochemistry:electrochemistry_acdeaa89_0e99_4941_8821_d5dea3d34912",
     "ConstantVoltageDischarging": "electrochemistry:electrochemistry_9865e4f9_756d_4d94_a6fd_4102ab795f9e",
     "Mesh": "electrochemistry:electrochemistry_18f2199b_c50c_49ec_bd17_a37626ca5e63",
-    "Foam": "emmo:EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018"
+    "Foam": "emmo:EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018",
+    "PercentUnit": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
   }
 };

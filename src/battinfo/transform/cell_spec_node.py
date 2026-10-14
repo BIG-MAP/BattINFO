@@ -24,7 +24,8 @@ The node shape is the canonical target shape:
 - Quantities use the EMMO ``hasProperty`` pattern via
   :func:`battinfo.transform.json_to_jsonld._descriptor_quantity_node`
   (list ``@type`` of ``[PropertyClass, co-type]``, ``hasNumericalPart`` typed
-  ``RealData``, ``hasMeasurementUnit`` as a bare unit IRI).
+  ``RealData``, ``hasMeasurementUnit`` as a bare unit IRI, and the bounds of a
+  range as ``schema:minValue`` / ``schema:maxValue``).
 - Provenance uses standard vocabularies only (dcterms / PROV-O) — no new
   ``battinfo:`` terms are minted.
 """
@@ -141,6 +142,10 @@ _EXTRA_CONTEXT_TERMS: tuple[str, ...] = (
     "isOutputOf",
     "BatteryMeasurement",
     "hasStringValue",
+    # The basis a percent unit states (wt%, vol%) rides as an extra class of the
+    # quantity; the unit itself is PercentUnit.
+    "WeightPercent",
+    "VolumePercent",
     # IEC designation datatype slot on the described cell.
     "hasIECCode",
     # Metrological datum on voltage-dimensioned quantities (voltage_reference).
@@ -413,7 +418,7 @@ def cell_spec_property_nodes(properties: Any, *, context_label: str = "") -> lis
     lossy edges: a key without a curated EMMO mapping gets no quantity class,
     only its value-basis class with the key as label
     (``semantic.property_unmapped``), and a quantity carrying only
-    ``value_text`` emits no numeric part (``semantic.value_text_only``).
+    ``value_text`` emits no number and no bound (``semantic.value_text_only``).
     """
     nodes: list[dict[str, Any]] = []
     if not isinstance(properties, Mapping):
@@ -433,7 +438,7 @@ def cell_spec_property_nodes(properties: Any, *, context_label: str = "") -> lis
             )
         has_number = any(
             isinstance(quantity.get(field), (int, float)) and not isinstance(quantity.get(field), bool)
-            for field in ("value", "typical_value")
+            for field in ("value", "typical_value", "min_value", "max_value")
         )
         if not has_number and isinstance(quantity.get("value_text"), str):
             warnings.warn(

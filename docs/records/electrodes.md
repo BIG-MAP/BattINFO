@@ -131,6 +131,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.96
@@ -149,6 +150,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -167,6 +169,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -347,6 +350,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.96
@@ -368,6 +372,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -389,6 +394,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -523,6 +529,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.95
@@ -538,6 +545,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.04
@@ -559,6 +567,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.01
@@ -693,6 +702,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.96
@@ -714,6 +724,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -735,6 +746,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -852,6 +864,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.9
@@ -873,6 +886,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.05
@@ -894,6 +908,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "MassFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "MassFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.05
@@ -976,6 +991,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "Porosity",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Porosity",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 0.35

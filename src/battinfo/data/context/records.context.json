@@ -375,7 +375,7 @@
     "min": "emmo:Minute",
     "s": "emmo:Second",
     "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%": "emmo:Percent",
+    "%": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
     "license": {
       "@id": "dcterms:license",
       "@type": "@id"

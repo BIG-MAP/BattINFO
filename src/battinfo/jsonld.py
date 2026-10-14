@@ -356,7 +356,9 @@ CONTEXT_UNIT_SYMBOLS: dict[str, str] = {
     # table, so a "C" -> Coulomb term here silently shadows the correct
     # electrochemistry:AmperePerAmpereHour mapping (commit 41b7db3).
     "1": "emmo:EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978",
-    "%": "emmo:Percent",
+    # PercentUnit, the only percent unit in the pinned closure. EMMO declares
+    # emmo:Percent in a units module the closure does not import.
+    "%": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
 }
 # Extra unit symbols not in the records context (CRate is current-per-capacity).
 TEST_CONDITION_UNIT_IRI: dict[str, str] = {
@@ -566,14 +568,16 @@ def protocol_property_value(name: str, value: Any, group: str = "") -> dict:
     """Labelled ``schema:PropertyValue`` fallback for anything outside the
     controlled condition vocabulary. ``group`` rides ``schema:propertyID`` so a
     consumer can still tell a safety limit from an ambient condition."""
+    from battinfo.transform.json_to_jsonld import schema_quantity_fields  # noqa: PLC0415
+
     node: dict = {"@type": "schema:PropertyValue", "schema:name": name}
     if group:
         node["schema:propertyID"] = group
     if isinstance(value, Mapping):
-        if value.get("value") is not None:
-            node["schema:value"] = value["value"]
-            if value.get("unit"):
-                node["schema:unitText"] = value["unit"]
+        fields = schema_quantity_fields(value)
+        if {"schema:value", "schema:minValue", "schema:maxValue"} & set(fields):
+            # A quantity, a range included: the value, bounds and unit as schema.org fields.
+            node.update(fields)
         else:
             node["schema:value"] = json.dumps(dict(value), ensure_ascii=False, sort_keys=True)
     else:
@@ -1155,6 +1159,7 @@ def test_to_jsonld(record: dict) -> dict:
             _MEASUREMENT_PARAMETER_TERMS,
             _descriptor_quantity_node,
             _voltage_reference_node,
+            schema_quantity_fields,
         )
 
         props: list[dict] = []
@@ -1176,10 +1181,8 @@ def test_to_jsonld(record: dict) -> dict:
                     props.append(ref_pv)
                     continue
             pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
-            if isinstance(value, Mapping) and "value" in value:
-                pv["schema:value"] = value.get("value")
-                if value.get("unit"):
-                    pv["schema:unitText"] = value["unit"]
+            if isinstance(value, Mapping):
+                pv.update(schema_quantity_fields(value))
             else:
                 pv["schema:value"] = value
             props.append(pv)
@@ -1643,8 +1646,15 @@ def _property_value_nodes(property_map: Any) -> list[dict]:
     Equipment quantities (voltage range, max current, ...) are lab-hardware
     facts outside the battery domain vocabulary, so they emit as honest named
     PropertyValues rather than through the EMMO property map (which would
-    warn on every key and mint battinfo: fallbacks).
+    warn on every key and mint battinfo: fallbacks). Every field a quantity
+    holds is kept (:func:`~battinfo.transform.json_to_jsonld.schema_quantity_fields`):
+    the value, else the typical value, else the text; the bounds as
+    ``schema:minValue`` and ``schema:maxValue``; the unit, else the unit text.
+    A quantity with none of value, typical value, bounds or text is left out
+    with the warning ``semantic.quantity_not_emitted``.
     """
+    from battinfo.transform.json_to_jsonld import schema_quantity_fields  # noqa: PLC0415
+
     out: list[dict] = []
     if not isinstance(property_map, Mapping):
         return out
@@ -1652,13 +1662,15 @@ def _property_value_nodes(property_map: Any) -> list[dict]:
         quantity = property_map[name]
         if not isinstance(quantity, Mapping):
             continue
-        value = quantity.get("value", quantity.get("value_text"))
-        if value is None:
+        fields = schema_quantity_fields(quantity)
+        if not {"schema:value", "schema:minValue", "schema:maxValue"} & set(fields):
+            warnings.warn(
+                f"semantic.quantity_not_emitted: '{name}' has no value, typical_value, min_value, "
+                "max_value or value_text that the JSON-LD export can carry, so it is left out.",
+                stacklevel=3,
+            )
             continue
-        node: dict = {"@type": "schema:PropertyValue", "schema:name": name, "schema:value": value}
-        if quantity.get("unit"):
-            node["schema:unitText"] = quantity["unit"]
-        out.append(node)
+        out.append({"@type": "schema:PropertyValue", "schema:name": name, **fields})
     return out
 
 
@@ -1800,12 +1812,18 @@ def _channel_to_jsonld(record: dict) -> dict:
         node["schema:position"] = body["index"]
     if body.get("equipment_id"):
         node["schema:isPartOf"] = {"@id": body["equipment_id"]}
+    properties = _property_value_nodes(body.get("property"))
     if body.get("status"):
-        node["schema:additionalProperty"] = {
-            "@type": "schema:PropertyValue",
-            "schema:name": "status",
-            "schema:value": body["status"],
-        }
+        properties.insert(
+            0,
+            {
+                "@type": "schema:PropertyValue",
+                "schema:name": "status",
+                "schema:value": body["status"],
+            },
+        )
+    if properties:
+        node["schema:additionalProperty"] = properties[0] if len(properties) == 1 else properties
     if body.get("comment"):
         node["schema:description"] = body["comment"]
     if prov:

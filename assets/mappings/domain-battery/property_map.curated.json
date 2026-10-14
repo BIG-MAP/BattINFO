@@ -9,7 +9,7 @@
     "correct mapping is to temperature-limit property classes in domain-electrochemistry.",
     "0.4.0: wired the operating-temperature, typical-capacity and maximum-pulse-current keys that were fallback-emitted while their EMMO classes were pending.",
     "0.5.0: adopted domain-electrochemistry 0.39.0. ocp types OpenCircuitPotential (the electrode quantity; OpenCircuitVoltage is now strictly the cell-level one) and entropic_coefficient TemperatureCoefficientOfTheOpenCircuitPotential; solid_diffusivity moves to the new GuestDiffusivity, electrode_pair_count to NumberOfElectrodePairs, and transport_efficiency is mapped to the new TransportEfficiency.",
-    "0.6.0: promoted nominal_continuous_charging_current and nominal_continuous_discharging_current from the candidate map as ChargingCurrent and DischargingCurrent; the emitter no longer reads the candidate map. rated_energy and certified_usable_energy move from NominalEnergy to RatedEnergy, and typical_energy to StoredEnergy, since domain-electrochemistry 0.39.0 has no TypicalEnergy class."
+    "0.6.0: promoted nominal_continuous_charging_current and nominal_continuous_discharging_current from the candidate map as ChargingCurrent and DischargingCurrent; the emitter no longer reads the candidate map. rated_energy and certified_usable_energy move from NominalEnergy to RatedEnergy, and typical_energy to StoredEnergy, since domain-electrochemistry 0.39.0 has no TypicalEnergy class. Entries whose class names a bound (Maximum*, Minimum*, UpperVoltageLimit, LowerVoltageLimit) carry bound: max or min; a quantity typed with such a class and given only that bound has the bound as its number."
   ],
   "mappings": [
     {
@@ -104,6 +104,7 @@
       "class_qname": "emmo:UpperVoltageLimit",
       "class_pref_label": "UpperVoltageLimit",
       "class_label": "UpperVoltageLimit",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -123,6 +124,7 @@
       "class_qname": "emmo:MaximumChargingTemperature",
       "class_pref_label": "MaximumChargingTemperature",
       "class_label": "MaximumChargingTemperature",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -132,6 +134,7 @@
       "class_qname": "emmo:MinimumChargingTemperature",
       "class_pref_label": "MinimumChargingTemperature",
       "class_label": "MinimumChargingTemperature",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -179,6 +182,7 @@
       "class_qname": "emmo:MaximumContinuousChargingCurrent",
       "class_pref_label": "MaximumContinuousChargingCurrent",
       "class_label": "MaximumContinuousChargingCurrent",
+      "bound": "max",
       "confidence": 0.9
     },
     {
@@ -188,6 +192,7 @@
       "class_qname": "emmo:MaximumContinuousDischargingCurrent",
       "class_pref_label": "MaximumContinuousDischargingCurrent",
       "class_label": "MaximumContinuousDischargingCurrent",
+      "bound": "max",
       "confidence": 0.9
     },
     {
@@ -261,6 +266,7 @@
       "class_qname": "emmo:LowerVoltageLimit",
       "class_pref_label": "LowerVoltageLimit",
       "class_label": "LowerVoltageLimit",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -280,6 +286,7 @@
       "class_qname": "emmo:MaximumDischargingTemperature",
       "class_pref_label": "MaximumDischargingTemperature",
       "class_label": "MaximumDischargingTemperature",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -289,6 +296,7 @@
       "class_qname": "emmo:MinimumDischargingTemperature",
       "class_pref_label": "MinimumDischargingTemperature",
       "class_label": "MinimumDischargingTemperature",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -484,6 +492,7 @@
       "class_qname": "emmo:MaximumConcentration",
       "class_pref_label": "MaximumConcentration",
       "class_label": "MaximumConcentration",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -493,6 +502,7 @@
       "class_qname": "emmo:MaximumChargingTemperature",
       "class_pref_label": "MaximumChargingTemperature",
       "class_label": "MaximumChargingTemperature",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "Candidates incorrectly mapped this to the Charging process class; correct class is MaximumChargingTemperature in domain-electrochemistry."
     },
@@ -503,6 +513,7 @@
       "class_qname": "emmo:MaximumContinuousChargingCurrent",
       "class_pref_label": "MaximumContinuousChargingCurrent",
       "class_label": "MaximumContinuousChargingCurrent",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -512,6 +523,7 @@
       "class_qname": "emmo:MaximumContinuousDischargingCurrent",
       "class_pref_label": "MaximumContinuousDischargingCurrent",
       "class_label": "MaximumContinuousDischargingCurrent",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -521,6 +533,7 @@
       "class_qname": "emmo:MaximumDischargingTemperature",
       "class_pref_label": "MaximumDischargingTemperature",
       "class_label": "MaximumDischargingTemperature",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "Candidates incorrectly mapped this to the Discharging process class."
     },
@@ -531,6 +544,7 @@
       "class_qname": "emmo:MaximumPower",
       "class_pref_label": "MaximumPower",
       "class_label": "MaximumPower",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "New in domain-electrochemistry 0.37.1; previously emitted as a battinfo: fallback term."
     },
@@ -541,6 +555,7 @@
       "class_qname": "emmo:MaximumPulseChargingCurrent",
       "class_pref_label": "MaximumPulseChargingCurrent",
       "class_label": "MaximumPulseChargingCurrent",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "Same class as the pulse_charging_current alias; both keys are datasheet spellings of the rating."
     },
@@ -551,6 +566,7 @@
       "class_qname": "emmo:MaximumPulseDischargingCurrent",
       "class_pref_label": "MaximumPulseDischargingCurrent",
       "class_label": "MaximumPulseDischargingCurrent",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "Same class as the pulse_discharging_current alias; both keys are datasheet spellings of the rating."
     },
@@ -561,6 +577,7 @@
       "class_qname": "emmo:MaximumStorageTemperature",
       "class_pref_label": "MaximumStorageTemperature",
       "class_label": "MaximumStorageTemperature",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "Unmapped in candidates; class found in domain-electrochemistry context."
     },
@@ -571,6 +588,7 @@
       "class_qname": "emmo:MinimumCapacity",
       "class_pref_label": "MinimumCapacity",
       "class_label": "MinimumCapacity",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -580,6 +598,7 @@
       "class_qname": "emmo:MinimumCapacity",
       "class_pref_label": "MinimumCapacity",
       "class_label": "MinimumCapacity",
+      "bound": "min",
       "confidence": 1.0,
       "notes": "Candidates incorrectly mapped this to generic Capacity; correct class is MinimumCapacity."
     },
@@ -590,6 +609,7 @@
       "class_qname": "emmo:MinimumChargingTemperature",
       "class_pref_label": "MinimumChargingTemperature",
       "class_label": "MinimumChargingTemperature",
+      "bound": "min",
       "confidence": 1.0,
       "notes": "Candidates incorrectly mapped this to the Charging process class."
     },
@@ -600,6 +620,7 @@
       "class_qname": "emmo:MinimumDischargingTemperature",
       "class_pref_label": "MinimumDischargingTemperature",
       "class_label": "MinimumDischargingTemperature",
+      "bound": "min",
       "confidence": 1.0,
       "notes": "Candidates incorrectly mapped this to the Discharging process class."
     },
@@ -610,6 +631,7 @@
       "class_qname": "emmo:MinimumStorageTemperature",
       "class_pref_label": "MinimumStorageTemperature",
       "class_label": "MinimumStorageTemperature",
+      "bound": "min",
       "confidence": 1.0,
       "notes": "Unmapped in candidates; class found in domain-electrochemistry context."
     },
@@ -686,6 +708,7 @@
       "class_qname": "emmo:MaximumOperatingTemperature",
       "class_pref_label": "MaximumOperatingTemperature",
       "class_label": "MaximumOperatingTemperature",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
     },
@@ -696,6 +719,7 @@
       "class_qname": "emmo:MinimumOperatingTemperature",
       "class_pref_label": "MinimumOperatingTemperature",
       "class_label": "MinimumOperatingTemperature",
+      "bound": "min",
       "confidence": 1.0,
       "notes": "New in domain-electrochemistry 0.36.0; previously emitted as a battinfo: fallback term."
     },
@@ -734,6 +758,7 @@
       "class_qname": "emmo:MaximumPower",
       "class_pref_label": "MaximumPower",
       "class_label": "MaximumPower",
+      "bound": "max",
       "confidence": 1.0,
       "notes": "New in domain-electrochemistry 0.37.1. PowerCapability is an altLabel of MaximumPower, so this key and maximum_power share one upstream class rather than forking one concept across two IRIs."
     },
@@ -772,6 +797,7 @@
       "class_qname": "emmo:MaximumPulseChargingCurrent",
       "class_pref_label": "MaximumPulseChargingCurrent",
       "class_label": "MaximumPulseChargingCurrent",
+      "bound": "max",
       "confidence": 0.9
     },
     {
@@ -781,6 +807,7 @@
       "class_qname": "emmo:MaximumPulseDischargingCurrent",
       "class_pref_label": "MaximumPulseDischargingCurrent",
       "class_label": "MaximumPulseDischargingCurrent",
+      "bound": "max",
       "confidence": 0.9
     },
     {
@@ -954,6 +981,7 @@
       "class_qname": "emmo:MaximumStoichiometricCoefficient",
       "class_pref_label": "MaximumStoichiometricCoefficient",
       "class_label": "MaximumStoichiometricCoefficient",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -963,6 +991,7 @@
       "class_qname": "emmo:MinimumStoichiometricCoefficient",
       "class_pref_label": "MinimumStoichiometricCoefficient",
       "class_label": "MinimumStoichiometricCoefficient",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -972,6 +1001,7 @@
       "class_qname": "emmo:MaximumStorageTemperature",
       "class_pref_label": "MaximumStorageTemperature",
       "class_label": "MaximumStorageTemperature",
+      "bound": "max",
       "confidence": 1.0
     },
     {
@@ -981,6 +1011,7 @@
       "class_qname": "emmo:MinimumStorageTemperature",
       "class_pref_label": "MinimumStorageTemperature",
       "class_label": "MinimumStorageTemperature",
+      "bound": "min",
       "confidence": 1.0
     },
     {
@@ -1075,6 +1106,7 @@
       "class_qname": "emmo:UpperVoltageLimit",
       "class_pref_label": "UpperVoltageLimit",
       "class_label": "UpperVoltageLimit",
+      "bound": "max",
       "confidence": 1.0
     },
     {

@@ -4460,6 +4460,8 @@ class AuthoringWorkspace:
                     rev_prop[iri] = key
 
         rev_unit: dict[str, str] = {v: k for k, v in _UNIT_MAP.items()}
+        # % and vol% share PercentUnit; the basis rides as a class of the node.
+        _PERCENT_UNIT_IRI = _UNIT_MAP["%"]
         # The shared quantity-node builder resolves units through the curated /
         # candidate unit maps as well, so reverse those too (first symbol wins;
         # _UNIT_MAP symbols take precedence for stability with older files).
@@ -4587,12 +4589,17 @@ class AuthoringWorkspace:
             return bases
 
         def _specs_from_property_nodes(nodes: list) -> dict:
-            """Reverse EMMO hasProperty nodes → {key: {value, unit}}.
+            """Reverse EMMO hasProperty nodes → {key: {value, min_value, max_value, unit}}.
 
             Accepts both quantity-node generations: the legacy single-string
             ``@type`` with a ``{"@id": ...}`` unit reference, and the canonical
             shape (list ``@type`` of ``[PropertyClass, co-type]`` with the unit
-            as a bare IRI string)."""
+            as a bare IRI string). The bounds come from ``schema:minValue`` and
+            ``schema:maxValue``; a number equal to the only bound given is that
+            bound, which the emitter also writes as the number of a Maximum or
+            Minimum class, so it is read back as the bound alone. PercentUnit
+            reads back as wt% or vol% when the node also carries WeightPercent
+            or VolumePercent, and as % otherwise."""
             specs: dict = {}
             for node in nodes:
                 type_raw = node.get("@type", "")
@@ -4621,8 +4628,23 @@ class AuthoringWorkspace:
                     unit_term = ""
                 unit_iri = _expand(unit_term)
                 unit_sym = rev_unit.get(unit_iri, unit_term.split(":")[-1])
-                if value is not None:
-                    specs[prop_key] = {"value": value, "unit": unit_sym}
+                if unit_iri == _PERCENT_UNIT_IRI:
+                    unit_sym = (
+                        "wt%" if "WeightPercent" in type_terms else "vol%" if "VolumePercent" in type_terms else "%"
+                    )
+                bounds = {
+                    field: node[term]
+                    for field, term in (("min_value", "schema:minValue"), ("max_value", "schema:maxValue"))
+                    if isinstance(node.get(term), (int, float)) and not isinstance(node.get(term), bool)
+                }
+                if value is not None and list(bounds.values()) == [value]:
+                    value = None
+                if value is None and not bounds:
+                    continue
+                spec: dict = {} if value is None else {"value": value}
+                spec.update(bounds)
+                spec["unit"] = unit_sym
+                specs[prop_key] = spec
             return specs
 
         # ── 4. Index graph nodes by type ───────────────────────────────────────

@@ -648,6 +648,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -666,6 +667,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -684,6 +686,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -754,6 +757,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -769,6 +773,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -844,6 +849,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.3
@@ -862,6 +868,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.7
@@ -881,6 +888,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -1040,6 +1048,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -1058,6 +1067,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1076,6 +1086,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1120,6 +1131,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1135,6 +1147,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1198,6 +1211,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.25
@@ -1216,6 +1230,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.75
@@ -1235,6 +1250,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.03
@@ -1393,6 +1409,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.94
@@ -1411,6 +1428,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1429,6 +1447,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.03
@@ -1473,6 +1492,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1488,6 +1508,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1551,6 +1572,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.3
@@ -1569,6 +1591,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.7
@@ -1588,6 +1611,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "VolumeFraction",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "VolumeFraction",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.02
@@ -1746,6 +1770,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.92
@@ -1764,6 +1789,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.04
@@ -1782,6 +1808,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.04
@@ -1826,6 +1853,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.95
@@ -1841,6 +1869,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "MassFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "MassFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.05
@@ -1904,6 +1933,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.5
@@ -1919,6 +1949,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
               "VolumeFraction",
               "ConventionalProperty"
             ],
+            "skos:prefLabel": "VolumeFraction",
             "hasNumericalPart": {
               "@type": "RealData",
               "hasNumberValue": 0.5

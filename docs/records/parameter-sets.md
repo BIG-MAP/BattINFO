@@ -939,6 +939,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.253991
@@ -1229,6 +1230,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.277493
@@ -1293,6 +1295,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.47
@@ -1981,6 +1984,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.20666
@@ -2270,6 +2274,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.20359
@@ -2334,6 +2339,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.47
@@ -3801,6 +3807,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.253991
@@ -3883,6 +3890,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.277493
@@ -3947,6 +3955,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.47
@@ -4647,6 +4656,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.253991
@@ -4937,6 +4947,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.277493
@@ -5001,6 +5012,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
             "Porosity",
             "ConventionalProperty"
           ],
+          "skos:prefLabel": "Porosity",
           "hasNumericalPart": {
             "@type": "RealData",
             "hasNumberValue": 0.47

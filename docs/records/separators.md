@@ -102,6 +102,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "Porosity",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Porosity",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 0.55
@@ -251,6 +252,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "Porosity",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Porosity",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 0.41
@@ -336,6 +338,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
           "Porosity",
           "ConventionalProperty"
         ],
+        "skos:prefLabel": "Porosity",
         "hasNumericalPart": {
           "@type": "RealData",
           "hasNumberValue": 0.42

@@ -300,6 +300,7 @@
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_82bfb8e6_c236_4b59_bd9a_c0fba0d5ecdd> skos:prefLabel "ThreeElectrodeCellDevice"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_82fef384_8eec_4765_b707_5397054df594> skos:prefLabel "ConductiveAdditive"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_83ee23b3_2f5c_4afa_b972_ac85e91d7306> skos:prefLabel "NormalHydrogenElectrode"@en .
+<https://w3id.org/emmo/domain/electrochemistry#electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb> skos:prefLabel "PercentUnit"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_860aa941_5ff9_4452_8a16_7856fad07bee> skos:prefLabel "hasActiveMaterial"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_86324806_4263_4d80_b5af_1a7be844ab5b> skos:prefLabel "MinimumStoichiometricCoefficient"@en .
 <https://w3id.org/emmo/domain/electrochemistry#electrochemistry_871bc4a4_2d17_4b88_9b0f_7ab85f14afea> skos:prefLabel "CounterElectrode"@en .

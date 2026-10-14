@@ -37,6 +37,11 @@ export type Values = Record<string, string>;
 
 // Units are emitted as full EMMO IRIs (hasMeasurementUnit is @type:@id), so they
 // need no @context term — and unit tokens with a slash cannot be context terms.
+// Each IRI is the one the package's unit map (unit_map.curated.json) gives the
+// same symbol; tests/test_mapping_governance.py reads this table and fails on a
+// disagreement or on an IRI that is not a unit of the pinned EMMO closure.
+// "%" is PercentUnit, the closure's only percent unit. mAh/g and mAh/cm2 are
+// not in the unit map yet; their EMMO units are in the closure.
 const EMMO = "https://w3id.org/emmo#";
 const ECHEM = "https://w3id.org/emmo/domain/electrochemistry#";
 const UNIT_IRI: Record<string, string> = {
@@ -45,13 +50,14 @@ const UNIT_IRI: Record<string, string> = {
   A: EMMO + "Ampere", mA: EMMO + "MilliAmpere",
   g: EMMO + "Gram", kg: EMMO + "Kilogram", mg: EMMO + "MilliGram",
   mm: EMMO + "MilliMetre", cm: EMMO + "CentiMetre", um: EMMO + "MicroMetre",
-  "Ω": EMMO + "Ohm", "mΩ": EMMO + "MilliOhm", "%": EMMO + "Percent",
+  "Ω": EMMO + "Ohm", "mΩ": EMMO + "MilliOhm",
+  "%": ECHEM + "electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb",
   degC: EMMO + "DegreeCelsius",
   "Wh/kg": EMMO + "WattHourPerKilogram", "Wh/L": EMMO + "WattHourPerLitre",
   "mg/cm2": EMMO + "MilliGramPerSquareCentiMetre",
   "g/cm3": EMMO + "GramPerCubicCentiMetre",
-  "mAh/g": ECHEM + "MilliAmpereHourPerGram",
-  "mAh/cm2": ECHEM + "MilliAmpereHourPerSquareCentiMetre",
+  "mAh/g": EMMO + "MilliAmpereHourPerGram",
+  "mAh/cm2": EMMO + "MilliAmpereHourPerSquareCentiMetre",
 };
 
 function unitIri(token: string): string {

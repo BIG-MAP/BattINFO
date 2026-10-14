@@ -268,7 +268,10 @@ def _unit_token(item: Mapping[str, Any]) -> str | None:
 
 
 def _normalized_unit(unit: str) -> str:
-    return unit.replace(" ", "").replace("ohms", "ohm")
+    normalized = unit.replace(" ", "").replace("ohms", "ohm")
+    # pct is a plain percent, the same unit as % and percent (the JSON-LD
+    # export gives all three PercentUnit).
+    return "%" if normalized == "pct" else normalized
 
 
 def _append_issue(
@@ -1263,6 +1266,41 @@ def _walk_non_finite(
             _walk_non_finite(sub, f"{path}[{index}]", issues, resource_type)
 
 
+def _walk_percent_basis(
+    value: Any,
+    path: str,
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a fraction's percent unit states the other basis.
+
+    ``mass_fraction`` is by mass, ``volume_fraction`` and ``porosity`` by
+    volume, wherever they sit in the record. ``vol%`` on a mass fraction or
+    ``wt%`` on a volume fraction contradicts the key; the JSON-LD export
+    publishes the value on [0, 1] and drops the stated basis. A warning under
+    every policy, from the same check the emitter warns with.
+    """
+    from battinfo.transform.json_to_jsonld import percent_basis_conflict  # noqa: PLC0415
+
+    if isinstance(value, Mapping):
+        for key, sub in value.items():
+            sub_path = f"{path}.{key}" if path else str(key)
+            problem = percent_basis_conflict(str(key), sub)
+            if problem:
+                _append_issue(
+                    issues,
+                    code="semantic.percent_basis_mismatch",
+                    severity="warning",
+                    path=sub_path,
+                    message=problem,
+                    resource_type=resource_type,
+                )
+            _walk_percent_basis(sub, sub_path, issues, resource_type)
+    elif isinstance(value, (list, tuple)):
+        for index, sub in enumerate(value):
+            _walk_percent_basis(sub, f"{path}[{index}]", issues, resource_type)
+
+
 def _validate_substance_resolution(
     doc: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1574,6 +1612,7 @@ def validate_semantic_report(
     # flat specs.
     _walk_non_finite(doc, "", issues, resource_type)
     _walk_epoch_plausibility(doc, "", issues, resource_type)
+    _walk_percent_basis(doc, "", issues, resource_type)
 
     specs = doc.get("properties")
     if isinstance(specs, Mapping):

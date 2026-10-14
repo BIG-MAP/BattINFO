@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import warnings
 from collections.abc import Mapping
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from importlib import resources
 from pathlib import Path
@@ -66,6 +68,10 @@ MANUAL_UNIT_TYPES = {
 LEGACY_UNIT_IRIS: dict[str, str] = {
     # EMMO's class for the programming language C, written for degree Celsius.
     "https://w3id.org/emmo#EMMO_36a9bf69_483b_42fd_8a0c_7ac9206320bc": "°C",
+    # WeightPercent and VolumePercent, two PercentQuantity classes, written as
+    # the units of % (and wt%, percent, pct) and vol%.
+    "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_2c0e66c8_d58d_44b2_b0ce_ba55194bd505": "%",
+    "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba": "vol%",
 }
 CONVERTER_LABEL_TO_TYPE = {
     label: type_name
@@ -427,6 +433,25 @@ def _property_type_map() -> dict[str, dict[str, str]]:
 
 
 @lru_cache(maxsize=1)
+def _bound_classes() -> dict[str, str]:
+    """Class term -> the bound it names, ``"max"`` or ``"min"``.
+
+    Read from the ``bound`` flag of ``property_map.curated.json``: a Maximum or
+    Upper class names a maximum, a Minimum or Lower class a minimum. A quantity
+    typed with such a class and given only that bound has the bound as its
+    number (a ``max_value`` of 10 A on MaximumPulseChargingCurrent is that
+    maximum, 10 A).
+    """
+    flags: dict[str, str] = {}
+    for item in _load_mapping_file("property_map.curated.json").get("mappings", []):
+        term = item.get("class_pref_label") or item.get("class_label")
+        bound = item.get("bound")
+        if isinstance(term, str) and bound in ("max", "min"):
+            flags[term] = bound
+    return flags
+
+
+@lru_cache(maxsize=1)
 def _descriptor_profile() -> dict[str, Any]:
     return _load_profile_file("profile.json")
 
@@ -647,6 +672,115 @@ def normalize_unit_symbol(unit: str | None) -> str | None:
     text = _MICRO_PREFIX_RE.sub("µ", text)
     text = _OHM_SUFFIX_RE.sub("Ω", text)
     return _UNIT_ALIASES.get(text, text)
+
+
+# Percent spellings. normalize_unit_symbol folds %, percent, pct and " %" into
+# "%", wt% and wt.% into "%" as well, and vol%, vol.% and v/v% into "vol%"; all
+# of them are the unit PercentUnit. The basis is read from the spelling itself,
+# before the fold drops it.
+_PERCENT_SYMBOLS = frozenset({"%", "vol%"})
+_MASS_PERCENT_SPELLINGS = frozenset({"wt%", "wt.%"})
+# The class that carries a stated basis on a quantity that is not a fraction.
+_PERCENT_BASIS_CLASS = {"mass": "WeightPercent", "volume": "VolumePercent"}
+# The basis each fraction key has by definition: porosity is a volume fraction.
+_FRACTION_BASIS = {"mass_fraction": "mass", "volume_fraction": "volume", "porosity": "volume"}
+
+
+def _is_percent(unit: Any) -> bool:
+    """True for every percent spelling the unit map accepts."""
+    return isinstance(unit, str) and normalize_unit_symbol(unit) in _PERCENT_SYMBOLS
+
+
+def _percent_basis(unit: Any) -> str | None:
+    """The basis a percent spelling states: ``"mass"`` for wt% and wt.%,
+    ``"volume"`` for vol%, vol.% and v/v%, and ``None`` for a plain percent
+    (%, percent, pct) or a unit that is not a percent."""
+    if not _is_percent(unit):
+        return None
+    if normalize_unit_symbol(unit) == "vol%":
+        return "volume"
+    if "".join(unit.split()).lower() in _MASS_PERCENT_SPELLINGS:
+        return "mass"
+    return None
+
+
+def _quantity_percent_basis(quantity: Mapping[str, Any]) -> str | None:
+    """The basis a quantity's percent unit states, from ``unit`` or ``unit_text``."""
+    for field in ("unit", "unit_text"):
+        basis = _percent_basis(quantity.get(field))
+        if basis:
+            return basis
+    return None
+
+
+def percent_basis_conflict(key: str, quantity: Any) -> str | None:
+    """Why a fraction's percent unit contradicts the fraction, or ``None``.
+
+    ``mass_fraction`` is by mass, ``volume_fraction`` and ``porosity`` by
+    volume. A unit that states the other basis (``vol%`` on a mass fraction,
+    ``wt%`` on a volume fraction or a porosity) contradicts the key. The
+    JSON-LD export then publishes the value on [0, 1] without the stated
+    basis; the emitter warns and validation reports
+    ``semantic.percent_basis_mismatch``, a warning under every policy.
+    """
+    expected = _FRACTION_BASIS.get(key)
+    if expected is None or not isinstance(quantity, Mapping):
+        return None
+    stated = _quantity_percent_basis(quantity)
+    if stated is None or stated == expected:
+        return None
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    return (
+        f"'{key}' is given in {unit}, a {stated} basis, but a {key.replace('_', ' ')} is by {expected}; "
+        "the JSON-LD export publishes it as a fraction of 1 and drops the stated basis."
+    )
+
+
+def _percent_to_fraction(value: Any) -> float | None:
+    """A percentage as a fraction of 1 (``41`` -> ``0.41``), or ``None`` if it is not a number.
+
+    Divides in decimal, so 4.3 gives 0.043 and not 0.043000000000000003. A
+    numeric string ("95") counts as its number.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except InvalidOperation:
+        return None
+    if not number.is_finite():
+        return None
+    fraction = float(number / 100)
+    return fraction if math.isfinite(fraction) else None
+
+
+def _fraction_quantity(name: str, quantity: dict[str, Any]) -> dict[str, Any]:
+    """A fraction key's quantity on [0, 1]: a percent in any spelling is rescaled.
+
+    ``porosity``, ``mass_fraction`` and ``volume_fraction`` are published with
+    UnitOne. When the unit is a percent (``%``, ``percent``, ``pct``, ``wt%``,
+    ``vol%`` and the rest), ``value``, ``typical_value``, the bounds and
+    ``standard_deviation`` are divided by 100 and the unit becomes ``1``. If
+    any of them is not a number, nothing is rescaled and the percent unit
+    stays. A basis that contradicts the key warns.
+    """
+    problem = percent_basis_conflict(name, quantity)
+    if problem:
+        warnings.warn(f"semantic.percent_basis_mismatch: {problem}", stacklevel=3)
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    if not _is_percent(unit):
+        return quantity
+    keys = [
+        k
+        for k in ("value", "typical_value", "min_value", "max_value", "standard_deviation")
+        if quantity.get(k) is not None
+    ]
+    scaled = {k: _percent_to_fraction(quantity[k]) for k in keys}
+    if not keys or any(v is None for v in scaled.values()):
+        return quantity
+    rescaled = {**quantity, **scaled, "unit": "1"}
+    rescaled.pop("unit_text", None)
+    return rescaled
 
 
 def _unit_lookup_candidates(unit: str) -> list[str]:
@@ -911,11 +1045,55 @@ def _condition_qualifier(ckey: str, cqty: Mapping[str, Any]) -> dict[str, Any] |
     return qualifier
 
 
+def _bound_value(value: Any) -> int | float | None:
+    """A ``min_value`` or ``max_value`` that can be published: a number."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    return value
+
+
+def _bound_as_number(term: str | None, lower: Any, upper: Any) -> int | float | None:
+    """The single bound that is the quantity's number, or ``None``.
+
+    Only where the curated property map flags the class as that bound
+    (:func:`_bound_classes`) and only that bound is given: ``max_value`` on a
+    Maximum class, ``min_value`` on a Minimum class. Never for any other class,
+    where a bound is not the value.
+    """
+    flag = _bound_classes().get(term.split(":", 1)[-1]) if term else None
+    if flag == "max" and upper is not None and lower is None:
+        return upper
+    if flag == "min" and lower is not None and upper is None:
+        return lower
+    return None
+
+
+# Keys that carry something a reader can use. A quantity node with none of
+# them is left out, with a warning.
+_QUANTITY_DATA_KEYS = ("hasNumericalPart", "hasStringValue", "schema:minValue", "schema:maxValue")
+
+
 def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str | None = None) -> dict[str, Any] | None:
+    """One EMMO quantity node: ``[class, value-basis class]`` with its number,
+    unit, bounds, text, sample statistics and conditions.
+
+    The number is ``value``, else ``typical_value``, else the one bound the
+    class names (:func:`_bound_as_number`). ``min_value`` and ``max_value`` are
+    always kept, as ``schema:minValue`` and ``schema:maxValue``. A percent unit
+    in any spelling is PercentUnit; on a key that is not a fraction, a spelling
+    that states a basis (``wt%``, ``vol%``) adds WeightPercent or VolumePercent
+    to the node's classes. The fraction keys (``porosity``, ``mass_fraction``,
+    ``volume_fraction``) are rescaled from a percent to [0, 1] first, see
+    :func:`_fraction_quantity`. A quantity with no number, bound or
+    ``value_text`` warns ``semantic.quantity_not_emitted`` and gives ``None``.
+    """
     if not isinstance(quantity, dict):
         return None
 
-    resolved_term = term or _property_type_term(name)
+    fraction = name in _FRACTION_PROPERTY_TERMS
+    if fraction:
+        quantity = _fraction_quantity(name, quantity)
+    resolved_term = term or _property_type_term(name) or _FRACTION_PROPERTY_TERMS.get(name)
     co_token = quantity.get("value_basis", quantity.get("co_type"))
     co_class = _CO_TYPE_CLASS.get(co_token) if isinstance(co_token, str) else None
     basis_class = co_class or _property_co_type(name)
@@ -929,15 +1107,21 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
         # No mapped class: the value-basis class is the only type and the record
         # key names the quantity. Callers warn semantic.property_unmapped.
         node = {"@type": [basis_class], "skos:prefLabel": name}
+    percent_class = None if fraction else _PERCENT_BASIS_CLASS.get(_quantity_percent_basis(quantity) or "")
+    if percent_class:
+        node["@type"].append(percent_class)
 
-    # Emit the primary (nominal/typical) value only.  EMMO's canonical pattern for a
-    # ConventionalProperty is a single RealData node; a range (min/max) is correctly
-    # represented as separate hasProperty entries with distinct EMMO property classes
-    # (e.g. MinimumCapacity alongside NominalCapacity).  Min/max bounds are preserved
-    # in the canonical JSON record and are available to JSON consumers.
+    lower = _bound_value(quantity.get("min_value"))
+    upper = _bound_value(quantity.get("max_value"))
     primary = quantity.get("value") if quantity.get("value") is not None else quantity.get("typical_value")
+    if primary is None:
+        primary = _bound_as_number(resolved_term, lower, upper)
     if primary is not None:
         node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": primary}
+    if lower is not None:
+        node["schema:minValue"] = lower
+    if upper is not None:
+        node["schema:maxValue"] = upper
 
     if quantity.get("value_text"):
         node["hasStringValue"] = quantity["value_text"]
@@ -990,12 +1174,18 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
                 "hasMeasurementParameter": params[0] if len(params) == 1 else params,
             }
 
-    # @type + skos:prefLabel alone carry no data - treat as empty (same
-    # behaviour as before the prefLabel injection).
-    return node if len(node) > 2 else None
+    if not any(key in node for key in _QUANTITY_DATA_KEYS):
+        warnings.warn(
+            f"semantic.quantity_not_emitted: '{name}' has no value, typical_value, min_value, "
+            "max_value or value_text that the JSON-LD export can carry, so it is left out.",
+            stacklevel=2,
+        )
+        return None
+    return node
 
 
-# Dimensionless fraction keys (need the UnitOne %→[0,1] encoding) → EMMO class.
+# Dimensionless fraction keys -> EMMO class. They are published on [0, 1] with
+# UnitOne: a value in any percent spelling is rescaled (_fraction_quantity).
 _FRACTION_PROPERTY_TERMS = {
     "mass_fraction": "MassFraction",
     "volume_fraction": "VolumeFraction",
@@ -1053,10 +1243,12 @@ _ELECTRODE_PROPERTY_TERMS: dict[str, str] = {
 def _descriptor_property_nodes(prop: Any, *, term_overrides: dict[str, str] | None = None) -> list[dict[str, Any]]:
     """Emit ``hasProperty`` nodes for an arbitrary holder property dict.
 
-    Every numeric quantity becomes a ``[EMMOClass, co-type]`` node via the curated
-    property map (with optional holder-specific ``term_overrides``); fraction keys use
-    the UnitOne encoding. This is the generic, holder-agnostic emitter that lets any
-    curated property attach to any component, rather than a per-holder whitelist.
+    Every quantity becomes a ``[EMMOClass, co-type]`` node via the curated
+    property map (with optional holder-specific ``term_overrides``) through the
+    shared :func:`_descriptor_quantity_node`; the fraction keys are rescaled to
+    [0, 1] with UnitOne there. This is the generic, holder-agnostic emitter that
+    lets any curated property attach to any component, rather than a per-holder
+    whitelist.
     """
     out: list[dict[str, Any]] = []
     if not isinstance(prop, dict):
@@ -1066,14 +1258,34 @@ def _descriptor_property_nodes(prop: Any, *, term_overrides: dict[str, str] | No
         quantity = prop[name]
         if not isinstance(quantity, dict):
             continue
-        if name in _FRACTION_PROPERTY_TERMS:
-            term = overrides.get(name) or _FRACTION_PROPERTY_TERMS[name]
-            node = _fraction_quantity_node(term, quantity)
-        else:
-            term = overrides.get(name) or _property_type_term(name)
-            node = _descriptor_quantity_node(name, quantity, term=term)
+        term = overrides.get(name) or _FRACTION_PROPERTY_TERMS.get(name) or _property_type_term(name)
+        node = _descriptor_quantity_node(name, quantity, term=term)
         if node:
             out.append(node)
+    return out
+
+
+def schema_quantity_fields(quantity: Mapping[str, Any]) -> dict[str, Any]:
+    """The schema.org value fields of a quantity, for ``schema:PropertyValue``
+    and ``schema:QuantitativeValue`` nodes.
+
+    ``schema:value`` is ``value``, else ``typical_value``, else ``value_text``;
+    ``schema:minValue`` and ``schema:maxValue`` are the bounds; and
+    ``schema:unitText`` is ``unit``, else ``unit_text``. A field the quantity
+    lacks is left out, so a range-only quantity gives its bounds and unit.
+    """
+    out: dict[str, Any] = {}
+    for key in ("value", "typical_value", "value_text"):
+        value = quantity.get(key)
+        if value is not None and value != "":
+            out["schema:value"] = value
+            break
+    for key, term in (("min_value", "schema:minValue"), ("max_value", "schema:maxValue")):
+        if quantity.get(key) is not None:
+            out[term] = quantity[key]
+    unit = quantity.get("unit") or quantity.get("unit_text")
+    if unit:
+        out["schema:unitText"] = unit
     return out
 
 
@@ -1081,41 +1293,23 @@ def _quantity_to_jsonld(quantity: dict[str, Any] | None) -> dict[str, Any] | Non
     if not isinstance(quantity, dict):
         return None
 
-    out: dict[str, Any] = {"@type": "schema:QuantitativeValue"}
-    has_content = False
-
-    if quantity.get("value") is not None:
-        out["schema:value"] = quantity["value"]
-        has_content = True
-    if quantity.get("min_value") is not None:
-        out["schema:minValue"] = quantity["min_value"]
-        has_content = True
-    if quantity.get("max_value") is not None:
-        out["schema:maxValue"] = quantity["max_value"]
-        has_content = True
-    if quantity.get("typical_value") is not None and "schema:value" not in out:
+    fields = schema_quantity_fields(quantity)
+    if not fields:
+        return None
+    out: dict[str, Any] = {"@type": "schema:QuantitativeValue", **fields}
+    if quantity.get("value") is None and quantity.get("typical_value") is not None:
         # A typical value is a value attributed by convention: emit it as the
         # schema:value and co-type the node so the nature stays explicit
         # (no battinfo:typicalValue duplicate of the schema/EMMO forms).
         # ConventionalProperty, never NominalProperty: EMMO's NominalProperty
         # means a property with no magnitude.
-        out["schema:value"] = quantity["typical_value"]
         out["@type"] = ["schema:QuantitativeValue", "ConventionalProperty"]
-        has_content = True
-    if quantity.get("value_text") and "schema:value" not in out:
-        out["schema:value"] = quantity["value_text"]
-        has_content = True
-
-    unit = quantity.get("unit") or quantity.get("unit_text")
-    if unit:
-        out["schema:unitText"] = unit
-        has_content = True
 
     unit_uri = quantity.get("unit_uri")
     if unit_uri:
         out["schema:unitCode"] = unit_uri
 
-    return out if has_content else None
+    return out
 
 
 def _agent_to_jsonld(agent: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -1794,10 +1988,6 @@ _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
     "other_additive": {"relation": "hasAdditive", "role_class": "Additive"},
 }
 
-# UnitOne IRI — used for dimensionless fraction quantities (MassFraction, VolumeFraction, Porosity).
-# Fraction values stored as percentages (0–100) are converted to the [0, 1] range on output.
-_UNIT_ONE_IRI = "https://w3id.org/emmo#EMMO_5ebd5e01_0ed3_49a2_a30d_cd05cbe72978"
-
 # Current-collector forms and substrates -> EMMO class terms, keyed by whole
 # lower-case words. One normaliser (_current_collector_terms) reads a
 # collector's form and material fields and then its name with these tables. A
@@ -1903,68 +2093,6 @@ def _current_collector_terms(text: Any) -> _CollectorTerms:
             break
     coating = words[min(coating_at)] if coating_at else None
     return _CollectorTerms(substrate, form, coating)
-
-
-def _emmo_quantity_node(
-    emmo_type: str,
-    quantity: dict[str, Any],
-    unit_iri_override: str | None = None,
-) -> dict[str, Any] | None:
-    """Build a ConventionalProperty node with an explicit EMMO type (bypasses the property map)."""
-    if not isinstance(quantity, dict):
-        return None
-    value = quantity.get("value")
-    if value is None:
-        return None
-    node: dict[str, Any] = {
-        "@type": [emmo_type, "ConventionalProperty"],
-        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
-    }
-    unit = quantity.get("unit")
-    iri = unit_iri_override or _unit_iri(unit)
-    if iri:
-        node["hasMeasurementUnit"] = iri
-    elif unit:
-        node["schema:unitText"] = unit
-    _apply_sample_statistics(node, quantity, unit)
-    return node
-
-
-def _fraction_quantity_node(emmo_type: str, quantity: dict[str, Any]) -> dict[str, Any] | None:
-    """Build a ConventionalProperty node for a dimensionless fraction (MassFraction, VolumeFraction).
-
-    When the stored unit is '%', the value is converted from the 0–100 percentage range to the
-    [0, 1] range and hasMeasurementUnit is set to UnitOne (dimensionless).  Other units are passed
-    through to the standard unit map lookup.
-    """
-    if not isinstance(quantity, dict):
-        return None
-    value = quantity.get("value")
-    if value is None:
-        return None
-    unit = quantity.get("unit", "")
-    if unit == "%":
-        try:
-            scaled = round(float(value) / 100, 6)
-        except (TypeError, ValueError):
-            # Non-numeric fraction (e.g. a string from CSV/spreadsheet ingestion):
-            # emit verbatim via the standard path rather than crashing the whole
-            # document transform on `value / 100`.
-            return _emmo_quantity_node(emmo_type, quantity)
-        node = {
-            "@type": [emmo_type, "ConventionalProperty"],
-            "hasNumericalPart": {"@type": "RealData", "hasNumberValue": scaled},
-            "hasMeasurementUnit": _UNIT_ONE_IRI,
-        }
-        # A spread stated in % rescales with the value it qualifies, or the
-        # emitted node would pair a [0,1] mean with a 0-100 deviation.
-        rescaled = dict(quantity)
-        deviation = quantity.get("standard_deviation")
-        if isinstance(deviation, (int, float)) and not isinstance(deviation, bool):
-            rescaled["standard_deviation"] = round(float(deviation) / 100, 6)
-        _apply_sample_statistics(node, rescaled)
-        return node
-    return _emmo_quantity_node(emmo_type, quantity)
 
 
 def _typed_constituent_node(

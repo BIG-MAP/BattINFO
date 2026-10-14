@@ -151,6 +151,7 @@ Representative issue codes:
   `semantic.electrode_polarity_expected`: the electrode holders disagree with the
   cell configuration — see [Electrodes](records/half-cells.md))
 - `semantic.chemistry_electrode_conflict` (the negative electrode basis contradicts the chemistry, such as lithium metal in a full `li-ion` cell or graphite in a `li-metal` one; see the chemistry labels in the [property keys reference](pages/property-reference.md))
+- `semantic.percent_basis_mismatch` (a warning under every policy: a fraction's percent unit states the other basis, such as `vol%` on a `mass_fraction` or `wt%` on a `volume_fraction` or a `porosity`; see the units in the [property keys reference](pages/property-reference.md))
 - `semantic.method_step_unmapped` (a warning under every policy: no published EMMO process class fits a test-protocol step, such as a constant-resistance charge or a cr or cccv step with no direction, so the JSON-LD export gives it none; see [Tests](records/tests.md))
 - `semantic.handle_kind_word_expected` (a warning under every policy: the record's `handle` does not end with its type's kind word; see [Name your records](howto/name-your-records.md))
 - `semantic.schema_version_superseded` and `semantic.schema_version_unknown` (warnings under every policy: the record's `schema_version` is one an earlier release wrote, `0.1.0` or `1.0.0`, or one this release does not know at all; the current version is `0.2.0`)

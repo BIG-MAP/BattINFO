@@ -60,15 +60,21 @@ def build() -> str:
         "",
         f"## Properties ({len(props)})",
         "",
+        "A quantity given as a range keeps both bounds, as `schema:minValue` and",
+        "`schema:maxValue` on its EMMO node. Where the class names a bound (the",
+        "Bound column below), that bound given alone is also the quantity's number:",
+        "a `max_value` of 10 A under `pulse_charging_current` is a",
+        "MaximumPulseChargingCurrent of 10 A. Any other range has no single number.",
+        "",
         "The keys of quantities in `properties={...}` on a cell spec and in the",
         "`property` blocks of material and component records, and the EMMO class",
         "each becomes in JSON-LD:",
         "",
-        "| Key | EMMO class |",
-        "|---|---|",
+        "| Key | EMMO class | Bound |",
+        "|---|---|---|",
     ]
     for p in sorted(props, key=lambda p: p["key"]):
-        lines.append(f"| `{p['key']}` | [{p['class_pref_label']}]({p['class_iri']}) |")
+        lines.append(f"| `{p['key']}` | [{p['class_pref_label']}]({p['class_iri']}) | {p.get('bound', '')} |")
 
     lines += [
         "",
@@ -91,6 +97,15 @@ def build() -> str:
     lines += [
         "",
         f"## Units ({len(units)})",
+        "",
+        "Every percent spelling (`%`, `percent`, `pct`, `wt%`, `wt.%`, `vol%`,",
+        "`vol.%`, `v/v%`) is the unit PercentUnit. A spelling that states a basis",
+        "keeps it as an extra class of the quantity: WeightPercent for `wt%` and",
+        "`wt.%`, VolumePercent for `vol%`, `vol.%` and `v/v%`. On `porosity`,",
+        "`mass_fraction` and `volume_fraction` a percent in any spelling is",
+        "published as a fraction of 1 with UnitOne. A basis that contradicts the",
+        "key (`vol%` on a mass fraction, `wt%` on a volume fraction or a porosity)",
+        "gets the warning `semantic.percent_basis_mismatch`.",
         "",
         "The unit symbols accepted in quantity dicts, and the unit IRI each maps",
         "to (EMMO where a term exists, QUDT as the documented fallback):",

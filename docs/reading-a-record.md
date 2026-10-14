@@ -48,7 +48,9 @@ record and SHACL validation alike:
                   "hasMeasurementUnit": { "@id": "emmo:Volt" } }]
 ```
 
-Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`, `W/L`) use QUDT.
+Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`) use QUDT.
+
+A quantity given as a range keeps both bounds on the same node, as `schema:minValue` and `schema:maxValue`. Where the class names a bound, such as `MaximumPulseChargingCurrent`, a bound given alone is also the `hasNumberValue`. Every percent spelling is the unit `PercentUnit`; `wt%` and `vol%` add `WeightPercent` or `VolumePercent` as an extra class of the node, and a porosity or a mass or volume fraction is a fraction of 1 with `UnitOne`.
 
 ## Structured test conditions
 
@@ -85,6 +87,6 @@ conditions, and test spec records (a test keeps its protocol name, not its link 
 round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap is a
 tracked enhancement.)
 
-A cell spec's format, chemistry, IEC code and cell configuration come back from the classes of its described battery, and its electrode bases from the classes of its electrode nodes. The chemistry is the first class the chemistry vocabulary names, which is the declared chemistry's. A deposit written before 0.8.0 also carries classes its electrode bases added whatever the chemistry, such as `LithiumManganeseDioxideBattery` on an alkaline cell, and those are not read as its chemistry. A specific NMC grade comes back as `nmc`, since all grades share one electrode class. A chemistry written as free text names no class, so it cannot come back: when the class read in its place contradicts the negative electrode, the import prints a warning and the strict save refuses the record until the chemistry is set.
+A cell spec's format, chemistry, IEC code and cell configuration come back from the classes of its described battery, and its electrode bases from the classes of its electrode nodes. The chemistry is the first class the chemistry vocabulary names, which is the declared chemistry's. A deposit written before 0.8.0 also carries classes its electrode bases added whatever the chemistry, such as `LithiumManganeseDioxideBattery` on an alkaline cell, and those are not read as its chemistry. A specific NMC grade comes back as `nmc`, since all grades share one electrode class. A property's bounds come back as `min_value` and `max_value`, and a percent unit as `wt%` or `vol%` when its node carries `WeightPercent` or `VolumePercent`. A chemistry written as free text names no class, so it cannot come back: when the class read in its place contradicts the negative electrode, the import prints a warning and the strict save refuses the record until the chemistry is set.
 
 A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.

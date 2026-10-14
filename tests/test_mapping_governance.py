@@ -687,14 +687,25 @@ _NOT_A_UNIT_IN_USE = {
     # A real EMMO unit, but EMMO 1.0.2 gives it no named superclass (only
     # restrictions), so it does not classify as a MeasurementUnit without a reasoner.
     "https://w3id.org/emmo#MilliAmpereHour",
-    # The `%` term of the records contexts. EMMO declares it in
-    # disciplines/units/specialunits, which the pinned chain does not import.
-    "https://w3id.org/emmo#Percent",
-    # WeightPercent and VolumePercent, the curated IRIs for `%` and `vol%`, are
-    # PercentQuantity classes in domain-electrochemistry, quantities rather than units.
-    _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505",
-    _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba",
 }
+
+PERCENT_UNIT = _ELECTROCHEMISTRY + "8430be19_6cae_4a15_a570_3c15d0d190eb"
+WEIGHT_PERCENT = _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505"
+VOLUME_PERCENT = _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba"
+
+_CREATE_MODEL = ROOT / "web" / "lib" / "create-model.ts"
+
+
+def _create_model_unit_iris() -> dict[str, str]:
+    """The Create page's hand-written ``UNIT_IRI`` table: unit token -> IRI."""
+    source = _CREATE_MODEL.read_text(encoding="utf-8")
+    prefixes = dict(re.findall(r'^const (\w+) = "([^"]+)";', source, flags=re.MULTILINE))
+    block = source.split("const UNIT_IRI: Record<string, string> = {", 1)[1].split("};", 1)[0]
+    table: dict[str, str] = {}
+    for token, prefix, local in re.findall(r'("[^"]+"|[A-Za-z]\w*)\s*:\s*(\w+)\s*\+\s*"([^"]+)"', block):
+        table[token.strip('"')] = prefixes[prefix] + local
+    assert table, "the UNIT_IRI table of create-model.ts was not found"
+    return table
 
 
 def _written_unit_iris() -> dict[str, list[str]]:
@@ -722,6 +733,8 @@ def _written_unit_iris() -> dict[str, list[str]]:
             add(_expand_with(context, context[term]), f"{name}:{term}")
         for symbol, value in CONTEXT_UNIT_SYMBOLS.items():
             add(_expand_with(context, value), f"CONTEXT_UNIT_SYMBOLS:{symbol}")
+    for token, iri in _create_model_unit_iris().items():
+        add(iri, f"create-model.ts:{token}")
     return found
 
 
@@ -789,5 +802,59 @@ def test_every_curated_unit_wins_in_the_emitter_table() -> None:
 def test_the_programming_language_c_is_read_back_but_never_written() -> None:
     from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
 
-    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C"}
+    assert LEGACY_UNIT_IRIS[PROGRAMMING_LANGUAGE_C] == "°C"
     assert PROGRAMMING_LANGUAGE_C not in _unit_type_map().values()
+
+
+def test_the_percent_quantities_are_read_back_but_never_written_as_units() -> None:
+    """``%`` and ``vol%`` named WeightPercent and VolumePercent, two quantities,
+    before 0.8.0. Both now name PercentUnit; records written with the old IRIs
+    still import with the symbol they stood for."""
+    from battinfo.jsonld import _UNIT_MAP, CONTEXT_UNIT_SYMBOLS
+    from battinfo.transform.json_to_jsonld import LEGACY_UNIT_IRIS, _unit_type_map
+
+    assert LEGACY_UNIT_IRIS == {PROGRAMMING_LANGUAGE_C: "°C", WEIGHT_PERCENT: "%", VOLUME_PERCENT: "vol%"}
+    for table in (_unit_type_map(), _UNIT_MAP):
+        assert table["%"] == table["vol%"] == PERCENT_UNIT
+        assert not {WEIGHT_PERCENT, VOLUME_PERCENT} & set(table.values())
+    assert CONTEXT_UNIT_SYMBOLS["%"] == "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+
+
+def test_the_create_page_units_agree_with_the_unit_map() -> None:
+    """Each unit the Create page writes is the one the Python emitter writes for
+    the same symbol, so a record made on the page and the same record saved
+    with the library publish the same unit IRI."""
+    from battinfo.transform.json_to_jsonld import _unit_iri
+
+    table = _create_model_unit_iris()
+    assert table["%"] == PERCENT_UNIT
+    disagree = {token: (iri, _unit_iri(token)) for token, iri in table.items() if _unit_iri(token) not in (None, iri)}
+    assert not disagree, disagree
+    closure_units = set(_load_json(_CLOSURE_TERMS)["measurement_units"])
+    unknown = {token: iri for token, iri in table.items() if _unit_iri(token) is None and iri not in closure_units}
+    assert not unknown, unknown
+
+
+# Classes that name a bound: a single max_value (or min_value) on a quantity
+# typed with one of them is that quantity's number.
+_BOUND_CLASS_NAME = re.compile(r"^(?P<max>Maximum|Upper)|^(?P<min>Minimum|Lower)")
+
+
+def test_every_bound_class_is_flagged_and_nothing_else() -> None:
+    expected: dict[str, str] = {}
+    flagged: dict[str, set[str]] = {}
+    for name in ("assets", "data"):
+        path = (
+            ROOT / "assets" / "mappings" / "domain-battery" / "property_map.curated.json"
+            if name == "assets"
+            else _MAPPING_DIR / "property_map.curated.json"
+        )
+        for entry in _load_json(path)["mappings"]:
+            label = entry["class_pref_label"]
+            match = _BOUND_CLASS_NAME.match(label)
+            if match:
+                expected[label] = "max" if match.group("max") else "min"
+            flagged.setdefault(label, set()).add(entry.get("bound", ""))
+    assert expected, "no bound classes found"
+    for label, flags in flagged.items():
+        assert flags == {expected.get(label, "")}, (label, flags)
