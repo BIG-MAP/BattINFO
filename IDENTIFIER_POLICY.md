@@ -116,8 +116,8 @@ A seed is built from what identifies the record, its natural key, by the seed bu
 
 On every path that mints through `battinfo.entities`:
 
-- A record keeps an IRI it already has. One pinned by its author, imported, or given by an earlier save is never minted again.
-- When records minted in one save get one IRI from their identity fields, each of them is minted again from its content. Two records that already had one IRI are refused.
+- A record keeps an IRI it already has. One pinned by its author, imported, or given by an earlier save, in the same session or an earlier one that saved to the same folder, is never minted again. A record saved by an earlier session is recognised by its content: a save of it would write the saved record again.
+- When records minted in one save get one IRI from their identity fields, each of them is minted again from its content, except the one recognised as the record already saved under that IRI. Two records that already had one IRI are refused.
 - A record that carries none of its identity fields is never merged with another: a save without an id refuses it, and a builder that accepts it gives it a random uid.
 - `tests/test_golden_iris.py` holds the IRI each path minted for each case when the 0.8.0 seeds were settled, and fails on any move it does not list.
 
@@ -138,7 +138,7 @@ The uids below are as permanent as any other once published, but no other path r
 
 Seed rules are a public contract from 0.8.0, the first release on PyPI: a seed change moves IRIs that users have already saved or published.
 
-- A seed change after 0.8.0, such as scoping lab labels to their publisher, or 0.9's move of every minting path onto `battinfo.entities`, MUST keep the IRIs minted under the old seed findable through a legacy-seed lookup. The code keeps the old seed, so that the record an old IRI names can still be found from its fields, as `_LEGACY_PARAMETER_FILE_SEED` (`api/_parameters.py`) does for parameter files minted before 2026-10-11, and as `entities.keep_legacy_uid` and `Workspace._keep_legacy_test_iris` do for cell specs and tests saved before 0.8.0, whose saves reuse the IRI already on disk.
+- A seed change after 0.8.0, such as scoping lab labels to their publisher, or 0.9's move of every minting path onto `battinfo.entities`, MUST keep the IRIs minted under the old seed findable through a legacy-seed lookup. The code keeps the old seed, so that the record an old IRI names can still be found from its fields, as `_LEGACY_PARAMETER_FILE_SEED` (`api/_parameters.py`) does for parameter files minted before 2026-10-11, and as `entities.keep_legacy_uid` and `Workspace._hold_saved_iris` do for cell specs and tests saved before 0.8.0 (colliding ones included), whose saves reuse the IRI already on disk.
 - A 0.8.x patch release MUST keep every IRI already on disk or published. A fix may change what a new record mints, never the IRI of a record that exists.
 - Every move is listed in the changelog, and in `MOVED` in `tests/test_golden_iris.py` with its reason.
 

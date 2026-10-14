@@ -42,6 +42,13 @@ from battinfo.api import (
 from battinfo.api import (
     query as query_api,
 )
+from battinfo.api._records import (
+    _record_from_cell_instance,
+    _record_from_cell_spec,
+    _record_from_dataset,
+    _record_from_test,
+    _record_from_test_protocol,
+)
 from battinfo.api._shared import _to_unix_time
 from battinfo.authoring import cell_description as build_cell_description
 from battinfo.bundle import (
@@ -57,13 +64,17 @@ from battinfo.bundle import (
 )
 from battinfo.entities import (
     cell_instance_identity_seed,
+    cell_spec_identity_seed,
+    cell_spec_seed_fields,
     cell_spec_uid,
     dataset_locator_seed,
     given_test_name,
     iri_namespace_map,
     kind_for_doc,
+    legacy_cell_spec_identity_seed,
     legacy_stable_uid,
     legacy_test_identity_seed,
+    save_entity_path,
     saved_record_body,
     seed_text,
     stable_uid,
@@ -318,6 +329,12 @@ def _given_test_name(test: Any, linked_cell: Any = None) -> str | None:
     )
 
 
+def _same_cell_spec_identity(body: Mapping[str, Any], spec: Any) -> bool:
+    """Whether *body*, a saved cell-spec record, has the natural key of *spec* (``entities.cell_spec_identity_seed``)."""
+    fields = _cell_spec_fields(spec.manufacturer, spec.model, spec.format, spec.chemistry, spec.size_code)
+    return cell_spec_identity_seed(**cell_spec_seed_fields(body)) == cell_spec_identity_seed(**fields)
+
+
 def _run_differences(saved: Mapping[str, Any], test: Any) -> list[str]:
     """How *saved*, a test record body, and *test* describe two runs: another instrument, start or end time.
 
@@ -357,10 +374,11 @@ def _disambiguate_entity_ids(
     distinct records whose identity fields match (two cell specs for one
     manufacturer and model with different capacities, two unnamed cycling
     tests on one cell) mint the *same* IRI, and on save the second would
-    overwrite the first. *assigned* says, for each entity, whether it had its
-    IRI before this finalize pass: pinned by the caller, imported, or minted by
-    an earlier pass (a save earlier in the session). Within a group of entities
-    that share an IRI:
+    overwrite the first. *assigned* says, for each entity, whether its IRI is
+    fixed: it had it before this finalize pass (pinned by the caller, imported,
+    or minted by an earlier pass, a save earlier in the session), or it is the
+    record a previous session saved under it (``Workspace._hold_saved_iris``).
+    Within a group of entities that share an IRI:
 
     - an assigned IRI is never re-minted: published identities and the links
       other records already hold to them stay where they are;
@@ -2167,17 +2185,22 @@ class Workspace:
         """Mint and link every record of the session, in place.
 
         *record_roots* are the records folders a save writes to (by default
-        :attr:`source_root`): a cell spec saved there under the IRI the seeds
-        of before 0.8.0 gave it keeps that IRI. With *refuse_replaced_runs* (a
-        save), a test that nothing tells apart from a saved test that records
-        another run raises ``ValueError`` instead
-        (:meth:`_refuse_replacing_saved_runs`); the session is left as it was.
+        :attr:`source_root`). With *refuse_replaced_runs* (a save), a test that
+        nothing tells apart from a saved test that records another run raises
+        ``ValueError`` instead (:meth:`_refuse_replacing_saved_runs`); the
+        session is left as it was.
 
         A record keeps an IRI it had before the pass, whether the caller pinned
-        it, an import set it or an earlier pass minted it; a record minted in
-        this pass whose IRI collides with another's is re-minted from its
-        content, and two records that both had one IRI before the pass raise
-        ``ValueError`` (see :func:`_disambiguate_entity_ids`).
+        it, an import set it or an earlier pass minted it. So does a record
+        saved under *record_roots* by an earlier session: one whose seeded IRI
+        names the saved record a save of it would write, and a cell spec or
+        test saved under the IRI the seeds of before 0.8.0 gave it
+        (:meth:`_hold_saved_iris`). A record minted in this pass whose IRI
+        collides with another's is re-minted from its content, and two records
+        that both had one IRI before the pass raise ``ValueError`` (see
+        :func:`_disambiguate_entity_ids`). Whether a record keeps its IRI does
+        not depend on whether a save ran between adding it and adding the
+        record that collides with it.
         """
         roots = [self.source_root] if record_roots is None else list(record_roots)
         # IRIs held before this pass (pinned, imported, or minted by an earlier
@@ -2187,47 +2210,70 @@ class Workspace:
         assigned_test_specs = [item.id is not None for item in self.test_specs]
         assigned_tests = [item.id is not None for item in self.tests]
         assigned_datasets = [item.id is not None for item in self.datasets]
-        finalized_cell_specs = [self._finalize_cell_spec(item, record_roots=roots) for item in self.cell_specs]
+        finalized_cell_specs = [self._finalize_cell_spec(item) for item in self.cell_specs]
         cell_spec_map = {
             id(original): finalized for original, finalized in zip(self.cell_specs, finalized_cell_specs, strict=True)
         }
         # Break cell-spec IRI collisions before cells link to them: distinct specs that
         # share identity fields must not overwrite each other on save, and each cell must
         # link to its own spec (cell_spec_map holds the same objects, so in-place
-        # re-minting propagates into _finalize_cell's cell_spec_id lookup below).
+        # re-minting propagates into _finalize_cell's cell_spec_id lookup below). A spec
+        # saved earlier keeps its IRI, one saved before 0.8.0 changed the seed included.
+        held_cell_specs = self._hold_saved_iris(
+            finalized_cell_specs,
+            "cell-spec",
+            assigned=assigned_cell_specs,
+            record_roots=roots,
+            legacy_ids=self._legacy_cell_spec_ids(finalized_cell_specs, assigned_cell_specs),
+            is_legacy_record=lambda index, body: _same_cell_spec_identity(body, finalized_cell_specs[index]),
+        )
         _disambiguate_entity_ids(
-            finalized_cell_specs, "cell-spec", workspace_root=self.data_root, assigned=assigned_cell_specs
+            finalized_cell_specs, "cell-spec", workspace_root=self.data_root, assigned=held_cell_specs
         )
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
         cell_map = {id(original): finalized for original, finalized in zip(self.cells, finalized_cells, strict=True)}
         # Break IRI collisions before datasets link to these ids (cell_map holds
         # the same objects, so in-place re-minting propagates to dataset linking).
-        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root, assigned=assigned_cells)
+        held_cells = self._hold_saved_iris(finalized_cells, "cell", assigned=assigned_cells, record_roots=roots)
+        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root, assigned=held_cells)
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
         test_spec_map = {
             id(original): finalized for original, finalized in zip(self.test_specs, finalized_test_specs, strict=True)
         }
         # Break test-spec IRI collisions before tests link to them via conformsTo.
+        held_test_specs = self._hold_saved_iris(
+            finalized_test_specs, "test-protocol", assigned=assigned_test_specs, record_roots=roots
+        )
         _disambiguate_entity_ids(
-            finalized_test_specs, "test-protocol", workspace_root=self.data_root, assigned=assigned_test_specs
+            finalized_test_specs, "test-protocol", workspace_root=self.data_root, assigned=held_test_specs
         )
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
         test_map = {id(original): finalized for original, finalized in zip(self.tests, finalized_tests, strict=True)}
         # The test seed changed in 0.8.0; a test saved under its earlier IRI keeps it.
-        self._keep_legacy_test_iris(finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map)
-        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=assigned_tests)
+        held_tests = self._hold_saved_iris(
+            finalized_tests,
+            "test",
+            assigned=assigned_tests,
+            record_roots=roots,
+            legacy_ids=self._legacy_test_ids(finalized_tests, assigned_tests),
+            is_legacy_record=lambda index, body: self._is_saved_run(
+                body, self.tests[index], finalized_tests[index], cell_map
+            ),
+        )
+        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=held_tests)
         if refuse_replaced_runs:
             self._refuse_replacing_saved_runs(
                 finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map
             )
 
         finalized_datasets = [self._finalize_dataset(item, cell_map, test_map) for item in self.datasets]
-        _disambiguate_entity_ids(
-            finalized_datasets, "dataset", workspace_root=self.data_root, assigned=assigned_datasets
+        held_datasets = self._hold_saved_iris(
+            finalized_datasets, "dataset", assigned=assigned_datasets, record_roots=roots
         )
+        _disambiguate_entity_ids(finalized_datasets, "dataset", workspace_root=self.data_root, assigned=held_datasets)
 
         dataset_ids_by_cell: dict[str, list[str]] = {}
         for dataset in finalized_datasets:
@@ -2515,28 +2561,141 @@ class Workspace:
                 return locator
         return ""
 
-    def _keep_legacy_test_iris(
+    def _hold_saved_iris(
         self,
-        finalized_tests: Sequence[Test],
+        finalized: Sequence[Any],
+        entity_type: str,
         *,
         assigned: Sequence[bool],
         record_roots: Sequence[Path],
-        cell_map: dict[int, Cell],
-    ) -> None:
-        """Keep the IRI a test was saved under before 0.8.0 changed the test seed.
+        legacy_ids: Sequence[str | None] | None = None,
+        is_legacy_record: Callable[[int, Mapping[str, Any]], bool] | None = None,
+    ) -> list[bool]:
+        """Which of *finalized* keep their IRI when the pass breaks collisions: *assigned*, and the records already saved.
 
-        Each test minted in this pass is also minted under the rule of before
-        0.8.0: its seed (``entities.legacy_test_identity_seed``) and the re-mint
-        from content that kept colliding tests apart then
-        (:func:`_legacy_disambiguated_ids`). When a records folder the save
-        writes to (*record_roots*) holds a test under that IRI and none under
-        the new one, and the saved test is this run (:meth:`_is_saved_run`),
-        the test keeps the saved IRI, and the datasets seeded from it keep
-        theirs. An IRI another test of the session has is never taken.
+        *finalized* are the records of one kind as this pass minted them, in
+        session order, and *assigned* says which had their IRI before it. A
+        records folder a save writes to (*record_roots*) can hold a record a
+        previous session saved, which this session mints again. When two
+        records minted in this pass share an IRI and a record is saved under
+        it, the one whose save would write that record again (:meth:`_is_saved_record`)
+        keeps it, and only the others are re-minted from their content; so a
+        record keeps its IRI whether or not a save ran before the record that
+        collides with it was added. A record saved under a seed of before 0.8.0
+        keeps that IRI too: *legacy_ids* holds, for each record, the IRI the
+        rule of before 0.8.0 ends with, and a record takes it when it is saved,
+        *is_legacy_record* says the saved body records this record, and nothing
+        is saved under the record's own IRI or another record has that one.
+        An IRI another record of the session has is never taken.
         """
+        held = list(assigned)
         roots = [Path(root) for root in record_roots]
-        if not roots or all(assigned):
-            return
+        if not roots:
+            return held
+        groups: dict[str, list[int]] = {}
+        for index, item in enumerate(finalized):
+            if item.id is not None:
+                groups.setdefault(item.id, []).append(index)
+        own_record: set[int] = set()  # alone on an IRI saved under the roots: the record is its own
+        for iri, members in groups.items():
+            if any(held[index] for index in members):
+                continue
+            uid = _iri_uid(iri)
+            if not any(save_entity_path(entity_type, uid, root).is_file() for root in roots):
+                continue
+            if len(members) == 1:
+                own_record.add(members[0])
+                continue
+            body = saved_record_body(entity_type, uid, roots)
+            match = next(
+                (index for index in members if body is not None and self._is_saved_record(finalized[index], body)),
+                None,
+            )
+            if match is not None:
+                held[match] = True
+        if legacy_ids is None or is_legacy_record is None:
+            return held
+        taken = {item.id for item in finalized if item.id is not None}
+        for index, item in enumerate(finalized):
+            legacy = legacy_ids[index]
+            if held[index] or index in own_record or item.id is None or legacy is None or legacy in taken:
+                continue
+            body = saved_record_body(entity_type, _iri_uid(legacy), roots)
+            if body is None or not is_legacy_record(index, body):
+                continue
+            item.id = legacy
+            held[index] = True
+            taken.add(legacy)
+        return held
+
+    def _is_saved_record(self, item: Any, saved: Mapping[str, Any]) -> bool:
+        """Whether *saved*, a record body saved under *item*'s IRI, is the record a save of *item* writes.
+
+        The two bodies are compared without the record's own IRI, the
+        volatile timestamps and derived back-links (``dataset_ids``), and, for
+        a dataset that has none of its own, without the publication time and
+        licence a save fills in.
+        """
+        builders: dict[type, Callable[[Any], dict[str, Any]]] = {
+            CellSpec: _record_from_cell_spec,
+            Cell: _record_from_cell_instance,
+            TestSpec: _record_from_test_protocol,
+            Test: _record_from_test,
+            Dataset: _record_from_dataset,
+        }
+        builder = builders.get(type(item))
+        if builder is None:
+            return False
+        try:
+            doc = builder(item)
+        except (ValueError, TypeError):
+            return False
+        kind = kind_for_doc(doc)
+        body = doc.get(kind.record_key) if kind is not None else None
+        if not isinstance(body, Mapping):
+            return False
+        skip = {_RECORD_ID_KEY, *_DERIVED_BACK_LINKS}
+        if isinstance(item, Dataset):
+            if item.published_at is None:
+                skip.add("published_at")
+            if not item.license:
+                skip.add("license")
+
+        def view(value: Mapping[str, Any]) -> Any:
+            return {key: entry for key, entry in _without_volatile(dict(value)).items() if key not in skip}
+
+        return view(body) == view(saved)
+
+    def _legacy_cell_spec_ids(self, finalized: Sequence[CellSpec], assigned: Sequence[bool]) -> list[str | None]:
+        """The IRI the finalize pass of before 0.8.0 gave each cell spec of *finalized*.
+
+        The natural-key seed of before 0.8.0 (``entities.legacy_cell_spec_identity_seed``,
+        hashed without NFC), and the re-mint from content that kept colliding
+        specs apart then (:func:`_legacy_disambiguated_ids`). A spec in
+        *assigned* starts from the IRI it has. Only for finding specs saved
+        under those IRIs.
+        """
+        started = [
+            spec.id
+            if held
+            else _legacy_entity_iri(
+                "cell-spec",
+                legacy_cell_spec_identity_seed(
+                    **_cell_spec_fields(spec.manufacturer, spec.model, spec.format, spec.chemistry, spec.size_code)
+                ),
+            )
+            for spec, held in zip(finalized, assigned, strict=True)
+        ]
+        return _legacy_disambiguated_ids(started, finalized, "cell-spec", workspace_root=self.data_root)
+
+    def _legacy_test_ids(self, finalized: Sequence[Test], assigned: Sequence[bool]) -> list[str | None]:
+        """The IRI the finalize pass of before 0.8.0 gave each test of *finalized*.
+
+        Its seed (``entities.legacy_test_identity_seed``), and the re-mint from
+        content that kept colliding tests apart then
+        (:func:`_legacy_disambiguated_ids`). A test in *assigned* starts from
+        the IRI it has. Only for finding tests saved under those IRIs.
+        """
         started = [
             test.id
             if held
@@ -2549,20 +2708,9 @@ class Workspace:
                     name=test.name,
                 ),
             )
-            for test, held in zip(finalized_tests, assigned, strict=True)
+            for test, held in zip(finalized, assigned, strict=True)
         ]
-        legacy_ids = _legacy_disambiguated_ids(started, finalized_tests, "test", workspace_root=self.data_root)
-        taken = {test.id for test in finalized_tests if test.id is not None}
-        for index, (test, held, legacy) in enumerate(zip(finalized_tests, assigned, legacy_ids, strict=True)):
-            if held or test.id is None or legacy is None or legacy in taken:
-                continue
-            if saved_record_body("test", _iri_uid(test.id), roots) is not None:
-                continue
-            body = saved_record_body("test", _iri_uid(legacy), roots)
-            if body is None or not self._is_saved_run(body, self.tests[index], test, legacy, cell_map):
-                continue
-            test.id = legacy
-            taken.add(legacy)
+        return _legacy_disambiguated_ids(started, finalized, "test", workspace_root=self.data_root)
 
     def _refuse_replacing_saved_runs(
         self,
@@ -2615,15 +2763,14 @@ class Workspace:
         body: Mapping[str, Any],
         original: Test,
         finalized: Test,
-        iri: str,
         cell_map: dict[int, Cell],
     ) -> bool:
-        """Whether *body*, the test saved as *iri*, records the run *finalized* (made from *original*) describes.
+        """Whether *body*, a saved test, records the run *finalized* (made from *original*) describes.
 
         It has the same cell, kind and protocol, and the same data files: the
-        datasets the session made from this run, minted with *iri* as their
-        test, are the ones the saved test lists. A test without data files is
-        told apart only by its start time, so the saved one must have the same.
+        datasets the session made from this run, minted with the saved test's
+        IRI as their test, are the ones the saved test lists. A test without
+        data files must have the same start time as the saved one.
         """
         if body.get("cell_id") != finalized.cell_instance_id or str(body.get("kind") or "") != str(finalized.test_kind):
             return False
@@ -2633,7 +2780,7 @@ class Workspace:
         datasets = [dataset for dataset in self.datasets if dataset.test is original]
         if not datasets:
             return not listed and _to_unix_time(body.get("started_at")) == _to_unix_time(finalized.started_at)
-        probe = finalized.model_copy(update={"id": iri})
+        probe = finalized.model_copy(update={"id": body.get("id")})
         made = sorted(str(self._finalize_dataset(dataset, cell_map, {id(original): probe}).id) for dataset in datasets)
         return made == listed
 
