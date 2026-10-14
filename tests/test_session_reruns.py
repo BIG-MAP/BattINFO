@@ -162,6 +162,15 @@ def test_an_unpinned_test_added_twice_in_a_new_session_is_saved_once(tmp_path: P
     assert _without_save_time(_files(root)) == _without_save_time(files)
 
 
+def test_matching_the_same_files_again_reuses_their_tests(tmp_path: Path) -> None:
+    ws = AuthoringWorkspace(root=_root(tmp_path), registry_url=None)
+    ws.add("cell", spec=ws.load("spec.cell-spec.json"), serial_numbers=["C01"])
+    first = ws.add("test", type="cycling", datasets="data/C01.csv")
+    again = ws.add("test", type="cycling", datasets="data/C01.csv")
+    assert len(first) == 1 and again[0] is first[0]
+    assert len(ws._ws.tests) == len(ws._ws.datasets) == 1
+
+
 def test_the_same_cell_iri_map_added_twice_keeps_its_iris(tmp_path: Path) -> None:
     root = _root(tmp_path)
     (root / "cell_iris.json").write_text(
