@@ -134,9 +134,16 @@ def test_a_string_that_is_not_a_finite_number_is_text(value: str) -> None:
 
 def test_value_text_wins_over_a_value_that_is_not_a_number() -> None:
     quantity = {"value": "about 500", "value_text": "approx. 500 um", "unit": "um"}
-    node = _quiet(_descriptor_quantity_node, "thickness", quantity)
+    node, messages = _warned(_descriptor_quantity_node, "thickness", quantity)
     assert "hasNumericalPart" not in node
     assert node["hasStringValue"] == "approx. 500 um"
+    # The warning says the value string is dropped, not that it is carried as text.
+    (message,) = [m for m in messages if "value_text_only" in m]
+    assert message.startswith(
+        "semantic.value_text_only: 'thickness' value 'about 500' is not a number and is not published"
+    )
+    assert "value_text 'approx. 500 um'" in message
+    assert "carries it as text" not in message
 
 
 def test_a_typical_value_is_the_number_when_the_value_is_text() -> None:

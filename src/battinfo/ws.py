@@ -173,6 +173,18 @@ def _default_specs_for(format_: str, chemistry: str) -> dict[str, dict]:
     return dict(_CYLINDRICAL_SECONDARY_SPECS)
 
 
+def _cell_spec_property_keys() -> frozenset[str]:
+    """The keys a cell spec's ``properties`` accept, read from its schema."""
+    from battinfo.validate.schema import schema_for_rel_path  # noqa: PLC0415
+
+    ref = schema_for_rel_path("cell-spec.schema.json")["properties"]["properties"]["$ref"]
+    file_name, _, pointer = ref.partition("#")
+    node: Any = schema_for_rel_path(file_name)
+    for part in pointer.strip("/").split("/"):
+        node = node[part]
+    return frozenset(node.get("properties", {}))
+
+
 def _short_id(name: str) -> str | None:
     """Extract the 6-char short ID from a batch name or filename stem."""
     m = _SHORT_ID_RE.search(name)
@@ -4449,17 +4461,22 @@ class AuthoringWorkspace:
 
         # Load prop map directly so we can keep only the FIRST key per IRI
         # (later aliases like "discharging_temperature_min" must not overwrite
-        # the canonical "minimum_discharging_temperature").
+        # the canonical "minimum_discharging_temperature"). The first key a cell
+        # spec's properties accept wins over any key listed before it: Mass
+        # reads back as mass, not as cap_assembly_weight, which the cell-spec
+        # schema refuses.
         _prop_map_path = Path(__file__).parent / "data" / "mappings" / "domain-battery" / "property_map.curated.json"
         rev_prop: dict[str, str] = {}
         # class IRI -> the bound the class names ("max" or "min"), from the
         # curated ``bound`` flag the emitter reads too.
         bound_of_class: dict[str, str] = {}
+        spec_keys = _cell_spec_property_keys()
         if _prop_map_path.exists():
             for m in json.loads(_prop_map_path.read_text(encoding="utf-8")).get("mappings", []):
                 iri = m.get("class_iri", "")
                 key = m.get("key", "")
-                if iri and key and iri not in rev_prop:  # first occurrence wins
+                accepted_first = key in spec_keys and rev_prop.get(iri) not in spec_keys
+                if iri and key and (iri not in rev_prop or accepted_first):
                     rev_prop[iri] = key
                 if iri and m.get("bound") in ("max", "min"):
                     bound_of_class.setdefault(iri, m["bound"])

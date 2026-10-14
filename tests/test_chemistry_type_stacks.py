@@ -12,6 +12,10 @@ ws.import_() reads the chemistry back from the first chemistry class in the
 stack and rebuilds the electrode bases and the cell configuration, so a deposit
 written before this change, whose stacks carry the extra classes, imports with
 the chemistry its author declared.
+
+Each stack is checked as labels and as the class IRIs the labels expand to,
+in record_to_jsonld's url and inline modes, in the deposit and after the
+import round trip.
 """
 
 from __future__ import annotations
@@ -23,11 +27,13 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pyld import jsonld as _jsonld
 
 import battinfo
 from battinfo.jsonld import record_to_jsonld
 from battinfo.transform.cell_spec_node import physical_type_stack
 from battinfo.transform.json_to_jsonld import _descriptor_specification_to_jsonld
+from battinfo.validate.jsonld import _inline_local_contexts
 from battinfo.validate.record import validate_record_report
 from battinfo.ws import AuthoringWorkspace
 
@@ -166,6 +172,37 @@ FRESH_ONLY: dict[str, tuple[dict[str, str], list[str]]] = {
 }
 ALL_CASES = {**CASES, **FRESH_ONLY}
 
+# Every class the stacks above name, with the IRI its own ontology gives it
+# (domain-battery 0.21.0, and domain-electrochemistry 0.39.0 for
+# HalfCellDevice), checked against each class's skos:prefLabel there. The
+# stacks are compared as labels and also as these IRIs, so a context term that
+# points a label at another class's IRI fails the tests below.
+BATTERY = "https://w3id.org/emmo/domain/battery#battery_"
+ECHEM = "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_"
+CLASS_IRI: dict[str, str] = {
+    "BatteryCell": BATTERY + "68ed592a_7924_45d0_a108_94d6275d57f0",
+    "CoinCell": BATTERY + "b7fdab58_6e91_4c84_b097_b06eff86a124",
+    "CylindricalBattery": BATTERY + "ac604ecd_cc60_4b98_b57c_74cd5d3ccd40",
+    "PouchCell": BATTERY + "392b3f47_d62a_4bd4_a819_b58b09b8843a",
+    "BatteryHalfCell": BATTERY + "8f0ae0b6_ee4b_47a0_b90b_1b072a62a7d9",
+    "HalfCellDevice": ECHEM + "37a06684_e6b6_4e1e_82ca_105868e3b6c9",
+    "AlkalineZincManganeseDioxideBattery": BATTERY + "b572826a_b4e4_4986_b57d_f7b945061f8b",
+    "ZincCarbonBattery": BATTERY + "aaaa6f4b_435b_425b_acb1_e8a427c3489a",
+    "LithiumManganeseDioxideBattery": BATTERY + "05adf5d2_0fbd_4c58_906e_4b875a7f2363",
+    "LithiumMetalBattery": BATTERY + "ada13509_4eed_4e40_a7b1_4cc488144154",
+    "LithiumSulfurBattery": BATTERY + "a5c1aa29_5404_4746_a9d0_0262c44ca419",
+    "PotassiumIonBattery": BATTERY + "22cd1325_5cbb_4fb3_b6a6_ae7aab5554a5",
+    "SodiumIonBattery": BATTERY + "42329a95_03fe_4ec1_83cb_b7e8ed52f68a",
+    "LithiumIonBattery": BATTERY + "96addc62_ea04_449a_8237_4cd541dd8e5f",
+    "LithiumIonNickelManganeseCobaltOxideBattery": BATTERY + "834095fa_f684_4368_a7ce_853579a1362a",
+    "LithiumIonNickelCobaltAluminiumOxideBattery": BATTERY + "217e44ed_efd9_4b9e_9cb4_1f7488d996b2",
+    "LithiumIonIronPhosphateBattery": BATTERY + "04a4e5a4_e6fd_43af_b1ca_4a16d5f8886c",
+    "LithiumIonGraphiteBattery": BATTERY + "2018e0da_4c25_46e9_83db_38431fc81ce0",
+    "LithiumIonTitanateBattery": BATTERY + "fd811dc3_8c37_4741_a099_78e26e4110ef",
+}
+IS_DESCRIPTION_FOR = "https://w3id.org/emmo#EMMO_f702bad4_fc77_41f0_a26d_79f6444fd4f3"
+CONFORMS_TO = "http://purl.org/dc/terms/conformsTo"
+
 
 def _types(value: Any) -> list[str]:
     return [value] if isinstance(value, str) else list(value or [])
@@ -211,6 +248,29 @@ def _electrode_types(described: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _expected_iris(model: str) -> list[str]:
+    return [CLASS_IRI[label] for label in ALL_CASES[model][1]]
+
+
+def _expanded(doc: dict[str, Any]) -> list[dict[str, Any]]:
+    """A document expanded offline, its contexts read from the bundled copies."""
+    return _jsonld.expand(_inline_local_contexts(doc))
+
+
+def _described_iris(expanded: list[dict[str, Any]], spec_iri: str) -> list[str]:
+    """The expanded @type of the battery the spec at *spec_iri* describes."""
+    (spec,) = [node for node in expanded if node.get("@id") == spec_iri]
+    (described,) = spec[IS_DESCRIPTION_FOR]
+    return described["@type"]
+
+
+def _emitted_iris(record: dict[str, Any], mode: str) -> list[str]:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        doc = record_to_jsonld(record, "cell-spec", context=mode)
+    return _described_iris(_expanded(doc), record["cell_spec"]["id"])
+
+
 def _import_and_save(deposit_path: Path, root: Path) -> AuthoringWorkspace:
     ws = AuthoringWorkspace(root=root, registry_url=None)
     ws.import_(str(deposit_path))
@@ -227,6 +287,25 @@ def _import_and_save(deposit_path: Path, root: Path) -> AuthoringWorkspace:
 def test_the_canonical_builder_types_each_cell_by_its_chemistry(model: str) -> None:
     fields, expected = ALL_CASES[model]
     assert physical_type_stack(_cell_body(fields)) == expected
+
+
+@pytest.mark.parametrize("mode", ["url", "inline"])
+@pytest.mark.parametrize("model", list(ALL_CASES))
+def test_record_to_jsonld_expands_the_stack_to_the_class_iris(model: str, mode: str) -> None:
+    fields, _ = ALL_CASES[model]
+    assert _emitted_iris(_record(**fields), mode) == _expected_iris(model)
+
+
+def test_the_hosted_context_alone_gives_each_class_its_iri() -> None:
+    """v1 agrees with the emitter's own table, so a url-mode cell spec needs no local patch."""
+    v1 = json.loads((ROOT / "src" / "battinfo" / "data" / "context" / "records.context.v1.json").read_text("utf-8"))
+    for label, iri in CLASS_IRI.items():
+        assert _jsonld.expand({"@context": v1["@context"], "@type": label}) == [{"@type": [iri]}], label
+    for model, (fields, _) in ALL_CASES.items():
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            doc = record_to_jsonld(_record(**fields), "cell-spec")
+        assert doc["@context"] == "https://w3id.org/battinfo/context/records/v1.json", model
 
 
 @pytest.mark.parametrize("model", list(ALL_CASES))
@@ -410,9 +489,11 @@ def fresh_round_trip(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]
         source.save()
         deposit_path = source.preview_jsonld()
     _import_and_save(deposit_path, base / "imported")
+    deposit = json.loads(deposit_path.read_text(encoding="utf-8"))
     return {
         "source": _saved_specs(base / "source"),
-        "deposit": json.loads(deposit_path.read_text(encoding="utf-8")),
+        "deposit": deposit,
+        "expanded_deposit": _expanded(deposit),
         "imported": _saved_specs(base / "imported"),
     }
 
@@ -426,6 +507,11 @@ def test_the_deposit_carries_the_stack(fresh_round_trip: dict[str, Any], model: 
     # The cell built to the spec carries the same classes.
     [cell] = [n for n in deposit["@graph"] if (n.get("dcterms:conformsTo") or {}).get("@id") == node["@id"]]
     assert _types(cell["@type"]) == expected
+    # Expanded with the deposit's own context, both carry the classes' IRIs.
+    expanded = fresh_round_trip["expanded_deposit"]
+    assert _described_iris(expanded, node["@id"]) == _expected_iris(model)
+    [cell_node] = [n for n in expanded if n.get(CONFORMS_TO) == [{"@id": node["@id"]}]]
+    assert cell_node["@type"] == _expected_iris(model)
 
 
 @pytest.mark.parametrize("model", list(ALL_CASES))
@@ -437,6 +523,8 @@ def test_save_preview_import_save_keeps_chemistry_bases_and_stack(fresh_round_tr
         assert imported["cell_spec"].get(field) == source["cell_spec"].get(field), field
     source_node, imported_node = _emitted(source), _emitted(imported)
     assert _types(imported_node["@type"]) == _types(source_node["@type"]) == expected
+    for mode in ("url", "inline"):
+        assert _emitted_iris(imported, mode) == _expected_iris(model), mode
     # The electrode bases come back as the electrodes they were written as. A
     # specific NMC grade comes back as nmc: all of them share one electrode class.
     assert _electrode_types(imported_node) == _electrode_types(source_node)
@@ -527,6 +615,8 @@ def test_an_old_deposit_imports_the_declared_chemistry_and_saves_the_new_stack(
         if stated is not None and not stated.startswith("nmc"):
             assert recovered == stated, field
     assert _types(_emitted(old_round_trip["imported"][model])["@type"]) == expected
+    for mode in ("url", "inline"):
+        assert _emitted_iris(old_round_trip["imported"][model], mode) == _expected_iris(model), mode
 
 
 def test_an_old_alkaline_deposit_with_a_free_text_chemistry_is_not_saved_as_li_mno2(

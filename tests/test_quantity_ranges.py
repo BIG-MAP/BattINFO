@@ -319,6 +319,37 @@ def test_the_re_saved_record_publishes_the_same_numbers(round_trip: dict[str, An
     assert first["MaximumContinuousChargingCurrent"] == (5.0, None, 5.0)
 
 
+def test_mass_thickness_and_volume_come_back_under_their_cell_spec_keys(tmp_path: Path) -> None:
+    """Mass, Thickness and Volume each have an earlier curated key the cell-spec
+    schema refuses (cap_assembly_weight, foil_thickness, available_volume). The
+    import read the class back as that key, so the re-save failed strict
+    validation."""
+    properties = {
+        "nominal_voltage": {"value": 3.7, "unit": "V"},
+        "mass": {"min_value": 40.0, "max_value": 45.0, "unit": "g"},
+        "thickness": {"value": 5.5, "unit": "mm"},
+        "volume": {"value": 22.0, "unit": "cm3"},
+    }
+    source = AuthoringWorkspace(root=tmp_path / "source", registry_url=None)
+    source.license("cc-by-4.0")
+    spec = battinfo.CellSpec(
+        manufacturer="Example Lab", model="P1", format="pouch", chemistry="li-ion", properties=properties
+    )
+    source.add("cell", spec=spec, serial_numbers=["P1-01"])
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        source.save()
+        deposit_path = source.preview_jsonld()
+    imported = AuthoringWorkspace(root=tmp_path / "imported", registry_url=None)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        imported.import_(str(deposit_path))
+        imported.save()
+    folder = tmp_path / "imported" / ".battinfo" / "records" / "cell-spec"
+    (record,) = [json.loads(path.read_text(encoding="utf-8")) for path in folder.glob("*.json")]
+    assert record["properties"] == properties
+
+
 def test_import_reads_a_stated_basis_and_an_old_percent_unit_back(round_trip: dict[str, Any]) -> None:
     deposit = json.loads(json.dumps(round_trip["deposit"]))
     nodes = {node["skos:prefLabel"]: node for node in _spec_node(deposit)["isDescriptionFor"]["hasProperty"]}

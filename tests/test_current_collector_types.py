@@ -49,6 +49,8 @@ FOIL = ECHEM + "1d5377a7_9f2b_4fdf_958a_7eeadce158d6"
 PERFORATED_FOIL = ECHEM + "c84a1d8f_e405_42ba_8c80_bbe3b9c6c66a"
 MESH = ECHEM + "18f2199b_c50c_49ec_bd17_a37626ca5e63"
 WOVEN_MESH = ECHEM + "3a69a00e_235a_4948_b369_8ac20116c85e"
+EXPANDED_MESH = ECHEM + "31b38a1b_5873_454c_ba99_00491497fb43"
+ELECTROSPUN_MESH = ECHEM + "9e2f4509_e3f1_4bff_a5f4_8792c372e338"
 FOAM = EMMO + "EMMO_1f5e3e7e_72c9_40d4_91dd_ae432d7b7018"
 
 # (current_collector body, expected class IRIs, coating text or None)
@@ -75,6 +77,16 @@ CASES: list[tuple[dict[str, Any], set[str], str | None]] = [
     ({"name": "Double-sided coated Cu foil"}, {CURRENT_COLLECTOR, COPPER, FOIL}, None),
     ({"name": "Pre-coated Al foil"}, {CURRENT_COLLECTOR, ALUMINIUM, FOIL}, None),
     ({"name": "Non-coated Al foil"}, {CURRENT_COLLECTOR, ALUMINIUM, FOIL}, None),
+    # Nor is a form word: "foil" here is what is coated.
+    ({"name": "Al foil coated"}, {CURRENT_COLLECTOR, ALUMINIUM, FOIL}, None),
+    ({"name": "Cu foil, coated"}, {CURRENT_COLLECTOR, COPPER, FOIL}, None),
+    ({"name": "Ni mesh coated with carbon"}, {CURRENT_COLLECTOR, NICKEL, MESH}, "carbon"),
+    # The word that names a kind of mesh need not stand next to "mesh".
+    ({"name": "Expanded copper mesh"}, {CURRENT_COLLECTOR, COPPER, EXPANDED_MESH}, None),
+    ({"name": "Woven stainless steel mesh"}, {CURRENT_COLLECTOR, STAINLESS_STEEL, WOVEN_MESH}, None),
+    ({"name": "Electrospun carbon mesh"}, {CURRENT_COLLECTOR, CARBON, ELECTROSPUN_MESH}, None),
+    # Form "mesh" takes the kind of mesh from the name.
+    ({"name": "Woven SS mesh", "form": "mesh"}, {CURRENT_COLLECTOR, STAINLESS_STEEL, WOVEN_MESH}, None),
     ({"name": "Carbon paper"}, {CURRENT_COLLECTOR, CARBON}, None),
     # Plain steel has no class in the pinned closure, so only the form types.
     ({"name": "Steel mesh"}, {CURRENT_COLLECTOR, MESH}, None),

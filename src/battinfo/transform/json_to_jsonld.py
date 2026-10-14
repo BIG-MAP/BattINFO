@@ -1141,9 +1141,10 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     The number is ``value``, else ``typical_value``, else the one bound the
     class names (:func:`_bound_as_number`). ``hasNumberValue`` is
     ``xsd:double``, so a ``value`` that is a string reading as a number is
-    published as that number, and any other string as ``hasStringValue`` (when
-    there is no ``value_text``), with a ``semantic.value_text_only`` warning.
-    ``min_value`` and ``max_value`` are
+    published as that number, and any other string as ``hasStringValue``, with
+    a ``semantic.value_text_only`` warning. When the quantity has its own
+    ``value_text``, that is the ``hasStringValue`` and the warning says the
+    ``value`` string is not published. ``min_value`` and ``max_value`` are
     always kept, as ``schema:minValue`` and ``schema:maxValue``. A percent unit
     in any spelling is PercentUnit; on a key that is not a fraction, a spelling
     that states a basis (``wt%``, ``vol%``) adds WeightPercent or VolumePercent
@@ -1190,15 +1191,23 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
     if upper is not None:
         node["schema:maxValue"] = upper
 
-    if text is not None:
+    value_text = quantity.get("value_text")
+    if text is not None and value_text:
+        warnings.warn(
+            f"semantic.value_text_only: '{name}' value '{text}' is not a number and is not "
+            f"published - the JSON-LD export carries value_text '{value_text}' as text "
+            "(hasStringValue) instead. Put the number in value.",
+            stacklevel=2,
+        )
+    elif text is not None:
         warnings.warn(
             f"semantic.value_text_only: '{name}' value '{text}' is not a number - the JSON-LD "
             "export carries it as text (hasStringValue), not as a number. Put the number in "
             "value and the wording in value_text.",
             stacklevel=2,
         )
-    if quantity.get("value_text"):
-        node["hasStringValue"] = quantity["value_text"]
+    if value_text:
+        node["hasStringValue"] = value_text
     elif text is not None:
         node["hasStringValue"] = text
 
@@ -2067,7 +2076,7 @@ _ELECTRODE_ROLE_MAP: dict[str, dict[str, str]] = {
 # Current-collector forms and substrates -> EMMO class terms, keyed by whole
 # lower-case words. One normaliser (_current_collector_terms) reads a
 # collector's form and material fields and then its name with these tables. A
-# generic "mesh" is a Mesh; only a name that says "woven mesh" is a WovenMesh.
+# generic "mesh" is a Mesh; only a name that also says "woven" is a WovenMesh.
 # The form field's values (foil, mesh, foam, perforated) are keys too. Plain
 # steel has no class: neither the v1 records context nor the pinned EMMO context
 # defines Steel, so only "stainless steel" and its spellings type.
@@ -2105,8 +2114,17 @@ _CC_STAINLESS_GRADE = re.compile(r"^(?:(?:sus|ss)3\d\d[a-z]?|3\d\dl)$")
 # and so does the word after "coated with".
 _CC_COATING_WORDS = frozenset({"coated", "plated"})
 # Words that say how or where a foil is coated, not what with: "double side
-# coated", "pre-coated", "non-coated".
-_CC_NOT_A_COATING = frozenset({"double", "single", "side", "sided", "both", "one", "two", "pre", "non", "un"})
+# coated", "pre-coated", "non-coated", and the form words ("Al foil coated").
+_CC_NOT_A_COATING = frozenset(
+    {"double", "single", "side", "sided", "both", "one", "two", "pre", "non", "un"}
+    | {word for key in _CC_FORM_FACTOR_MAP for word in key.split()}
+)
+# The kinds of mesh, by the word that names them. A name that says "mesh"
+# anywhere is that kind of mesh when the word is in it too: "Expanded copper
+# mesh" is an ExpandedMesh, "Woven stainless steel mesh" a WovenMesh.
+_CC_MESH_KINDS: dict[str, str] = {
+    key.split()[0]: cls for key, cls in _CC_FORM_FACTOR_MAP.items() if key.endswith(" mesh")
+}
 
 
 def _phrases(table: dict[str, str]) -> list[tuple[tuple[str, ...], str]]:
@@ -2133,9 +2151,11 @@ def _current_collector_terms(text: Any) -> _CollectorTerms:
     word before "coated" or "plated", or after "coated with", is the coating
     and never the substrate, so "carbon-coated Al" is aluminium with a carbon
     coating; the coating is returned as written. A word that says how the foil
-    is coated ("double side coated", "pre-coated") names no coating. The form
-    is the most specific one named, so "perforated foil" wins over "foil" and
-    "woven mesh" over "mesh".
+    is coated ("double side coated", "pre-coated") or a form word ("Al foil
+    coated") names no coating. The form is the most specific one named, so
+    "perforated foil" wins over "foil", and a name with "mesh" in it is a
+    woven, expanded or electrospun mesh when it says so anywhere ("Woven
+    stainless steel mesh").
     """
     if not isinstance(text, str) or not text.strip():
         return _CollectorTerms(None, None, None)
@@ -2146,7 +2166,8 @@ def _current_collector_terms(text: Any) -> _CollectorTerms:
         if token not in _CC_COATING_WORDS:
             continue
         if idx + 2 < len(tokens) and tokens[idx + 1] == "with":
-            coating_at.add(idx + 2)
+            if tokens[idx + 2] not in _CC_NOT_A_COATING:
+                coating_at.add(idx + 2)
         elif idx > 0 and tokens[idx - 1] not in _CC_NOT_A_COATING:
             coating_at.add(idx - 1)
     substrate: str | None = None
@@ -2167,6 +2188,8 @@ def _current_collector_terms(text: Any) -> _CollectorTerms:
         if any(tuple(tokens[start : start + len(phrase)]) == phrase for start in range(len(tokens))):
             form = cls
             break
+    if form == _CC_FORM_FACTOR_MAP["mesh"]:
+        form = next((cls for word, cls in _CC_MESH_KINDS.items() if word in tokens), form)
     coating = words[min(coating_at)] if coating_at else None
     return _CollectorTerms(substrate, form, coating)
 
@@ -2288,10 +2311,12 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
         'Carbon coated aluminium foil'  → ['CurrentCollector', 'Aluminium', 'Foil']
 
     A field that names no class leaves its facet to the name, except form
-    ``other``, which says the form is none of the listed ones. The name and the
-    material are kept as ``schema:name`` and ``schema:material``. A coating is
-    not a class of the collector: it is kept as the text of a ``hasCoating``
-    node (``{"schema:material": "Carbon"}``), as housing parts keep theirs.
+    ``other``, which says the form is none of the listed ones. Form ``mesh``
+    takes the kind of mesh the name gives ("Woven SS mesh" is a WovenMesh).
+    The name and the material are kept as ``schema:name`` and
+    ``schema:material``. A coating is not a class of the collector: it is kept
+    as the text of a ``hasCoating`` node (``{"schema:material": "Carbon"}``),
+    as housing parts keep theirs.
 
     ``material_spec_id`` cites the standalone material-spec for the foil material,
     emitted as ``schema:isVariantOf`` — the same reference seam a material
@@ -2309,6 +2334,9 @@ def _descriptor_current_collector_to_jsonld(cc: dict[str, Any] | None) -> dict[s
         form_class = None
     else:
         form_class = _current_collector_terms(form).form or from_name.form
+        # Form "mesh" leaves the kind of mesh to the name.
+        if form_class == _CC_FORM_FACTOR_MAP["mesh"] and from_name.form in _CC_MESH_KINDS.values():
+            form_class = from_name.form
     coating = from_material.coating or from_name.coating
     cc_types = ["CurrentCollector", *(cls for cls in (substrate, form_class) if cls)]
     node: dict[str, Any] = {"@type": cc_types if len(cc_types) > 1 else cc_types[0]}
