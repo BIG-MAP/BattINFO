@@ -488,7 +488,7 @@ def test_saved_cells_reload_with_their_electrodes(tmp_path: Path) -> None:
 
     reopened = AuthoringWorkspace(tmp_path)
     assert reopened.reload_cells() == 1
-    reloaded = reopened._cells_by_short_id["c-1"]
+    reloaded = reopened._resolve_cell("c-1")
     assert reloaded.working_electrode_id == WORKING_IRI
 
 

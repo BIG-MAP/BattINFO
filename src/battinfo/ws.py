@@ -25,7 +25,7 @@ import json
 import os
 import re
 import warnings
-from collections.abc import Callable, Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -181,16 +181,86 @@ def _short_id(name: str) -> str | None:
     return m.group(1) if m else None
 
 
-def _serial_matches(token: str, serial: str | None) -> bool:
-    """True if *token* identifies *serial* — by exact match or shared 6-char short ID.
+# A short ID on its own: six characters of the UID alphabet (no i, l, o or u),
+# such as "063b77". Only such a label is matched by short ID; any other label
+# has to match a cell's serial number or name exactly, so "LAB-2025-000001"
+# never binds "LAB-2024-000001" and "NMC-sample" never binds "LFP-sample".
+_BARE_SHORT_ID_RE = re.compile(r"[0-9a-hjkmnp-tv-z]{6}")
 
-    Lets a filename stem, a short ID, or a full serial all resolve to the same cell.
+
+def _is_short_id(token: str) -> bool:
+    """True if *token* is a short ID on its own, not a label that ends in one."""
+    return _BARE_SHORT_ID_RE.fullmatch(token) is not None
+
+
+def _iri_short_id(iri: str | None) -> str | None:
+    """The short ID of a record IRI: the first six characters of its UID."""
+    tail = (iri or "").rstrip("/").rsplit("/", 1)[-1]
+    return tail.replace("-", "")[:6] if is_dashed_uid(tail) else None
+
+
+def _label_short_id(label: str, *, file_stem: bool = False) -> str | None:
+    """The short ID a cell label stands for, or None.
+
+    A label stands for a short ID only when it is one. A data file's name may
+    also carry one: for a file-name stem, the short ID its name starts with or
+    ends in (``gm6pmr.bdf``, ``cycling-gm6pmr``) counts too.
     """
-    if not serial or not token:
-        return False
-    if token == serial:
-        return True
-    return (_short_id(token) or token) == (_short_id(serial) or serial)
+    if _is_short_id(label):
+        return label
+    if file_stem:
+        base = label.split(".", 1)[0]
+        if _is_short_id(base):
+            return base
+        sid = _short_id(label)
+        if sid and _is_short_id(sid):
+            return sid
+    return None
+
+
+def _cells_named_by(
+    label: str, cells: Sequence[tuple[builtins.list[str], str | None]], short_id: str | None
+) -> builtins.list[int]:
+    """Indexes of the cells *label* names, exact serial or name matches first.
+
+    *cells* holds each cell's labels (its serial number and name) and its IRI. A
+    cell with *label* among its labels matches. Only when none does is
+    *short_id* tried: a cell matches when its IRI's short ID, or the short ID one
+    of its labels ends in, equals it.
+    """
+    exact = [i for i, (labels, _) in enumerate(cells) if label in labels]
+    if exact or not short_id:
+        return exact
+    return [
+        i
+        for i, (labels, iri) in enumerate(cells)
+        if short_id == _iri_short_id(iri) or any(_short_id(text) == short_id for text in labels)
+    ]
+
+
+def _describe_session_cell(cell: Any) -> str:
+    """One line naming a session cell: serial, name, spec and IRI."""
+    serial = getattr(cell, "serial_number", None)
+    name = getattr(cell, "name", None)
+    spec = getattr(cell, "cell_spec_id", None) or getattr(getattr(cell, "cell_spec", None), "id", None)
+    parts = [f"serial {serial!r}" if serial else "no serial"]
+    if name and name != serial:
+        parts.append(f"name {name!r}")
+    if spec:
+        parts.append(f"spec {spec}")
+    parts.append(getattr(cell, "id", None) or "no IRI until ws.save()")
+    return ", ".join(parts)
+
+
+def _describe_registry_cell(hit: Mapping[str, Any]) -> str:
+    """One line naming a registry cell: IRI, label, spec and publisher."""
+    label = hit.get("title") or hit.get("serial_number") or hit.get("name") or "untitled"
+    details = [str(label)]
+    if hit.get("cell_spec_id"):
+        details.append(f"spec {hit['cell_spec_id']}")
+    publisher = hit.get("publisher_id")
+    details.append(f"published by {publisher}" if publisher else "publisher not given")
+    return f"{hit.get('id') or '(no IRI)'} ({', '.join(details)})"
 
 
 # ── Resource-type vocabulary ──────────────────────────────────────────────────
@@ -1957,15 +2027,15 @@ class AuthoringWorkspace:
         if registry_url is not _UNSET:
             registry_url = registry_url.rstrip("/") if registry_url else None
         self._registry_url_given: str | None = registry_url
-        # name -> Cell, keyed by short_id for test matching
-        self._cells_by_short_id: dict[str, Any] = {}
-        # Lookup keys that two or more DIFFERENT cells answer to. A display name
-        # is not an identifier: a batch may legitimately share one public label
-        # across many serials. Such a key cannot pick a cell, so resolving it
-        # raises instead of silently returning whichever cell was indexed last.
-        self._ambiguous_cell_keys: set[str] = set()
+        # Every cell the session can be pointed at by a label, once each, with
+        # the labels it answers to (its serial number and name as given). A
+        # cell known only by its IRI is not listed. A lookup reads
+        # this list, so a label that two or more cells answer to is reported
+        # with every candidate rather than resolved to whichever came last: a
+        # display name is not an identifier, and a batch may share one.
+        self._indexed_cells: builtins.list[tuple[Any, builtins.list[str]]] = []
         # True once cell instances saved in a previous session have been lazily
-        # loaded from .battinfo/records/cell-instance/ into the index above, so a
+        # loaded from .battinfo/records/cell-instance/ into the list above, so a
         # fresh process can still resolve a cell by serial (day-2 rehydration).
         self._cells_rehydrated = False
         # (registry, entity type, IRI) -> outcome of looking a referenced record
@@ -3294,11 +3364,13 @@ class AuthoringWorkspace:
             '    manufacturer="Samsung SDI", model="INR21700-50E",\n'
             '    format="cylindrical", chemistry="Li-ion")\n'
             "\n"
-            "# 5. Register the physical cells you tested\n"
-            'ws.add("cell", spec=spec, serial_numbers=["S1", "S2", "S3"])\n'
+            "# 5. Register the physical cells you tested, by the serials printed on\n"
+            "#    them or labels only your lab uses: a cell's IRI comes from its spec\n"
+            '#    and serial, so a bare "S1" mints the IRI of every other lab\'s "S1".\n'
+            'ws.add("cell", spec=spec, serial_numbers=["MYLAB-50E-001", "MYLAB-50E-002", "MYLAB-50E-003"])\n'
             "\n"
             "# 6. Attach a test + data to a cell (explicit)\n"
-            'ws.add("test", type="cycling", cell="S1", data="bdf/S1.bdf.csv")\n'
+            'ws.add("test", type="cycling", cell="MYLAB-50E-001", data="bdf/MYLAB-50E-001.bdf.csv")\n'
             "\n"
             "# 7. Publish (add zenodo=True for a citable DOI)\n"
             "ws.save()\n"
@@ -3325,7 +3397,10 @@ class AuthoringWorkspace:
         - ``type="cell-spec"`` (default) — fuzzy text search by manufacturer/model;
           tolerates typos. ``ws.search("duracell mn2400")``
         - ``type="cell"`` — look up existing instances by ``serial``/``serials``/
-          ``batch`` (exact or 6-char short ID). ``ws.search(type="cell", serial="tpejqj")``
+          ``batch``. A serial matches a cell's serial number or name exactly; a
+          6-char short ID on its own also matches the cell whose IRI or label
+          carries it. ``serial`` and ``batch`` together narrow to both. Each hit
+          names its publisher. ``ws.search(type="cell", serial="tpejqj")``
         - ``type="test"`` / ``"test-spec"`` / ``"dataset"`` — list records, optionally
           narrowed by ``query`` (title substring).
 
@@ -3368,7 +3443,8 @@ class AuthoringWorkspace:
             if found:
                 print(f"Found {len(found)} cell instance(s):")
                 for c in found:
-                    print(f"  {c.get('name') or c.get('serial_number') or ''}  {c['id']}")
+                    publisher = f"  (published by {c['publisher_id']})" if c.get("publisher_id") else ""
+                    print(f"  {c.get('name') or c.get('serial_number') or ''}  {c['id']}{publisher}")
             else:
                 print("No matching cell instances found in the registry.")
             return found
@@ -3624,10 +3700,18 @@ class AuthoringWorkspace:
             ws.add("test", type="capacity_check", cell="FAC-001",
                    data="data/FAC-001.csv", instrument="Maccor 4200")
 
-        ``cell`` accepts a serial, IRI, ``Cell``, or search result, and is
-        resolved in this session, locally, then in the registry (referenced if it
-        already exists).  A cell found in the registry is kept as a read-only copy
-        of its published record under ``.battinfo/references/``, so the strict
+        ``cell`` accepts a serial, name, short ID, IRI, ``Cell``, or search
+        result, and is resolved in this session, locally, then in the registry
+        (referenced if it already exists).  A serial or name has to match a
+        cell's exactly; a six-character short ID on its own (``"063b77"``) also
+        matches the cell whose IRI or label carries it, but ``"LAB-2025-000001"``
+        never binds ``"LAB-2024-000001"``.  A label that several cells answer to,
+        here or in the registry, raises ``ValueError`` listing them; pass the
+        one you mean by its IRI.  When the registry binds the cell, a line names
+        it and its publisher: lab labels such as ``"C01"`` are not scoped to a
+        lab until 0.9, so check it is yours.  A cell found in the registry is
+        kept as a read-only copy of its published record under
+        ``.battinfo/references/``, so the strict
         save resolves it and a Zenodo deposit describes it with a stub node;
         the copy is never submitted or uploaded.  With ``registry_url=None``
         a cell this workspace does not hold cannot be checked, and ``ws.save()``
@@ -3640,7 +3724,8 @@ class AuthoringWorkspace:
         channel label, or ``"<unit>/CHn"`` (see ``ws.add("equipment", ...)``).
 
         For large batches you may instead pass ``datasets="glob"`` to match files to
-        already-loaded cells by the 6-char short ID in each filename.
+        already-loaded cells: a file named after a cell's serial or name matches
+        that cell, and otherwise the 6-char short ID in its name does.
 
         The keywords a test takes are ``type`` (or ``kind``), ``cell``, ``data``,
         ``raw``, ``datasets``, ``spec`` (or ``protocol``), ``conformance``,
@@ -4264,31 +4349,44 @@ class AuthoringWorkspace:
         return count
 
     def _index_cell(self, cell: Any, *keys: str | None) -> None:
-        """Index ``cell`` under every lookup key it answers to (and each key's short id).
+        """Index ``cell`` under the labels it answers to (its serial number and name).
 
         A cell's IDENTITY is its serial number; its name is display text, so a
-        batch may share one public label across many serials. When a key already
-        points at a *different* cell it is recorded as ambiguous rather than
-        overwritten, and :meth:`_resolve_cell` then refuses to guess.
+        batch may share one public label across many serials. Indexing never
+        decides between two cells that share a label: :meth:`_cells_labelled`
+        finds every cell a label names, and :meth:`_resolve_cell` then refuses
+        to guess.
         """
-        for key in keys:
-            if not key:
-                continue
-            for k in (key, _short_id(key)):
-                if not k:
-                    continue
-                existing = self._cells_by_short_id.get(k)
-                if existing is not None and existing is not cell:
-                    self._ambiguous_cell_keys.add(k)
-                self._cells_by_short_id[k] = cell
+        labels = [key for key in keys if key]
+        if not labels:
+            return  # a cell known only by its IRI is looked up by that IRI each time
+        entry = next((item for item in self._indexed_cells if item[0] is cell), None)
+        if entry is None:
+            self._indexed_cells.append((cell, labels))
+        else:
+            entry[1].extend(label for label in labels if label not in entry[1])
+
+    def _cells_labelled(self, label: str, *, file_stem: bool = False) -> builtins.list[Any]:
+        """Every cell this session indexes that *label* names, exact matches first.
+
+        A cell whose serial number or name is *label* matches. Only when none
+        does, and *label* is a short ID on its own (or, for a data file's
+        *file_stem*, carries one), does a cell match whose IRI or label carries
+        that short ID. See ``_cells_named_by``.
+        """
+        cells = [(labels, getattr(cell, "id", None)) for cell, labels in self._indexed_cells]
+        short_id = _label_short_id(label, file_stem=file_stem)
+        return [self._indexed_cells[i][0] for i in _cells_named_by(label, cells, short_id)]
 
     def _index_saved_cells(self) -> int:
         """Load cell instances saved on disk into the serial → cell index (quiet).
 
         Shared core of :meth:`reload_cells` and :meth:`_rehydrate_cell_index`;
         scans ``.battinfo/records/cell-instance/`` and returns the count loaded.
-        Marks the index as rehydrated so :meth:`_rehydrate_cell_index` becomes a
-        no-op afterwards.
+        A saved cell the session already holds under its IRI is counted but not
+        loaded again, so reading the records back never gives one cell two
+        objects. Marks the index as rehydrated so :meth:`_rehydrate_cell_index`
+        becomes a no-op afterwards.
         """
         from battinfo.bundle import Cell
 
@@ -4297,11 +4395,15 @@ class AuthoringWorkspace:
         if not ci_dir.exists():
             return 0
 
+        held = {getattr(cell, "id", None) for cell, _ in self._indexed_cells} - {None}
         count = 0
         for src in sorted(ci_dir.glob("*.json")):
             try:
                 raw = json.loads(src.read_text(encoding="utf-8"))
                 ci = raw.get("cell_instance", {})
+                if ci.get("id") and ci.get("id") in held:
+                    count += 1
+                    continue
                 cell = Cell(
                     id=ci.get("id"),
                     cell_spec_id=ci.get("cell_spec_id"),
@@ -4311,7 +4413,7 @@ class AuthoringWorkspace:
                     working_electrode_id=ci.get("working_electrode_id"),
                     counter_electrode_id=ci.get("counter_electrode_id"),
                 )
-                self._index_cell(cell, ci.get("serial_number"), ci.get("name"), ci.get("short_id") or None)
+                self._index_cell(cell, ci.get("serial_number"), ci.get("name"))
                 count += 1
             except Exception as exc:
                 print(f"  WARNING: could not load {src.name} -- {exc}")
@@ -4385,37 +4487,44 @@ class AuthoringWorkspace:
         serials: builtins.list[str] | None = None,
         batch_id: str | None = None,
     ) -> builtins.list[dict]:
-        """Resolve published cell instances by serial/short-ID or batch.
+        """Resolve published cell instances by serial or name, short ID, and batch.
 
-        Returns one dict per match: id (canonical IRI), serial_number, batch_id,
-        cell_spec_id, manufacturer, model, title.
+        Each label in *serials* matches the cells whose serial number or name
+        is exactly that label. Only when none is, and the label is a short ID
+        on its own (six characters such as ``"tpejqj"``), does it match the
+        cells whose IRI, serial or name carries that short ID; a label that
+        merely ends like another cell's serial never matches it. With
+        *batch_id*, only cells of that batch count, together with *serials*
+        when both are given. Returns one dict per match, in the registry's
+        order: id (canonical IRI), name, serial_number, batch_id, cell_spec_id,
+        manufacturer, model, title and publisher_id.
         """
         wanted = [s for s in (serials or []) if s]
-        out: list[dict] = []
+        rows: list[dict] = []
         for r in self._registry_resources("cell"):
             meta = r.get("metadata") or {}
-            name = meta.get("name") or r.get("title")
-            serial = meta.get("serial_number")
-            batch = meta.get("batch_id")
-            if batch_id is not None:
-                if batch != batch_id:
-                    continue
-            elif wanted:
-                if not any(_serial_matches(t, name) or _serial_matches(t, serial) for t in wanted):
-                    continue
-            out.append(
+            if batch_id is not None and meta.get("batch_id") != batch_id:
+                continue
+            rows.append(
                 {
                     "id": r.get("canonical_iri", ""),
-                    "name": name,
-                    "serial_number": serial,
-                    "batch_id": batch,
+                    "name": meta.get("name") or r.get("title"),
+                    "serial_number": meta.get("serial_number"),
+                    "batch_id": meta.get("batch_id"),
                     "cell_spec_id": meta.get("cell_spec_id"),
                     "manufacturer": meta.get("manufacturer"),
                     "model": meta.get("model"),
                     "title": r.get("title", ""),
+                    "publisher_id": r.get("publisher_id"),
                 }
             )
-        return out
+        if not wanted:
+            return rows
+        cells = [([text for text in (row["serial_number"], row["name"]) if text], row["id"]) for row in rows]
+        chosen: set[int] = set()
+        for token in wanted:
+            chosen.update(_cells_named_by(token, cells, token if _is_short_id(token) else None))
+        return [row for i, row in enumerate(rows) if i in chosen]
 
     def import_(
         self,
@@ -4641,7 +4750,7 @@ class AuthoringWorkspace:
             engine.datasets,
         )
         held_before = [builtins.list(collection) for collection in collections]
-        index_before = (dict(self._cells_by_short_id), set(self._ambiguous_cell_keys))
+        index_before = [(cell, builtins.list(labels)) for cell, labels in self._indexed_cells]
         clashes: builtins.list[str] = []
 
         def _held_or_new(obj: Any, pool: builtins.list[Any], what: str) -> Any:
@@ -4876,7 +4985,7 @@ class AuthoringWorkspace:
         if clashes:
             for collection, items in zip(collections, held_before):
                 collection[:] = items
-            self._cells_by_short_id, self._ambiguous_cell_keys = index_before
+            self._indexed_cells = index_before
             shown = ", ".join(clashes[:3]) + (f" and {len(clashes) - 3} more" if len(clashes) > 3 else "")
             raise ValueError(
                 f"The deposit has {len(clashes)} record(s) whose IRI a different record of this session "
@@ -4925,8 +5034,7 @@ class AuthoringWorkspace:
             ws.save()
         """
         self._ws = self._make_engine()
-        self._cells_by_short_id = {}
-        self._ambiguous_cell_keys = set()
+        self._indexed_cells = []
         self._session_paths = set()
         self._added_paths = set()
         print("Workspace cleared.")
@@ -4970,6 +5078,14 @@ class AuthoringWorkspace:
         — unless ``allow_partial=True``, in which case failures are returned in the
         outcome list instead.  Returns a list of per-record outcome dicts (``ok``,
         ``status``, ``error``, ``iri`` …).  No git or filesystem dependency.
+
+        A record the registry already holds with other content is retried once
+        as a new version (``version_bumped``).  A record whose IRI another
+        publisher holds is not: its outcome has status ``conflict``, names the
+        IRI and the publisher, and says how to rename it (a serial or
+        ``names=`` only your lab uses) or pin an IRI of your own.  Lab labels
+        such as ``"S1"`` are not scoped to a lab until 0.9, so two labs that both
+        name a cell of one spec ``"S1"`` mint one IRI.
 
         Credentials can be passed as arguments, established with ``ws.login()``
         (scoped to this workspace instance), set as environment variables, or
@@ -8561,7 +8677,7 @@ class AuthoringWorkspace:
         # Loading the same result again (a notebook cell re-run) reuses the cell
         # already referenced; a second object would make its serial ambiguous.
         iri = result.get("id")
-        known = next((cell for cell in self._cells_by_short_id.values() if iri and cell.id == iri), None)
+        known = next((cell for cell, _ in self._indexed_cells if iri and cell.id == iri), None)
         if known is not None:
             return known
         cell = Cell(
@@ -8874,7 +8990,7 @@ class AuthoringWorkspace:
                 # merely indistinguishable (warn and keep the first).
                 (repeated_serials if s else repeated_names).append(key)
                 continue
-            if key and key in self._cells_by_short_id:
+            if key and any(key in labels for _, labels in self._indexed_cells):
                 already.append(key)
                 continue
             if key:
@@ -10157,11 +10273,15 @@ class AuthoringWorkspace:
     def _resolve_cell(self, ref: Any) -> Any:
         """Resolve a cell reference: this session, then records saved on disk, then the registry.
 
-        Accepts a ``Cell``, a search result, a serial / short ID, or an IRI.
-        Serials authored in a previous session are rehydrated from
-        ``.battinfo/records/cell-instance/`` (so resolution works in a fresh
-        process). An instance found only in the registry is referenced (not
-        re-published).
+        Accepts a ``Cell``, a search result, a serial number or name, a short
+        ID, or an IRI. A serial number or name has to match a cell's exactly; a
+        short ID is matched only when the label is one on its own (see
+        :meth:`_cells_labelled`). Serials authored in a previous session are
+        rehydrated from ``.battinfo/records/cell-instance/`` (so resolution
+        works in a fresh process). An instance found only in the registry is
+        referenced (not re-published), with a line naming it and its
+        publisher. A label that several cells answer to, in the session or in
+        the registry, raises ``ValueError`` listing them.
         """
         from battinfo.bundle import Cell  # noqa: PLC0415
 
@@ -10174,39 +10294,29 @@ class AuthoringWorkspace:
             if s.startswith("http"):  # an IRI
                 # A cell already found (by serial, a search hit or an earlier IRI) is
                 # reused, not referenced and looked up in the registry again.
-                known = next(
-                    (cell for cell in self._cells_by_short_id.values() if getattr(cell, "id", None) == s), None
-                )
+                known = next((cell for cell, _ in self._indexed_cells if getattr(cell, "id", None) == s), None)
                 if known is not None:
                     return known
                 return self._reference_cell({"id": s, "type": "cell"})
-            sid = _short_id(s)
 
-            def _lookup() -> Any:
-                for key in (s, sid):
-                    if not key:
-                        continue
-                    if key in self._ambiguous_cell_keys:
-                        raise ValueError(
-                            f"{key!r} matches more than one cell in this workspace, so it "
-                            "cannot identify one. It is a display name shared by several "
-                            "cells; reference the cell by its serial number or IRI instead."
-                        )
-                    hit = self._cells_by_short_id.get(key)
-                    if hit is not None:
-                        return hit
-                return None
-
-            hit = _lookup()
+            hit = self._session_cell(s)
             if hit is None:
                 # Day-2: this fresh process has an empty index; load cells saved
                 # to disk in a previous session before falling back to the registry.
                 self._rehydrate_cell_index()
-                hit = _lookup()
+                hit = self._session_cell(s)
             if hit is not None:
                 return hit
             found = self._query_registry_cells(serials=[s])
+            if len(found) > 1:
+                listing = "\n".join(f"  {_describe_registry_cell(c)}" for c in found)
+                raise ValueError(
+                    f"{s!r} matches {len(found)} cells in the registry, so it cannot pick one:\n{listing}\n"
+                    'Pass the one you mean by its IRI, cell="https://w3id.org/battinfo/cell/...", '
+                    f"or reference it first with ws.load(ws.search(type='cell', serial={s!r})[i])."
+                )
             if found:
+                print(f"  cell {s!r} found in the registry: {_describe_registry_cell(found[0])}")
                 return self._reference_cell({**found[0], "type": "cell"})
             searched = "this session, the records saved under {root}".format(root=self._ws.source_root)
             searched += ", or the registry" if self._registry_url else " (registry not configured)"
@@ -10215,6 +10325,19 @@ class AuthoringWorkspace:
                 "Create it with ws.add('cell', ...), or check the serial."
             )
         raise TypeError("cell= must be a serial, IRI, Cell, or search result.")
+
+    def _session_cell(self, label: str) -> Any:
+        """The one session cell *label* names, or None; raises when it names several."""
+        cells = self._cells_labelled(label)
+        if len(cells) > 1:
+            listing = "\n".join(f"  {_describe_session_cell(c)}" for c in cells)
+            raise ValueError(
+                f"{label!r} matches more than one cell in this workspace, so it cannot identify one:\n"
+                f"{listing}\n"
+                "Pass the cell itself (the object ws.add('cell') returned), its IRI, or a serial "
+                "number only it has."
+            )
+        return cells[0] if cells else None
 
     def _add_tests_by_filename(
         self,
@@ -10240,12 +10363,12 @@ class AuthoringWorkspace:
             return []
 
         # Auto-reload cells saved in a previous session so matching can succeed.
-        if not self._cells_by_short_id:
+        if not self._indexed_cells:
             ci_dir = self._ws.source_root / "cell-instance"
             if ci_dir.exists() and any(ci_dir.glob("*.json")):
                 print("  No cells in memory - reloading saved cell instances...")
                 self.reload_cells()
-        if not self._cells_by_short_id:
+        if not self._indexed_cells:
             raise RuntimeError(
                 "No cell instances available to match.\n"
                 "  Create them:                ws.add('cell', spec=spec, serial_numbers=[...])\n"
@@ -10255,26 +10378,30 @@ class AuthoringWorkspace:
         print(f"Matching {len(matched_files)} file(s) to cell instances...")
         unmatched: list[Path] = []
         tests = []
+        labels_of = {id(cell): labels for cell, labels in self._indexed_cells}
         for f in matched_files:
-            sid = _short_id(f.stem)
-            ambiguous = next((k for k in (sid, f.stem) if k and k in self._ambiguous_cell_keys), None)
-            if ambiguous is not None:
+            # A file named after a cell's serial or name matches that cell; only
+            # otherwise does the short ID in its name count.
+            candidates = self._cells_labelled(f.stem, file_stem=True)
+            by_label = bool(candidates) and f.stem in labels_of[id(candidates[0])]
+            key = f.stem if by_label else _label_short_id(f.stem, file_stem=True)
+            if len(candidates) > 1:
                 # Matching this file to "a" cell would attach the measurement to
                 # an arbitrary one of several. Skip it and say why.
                 unmatched.append(f)
                 print(
-                    f"  AMBIGUOUS {f.name} -- {ambiguous!r} matches more than one cell; "
-                    "name the file after the serial number"
+                    f"  AMBIGUOUS {f.name} -- {key!r} matches more than one cell; name the file after the serial number"
                 )
                 continue
-            if sid and sid in self._cells_by_short_id:
-                cell, how = self._cells_by_short_id[sid], f'short id "{sid}"'
-            elif f.stem in self._cells_by_short_id:
-                cell, how = self._cells_by_short_id[f.stem], "serial number"
-            else:
+            if not candidates:
                 unmatched.append(f)
                 print(f"  NO MATCH  {f.name}")
                 continue
+            cell = candidates[0]
+            if not by_label:
+                how = f'short id "{key}"'
+            else:
+                how = "serial number" if f.stem == getattr(cell, "serial_number", None) else "name"
             test = self._ws.record_test(
                 cell,
                 kind=test_type,
@@ -10296,7 +10423,7 @@ class AuthoringWorkspace:
             known = sorted(
                 {
                     (c.name or c.serial_number)
-                    for c in self._cells_by_short_id.values()
+                    for c, _ in self._indexed_cells
                     if getattr(c, "name", None) or getattr(c, "serial_number", None)
                 }
             )
@@ -10813,7 +10940,8 @@ def _registry_conflict_detail(exc: Exception) -> dict | None:
 
     Prefers the parsed HTTP status code and JSON body carried by
     ``RegistryClientError`` (``status_code`` + ``response_body``); the registry
-    declares the 409 body with ``keys`` / ``existing_id`` / ``existing_status`` /
+    declares the 409 body with ``conflict`` (the kind, such as
+    ``canonical_identity``) / ``keys`` / ``existing_id`` / ``existing_status`` /
     ``context``. Falls back to a bare ``"409"`` substring match only when neither
     the status code nor a parseable body is available (a plain ``RuntimeError``).
 
@@ -10835,7 +10963,7 @@ def _registry_conflict_detail(exc: Exception) -> dict | None:
             inner = parsed.get("detail")
             candidate = inner if isinstance(inner, dict) else parsed
             if isinstance(candidate, dict) and any(
-                candidate.get(k) is not None for k in ("existing_id", "existing_status", "keys")
+                candidate.get(k) is not None for k in ("conflict", "existing_id", "existing_status", "keys")
             ):
                 detail = candidate
     if status == 409:
@@ -10861,10 +10989,15 @@ def _do_submit(
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
-    Retries once with a bumped source_version on 409. Returns a dict with ``ok``
-    (True for published/validated, False for failed/rejected/errored), ``status``,
-    ``error`` (the message when not ok), ``iri`` and the raw ``result``. A failed
-    record is reported in the outcome, never swallowed, so the batch surfaces it.
+    Retries once with a bumped source_version on a 409, except one with
+    ``conflict == "canonical_identity"``: the record's IRI belongs to another
+    publisher, so a new version would clash the same way. That outcome has
+    status ``conflict``, names the IRI and its publisher (``existing_iri``,
+    ``publisher_id``) and says how to rename or pin the record. Returns a dict
+    with ``ok`` (True for published/validated, False for failed/rejected/errored),
+    ``status``, ``error`` (the message when not ok), ``iri`` and the raw
+    ``result``. A failed record is reported in the outcome, never swallowed, so
+    the batch surfaces it.
     """
     import copy
 
@@ -10908,6 +11041,27 @@ def _do_submit(
             # Parse the structured 409 (status code + JSON body) over matching the
             # string "409", which could appear anywhere in an error/response body.
             conflict = _registry_conflict_detail(exc)
+            if conflict is not None and conflict.get("conflict") == "canonical_identity":
+                existing = str(conflict.get("canonical_iri") or conflict.get("existing_id") or "")
+                owner = str(conflict.get("publisher_id") or "")
+                resource = payload.get("resource")
+                resource_type = resource.get("resource_type") if isinstance(resource, dict) else None
+                head, hint = _canonical_identity_message(existing, owner, resource_type)
+                print(f"  ERROR: {title} -- {head}")
+                print(f"    {hint}")
+                return {
+                    "title": title,
+                    "source_local_id": source_local_id,
+                    "ok": False,
+                    "status": "conflict",
+                    "iri": "",
+                    "error": f"{head} {hint}",
+                    "result": None,
+                    "version_bumped": bumped_version,
+                    "conflict": "canonical_identity",
+                    "existing_iri": existing,
+                    "publisher_id": owner,
+                }
             if attempt == 0 and conflict is not None:
                 # The registry already holds a record for this identity. It de-duplicates an
                 # identical re-submission on its side, so a 409 here means the content genuinely
@@ -10946,6 +11100,39 @@ def _do_submit(
         "result": None,
         "version_bumped": bumped_version,
     }
+
+
+# Record types whose IRI comes from what they describe (a product, a protocol,
+# a parameter file's content), the same for everyone, so a clash means the same
+# thing was published before.
+_SHARED_KEY_RESOURCE_TYPES = frozenset(
+    {"cell_spec", "test_spec", "test_protocol", "material_spec", "electrode_spec", "equipment_spec", "parameter_set"}
+)
+
+
+def _canonical_identity_message(iri: str, publisher: str, resource_type: str | None) -> tuple[str, str]:
+    """The line and the advice for a record whose IRI another publisher holds."""
+    owner = f"publisher {publisher!r}" if publisher else "another publisher"
+    head = f"{iri or 'its IRI'} is already registered to {owner}; not retried as a new version."
+    if resource_type in _SHARED_KEY_RESOURCE_TYPES:
+        hint = (
+            "This record's IRI comes from what it describes (a product's manufacturer and model, a "
+            "protocol, a parameter file's content), so that publisher has published the same thing. "
+            "Reference theirs with ws.load(ws.search(...)) instead of submitting a copy. If yours "
+            "describes something else, correct its identity fields, or pin an IRI of your own with id= "
+            "or uid=."
+        )
+    else:
+        hint = (
+            "Your record mints the same IRI as theirs from the same identity fields: labels such as "
+            "serial 'S1' or name 'C01' are not scoped to a lab until BattINFO 0.9. Give it an identity "
+            "only your lab uses and save again: the serial printed on the cell or a lab-specific one "
+            "(ws.add('cell', ..., serial_numbers=[...])), a lab-specific name for a cell without a "
+            "serial (names=[...]), or an IRI of your own pinned with iris=[...] (iri= or uid= for a "
+            "test). A cell's tests and datasets get new IRIs with it. If the record is yours, submit "
+            "with that publisher's key instead."
+        )
+    return head, hint
 
 
 def _bump_version(ver: str) -> str:

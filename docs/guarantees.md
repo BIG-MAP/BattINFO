@@ -82,6 +82,7 @@ The same record gets the same structural verdict in all three.
   exponential backoff.
 - Submission content conflicts return a **structured 409** naming the existing
   record, not a bare string.
+- A record whose IRI another publisher already holds comes back from `ws.submit()` as a `conflict` outcome that names the IRI and that publisher and says how to rename or pin the record. It is not retried as a new version.
 
 ### Deprecations are announced
 

@@ -142,6 +142,66 @@ def test_non_conflict_error_does_not_bump(monkeypatch: pytest.MonkeyPatch) -> No
     assert state["n"] == 1  # a non-conflict error is not retried
 
 
+CLASHING_CELL = "https://w3id.org/battinfo/cell/q2kd-7x4m-p9ar-vd3n"
+
+
+def _canonical_identity_409() -> RegistryClientError:
+    """The 409 the registry returns when another publisher holds the record's IRI."""
+    body = {
+        "detail": {
+            "message": f"Canonical identity '{CLASHING_CELL}' is already registered to publisher 'lab-b'.",
+            "conflict": "canonical_identity",
+            "existing_id": "q2kd7x4mp9arvd3n",
+            "publisher_id": "lab-b",
+            "workspace_id": "ws-lab-b",
+            "canonical_iri": CLASHING_CELL,
+        }
+    }
+    return RegistryClientError(
+        "Registry submission failed with HTTP 409", status_code=409, response_body=json.dumps(body)
+    )
+
+
+@pytest.mark.parametrize("first_attempt_conflict", ["canonical_identity", "submission_content"])
+def test_canonical_identity_conflict_is_reported_not_retried(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], first_attempt_conflict: str
+) -> None:
+    calls: list[str | None] = []
+
+    def behavior(payload, **kw):  # noqa: ANN001
+        calls.append(payload.get("source_version"))
+        if first_attempt_conflict == "submission_content" and len(calls) == 1:
+            raise RegistryClientError("conflict", status_code=409)  # retried as a new version
+        raise _canonical_identity_409()
+
+    out = _run_do_submit(monkeypatch, behavior)
+
+    # Another publisher's IRI: a new version would clash the same way, so no retry.
+    assert len(calls) == (1 if first_attempt_conflict == "canonical_identity" else 2)
+    assert out["ok"] is False
+    assert out["status"] == "conflict"
+    assert out["conflict"] == "canonical_identity"
+    assert out["existing_iri"] == CLASHING_CELL
+    assert out["publisher_id"] == "lab-b"
+    printed = capsys.readouterr().out
+    for text in (out["error"], printed):
+        assert CLASHING_CELL in text and "lab-b" in text
+        assert "names=" in text and "serial_numbers=" in text and "iris=" in text
+    assert printed.count("retrying as version") == len(calls) - 1
+
+
+def test_a_spec_held_by_another_publisher_is_pointed_at_the_published_one(monkeypatch: pytest.MonkeyPatch) -> None:
+    def behavior(payload, **kw):  # noqa: ANN001
+        raise _canonical_identity_409()
+
+    monkeypatch.setattr("battinfo.api.submit_publication_package", behavior)
+    payload = {"source_version": "2026-07-02", "resource": {"resource_type": "cell_spec", "source_version": "x"}}
+    out = ws_module._do_submit(payload, "https://registry.example", "k", "Molicel INR21700-P45B")
+
+    assert out["status"] == "conflict"
+    assert "ws.load(ws.search(" in out["error"] and "serial_numbers=" not in out["error"]
+
+
 # ── Nested ids are content: only the record's own id is left out ──────────────
 SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 WRONG_DATASET = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-0001"
