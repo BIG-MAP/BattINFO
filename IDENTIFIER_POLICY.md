@@ -293,27 +293,91 @@ If versioning is required:
 
 ### 11.1 Served-Artifact Immutability
 
-The shared documents served under `https://w3id.org/battinfo/` — the records
-JSON-LD context and the JSON Schemas — are versioned resources and are
-**immutable once published**:
+The shared documents served under `https://w3id.org/battinfo/`, the records JSON-LD context and the JSON Schemas, are versioned resources and are **immutable once published**:
 
 - `https://w3id.org/battinfo/context/records/v1.json`
 - `https://w3id.org/battinfo/schema/*`
 
-Once a version of these artifacts is published, its content MUST NOT change in
-place. The 373 terms defined by the `v1` records context, and each published
-schema, are frozen: consumers may cache them indefinitely and rely on their
-meaning being stable for the lifetime of that URL.
+Both are frozen from the `v0.8.0` tag of BattINFO, its first release on PyPI. Consumers may cache them indefinitely and rely on their meaning staying the same for the lifetime of the URL. The first version of this section, of 30 July 2026, already declared them frozen, yet both changed in place until the release; the [erratum](#erratum-changes-made-in-place-before-080) below lists every such change.
 
-A change that alters, removes, or repurposes any term — anything that could
-change how an already-published record expands or validates — MUST be shipped
-as a **new version at a new URL** (`context/records/v2.json`,
-`schema/.../v2/...`), never by editing `v1` in place. Purely additive,
-backward-compatible clarifications MAY be made within a version only when they
-cannot change the interpretation of any record already published against it;
-when in doubt, mint a new version. Existing versioned URLs remain served and
-unchanged so records that reference them keep resolving to the exact document
-they were authored against.
+The `v1` records context is append-only from the tag. It defines 705 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
+
+- A term in that file MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed. `scripts/gen_context.py` refuses to write such a change, and `tests/test_context_v1_freeze.py` fails on one. The pre-release corrections in that script (`PRE_RELEASE_CORRECTIONS`) can no longer change a frozen term.
+- A release MAY add terms. A release whose records use a new term ships only after the registry serves the context that defines it.
+- A term found to be wrong stays as it is. Where an emitter chooses the term, as for a class in `@type`, it can switch to a new, correct term; records published with the old one keep their old meaning. A record key whose expansion is wrong waits for a `v2` context at a new URL (`context/records/v2.json`).
+
+The 0.8.0 schemas are frozen from the same tag. Each schema served under `https://w3id.org/battinfo/schema/` at the tag keeps its content at that URL. From the tag:
+
+- An edit that cannot change whether any document validates, to a `description`, `title`, `$comment` or `examples`, MAY be made in place.
+- Any other change, whether it tightens a rule, widens one or adds an optional property, MUST be published as a new schema at a new, versioned URL (`schema/.../v2/...`), while the old URL keeps serving the old content.
+- A schema for a new record type MAY be added at its own URL at any time.
+
+So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descriptions, but it cannot correct a `v1` term or change what a 0.8.0 schema accepts at its URL. How versioned schema URLs are laid out, and what a record's `schema_version` then says about the schemas it was written against, are to be defined in 0.9. Existing versioned URLs remain served and unchanged, so records that reference them keep resolving to the exact document they were written against.
+
+#### Erratum: changes made in place before 0.8.0
+
+When this section was first written, on 30 July 2026, it named "the 373 terms defined by the `v1` records context" as frozen. The registry had then served the complete `v1` context at its URL since 22 July (a smaller context before that) and the schemas since early July. It went on re-syncing both from BattINFO until 12 October 2026, and the release itself corrects more. This erratum lists every change made after 30 July 2026, up to the `v0.8.0` tag, to the definition of an existing term or to what an existing schema accepts. It leaves out new terms (`v1` grows from 373 to 705), new schema files, and edits to descriptions, titles, comments and annotations, such as the withdrawn Battery Pass profile and the IEC wording of `size_code`. It was compiled by comparing the context at each commit that changed it, and the schemas at each registry re-sync, with the copies 0.8.0 ships.
+
+A record published before a change keeps the expansion it was rendered with until the registry renders it again with the 0.8.0 copies.
+
+##### The v1 records context
+
+Each row gives what the term expanded to on 30 July 2026, or when it was first served if that was later, and what it expands to from 0.8.0. Names in plain text are the labels of EMMO classes and relations and stand for their IRIs; the snapshot file has every definition in full.
+
+| Term | Before | From 0.8.0 | Changed by |
+|---|---|---|---|
+| `typical_capacity` | NominalCapacity | TypicalCapacity | PR #331 (4 August) |
+| `operating_temperature_min` | `battinfo:operatingTemperatureMin` | MinimumOperatingTemperature | PR #331 |
+| `operating_temperature_max` | `battinfo:operatingTemperatureMax` | MaximumOperatingTemperature | PR #331 |
+| `Wh`, `WattHour` | `emmo:WattHour` | `emmo:Watthour` | PR #331 |
+| `kWh`, `KiloWattHour` | `emmo:KiloWattHour` | `emmo:KiloWatthour` | PR #331 |
+| `power_capability` | `battinfo:powerCapability` | MaximumPower | PR #415 (7 October) |
+| `maximum_power` | `battinfo:maximumPower` | MaximumPower | PR #415 |
+| `power_energy_ratio` | `battinfo:powerEnergyRatio` | PowerToEnergyRatio | PR #415 |
+| `round_trip_energy_efficiency` | `battinfo:roundTripEnergyEfficiency` | RoundTripEnergyEfficiency | PR #415 |
+| `capacity_fade` | CapacityFade, the degradation phenomenon | CapacityFadeRate | PR #415 |
+| `capacity_threshold_exhaustion` | `battinfo:capacityThresholdExhaustion` | EndOfLifeCapacityThreshold | PR #415 |
+| `charging_time` | `battinfo:chargingTime` | ChargingTime | PR #415 |
+| `degC` | `emmo:EMMO_36a9bf69_…`, EMMO's class for the programming language C | `emmo:DegreeCelsius` | PR #443 (13 October) |
+| `TemperatureCoefficientOfTheOpenCircuitVoltage` | `electrochemistry_3b938708_…`, the IRI of CoatingThickness | `electrochemistry_3bb5ae23_…`, the temperature coefficient | PR #443 |
+| `%` | `emmo:Percent`, outside the pinned EMMO closure | PercentUnit (domain-electrochemistry) | 0.8.0 |
+| `nominal_continuous_charging_current` | MaximumContinuousChargingCurrent | ChargingCurrent | 0.8.0 |
+| `nominal_continuous_discharging_current` | MaximumContinuousDischargingCurrent | DischargingCurrent | 0.8.0 |
+| `rated_energy`, `certified_usable_energy` | NominalEnergy | RatedEnergy | 0.8.0 |
+| `typical_energy` | NominalEnergy | StoredEnergy | 0.8.0 |
+| `WattPerLitre` | QUDT `unit:W-PER-L`, which does not resolve | `emmo:WattPerLitre` | 0.8.0 |
+| `hasTestObject`, `cell_id` | `battery_da3b3f28_…`, a domain-battery relation with no definition | hasTestObject of domain-electrochemistry | 0.8.0 |
+| `hasTestEquipment` | `battery_df4ff8f1_…`, a domain-battery relation with no definition | hasTestEquipment of domain-electrochemistry | 0.8.0 |
+| `ambient_temperature` | `battinfo:ambientTemperature`, a placeholder | AmbientCelsiusTemperature | 0.8.0 |
+| `id` | `schema:productID` | `schema:identifier` | 0.8.0 |
+| `hasNumberValue`, `hasNumericalValue` | EMMO's hasNumberValue, with no datatype | the same IRI, typed `xsd:double` | 0.8.0 |
+| `active_material_spec_id` | the ActiveMaterial class | hasActiveMaterial | 0.8.0 |
+
+`PrismaticBattery` also changed in PR #331, to a hyphenated IRI the battery ontology had deprecated, and PR #415 restored it, so it ends as it was on 30 July. The registry served the PR #331 changes from 11 August 2026 and the PR #415 changes from 7 October, and from 11 October it served `TemperatureCoefficientOfTheOpenCircuitVoltage` with the CoatingThickness IRI. The PR #443 corrections and those marked 0.8.0 reach the hosted copy with the 0.8.0 re-sync. Among the terms 0.8.0 adds are twelve unit terms, `MilliAmpereHourPerGram`, `AmpereHourPerKilogram`, `MilliAmpereHourPerSquareCentiMetre`, `SiemensPerCentiMetre`, `KiloPascal`, `MegaPascal`, `WattPerWattHour`, `KiloWatt`, `MilliWatt`, `SquareMilliMetre`, `CubicMilliMetre` and `Day`. `%/month` and `year` have no unit in the pinned EMMO closure, so `v1` has no term for them and records keep them as text (`schema:unitText`); a term for them would be an addition.
+
+##### The JSON Schemas
+
+These changes can make a record that validated before fail now:
+
+- Quantity values are numbers only (0.8.0). `value` in `modules/common/quantity.schema.json` and in the `Quantity` of `battinfo.base.schema.json` took a number or a non-empty string, and now takes a number only; text goes in `value_text`. 19 of the 22 record kinds use this module, and so do the `conditions` maps of quantities. A scan of the published corpus on 13 October 2026 (all 1,695 records in battinfo-records and a sample of 295 registry records) found none with text in `value`. When battinfo reads an older record (`ws.import_()`, `ws.load()`, an upsert through `save_record`), it turns a numeric string into a number and moves other text to `value_text`, with a warning.
+- Date strings have a fixed form (8 September, PR #388). In cell, current-collector, electrode, electrolyte, housing, material and separator records, `manufactured_at`, `expires_at`, `received_date` and `opened_date` took a Unix time or any string. A string must now read `YYYY`, `YYYY-MM` or `YYYY-MM-DD`.
+- Test conditions are quantities (8 September, PR #388). An entry of a test record's `conditions` map could hold anything and must now be a quantity.
+- A cell spec's `housing` and `construction` are checked (8 September, PR #388). `housing` took any object and now follows `modules/components/housing.schema.json`, which allows `cap`, `case`, `comment`, `parts`, `property`, `seals` and `terminals` only. In `construction`, `electrode_length` and `jellyroll_volume` took any object and must now be quantities.
+- An electrode's `tab` is checked (8 September, PR #388). In `electrode-spec.schema.json` and `modules/components/electrode.schema.json` it took any object; it now allows `material`, `manufacturer`, `supplier`, `product_id`, `comment` and the dimensions under `property` only.
+- The provenance block of electrode-spec and electrode records lost `comment`, `curated_by`, `file_hash` and `workflow_version` (8 September, PR #388), which it had accepted from 14 August.
+- `modules/components/specification.schema.json` requires `name` and `cell_format` instead of `format`, `positive_electrode_basis` and `negative_electrode_basis`, and its `id` must be a `spec/` IRI, no longer a `cell/` one (8 September, PR #388). `cell-spec.schema.json` uses only its `separator`, so cell-spec records are not affected; a document validated against the module as a whole may be.
+- Parameter sets lost `members` and `set_id` (11 October, PRs #421 and #436), which were served from 4 October. A parameter set is now either a claim batch (`claims` and exactly one target, as in August) or one parameter file (`parts`, `parameters_sha256` and exactly one cell link). For one day, from 11 to 12 October, `id` took only a `dataset/` IRI; it now takes a `dataset/` IRI, or a `spec/` IRI for a record minted before (section 6.3).
+
+These changes only accept more, so a record that validated before still does:
+
+- `battinfo_version`, in the provenance block and in the envelope of `battinfo.base.schema.json`, takes PEP 440 versions (`0.8.0rc1`, `0.8.0.dev1`, `0.8.0.post1`, `0.8.0+local`) as well as `X.Y.Z` with a hyphenated suffix, in all 25 schemas that carry the pattern (PR #456).
+- `material_spec_id` in the material-component, current-collector and electrolyte modules, and `electrode_spec_id` in the electrode module, take the superseded `material-spec/` and `electrode-spec/` IRIs as well as `spec/` (0.8.0).
+- A quantity that gives only `value_text` needs no unit (8 September), and an inline electrode may consist of its `electrode_spec_id` alone (14 August).
+- A cell spec's `reference_electrode` takes an inline electrode as well as a string, and a parameter set no longer needs `claims` (4 October).
+- Enumerations gained values: the housing part type `vent` (31 July), the material classes `thickener` and `dispersant` (8 September), the test and test-protocol kinds `pitt` and `cyclic_voltammetry`, and the termination quantity `soc` (4 October).
+- Optional properties were added to most schemas, `license` and `handle` among them. A record written before uses none of them. The 0.8.0 changelog describes each.
+
+The first version of this section allowed additive, backward-compatible changes within a version, so the changes in this last list did not break it; they are listed so that the record is complete.
 
 ## 12. Governance Scope
 

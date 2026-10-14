@@ -93,6 +93,8 @@ python scripts/gen_context.py --check
 
 The first command writes v1 and the snapshot from the same build; commit both. The second should then report `0 added since the 0.8.0 snapshot`. A term added to v1 after the snapshot, by a soak fix for instance, passes the guard but is not frozen, so if the count is not 0, run the first command again before the tag. `--write-snapshot` refuses once the checkout has the `v0.8.0` tag; from then on the guard blocks every correction of a frozen term, and `PRE_RELEASE_CORRECTIONS` can no longer change v1. Later releases add terms without retaking this snapshot.
 
+Section 11.1 of `IDENTIFIER_POLICY.md` says how many terms 0.8.0 freezes, and its erratum lists every term changed in place before the tag. After a retake, bring both up to date: the number of terms is the count `--write-snapshot` prints less one, since `@version` is not a term, and each term it reports as changed belongs in the erratum's table. `tests/test_identifier_policy_erratum.py` fails when an entry of `PRE_RELEASE_CORRECTIONS` is missing from that table, or when a changelog entry mentions the erratum without linking to it.
+
 ## The ontology at its w3id IRIs
 
 `battinfo.ttl` is served from GitHub Pages. For a final tag `vX.Y.Z` the docs workflow (`.github/workflows/docs-deploy.sh`) copies it to `battinfo/versions/X.Y.Z/` on the `gh-pages` branch, and to the root of the site when the tag is the newest final release, each time with a short `battinfo.html` for browsers. A pre-release tag publishes no ontology. A tag whose `battinfo.ttl` declares another version deploys its documentation but not the ontology, and the deploy job fails.
