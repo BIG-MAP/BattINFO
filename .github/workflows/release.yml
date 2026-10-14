@@ -4,13 +4,22 @@ name: Release
 # No API tokens are stored: PyPI verifies the GitHub OIDC identity instead.
 #
 # Usage:
-#   - Push a tag `vX.Y.Z` (must match battinfo.__version__) -> builds, checks,
-#     publishes to PyPI, and drafts a GitHub Release.
-#   - Run manually (workflow_dispatch) with target=testpypi for a dry run.
+#   - Push a tag `vX.Y.Z`, or a pre-release tag such as `vX.Y.Zrc1`, that
+#     matches battinfo.__version__ -> the gates below, the build, the upload to
+#     PyPI and a draft GitHub Release, marked as a pre-release for a
+#     pre-release tag. A pushed tag is the only route to PyPI.
+#   - Run it by hand (workflow_dispatch, target=testpypi) to rehearse on
+#     TestPyPI. A manual run never uploads to PyPI, on any ref, a tag included.
+#
+# Gates: ci.yml (the CI suite), install-smoke.yml (the built wheel in empty
+# environments on Python 3.11 and 3.14, on Linux and Windows) and the hosted
+# check (scripts/check_hosted_files.py), which blocks only a final tag vX.Y.Z.
+# tests/test_release_workflow.py checks these conditions.
 #
 # One-time setup (maintainer, on each index):
 #   PyPI/TestPyPI -> Account -> Publishing -> add a GitHub trusted publisher:
 #     owner=BIG-MAP  repo=BattINFO  workflow=release.yml  environment=pypi (or testpypi)
+# The repository settings behind the pypi environment are listed in RELEASING.md.
 
 on:
   push:
@@ -18,9 +27,9 @@ on:
   workflow_dispatch:
     inputs:
       target:
-        description: "Publish target for a manual run"
+        description: "Publish target for a manual run (PyPI takes a pushed tag)"
         type: choice
-        options: [testpypi, pypi]
+        options: [testpypi]
         default: testpypi
 
 permissions:
@@ -31,11 +40,45 @@ jobs:
     name: CI gate
     uses: ./.github/workflows/ci.yml
 
-  build:
-    name: Build & validate distribution
-    needs: ci
+  install-smoke:
+    name: Install gate
+    uses: ./.github/workflows/install-smoke.yml
+
+  hosted:
+    # The registry serves the v1 records context, the JSON Schemas and the
+    # record vocabulary at their w3id IRIs, from copies it vendors. A final
+    # release goes to PyPI only when those equal this commit's copies. A
+    # TestPyPI rehearsal or a pre-release tag usually runs before the registry
+    # has the new copies, so for those a mismatch is reported but not blocked.
+    name: Hosted files match this commit
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Compare the files w3id serves with this commit's copies
+        id: compare
+        continue-on-error: true
+        run: python scripts/check_hosted_files.py --summary "$GITHUB_STEP_SUMMARY"
+      - name: Block a final release on a mismatch
+        if: steps.compare.outcome == 'failure'
+        run: |
+          final='^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$'
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" =~ $final ]]; then
+            echo "::error::The files w3id serves differ from this commit's copies, as the step above lists. Deploy the registry with this commit's copies, then re-run this job."
+            exit 1
+          fi
+          echo "::warning::The files w3id serves differ from this commit's copies, as the step above lists. Only a final release tag is blocked by this."
+
+  build:
+    name: Build & validate distribution
+    needs: [ci, install-smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      prerelease: ${{ steps.tag.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
 
@@ -51,14 +94,23 @@ jobs:
         run: uvx twine check dist/*
 
       - name: Verify tag matches built version
+        id: tag
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          built="$(ls dist/*.whl | sed -E 's/.*battinfo-([^-]+)-py3.*/\1/')"
+          wheels=(dist/battinfo-*.whl)
+          built="${wheels[0]#dist/battinfo-}"
+          built="${built%%-*}"
           echo "tag=$tag  built=$built"
           if [ "$tag" != "$built" ]; then
             echo "::error::Tag $GITHUB_REF_NAME does not match package version $built (set battinfo.__version__)."
             exit 1
+          fi
+          # Any version other than X.Y.Z, such as 0.8.0rc1 or 0.8.0.dev1, is a pre-release.
+          if [[ "$tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload dist artifact
@@ -82,6 +134,8 @@ jobs:
         with:
           name: dist
           path: dist/
+      # No skip-existing here: a rehearsal of a version TestPyPI already holds
+      # has to fail, or it would go on to test the files uploaded before.
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -89,8 +143,10 @@ jobs:
 
   publish-pypi:
     name: Publish to PyPI
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    needs: [build, hosted]
+    # Only a pushed v tag. A manual run is never a push event, so it cannot
+    # reach PyPI, even when it runs on a tag ref.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -104,11 +160,16 @@ jobs:
           path: dist/
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # A run that stopped part-way through the upload is finished with
+          # "Re-run failed jobs" on the same run: it uploads the same build,
+          # and the files PyPI already has are skipped.
+          skip-existing: true
 
   github-release:
     name: Draft GitHub Release
-    needs: publish-pypi
-    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build, publish-pypi]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       contents: write   # required to create the release
@@ -120,6 +181,11 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
+          # Always a draft. Zenodo archives every GitHub Release that is
+          # published, pre-releases included, so a person publishes it after
+          # the checks in RELEASING.md. A pre-release tag's draft is marked as
+          # a pre-release and is never published.
           draft: true
+          prerelease: ${{ needs.build.outputs.prerelease == 'true' }}
           generate_release_notes: true
           files: dist/*

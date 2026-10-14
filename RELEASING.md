@@ -14,7 +14,12 @@ On [PyPI](https://pypi.org/manage/account/publishing/) and [TestPyPI](https://te
 | Workflow | `release.yml` | `release.yml` |
 | Environment | `pypi` | `testpypi` |
 
-Create GitHub environments named `pypi` and `testpypi` in the repository settings. Required reviewers on `pypi` make every upload wait for an approval.
+Create GitHub environments named `pypi` and `testpypi` in the repository settings. `release.yml` uploads to PyPI only from a pushed `v` tag, and these settings, which a repository admin makes and no pull request can carry, hold the same line on GitHub's side:
+
+- On `pypi`, one required reviewer, the PyPI approver named in the release's tracking issue, who may approve their own run. Every upload waits for that approval.
+- On `pypi`, deployment branches and tags limited to the tag rule `v*.*.*`, so no branch can deploy to it, whatever a workflow file says.
+- On `pypi`, "Allow administrators to bypass configured protection rules" switched off.
+- A tag ruleset for `refs/tags/v*` that lets only maintainers create, update or delete release tags.
 
 Keep the Zenodo integration switched on for the repository. Its webhook archives each published GitHub Release as a new version under the concept DOI [10.5281/zenodo.6304782](https://doi.org/10.5281/zenodo.6304782).
 
@@ -55,8 +60,22 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
    git push origin vX.Y.Z
    ```
 
-   The tag runs `release.yml` again: the CI gate, the build, a check that the tag matches the built version, the upload to PyPI and a draft GitHub Release with the files attached. The docs workflow publishes the documentation for the tag.
+   The tag runs `release.yml` again: the CI gate; the install gate (`install-smoke.yml`, which installs the built wheel in empty environments on Python 3.11 and 3.14, on Linux and Windows, core-only and with `[processing]`); the build and a check that the tag matches the built version; the hosted check; then, after the `pypi` approval, the upload to PyPI and a draft GitHub Release with the files attached. A manual run of `release.yml` can only target TestPyPI.
+
+   The hosted check (`scripts/check_hosted_files.py`) compares the files w3id serves (the v1 records context, every JSON Schema at its `$id` and the record vocabulary) with the tag's copies. For a final tag a difference stops the upload: deploy the registry with the tag's copies, then use "Re-run failed jobs" on the same run. If the upload itself stops part-way, "Re-run failed jobs" finishes it, since files PyPI already has are skipped. After the release, a daily workflow (`hosted-files.yml`) checks that the hosted context still holds every term of the last release with the same value.
+
+   A pre-release tag such as `vX.Y.Zrc1` goes the same way, except that the hosted check only reports, and the draft release is marked as a pre-release. Leave that draft unpublished, since Zenodo archives pre-releases too. The docs workflow publishes the documentation for the tag.
 
 8. Review the draft release and publish it. Zenodo then archives it under the concept DOI and takes the metadata, authors included, from `CITATION.cff`. The README badge and citation use the concept DOI and need no change.
 
 Never delete a published tag or a PyPI release, because downstream users and the Zenodo archive refer to them. A bad release is fixed by publishing a patch release.
+
+## Zenodo sandbox run
+
+Before a release, run `scripts/zenodo_sandbox_check.py` by hand against the release candidate, installed in a clean environment, with a token made on [sandbox.zenodo.org](https://sandbox.zenodo.org/account/settings/applications/) (scopes `deposit:write` and `deposit:actions`):
+
+```bash
+ZENODO_SANDBOX_TOKEN=<token> python scripts/zenodo_sandbox_check.py
+```
+
+It builds a small workspace in a new folder and deposits it to the sandbox the ways a user does: three data files that share a name or differ only in case, a draft then its publish, a run that stops part-way and is finished by a retry, a new version (first with a local data file deleted), a draft then `ws.submit()`, and sandbox then production: the sandbox runs leave the records and the zenodo.org state alone, and a deposit to zenodo.org would start a record of its own. That last check stops every request to zenodo.org before it is sent, so the script reaches the sandbox only. It never uses `ZENODO_API_TOKEN` and will not run in CI or under pytest. It stops at the first step that fails and lists the sandbox records it made.

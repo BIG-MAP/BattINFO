@@ -1,8 +1,12 @@
 # Verifies that the install commands documented for end users (README.md,
 # QUICKSTART.md, docs/pages/getting-started.rst) still succeed in a clean
-# virtual environment with stock pip against live PyPI. This complements the
-# uv.lock-based CI, which never exercises the plain-pip resolver a first-time
-# user hits.
+# virtual environment with stock pip against live PyPI, on the oldest and the
+# newest supported Python. This complements the uv.lock-based CI, which never
+# exercises the plain-pip resolver a first-time user hits.
+#
+# release.yml calls this workflow as a gate next to ci.yml (workflow_call), so
+# every TestPyPI rehearsal and every release tag installs the built wheel in
+# empty environments first.
 name: install-smoke
 
 on:
@@ -25,22 +29,25 @@ on:
       - docs/pages/troubleshooting.md
       - src/battinfo/_util.py
       - .github/workflows/install-smoke.yml
+  workflow_call:
   workflow_dispatch:
 
 jobs:
   smoke:
-    name: pip install (${{ matrix.os }})
+    name: pip install (py${{ matrix.python-version }} · ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        # The oldest and the newest Python the classifiers name.
+        python-version: ["3.11", "3.14"]
     steps:
       - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: pip install -e .
         shell: bash
@@ -111,9 +118,10 @@ jobs:
 
       # What a PyPI user gets: the built wheel, stock pip, an empty environment,
       # a working directory outside the checkout. The core install runs the
-      # first Quickstart step and checks that the SHACL shapes ran (pyshacl is
-      # a core dependency); a second environment installs the wheel with the
-      # processing extra and converts a small CSV.
+      # first Quickstart step, checks that the SHACL shapes ran (pyshacl is
+      # a core dependency) and runs battinfo --help; a second environment
+      # installs the wheel with the processing extra, runs battinfo --help and
+      # converts a small CSV.
       - name: wheel in an empty environment, outside the checkout
         shell: bash
         run: |
@@ -123,9 +131,14 @@ jobs:
           wheel=$(ls "$RUNNER_TEMP"/dist/battinfo-*.whl)
           v="$RUNNER_TEMP/venv-wheel"
           python -m venv "$v"
-          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          if [ -f "$v/Scripts/python.exe" ]; then
+            py="$v/Scripts/python.exe"; cli="$v/Scripts/battinfo.exe"
+          else
+            py="$v/bin/python"; cli="$v/bin/battinfo"
+          fi
           "$py" -m pip install --upgrade pip
           "$py" -m pip install "$wheel"
+          "$cli" --help > /dev/null
           work="$RUNNER_TEMP/wheel-smoke"
           mkdir -p "$work"
           cd "$work"
@@ -159,9 +172,14 @@ jobs:
           "$py" -c "from battinfo.registry import Registry; print(Registry())"
           v="$RUNNER_TEMP/venv-wheel-processing"
           python -m venv "$v"
-          if [ -f "$v/Scripts/python.exe" ]; then py="$v/Scripts/python.exe"; else py="$v/bin/python"; fi
+          if [ -f "$v/Scripts/python.exe" ]; then
+            py="$v/Scripts/python.exe"; cli="$v/Scripts/battinfo.exe"
+          else
+            py="$v/bin/python"; cli="$v/bin/battinfo"
+          fi
           "$py" -m pip install --upgrade pip
           "$py" -m pip install "${wheel}[processing]"
+          "$cli" --help > /dev/null
           work="$RUNNER_TEMP/wheel-convert-smoke"
           mkdir -p "$work"
           cd "$work"

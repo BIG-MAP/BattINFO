@@ -39,6 +39,21 @@ jobs:
       - name: Mypy
         run: uv run --no-sync mypy
 
+  workflows:
+    # Lints every workflow file, with the shell scripts in them, which the
+    # image passes to shellcheck. A broken release.yml would otherwise show
+    # only when a tag is pushed. tests/test_release_workflow.py checks what
+    # the release workflow does.
+    name: Workflow files (actionlint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: actionlint
+        uses: docker://rhysd/actionlint:1.7.7
+        with:
+          args: -color
+
   test:
     name: Test (py${{ matrix.python-version }} · ${{ matrix.os }})
     runs-on: ${{ matrix.os }}

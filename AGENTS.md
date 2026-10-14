@@ -33,6 +33,8 @@ uv run pytest --nbmake docs/guides/ -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
+CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags.
+
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
 The doc-snippets job executes the code blocks of the pages listed in `SNIPPET_FILES` in `.tools/quality/run_doc_snippets.py`. Add a new how-to page to that list, and put `<!-- doc-snippet: skip -->` on the line above any block that cannot run offline. The Sphinx build turns warnings into errors and needs pandoc on the PATH to render the notebooks.

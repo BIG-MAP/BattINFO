@@ -1,0 +1,33 @@
+# Checks every day that the v1 records context w3id serves still holds every
+# term of the last release (the newest vX.Y.Z tag) with the same value. The
+# registry serves it from a vendored copy, so a registry deploy or rollback
+# that drops or changes a released term turns this red. Terms that main has
+# added since the release do not count: v1 only ever gains terms, and the
+# registry takes them at the next release. release.yml compares every hosted
+# file with the tag's copies before an upload; this keeps watching afterwards.
+name: Hosted files
+
+on:
+  schedule:
+    - cron: "23 5 * * *"   # every day, 05:23 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-terms:
+    name: Hosted context keeps the released terms
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the release tags
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      # The registry's host can take a minute to wake up, so each request is
+      # tried up to six times, waiting 30 s longer each time.
+      - name: Compare the hosted v1 context with the last release's terms
+        run: python scripts/check_hosted_files.py --release-terms --attempts 6 --wait 30 --summary "$GITHUB_STEP_SUMMARY"
