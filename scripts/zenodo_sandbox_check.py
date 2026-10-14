@@ -231,12 +231,14 @@ def check_data_files(files: dict[str, str], expected: dict[str, str]) -> list[st
     return names
 
 
+def _on_zenodo(host: str) -> bool:
+    """True for zenodo.org and its subdomains (sandbox.zenodo.org), compared as whole host names."""
+    host = host.lower()
+    return host == "zenodo.org" or host.endswith(".zenodo.org")
+
+
 def check_sandbox_left_records_alone(root: Path) -> None:
-    on_zenodo = [
-        location
-        for location in locations(root)
-        if (urllib.parse.urlsplit(location).hostname or "").endswith("zenodo.org")
-    ]
+    on_zenodo = [location for location in locations(root) if _on_zenodo(urllib.parse.urlsplit(location).hostname or "")]
     expect(not on_zenodo, f"a sandbox deposit changed the dataset records, which now name {on_zenodo}")
     expect(
         state(root, "zenodo.json") is None, "a sandbox deposit wrote .battinfo/zenodo.json, the zenodo.org state file"
