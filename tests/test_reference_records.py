@@ -46,3 +46,30 @@ def test_generation_is_deterministic() -> None:
     # randomly minted uid or a wall-clock timestamp leak through would make the
     # drift gate flaky instead of honest.
     assert gen.render_all() == gen.render_all()
+
+
+def test_the_pages_say_where_voltage_reference_goes() -> None:
+    # The emitters put a voltage_reference on a quantity under
+    # schema:valueReference, never under hasMetrologicalReference (the unit
+    # already fills EMMO's one metrological reference). The pages said the
+    # opposite.
+    from battinfo.jsonld import test_to_jsonld
+    from battinfo.transform.json_to_jsonld import _descriptor_quantity_node
+
+    li = {"value_text": "Li/Li+"}
+    quantity = _descriptor_quantity_node(
+        "average_voltage", {"value": 3.7, "unit": "V", "conditions": {"voltage_reference": li}}
+    )
+    assert quantity is not None
+    assert quantity["schema:valueReference"]["@type"] == ["ReferenceElectrode", "LithiumElectrode"]
+    test_node = test_to_jsonld(
+        {"test": {"id": "https://w3id.org/battinfo/test/0000-0000-0000-0000", "conditions": {"voltage_reference": li}}}
+    )
+    test_body = {key: value for key, value in test_node.items() if key != "@context"}
+    assert "voltage_reference" in str(test_body)
+    assert "hasMetrologicalReference" not in str(quantity) + str(test_body)
+
+    for name, text in gen.render_all().items():
+        assert "hasMetrologicalReference" not in text, f"docs/records/{name} names hasMetrologicalReference"
+    intro = gen.render_all()["cells.md"].split("## Fields", 1)[1]
+    assert "`voltage_reference` key goes under `schema:valueReference`" in intro

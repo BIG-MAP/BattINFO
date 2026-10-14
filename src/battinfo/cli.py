@@ -3298,12 +3298,10 @@ def _process_single_cell(
             validation_policy=validation_policy,
             bundle=bundle,
         )
-    except FileNotFoundError as exc:
+    except (FileNotFoundError, RuntimeError, ValueError) as exc:
+        # --json silences the console, so the message also goes in the result.
         console.print(f"  [red]Error:[/red] {exc}")
-        return False, {}
-    except (RuntimeError, ValueError) as exc:
-        console.print(f"  [red]Error:[/red] {exc}")
-        return False, {}
+        return False, {"errors": [str(exc)]}
 
     if result["errors"]:
         console.print("  [red]Manifest errors -- fix battinfo.yaml:[/red]")

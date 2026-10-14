@@ -236,7 +236,7 @@ def generate_dataset_plots(
 def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
     """Convert *csv_path* to BDF CSV; return output path or None."""
     try:
-        from bdf.io import save as bdf_save
+        import bdf.io  # noqa: F401, PLC0415
     except ImportError:
         return None
 
@@ -249,7 +249,7 @@ def _convert_to_bdf(csv_path: Path, work_dir: Path, stem: str) -> Path | None:
         # reader matches) and validate=False keeps partially-conformant files
         # convertible — the interop policy is "express what you can".
         df, _meta = _read_bdf_pandas(csv_path, validate=False)
-        bdf_save(df, out_path, index=False)
+        _save_bdf(df, out_path)
         return out_path
     except Exception:
         return None
@@ -301,7 +301,7 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
     ``.bdf.parquet`` already exists (test type re-inferred from the parquet).
     """
     try:
-        from bdf.io import save as bdf_save
+        import bdf.io  # noqa: F401, PLC0415
     except ImportError:
         return None, None
 
@@ -330,7 +330,7 @@ def convert_raw_to_bdf(raw_path: Path) -> tuple[Path | None, str | None]:
             # Suppress any diagnostic prints from batterydf plugins
             with _cl.redirect_stdout(_io.StringIO()), _cl.redirect_stderr(_io.StringIO()):
                 df, _meta = _read_bdf_pandas(raw_path, validate=False)
-            bdf_save(df, out_path, index=False)
+            _save_bdf(df, out_path)
         return out_path, _infer_test_type_from_df(df)
     except Exception:
         return None, None

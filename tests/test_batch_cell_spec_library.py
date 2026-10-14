@@ -24,12 +24,13 @@ import yaml
 from typer.testing import CliRunner
 
 import battinfo
-from battinfo.api import PACKAGED_LIBRARY_CELL_SPEC_DIR
+from battinfo.api import PACKAGED_LIBRARY_CELL_SPEC_DIR, query_library_cell_specs
 from battinfo.cli import app
 from battinfo.contribution import (
     BATCH_MANIFEST,
     CONTRIBUTION_MANIFEST,
     INGEST_MANIFEST,
+    TEMPLATE_DIR,
     init_batch,
     package_batch,
     process_contribution,
@@ -76,6 +77,17 @@ def test_the_packaged_library_is_found_from_the_package_itself() -> None:
     assert PACKAGED_LIBRARY_CELL_SPEC_DIR == package_dir / "data" / "library" / "cell-spec"
     assert DEFAULT_CR2032_LIBRARY_SPEC.parent == PACKAGED_LIBRARY_CELL_SPEC_DIR
     assert DEFAULT_CR2032_LIBRARY_SPEC.is_file()
+
+
+def test_the_contribution_template_gives_a_packaged_cell_spec_as_its_example() -> None:
+    # The example IRI in the battinfo.yaml that `battinfo dataset init` writes
+    # was under cell/, the namespace of cell instances, and named no record.
+    text = (TEMPLATE_DIR / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8")
+    examples = re.findall(r"^# Example: (\S+)", text, flags=re.MULTILINE)
+    assert examples, text
+    for iri in examples:
+        assert iri.startswith("https://w3id.org/battinfo/spec/"), iri
+        assert query_library_cell_specs(id=iri, directory=PACKAGED_LIBRARY_CELL_SPEC_DIR), iri
 
 
 _RUN_OUTSIDE_A_CHECKOUT = """
@@ -205,6 +217,31 @@ class TestACellSpecNeitherLibraryHolds:
         assert UNKNOWN_IRI in message
         _assert_names_the_libraries(message, tmp_path)
         assert not (cell / INGEST_MANIFEST).exists()
+
+    def test_the_dataset_process_command_puts_it_in_the_json_errors(self, tmp_path: Path, monkeypatch) -> None:
+        # --json printed {"ok": false, "errors": []} here: the exception message
+        # reached only the console, which --json silences.
+        monkeypatch.chdir(tmp_path)
+        batch_dir = tmp_path / "batch"
+        cell = _cell_with_data(batch_dir, init_batch(batch_dir, "Energizer CR2032", 1, lab="SINTEF"))
+        manifest_path = cell / CONTRIBUTION_MANIFEST
+        manifest_path.write_text(
+            manifest_path.read_text(encoding="utf-8").replace(ENERGIZER_IRI, UNKNOWN_IRI), encoding="utf-8"
+        )
+        expected = f"Cell spec {UNKNOWN_IRI} is not in the cell-spec library"
+
+        result = runner.invoke(app, ["dataset", "process", str(cell), "--json"])
+        assert result.exit_code == 1
+        payload = json.loads(result.stdout)
+        assert payload["ok"] is False
+        assert len(payload["errors"]) == 1 and payload["errors"][0].startswith(expected), payload
+
+        result = runner.invoke(app, ["dataset", "process", str(batch_dir), "--json"])
+        assert result.exit_code == 1
+        payload = json.loads(result.stdout)
+        assert (payload["ok"], payload["fail_count"]) == (False, 1)
+        [cell_result] = payload["cells"]
+        assert len(cell_result["errors"]) == 1 and cell_result["errors"][0].startswith(expected), payload
 
 
 # ── The local library ─────────────────────────────────────────────────────────
