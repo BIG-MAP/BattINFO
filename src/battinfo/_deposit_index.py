@@ -18,7 +18,9 @@ nothing in it names the local file any more, so the index keeps it: the
 next deposit (a new version, a retry after a failed run, or a new record
 after ``zenodo.json`` was deleted) finds the file through the index, and
 keeps the copy a new version takes over from the one before when the local
-file is gone.
+file is gone. A deposit carries a file hosted in R2 only when it is called
+with ``archive_hosted_files=True``, and then reads it from the local file
+the index names.
 
 The index is a JSON object::
 
@@ -41,7 +43,9 @@ The index is a JSON object::
       },
       "hosted": {
         "https://pub.example/datasets/abc/cycling.csv": {"path": "...", "size": 70,
-                                                         "md5": "...", "sha256": "..."}
+                                                         "md5": "...", "sha256": "..."},
+        "s3://lab-private/datasets/def/eis.csv": {"path": "...", "size": 52, "md5": "...",
+                                                  "sha256": "...", "private": true}
       }
     }
 
@@ -55,7 +59,8 @@ across versions. ``drafts`` lists, by record id, the files of a draft that
 is not published yet: a draft that is never published (one deleted on the
 Zenodo website) leaves the entries of the published versions as they were,
 and a published one joins them. ``hosted`` maps each URL ``ws.upload()``
-gave a record to the local file behind it.
+gave a record to the local file behind it, marked ``"private": true`` when
+the copy went to the private bucket (``ws.upload(public=False)``).
 
 The deposit state names the Zenodo record the next ``ws.zenodo()``
 continues, one file for each Zenodo: ``zenodo.json`` for zenodo.org and
@@ -174,13 +179,18 @@ def registered_keys(index: Mapping[str, Any]) -> frozenset[str]:
 
 @dataclass(frozen=True)
 class IndexedFile:
-    """A file the index knows: the local file behind a deposited or hosted copy."""
+    """A file the index knows: the local file behind a deposited or hosted copy.
+
+    ``private`` is written to the index only when it is true.
+    """
 
     #: The resolved local path, as text; empty when the index does not know it.
     path: str
     size: int = 0
     md5: str = ""
     sha256: str = ""
+    #: True for a copy ``ws.upload(public=False)`` put in the private bucket.
+    private: bool = False
 
     @classmethod
     def from_entry(cls, entry: Mapping[str, Any]) -> IndexedFile:
@@ -190,10 +200,14 @@ class IndexedFile:
             size=size if isinstance(size, int) and not isinstance(size, bool) else 0,
             md5=str(entry.get("md5") or ""),
             sha256=str(entry.get("sha256") or ""),
+            private=entry.get("private") is True,
         )
 
     def to_entry(self) -> dict[str, Any]:
-        return {"path": self.path, "size": self.size, "md5": self.md5, "sha256": self.sha256}
+        entry: dict[str, Any] = {"path": self.path, "size": self.size, "md5": self.md5, "sha256": self.sha256}
+        if self.private:
+            entry["private"] = True
+        return entry
 
     def path_key(self) -> str:
         """The file's path in the case the OS compares, as the deposit file plan keys files."""
@@ -449,6 +463,8 @@ def _file_entry_problem(entry: object) -> str | None:
     size = entry.get("size", 0)
     if not isinstance(size, int) or isinstance(size, bool):
         return "has a size that is not a whole number"
+    if not isinstance(entry.get("private", False), bool):
+        return "has a 'private' that is not true or false"
     return None
 
 

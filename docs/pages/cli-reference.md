@@ -115,9 +115,9 @@ Accepts three layouts:
   battinfo push ./my_batch/                                     --sandbox   # existing batch.yaml
 
 
-One-time setup:
+One-time setup, with a token made on sandbox.zenodo.org:
   battinfo config set creator &quot;Family, Given; Institution&quot;
-  battinfo config set zenodo_token &lt;token&gt;
+  battinfo config set zenodo_sandbox_token &lt;token&gt;
 
 **Usage**:
 
@@ -137,7 +137,7 @@ $ battinfo push [OPTIONS] {folder}
 * `--lab <str>`: Lab name.
 * `--operator <str>`: Operator name.
 * `-c, --creator <str>`: Creator: &quot;Family, Given; Affiliation&quot;. Falls back to config.
-* `--token <str>`: Zenodo API token. Falls back to config / ZENODO_API_TOKEN.
+* `--token <str>`: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.
 * `--sandbox`: Upload to sandbox.zenodo.org, with a token made there. Every upload needs it in this release.
 * `--community <str>`: Zenodo community. Default: from config.
 * `--no-community`: Skip community submission.
@@ -2133,7 +2133,7 @@ $ battinfo batch upload [OPTIONS] {staging_dir}
 
 **Options**:
 
-* `--token <str>`: Zenodo API token. Env: ZENODO_API_TOKEN.
+* `--token <str>`: Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, then zenodo_sandbox_token in the config file.
 * `--sandbox`: Upload to the Zenodo sandbox (sandbox.zenodo.org), with a token made there. Required in this release.
 * `--community <str>`: Zenodo community. Default: value from config or battinfo-reference.
 * `--no-community`: Skip community submission.
@@ -2172,6 +2172,10 @@ Examples:
   battinfo config set creator &quot;Clark, Simon; SINTEF | Smith, Jane; NTNU&quot;
   battinfo config set license CC-BY-4.0
   battinfo config set community battinfo-reference
+  battinfo config set zenodo_sandbox_token &lt;token&gt;
+
+zenodo_sandbox_token is a token made on sandbox.zenodo.org, which the
+batch path (battinfo batch upload, battinfo push) sends to the sandbox.
 
 A secret, such as zenodo_token, is echoed with only its last four
 characters shown, or fully hidden when it is shorter than 12 characters.
@@ -2185,7 +2189,7 @@ $ battinfo config set [OPTIONS] {key} {value}
 
 **Arguments**:
 
-* `key`: Config key: creator, license, community, zenodo_token.  [required]
+* `key`: Config key: creator, license, community, zenodo_token, zenodo_sandbox_token.  [required]
 * `value`: Value to store.  [required]
 
 **Options**:

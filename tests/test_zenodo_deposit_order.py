@@ -241,8 +241,9 @@ def test_publish_to_zenodo_without_creators_saves_and_uploads_nothing(
         ws.publish(zenodo=True, note="no creators")
     assert _saved_records(ws) == [] and steps == [] and api.requests == []
 
-    # Given creators, the same call saves, uploads, deposits and submits.
-    ws.publish(zenodo=True, note="with creators", creators=CREATORS)
+    # Given creators, the same call saves, uploads, deposits and submits. With R2
+    # storage the deposit archives the files hosted there only when asked to.
+    ws.publish(zenodo=True, note="with creators", creators=CREATORS, archive_hosted_files=True)
     assert _saved_records(ws) and steps == ["upload", "submit"]
     assert api.published and api.metadata is not None and api.metadata["creators"] == CREATORS
 

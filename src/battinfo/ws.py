@@ -1470,6 +1470,12 @@ def _omission_list(omissions: Iterable[Omission], limit: int = 10) -> str:
     return shown + (f"; and {len(unique) - limit} more" if len(unique) > limit else "")
 
 
+def _shown_list(items: list[str], limit: int = 10) -> str:
+    """*items* on one line for a message: the first *limit*, then how many more."""
+    shown = "; ".join(items[:limit])
+    return shown + (f"; and {len(items) - limit} more" if len(items) > limit else "")
+
+
 def _not_found_locally_note(iris: list[str]) -> str:
     """Why the records in *iris* have no node in the deposit, and how to fetch them."""
     shown = ", ".join(iris[:5]) + (f" and {len(iris) - 5} more" if len(iris) > 5 else "")
@@ -4211,6 +4217,7 @@ class AuthoringWorkspace:
         publication_mode: str = STAGED_PUBLICATION_MODE,
         allow_partial: bool = False,
         allow_local_files: bool = False,
+        archive_hosted_files: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -4226,14 +4233,17 @@ class AuthoringWorkspace:
         This is equivalent to running, in order::
 
             ws.save()
-            ws.upload()                                 # only when zenodo=True
+            ws.upload()                                 # only with zenodo=True and R2 storage
             ws.zenodo(publish=True, creators=creators)  # only when zenodo=True
             ws.submit(note=note, doi=...)
 
         With ``zenodo=True`` the Zenodo token and the deposit's creators are
         looked up first, and the file that records the workspace's Zenodo
         record is read (see :meth:`zenodo`), so a call that fails any of these
-        is refused before anything is saved, uploaded or sent.
+        is refused before anything is saved, uploaded or sent. A deposit that
+        would archive data files hosted in R2 storage is refused after the
+        save, before anything is uploaded or sent, unless
+        ``archive_hosted_files=True``.
 
         For finer control — e.g. reviewing a Zenodo draft before it goes live —
         call those four steps individually instead.
@@ -4272,6 +4282,13 @@ class AuthoringWorkspace:
             :meth:`submit`); ``zenodo=True`` deposits the files first and points
             the records at the deposited copies. ``True`` lifts the check, for a
             local test registry only.
+        archive_hosted_files:
+            Archive data files hosted in R2 storage in the Zenodo deposit (only
+            with ``zenodo=True``; see :meth:`zenodo`). With R2 storage
+            configured, ``zenodo=True`` puts the data files in R2 with
+            :meth:`upload` before the deposit, so it needs this too. Without
+            it such a call is refused after the save, before anything is
+            uploaded or sent, and the refusal names the files.
         """
         if zenodo:
             # A deposit without a token or a creator, or one whose recorded
@@ -4293,11 +4310,22 @@ class AuthoringWorkspace:
             self.save()
         finally:
             self._publishing = False
-        if zenodo and not allow_local_files and not self._r2_configured():
-            # Records point at Zenodo's copies of their files; a zipped deposit has
-            # none to point at. Refuse before anything is deposited.
-            self._refuse_a_zipped_deposit()
         if zenodo:
+            # Both checks below come before the R2 upload and the deposit.
+            plan = self._deposit_file_plan(
+                self._ws.source_root,
+                report=False,
+                measure=False,
+                context=self._deposit_context(sandbox=sandbox),
+            )
+            if not archive_hosted_files:
+                # Files hosted in R2 go into the deposit only when asked for,
+                # those ws.upload() is about to put there included.
+                self._refuse_hosted_files(plan, verb="publish", from_publish=True)
+            if not allow_local_files and not self._r2_configured():
+                # Records point at Zenodo's copies of their files; a zipped deposit has
+                # none to point at. Refuse before anything is deposited.
+                self._refuse_a_zipped_deposit(plan)
             if self._r2_configured():
                 self.upload()
             else:
@@ -4308,7 +4336,7 @@ class AuthoringWorkspace:
                 )
             # ws.submit() takes the DOI from the deposit's record in
             # .battinfo/zenodo.json, and puts it on the records the deposit holds.
-            self.zenodo(publish=True, sandbox=sandbox, creators=creators)
+            self.zenodo(publish=True, sandbox=sandbox, creators=creators, archive_hosted_files=archive_hosted_files)
         return self.submit(
             note=note,
             doi=doi,
@@ -6339,8 +6367,12 @@ class AuthoringWorkspace:
         updated in-place so ``ws.submit()`` sends the R2 URL, not the local path,
         and so is each dataset in memory, so a later ``ws.save()`` keeps it.
         ``.battinfo/deposit-files.json`` records the local file behind each R2
-        URL, so a later ``ws.zenodo()`` still finds the file and archives it
-        in the deposit; the records keep the R2 URLs.
+        URL, and whether it went to the private bucket. A later
+        :meth:`zenodo` refuses a deposit of files hosted in R2 unless it is
+        called with ``archive_hosted_files=True``. It then archives each one
+        from that local file and names in a warning each one from the private
+        bucket, since the deposit makes it public; the records keep the R2
+        URLs.
 
         Parameters
         ----------
@@ -6351,7 +6383,9 @@ class AuthoringWorkspace:
             download URLs under ``R2_PUBLIC_BASE_URL``. ``False`` writes to
             ``R2_BUCKET_PRIVATE`` (or *bucket*) without the ACL and gives the
             records ``s3://`` locations. It never falls back to the public
-            bucket: with no private bucket set it raises.
+            bucket: with no private bucket set it raises. A Zenodo deposit
+            archives such a file only with ``archive_hosted_files=True``,
+            which makes it public, and names it in a warning.
         dry_run:
             Print what would be uploaded without doing anything.
 
@@ -6515,6 +6549,7 @@ class AuthoringWorkspace:
                     size=measured.size,
                     md5=measured.md5,
                     sha256=sha256,
+                    private=not public,
                 )
                 # The primary (processed) distribution sets the dataset access_url.
                 if primary_url is None and dist.get("role") != "raw":
@@ -6601,6 +6636,7 @@ class AuthoringWorkspace:
         contributors: builtins.list[dict] | None = None,
         license: str | None = None,
         keywords: builtins.list[str] | None = None,
+        archive_hosted_files: bool = False,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -6662,8 +6698,13 @@ class AuthoringWorkspace:
         naming each dataset and how to point it at its local file again; with no
         record to start from, a file with no local copy refuses the deposit
         before anything is sent. Each file keeps its name, and so its URL, from
-        one version to the next. The files :meth:`upload` put in R2 storage go
-        into the deposit too, while their records keep the R2 URLs.
+        one version to the next.
+
+        A deposit whose records point at files :meth:`upload` put in R2 storage
+        is refused before anything is sent, and the refusal names the files,
+        unless ``archive_hosted_files=True``: the deposit then archives each from
+        the local file :meth:`upload` recorded, and the records keep their R2
+        URLs.
 
         A record that points at a copy of its data the deposit should carry, but
         whose local file this workspace has no record of, refuses the deposit
@@ -6751,6 +6792,11 @@ class AuthoringWorkspace:
             contributor ``"type"`` (default ``"ProjectMember"``).
         keywords:
             Extra keywords appended to auto-derived list.
+        archive_hosted_files:
+            Archive the data files :meth:`upload` put in R2 storage, which a
+            deposit otherwise refuses. Each comes from its local file, and a
+            warning names each one from the private bucket
+            (``upload(public=False)``), since the deposit makes it public.
 
         Returns
         -------
@@ -6825,6 +6871,12 @@ class AuthoringWorkspace:
         context = self._deposit_context(sandbox=sandbox, record_id=record_id, state=state, index=index)
         plan = self._deposit_file_plan(records_dir, context=context)
         kept_files = plan.kept_files()
+        # A file ws.upload() put in R2 storage goes into the deposit only when
+        # the call asks for it, and one from the private bucket with a warning.
+        if archive_hosted_files:
+            self._warn_private_hosted_files(plan)
+        else:
+            self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
 
         # ── 4. Placeholder graph, checked for a draft as for a publish ─────────
         # A refusal here leaves no draft behind. The graph is built as
@@ -7580,7 +7632,9 @@ class AuthoringWorkspace:
         *context* (by default the one :meth:`_deposit_context` reads): its
         local file is planned when it is there; when it is gone, a deposit
         that continues the record holding the copy keeps that copy, and any
-        other lists the file as missing. A copy of the workspace's own data
+        other lists the file as missing. The URL of a copy :meth:`upload`
+        made goes into ``plan.hosted``, which :meth:`zenodo` refuses unless it
+        is asked to archive such files. A copy of the workspace's own data
         whose local file the index does not know is an omission instead of a
         link (see ``DepositContext.refusal_for``): an R2 copy an earlier build
         made, an ``s3:`` URL, or a URL in a sandbox record from a deposit on
@@ -7729,15 +7783,17 @@ class AuthoringWorkspace:
                 print(f"  WARNING: {warning}")
         return plan
 
-    def _refuse_a_zipped_deposit(self) -> None:
+    def _refuse_a_zipped_deposit(self, plan: DepositFilePlan | None = None) -> None:
         """Refuse publish(zenodo=True) before any deposit exists when its files would be zipped.
 
         A deposit of more than ``_ZENODO_ZIP_THRESHOLD`` data files is zipped by
         test kind, and the registry cannot yet point a record at a file inside an
         archive: the records would keep their local file paths, and the registry
-        half would refuse them only after the DOI was minted.
+        half would refuse them only after the DOI was minted. *plan* is the
+        deposit's file plan, made here when not given.
         """
-        plan = self._deposit_file_plan(self._ws.source_root, report=False, measure=False)
+        if plan is None:
+            plan = self._deposit_file_plan(self._ws.source_root, report=False, measure=False)
         count = len(plan.local_files())
         if plan.zipped:
             raise ValueError(
@@ -7748,6 +7804,54 @@ class AuthoringWorkspace:
                 "ws.zenodo(publish=True), or split the workspace into parts of at most "
                 f"{_ZENODO_ZIP_THRESHOLD} data files."
             )
+
+    def _refuse_hosted_files(self, plan: DepositFilePlan, *, verb: str, from_publish: bool = False) -> None:
+        """Refuse a deposit that would archive data files hosted in R2 storage, and name the files.
+
+        The files are the copies :meth:`upload` made that the dataset records
+        point at (``plan.hosted``). From :meth:`publish` with R2 storage
+        configured, they are also the local data files :meth:`upload` is about
+        to put there, since :meth:`publish` runs it before the deposit. A
+        deposit archives such files only when it is called with
+        ``archive_hosted_files=True``. *verb* names what is refused
+        (``publish`` or ``deposit``).
+        """
+        hosted = sorted(plan.hosted)
+        uploading = from_publish and self._r2_configured()
+        local = [self._rel_to_root(str(entry.path)) for entry in plan.located_files()] if uploading else []
+        if not hosted and not local:
+            return
+        sentences = [f"Refusing to {verb}: the deposit would archive data files hosted in R2 storage."]
+        if local:
+            sentences.append(
+                "R2 storage is configured, so ws.publish(zenodo=True) puts these in R2 with ws.upload() "
+                f"before the deposit: {_shown_list(local)}."
+            )
+        if hosted:
+            sentences.append(f"The dataset records point at these copies ws.upload() made: {_shown_list(hosted)}.")
+        sentences.append(
+            "A Zenodo deposit makes a public copy of each file it holds, so it archives files hosted in "
+            "R2 only when asked: pass archive_hosted_files=True to archive them from their local files, "
+            "with the records still pointing at R2."
+        )
+        if local and not hosted:
+            sentences.append("To let Zenodo host the files instead, run ws.zenodo(publish=True), then ws.submit().")
+        sentences.append("Nothing was uploaded, deposited or sent." if from_publish else "Nothing was sent to Zenodo.")
+        raise ValueError(" ".join(sentences))
+
+    def _warn_private_hosted_files(self, plan: DepositFilePlan) -> None:
+        """Name in a warning each data file the deposit archives from the private R2 bucket, since it makes them public."""
+        private = sorted(plan.private_hosted)
+        if not private:
+            return
+        warnings.warn(
+            f"The deposit archives {len(private)} data file(s) that ws.upload(public=False) put in the "
+            "private R2 bucket, and it makes them public: " + "; ".join(private),
+            stacklevel=3,
+        )
+        print(f"  WARNING: the deposit makes {len(private)} data file(s) from the private R2 bucket public:")
+        for url in private:
+            print(f"    {url}")
 
     @staticmethod
     def _assemble_zenodo_jsonld(

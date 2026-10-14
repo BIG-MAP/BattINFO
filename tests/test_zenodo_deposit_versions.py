@@ -30,6 +30,10 @@
   unpublished draft of this account or in an unrecorded version of its own
   Zenodo record) refuses the deposit instead of being linked to, in a new
   session and in a first deposit too.
+- A deposit of files ``ws.upload()`` put in R2, or that ``ws.publish(zenodo=True)``
+  would put there, is refused before any request unless
+  ``archive_hosted_files=True``, which archives them from their local files and
+  names each one from the private bucket in a warning.
 
 All offline: Zenodo's HTTP API (production and sandbox) and the registry are
 answered in memory, so the real ZenodoClient runs.
@@ -937,32 +941,139 @@ def _fake_r2(monkeypatch: pytest.MonkeyPatch) -> _FakeS3:
         ("R2_ACCESS_KEY_ID", "k"),
         ("R2_SECRET_ACCESS_KEY", "s"),
         ("R2_BUCKET", "b"),
+        ("R2_BUCKET_PRIVATE", "pb"),
         ("R2_PUBLIC_BASE_URL", "https://pub.example"),
     ):
         monkeypatch.setenv(name, value)
     return s3
 
 
-def test_files_hosted_on_r2_are_archived_in_the_deposit(
+R2_REFUSAL = "the deposit would archive data files hosted in R2 storage."
+
+
+@pytest.mark.parametrize("public", [True, False], ids=["public-bucket", "private-bucket"])
+def test_a_deposit_of_files_on_r2_is_refused_before_any_request(
+    tmp_path: Path, zenodo: _Zenodo, monkeypatch: pytest.MonkeyPatch, public: bool
+) -> None:
+    _fake_r2(monkeypatch)
+    ws = _workspace(tmp_path)
+    [r2_url] = ws.upload(public=public)
+    assert r2_url.startswith("https://pub.example/datasets/" if public else "s3://pb/datasets/")
+
+    with pytest.raises(ValueError) as excinfo:
+        _deposit(ws, publish=True)
+
+    message = str(excinfo.value)
+    assert message.startswith(f"Refusing to publish: {R2_REFUSAL}")
+    assert f"The dataset records point at these copies ws.upload() made: {r2_url}." in message
+    assert "pass archive_hosted_files=True" in message
+    assert message.endswith("Nothing was sent to Zenodo.")
+    assert zenodo.requests == [] and _state(tmp_path) is None
+    assert set(_locations(ws)) == {r2_url}
+
+
+def test_publish_with_r2_storage_is_refused_before_the_upload(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """With R2 configured, ws.publish(zenodo=True) would put the files in R2 and then archive them."""
+    s3 = _fake_r2(monkeypatch)
+    monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+    ws = _workspace(tmp_path)
+
+    with pytest.raises(ValueError) as excinfo:
+        ws.publish(zenodo=True, creators=CREATORS)
+
+    message = str(excinfo.value)
+    assert message.startswith(f"Refusing to publish: {R2_REFUSAL}")
+    assert f"ws.upload() before the deposit: {Path('C01') / 'cycling.csv'}." in message
+    assert "pass archive_hosted_files=True" in message
+    assert "To let Zenodo host the files instead, run ws.zenodo(publish=True), then ws.submit()." in message
+    assert message.endswith("Nothing was uploaded, deposited or sent.")
+    assert s3.objects == {} and zenodo.requests == [] and registry.payloads == []
+    assert all(location.startswith("file:") for location in _locations(ws))
+
+
+def test_publish_with_the_flag_puts_the_files_in_r2_and_archives_them(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    s3 = _fake_r2(monkeypatch)
+    for name, value in (
+        ("ZENODO_API_TOKEN", "placeholder"),
+        ("BATTINFO_REGISTRY_URL", REGISTRY["registry_url"]),
+        ("BATTINFO_API_KEY", "k"),
+        ("BATTINFO_WORKSPACE_ID", "w"),
+        ("BATTINFO_PUBLISHER_ID", "p"),
+    ):
+        monkeypatch.setenv(name, value)
+    ws = _workspace(tmp_path)
+    data = (tmp_path / "C01" / "cycling.csv").read_bytes()
+
+    outcomes = ws.publish(zenodo=True, creators=CREATORS, archive_hosted_files=True)
+
+    assert outcomes and all(outcome["ok"] for outcome in outcomes)
+    [r2_url] = set(_locations(ws))
+    assert r2_url.startswith("https://pub.example/datasets/") and len(s3.objects) == 1
+    state = _state(tmp_path)
+    assert state is not None and state["published"] is True
+    assert zenodo.deposit(int(state["record_id"])).files["cycling.csv"] == data
+    sent = json.dumps(registry.payloads)
+    assert r2_url in sent and "file:" not in sent
+
+
+def test_the_flag_archives_files_on_r2_and_warns_for_the_private_ones(
+    tmp_path: Path, zenodo: _Zenodo, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _fake_r2(monkeypatch)
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    c02 = tmp_path / "C02" / "cycling.csv"
+    data = sorted(path.read_bytes() for path in (tmp_path / "C01" / "cycling.csv", c02))
+    # C02's file is away during the private upload, so only C01 goes to the private bucket.
+    away = c02.rename(tmp_path / "away.csv")
+    ws.upload(public=False)
+    away.rename(c02)
+    ws.upload()
+    locations = set(_locations(ws))
+    [private_url] = [url for url in locations if url.startswith("s3://pb/")]
+    [public_url] = [url for url in locations if url.startswith("https://pub.example/")]
+    assert locations == {private_url, public_url}
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="private R2 bucket") as caught:
+        result = _deposit(ws, publish=True, archive_hosted_files=True)
+
+    assert result.published
+    [warning] = [str(item.message) for item in caught if "private R2 bucket" in str(item.message)]
+    assert warning.startswith("The deposit archives 1 data file(s) that ws.upload(public=False) put in the")
+    assert warning.endswith(f"and it makes them public: {private_url}")
+    out = capsys.readouterr().out
+    assert f"WARNING: the deposit makes 1 data file(s) from the private R2 bucket public:\n    {private_url}\n" in out
+    assert public_url not in out
+    # Both files are archived from their local files; the records keep the R2 URLs.
+    deposit = zenodo.deposit(int(result.record_id))
+    assert sorted(content for name, content in deposit.files.items() if name.endswith("cycling.csv")) == data
+    graph_urls = _download_urls(zenodo.graph(int(result.record_id)))
+    assert len(graph_urls) == 2 and all(url.startswith(f"{HOSTS['production']}/records/") for url in graph_urls)
+    assert set(_locations(ws)) == locations
+    ws.save()
+    assert set(_locations(ws)) == locations
+
+
+def test_the_index_marks_a_copy_in_the_private_bucket(
     tmp_path: Path, zenodo: _Zenodo, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _fake_r2(monkeypatch)
     ws = _workspace(tmp_path)
-    data = (tmp_path / "C01" / "cycling.csv").read_bytes()
-    [r2_url] = ws.upload()
-    assert set(_locations(ws)) == {r2_url}
+    [r2_url] = ws.upload(public=False)
+    path = tmp_path / ".battinfo" / "deposit-files.json"
+    index = json.loads(path.read_text(encoding="utf-8"))
+    assert index["hosted"][r2_url]["private"] is True
 
-    result = _deposit(ws, publish=True)
-
-    assert result.published
-    assert zenodo.deposit(int(result.record_id)).files["cycling.csv"] == data
-    # The deposit graph links to the archived copy; the records keep the R2 URL.
-    assert _download_urls(zenodo.graph(int(result.record_id))) == [
-        f"{HOSTS['production']}/records/{result.record_id}/files/cycling.csv"
-    ]
-    assert set(_locations(ws)) == {r2_url}
-    ws.save()
-    assert set(_locations(ws)) == {r2_url}
+    index["hosted"][r2_url]["private"] = "yes"
+    content = json.dumps(index)
+    path.write_text(content, encoding="utf-8")
+    with pytest.raises(DepositIndexError, match="has a 'private' that is not true or false"):
+        _deposit(ws, archive_hosted_files=True)
+    assert zenodo.requests == [] and path.read_text(encoding="utf-8") == content
 
 
 # ── Copies whose local file the workspace does not know ───────────────────────

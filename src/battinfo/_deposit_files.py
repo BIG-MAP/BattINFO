@@ -20,7 +20,10 @@ a URL under a record of this workspace's Zenodo record, or one
 ``ws.upload()`` made, is a file of the deposit (a :class:`RemoteSource`).
 Its local file is planned as any other when it is there. When it is gone, a
 deposit that continues the record keeps the copy it already holds (a kept
-file, never sent again), and any other deposit lists it as missing. A copy
+file, never sent again), and any other deposit lists it as missing. The
+plan lists the copies ``ws.upload()`` made in R2 storage
+(:attr:`DepositFilePlan.hosted`), which ``ws.zenodo()`` archives only when
+it is called with ``archive_hosted_files=True``. A copy
 of the workspace's own data whose local file the index does not know, such
 as an R2 copy an earlier build made, refuses the deposit instead of being
 linked to (:meth:`DepositContext.refusal_for`). Any other Zenodo file URL
@@ -252,8 +255,9 @@ class RemoteSource:
     empty when it has none yet. ``continued`` says that the record the deposit
     continues already holds the file under ``name``, so the deposit can keep
     that copy when the local file is gone. ``hosted`` marks a copy hosted
-    elsewhere (R2): the deposit carries the file too, but the records keep
-    pointing at the hosted copy.
+    elsewhere (R2): a deposit that archives it carries the file too, but the
+    records keep pointing at the hosted copy. ``private`` marks a hosted copy
+    in the private bucket (``ws.upload(public=False)``).
     """
 
     url: str
@@ -264,6 +268,7 @@ class RemoteSource:
     sha256: str = ""
     continued: bool = False
     hosted: bool = False
+    private: bool = False
 
 
 @dataclass(frozen=True)
@@ -333,8 +338,8 @@ class DepositContext:
         # continues, when an earlier version of it deposited the file.
         for name, item in self.held_files().items():
             if item.path and item.path_key() == hosted.path_key():
-                return _remote(url, name, item, item, continued=True, hosted=True)
-        return _remote(url, "", hosted, hosted, hosted=True)
+                return _remote(url, name, item, item, continued=True, hosted=True, private=hosted.private)
+        return _remote(url, "", hosted, hosted, hosted=True, private=hosted.private)
 
     def refusal_for(self, url: str, *, short_id: str = "") -> str | None:
         """Why a deposit refuses a dataset whose data *url* names, or ``None``.
@@ -412,6 +417,7 @@ def _remote(
     *,
     continued: bool = False,
     hosted: bool = False,
+    private: bool = False,
 ) -> RemoteSource:
     """A :class:`RemoteSource` whose local file is *local*'s and whose size and digests are *digests*'s."""
     return RemoteSource(
@@ -423,6 +429,7 @@ def _remote(
         sha256=digests.sha256 if digests is not None else "",
         continued=continued,
         hosted=hosted,
+        private=private,
     )
 
 
@@ -515,9 +522,13 @@ class DepositFilePlan:
     measured: bool = True
     #: The :func:`~battinfo._util.lexical_key` of each file the workspace registered.
     registered: frozenset[str] = frozenset()
-    #: URLs of copies hosted elsewhere (R2) whose files the deposit carries
-    #: too; the records keep pointing at these.
+    #: URLs of the copies ``ws.upload()`` made in R2 storage that the records
+    #: point at. ``ws.zenodo()`` refuses a deposit with any of them unless it
+    #: is called with ``archive_hosted_files=True``; the deposit then carries
+    #: their files too, and the records keep pointing at these URLs.
     hosted: frozenset[str] = frozenset()
+    #: The URLs in ``hosted`` of copies in the private bucket (``ws.upload(public=False)``).
+    private_hosted: frozenset[str] = frozenset()
     #: Zenodo file URLs on the deposit's Zenodo that the workspace cannot
     #: tell a link from a copy of its own data, by record id, each as
     #: ``(dataset, URL)`` (see :meth:`DepositContext.unplaced_record`). The
@@ -526,6 +537,8 @@ class DepositFilePlan:
     unplaced: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
     _by_key: dict[str, DepositFile] = field(default_factory=dict, repr=False)
     _by_location: dict[str, DepositFile | None] = field(default_factory=dict, repr=False)
+    #: The :func:`path_key` of each file a dataset record names by a ``file:`` location.
+    _located: frozenset[str] = field(default_factory=frozenset, repr=False)
 
     def entry_for(self, location: object) -> DepositFile | None:
         """The planned file a record location names, by resolved path.
@@ -550,6 +563,10 @@ class DepositFilePlan:
     def kept_files(self) -> list[DepositFile]:
         """The files the deposit already holds and keeps, with no local file to send."""
         return [entry for entry in self.files if entry.kept]
+
+    def located_files(self) -> list[DepositFile]:
+        """The data files a dataset record names by their local ``file:`` location: those ``ws.upload()`` would put in R2."""
+        return [entry for key, entry in self._by_key.items() if key in self._located]
 
     def archives(self) -> dict[str, list[DepositFile]]:
         """The files of a zipped deposit, by the archive that carries them."""
@@ -631,8 +648,11 @@ def build_deposit_file_plan(
     :meth:`DepositContext.source_for`). The local file behind a copy is
     planned as any other file when it is there. When it is gone, a copy the
     deposit already holds (``source.continued``) is a kept file, never sent
-    again; any other is listed in ``missing``. *unplaced* goes into the plan
-    as it is (see :attr:`DepositFilePlan.unplaced`).
+    again; any other is listed in ``missing``. The URL of a copy
+    ``ws.upload()`` made goes into ``hosted`` (and into ``private_hosted``
+    for one in the private bucket), for the caller to refuse or archive.
+    *unplaced* goes into the plan as it is (see
+    :attr:`DepositFilePlan.unplaced`).
 
     A kept file has the name it has on the deposit. Each other file keeps
     the name in the URL of the copy a record points at, or else the name
@@ -660,6 +680,8 @@ def build_deposit_file_plan(
     kept_location: dict[str, DepositFile] = {}  # URL -> the kept file it names
     url_names: dict[str, str] = {}  # path key -> the name in a record's URL
     hosted: set[str] = set()
+    private_hosted: set[str] = set()
+    located: set[str] = set()  # path keys of the files named by a file: location
 
     def _add(key: str, path: Path, kind: str) -> None:
         if key not in seen:
@@ -688,10 +710,13 @@ def build_deposit_file_plan(
         resolved = _resolved(path)
         key = os.path.normcase(str(resolved))
         key_of_location[location] = key
+        located.add(key)
         _add(key, resolved, kind)
     for source, kind in remote:
         if source.hosted:
             hosted.add(source.url)
+            if source.private:
+                private_hosted.add(source.url)
         # The index wrote this path when the file went into a deposit or an
         # upload, after the screen had passed it.
         if source.path is not None and source.path.is_file():
@@ -774,9 +799,11 @@ def build_deposit_file_plan(
         measured=measure,
         registered=frozenset(registered),
         hosted=frozenset(hosted),
+        private_hosted=frozenset(private_hosted),
         unplaced={record: list(uses) for record, uses in (unplaced or {}).items()},
         _by_key=by_key,
         _by_location=by_location,
+        _located=frozenset(located),
     )
 
 

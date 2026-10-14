@@ -23,6 +23,7 @@ from battinfo._deposit_files import kept_copy_problems
 from battinfo._jsonio import write_json
 from battinfo._util import url_segment
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
+from battinfo.config import resolve_zenodo_sandbox_token
 
 PathLike = str | Path
 
@@ -440,9 +441,25 @@ class ZenodoClient:
 # ── Module-level utilities ─────────────────────────────────────────────────────
 
 
-def _resolve_token(token: str | None) -> str:
+def _resolve_token(token: str | None, *, sandbox: bool = False) -> str:
+    """*token*, else the token for zenodo.org or, with *sandbox*, for the sandbox.
+
+    For zenodo.org that is ``ZENODO_API_TOKEN`` (or the legacy ``ZENODO_TOKEN``).
+    For the sandbox it is ``ZENODO_SANDBOX_TOKEN``, then ``zenodo_sandbox_token``
+    in ``~/.battinfo/config.yaml`` (see
+    :func:`battinfo.config.resolve_zenodo_sandbox_token`), so a zenodo.org
+    token is never sent to the sandbox.
+    """
     if token is not None:
         return token
+    if sandbox:
+        found = resolve_zenodo_sandbox_token(None)
+        if found:
+            return found
+        raise ZenodoError(
+            "No Zenodo sandbox token provided. Pass token=, set ZENODO_SANDBOX_TOKEN, or run "
+            "battinfo config set zenodo_sandbox_token <token>, with a token made on sandbox.zenodo.org."
+        )
     env = os.environ.get("ZENODO_API_TOKEN") or os.environ.get("ZENODO_TOKEN")
     if env:
         return env
@@ -733,7 +750,9 @@ def upload_zenodo_package(
         staging_dir: Directory produced by ``build_zenodo_package``.
         creators: Zenodo creator list, e.g.
                   ``[{"name": "Clark, Simon", "affiliation": "SINTEF"}]``.
-        token: Zenodo API token.  Falls back to ``ZENODO_API_TOKEN`` env var.
+        token: Zenodo token, made on sandbox.zenodo.org. Falls back to
+               ``ZENODO_SANDBOX_TOKEN``, then ``zenodo_sandbox_token`` in
+               ``~/.battinfo/config.yaml``; a zenodo.org token is never read.
         sandbox: Use the Zenodo sandbox. Required in this release.
         community: Zenodo community identifier for submission
                    (``None`` skips community submission).
@@ -765,7 +784,7 @@ def upload_zenodo_package(
         raise ValueError("creators must be a non-empty list.")
 
     staging = Path(staging_dir)
-    api_token = _resolve_token(token)
+    api_token = _resolve_token(token, sandbox=sandbox)
     client = ZenodoClient(token=api_token, sandbox=sandbox)
 
     bundle_path = staging / bundle_filename

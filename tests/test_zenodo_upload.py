@@ -485,10 +485,12 @@ class TestUploadZenodoPackage:
         with pytest.raises(ValueError, match="creators"):
             upload_zenodo_package(staging, [], token="tok", sandbox=True)
 
-    def test_no_token_raises(self, tmp_path: Path) -> None:
+    def test_no_token_raises(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         staging = _staged_package(tmp_path)
         import os
 
+        # The sandbox token's last fallback is the config file: one in the test's folder, with none stored.
+        monkeypatch.setattr("battinfo.config.USER_CONFIG_PATH", tmp_path / "home" / ".battinfo" / "config.yaml")
         with patch.dict(os.environ, {}, clear=True):
             os.environ.pop("ZENODO_API_TOKEN", None)
             with pytest.raises(ZenodoError, match="token"):

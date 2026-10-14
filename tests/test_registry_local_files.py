@@ -434,5 +434,5 @@ def test_a_zipped_deposit_is_fine_with_r2_storage(
     ws = _workspace_with_two_files(tmp_path / "ws")
     steps = _record_deposits(ws, monkeypatch)
     with pytest.raises(SubmitError):  # the stub upload pointed nothing at R2
-        ws.publish(zenodo=True, creators=CREATORS)
+        ws.publish(zenodo=True, creators=CREATORS, archive_hosted_files=True)
     assert steps == ["upload", "zenodo"]

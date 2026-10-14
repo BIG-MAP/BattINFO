@@ -100,7 +100,8 @@ These gaps were known when 0.8.0 was released and are planned for 0.8.x or 0.9. 
 
 ### CLI batch path
 
-- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They read the token from `--token`, the config file or `ZENODO_API_TOKEN`, not `ZENODO_SANDBOX_TOKEN`, so pass a sandbox token with `--token`. Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+- `battinfo batch upload` and `battinfo push` upload only to the Zenodo sandbox, so an upload needs `--sandbox`; without it they stop before contacting Zenodo. They send a sandbox token: `--token`, else `ZENODO_SANDBOX_TOKEN`, else `zenodo_sandbox_token` in the config file (`battinfo config set zenodo_sandbox_token <token>`). Uploads to zenodo.org from the batch path come in a later release; to publish there now, use `ws.zenodo()` from `battinfo.workspace()`.
+- Run `battinfo batch package` again before you retry `battinfo batch upload`: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.
 
 ### Dependencies
 

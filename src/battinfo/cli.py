@@ -3913,7 +3913,7 @@ def batch_package(
         typer.echo(f"  {fname.name}")
     typer.echo()
     typer.echo("Upload to Zenodo sandbox with:")
-    typer.echo(f"  battinfo batch upload {staging} --token $ZENODO_TOKEN --sandbox")
+    typer.echo(f"  battinfo batch upload {staging} --sandbox")
 
 
 @batch_app.command("upload")
@@ -3921,7 +3921,12 @@ def batch_upload(
     staging_dir: Path = typer.Argument(
         ..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."
     ),
-    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN."),
+    token: str | None = typer.Option(
+        None,
+        "--token",
+        help="Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, "
+        "then zenodo_sandbox_token in the config file.",
+    ),
     sandbox: bool = typer.Option(
         False,
         "--sandbox",
@@ -3960,15 +3965,25 @@ def batch_upload(
     The deposit URL is printed at the end -- open it to review and publish.
     """
 
-    from battinfo.config import resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_sandbox_token
     from battinfo.zenodo import upload_zenodo_package
 
     cfg = _user_config_or_exit(json_output=json_output)
-    resolved_token = resolve_zenodo_token(token)
+    if not sandbox:
+        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
+
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": _BATCH_UPLOAD_SANDBOX_ONLY}))
+        else:
+            typer.echo(f"Error: {_BATCH_UPLOAD_SANDBOX_ONLY}", err=True)
+        raise typer.Exit(code=1)
+
+    resolved_token = resolve_zenodo_sandbox_token(token)
     if not resolved_token:
         typer.echo(
-            "Error: Zenodo token required. Pass --token, set ZENODO_API_TOKEN, or run:\n"
-            "  battinfo config set zenodo_token <token>",
+            "Error: Zenodo sandbox token required. Pass --token, set ZENODO_SANDBOX_TOKEN, or run:\n"
+            "  battinfo config set zenodo_sandbox_token <token>\n"
+            "with a token made on sandbox.zenodo.org.",
             err=True,
         )
         raise typer.Exit(code=1)
@@ -3983,15 +3998,6 @@ def batch_upload(
         raise typer.Exit(code=1)
 
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
-
-    if not sandbox:
-        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
-
-        if json_output:
-            typer.echo(json.dumps({"ok": False, "error": _BATCH_UPLOAD_SANDBOX_ONLY}))
-        else:
-            typer.echo(f"Error: {_BATCH_UPLOAD_SANDBOX_ONLY}", err=True)
-        raise typer.Exit(code=1)
 
     if not json_output:
         target = "Zenodo Sandbox" if sandbox else "Zenodo"
@@ -4067,7 +4073,10 @@ def push(
         None, "--creator", "-c", help='Creator: "Family, Given; Affiliation". Falls back to config.'
     ),
     token: str | None = typer.Option(
-        None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."
+        None,
+        "--token",
+        help="Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, "
+        "then zenodo_sandbox_token in the config file.",
     ),
     sandbox: bool = typer.Option(
         False,
@@ -4095,13 +4104,13 @@ def push(
       battinfo push ./my_batch/                                     --sandbox   # existing batch.yaml
 
     \b
-    One-time setup:
+    One-time setup, with a token made on sandbox.zenodo.org:
       battinfo config set creator "Family, Given; Institution"
-      battinfo config set zenodo_token <token>
+      battinfo config set zenodo_sandbox_token <token>
     """
     from rich.console import Console
 
-    from battinfo.config import resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_sandbox_token
     from battinfo.contribution import BATCH_MANIFEST, _group_files_by_cell, push_batch
 
     console = Console(highlight=False)
@@ -4114,18 +4123,22 @@ def push(
             console.print(f"[red]Error:[/red] {msg}")
         raise typer.Exit(code=1)
 
-    creators = resolve_creators(creator)
-    if not creators:
-        _err('no creator specified. Pass --creator or run: battinfo config set creator "Family, Given; Institution"')
-
-    resolved_token = resolve_zenodo_token(token)
-    if not dry_run and not resolved_token:
-        _err("Zenodo token required. Pass --token or run: battinfo config set zenodo_token <token>")
-
     if not dry_run and not sandbox:
         from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
 
         _err(_BATCH_UPLOAD_SANDBOX_ONLY)
+
+    creators = resolve_creators(creator)
+    if not creators:
+        _err('no creator specified. Pass --creator or run: battinfo config set creator "Family, Given; Institution"')
+
+    # Only the sandbox token: a zenodo.org token is never sent to the sandbox.
+    resolved_token = resolve_zenodo_sandbox_token(token) if sandbox else None
+    if not dry_run and not resolved_token:
+        _err(
+            "Zenodo sandbox token required. Pass --token, set ZENODO_SANDBOX_TOKEN, or run: "
+            "battinfo config set zenodo_sandbox_token <token> (a token made on sandbox.zenodo.org)"
+        )
 
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
@@ -4246,7 +4259,7 @@ def _user_config_or_exit(*, json_output: bool = False) -> dict[str, Any]:
 
 @config_app.command("set")
 def config_set(
-    key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token."),
+    key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token, zenodo_sandbox_token."),
     value: str = typer.Argument(..., help="Value to store."),
 ) -> None:
     """Set a user preference that is applied as the default across all commands.
@@ -4257,6 +4270,10 @@ def config_set(
       battinfo config set creator "Clark, Simon; SINTEF | Smith, Jane; NTNU"
       battinfo config set license CC-BY-4.0
       battinfo config set community battinfo-reference
+      battinfo config set zenodo_sandbox_token <token>
+
+    zenodo_sandbox_token is a token made on sandbox.zenodo.org, which the
+    batch path (battinfo batch upload, battinfo push) sends to the sandbox.
 
     A secret, such as zenodo_token, is echoed with only its last four
     characters shown, or fully hidden when it is shorter than 12 characters.
