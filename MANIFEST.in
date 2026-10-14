@@ -9,3 +9,7 @@ recursive-include src/battinfo/data *
 recursive-include src/battinfo py.typed
 global-exclude *.py[cod]
 global-exclude __pycache__/*
+# setuptools adds tests/test*.py by default, but the tests also read fixtures,
+# docs, scripts and web files that the sdist leaves out, so they could not run
+# from it. They run from a checkout of the release tag.
+prune tests

@@ -54,8 +54,6 @@ def _example_per_kind() -> dict[str, dict]:
     """One shipped example record per entity kind (every kind has one)."""
     found: dict[str, dict] = {}
     for path in sorted(EXAMPLES.rglob("*.json")):
-        if "profiles" in path.parts:
-            continue
         doc = json.loads(path.read_text(encoding="utf-8"))
         kind = kind_for_doc(doc) if isinstance(doc, dict) else None
         if kind is not None and kind.entity_type not in found:

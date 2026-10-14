@@ -9,6 +9,7 @@ non-numeric placeholders) so a string never reaches arithmetic or a quantity
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -55,7 +56,8 @@ def test_converter_quantity_value_coerces_numbers_and_drops_placeholders() -> No
     assert _quantity_value({"hasNumericalPart": {"hasNumberValue": "15"}}) == 15.0
     assert _quantity_value({"hasNumericalPart": {"hasNumberValue": 3.2}}) == 3.2
     assert _quantity_value({"hasNumericalPart": {"hasNumberValue": "n/a"}}) is None
-    # A genuine string-valued property is still preserved.
+    # A genuine string-valued property is still preserved (the importer
+    # stores it as value_text, never in a quantity's value).
     assert _quantity_value({"hasStringValue": "blue"}) == "blue"
 
 
@@ -76,7 +78,12 @@ def test_json_to_jsonld_string_percent_fraction_does_not_crash() -> None:
             },
         },
     }
-    # Must not raise TypeError on `value / 100`; "95" % -> 0.95 fraction.
+    # Must not raise TypeError on `value / 100`. The emitter does not coerce
+    # text: "95" goes out as hasStringValue, never as a scaled hasNumberValue
+    # (validation refuses text in a quantity's value before it gets here).
     out = to_jsonld(record, target="domain-battery")
     assert "95" not in str(out.get("@type", ""))  # sanity: produced a document
     assert out is not None
+    dumped = json.dumps(out)
+    assert '"hasStringValue": "95"' in dumped
+    assert '"hasNumberValue": 0.95' not in dumped

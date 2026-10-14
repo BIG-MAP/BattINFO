@@ -14,7 +14,7 @@ import json
 import sys
 from pathlib import Path
 
-from battinfo.transform.json_to_jsonld import to_jsonld
+from battinfo import record_to_jsonld
 
 EXAMPLES = Path("examples")
 RECORD_KEYS = (
@@ -222,12 +222,11 @@ for key, doc, f in records:
                 check_ref(body[fld], f"{f.name}.{fld}")
                 referenced.add(body[fld])
 
-    # JSON-LD emission (skip organization — not a domain-battery node)
-    if key not in ("organization",):
-        try:
-            to_jsonld(doc, target="domain-battery")
-        except Exception as exc:  # noqa: BLE001
-            errors.append(f"JSON-LD FAIL {f.name}: {exc}")
+    # JSON-LD emission, through the emitter that covers every record kind
+    try:
+        record_to_jsonld(doc, key)
+    except Exception as exc:  # noqa: BLE001
+        errors.append(f"JSON-LD FAIL {f.name}: {exc}")
 
 # orphan specs (info only)
 for key, doc, f in records:

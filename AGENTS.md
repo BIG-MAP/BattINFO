@@ -10,7 +10,7 @@ Package code is in `src/battinfo/`, schemas and mappings in `assets/`, example r
 
 ## Set up and run the checks
 
-The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI runs 3.11 and 3.12 on Linux and Windows.
+The project uses [uv](https://docs.astral.sh/uv/) with a committed `uv.lock`. It needs Python 3.11 or newer, and CI tests 3.11–3.14 on Linux and Windows. A further CI job installs the lowest version that `pyproject.toml` allows of each core, `publish` and `processing` requirement, on Python 3.11, and runs part of the suite against them. Raise a floor only when battinfo needs the newer release, and run `uv lock` in the same change; `tests/test_packaging_metadata.py` fails while the lock disagrees.
 
 ```bash
 uv sync --all-extras    # .venv from uv.lock, with the dev, docs and feature extras
@@ -33,9 +33,11 @@ uv run pytest --nbmake docs/guides/ -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
+CI also lints every workflow file with [actionlint](https://github.com/rhysd/actionlint), which passes each `run:` script to shellcheck, so run `actionlint` before you push a change to `.github/workflows/`. `tests/test_release_workflow.py` checks the conditions in `release.yml` that keep PyPI uploads to pushed tags, and `tests/test_docs_deploy.py` runs `docs-deploy.sh` against a scratch gh-pages tree, the ontology it publishes for a final tag included. After `uv build`, the CI package job runs `scripts/check_distribution.py dist`, which fails when the wheel or the sdist carries other metadata than `pyproject.toml` declares, or the sdist holds the tests.
+
 The test suite runs with sockets disabled (pytest-socket, set in `pyproject.toml`). Mock network calls; a test that really needs the network opts in with `@pytest.mark.enable_socket`. Coverage has to stay at or above the `fail_under` floor in `pyproject.toml`.
 
-The doc-snippets job executes the code blocks of the pages listed in `SNIPPET_FILES` in `.tools/quality/run_doc_snippets.py`. Add a new how-to page to that list, and put `<!-- doc-snippet: skip -->` on the line above any block that cannot run offline. The Sphinx build turns warnings into errors and needs pandoc on the PATH to render the notebooks.
+The doc-snippets job executes the code blocks of the pages listed in `SNIPPET_FILES` in `.tools/quality/run_doc_snippets.py`, and the `::` examples in the docstring of each module listed there (`src/battinfo/ws.py`). Add a new how-to page to that list, and put `<!-- doc-snippet: skip -->` on the line above any block that cannot run offline. The Sphinx build turns warnings into errors and needs pandoc on the PATH to render the notebooks.
 
 `.tools/quality/run_verification.py` is a shorter acceptance gate: the three acceptance test files, `tests/installed_smoke.py` and a wheel build. Pass `--report-json <path>` for a machine-readable summary. Key paths are also listed in `.tools/agent/manifest.json`, and `tests/test_agent_readiness.py` checks that those paths exist.
 
@@ -80,7 +82,7 @@ The JSON Schema is the save-time contract and the pydantic models in `src/battin
 - `ws.preview_jsonld()` writes the JSON-LD graph a Zenodo deposit would carry and prints the publication checks. `ws.zenodo()` makes the deposit and leaves a draft unless you pass `publish=True`.
 - `ws.submit()` sends this session's records to the registry review queue: what the last `ws.save()` wrote, and the equipment records `ws.add("equipment")` saved when it was called. `ws.publish()` does save and submit in one call, with a Zenodo deposit first when `zenodo=True`.
 - `ws.login(api_key=...)` stores the registry key in the workspace's own `.battinfo/credentials`. `ws.credentials_status()` and `ws.has_credential(name)` say which credentials a workspace has and where each comes from, without the values.
-- `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved records as RDF.
+- `ws.import_(...)` rebuilds a workspace from a published `battinfo.json`, and `ws.export(fmt)` writes the saved cell specs, cells, test specs, tests and datasets as RDF.
 
 `help(ws.add)` and `ws.commands()` list the rest. A minimal offline session:
 
@@ -105,9 +107,9 @@ Credentials belong to their workspace. Each one is looked up in one order (an ar
 
 A few record types are written outside the workspace. Separators, current collectors, electrolytes and housings go through `battinfo.api.create_component_spec` and `save_component_spec` (and the `*_component_instance` pair), as in `docs/howto/build-a-cell-from-components.md`. Organizations have `battinfo.api.create_organization` and `save_organization`. Datasets that describe files already archived elsewhere, collection members among them, use the `battinfo.Dataset` model with `battinfo.save_dataset`.
 
-For one record without a workspace, use the record models (`CellSpec`, `Cell`, `TestSpec`, `Test`, `Dataset`) with `battinfo.publish(...)`. Detailed cell composition (bill of materials, electrode coatings, electrolyte recipe) is built with the helpers in `battinfo.authoring`, such as `bom`, `electrode`, `electrolyte_recipe` and `separator_spec`.
+For one record without a workspace, use the record models. `battinfo.publish(...)` takes a `CellSpec` only; a `Cell`, `TestSpec`, `Test` or `Dataset` is saved with `save_cell_instance`, `save_test_spec`, `save_test` or `save_dataset`, which mint its IRI. Detailed cell composition (bill of materials, electrode coatings, electrolyte recipe) is built with the helpers in `battinfo.authoring`, such as `bom`, `electrode`, `electrolyte_recipe` and `separator_spec`.
 
-Do not build on `battinfo.Workspace`. That name is the object-graph engine behind the workspace, now at `battinfo._workspace.Workspace`; the top-level alias warns and is due to be removed one release after 0.8. The curated top level is the `__all__` list in `src/battinfo/__init__.py`. Other names still import from `battinfo` with a `DeprecationWarning` (`_LAZY_EXPORTS`), so new code imports them from their home module, for example `from battinfo.authoring import bom`. Retired class names such as `CellSpecification` resolve through `_DEPRECATED_ALIASES`.
+Do not build on `battinfo.Workspace`. That name is the object-graph engine behind the workspace, now at `battinfo._workspace.Workspace`; the top-level alias warns and is due to be removed in 0.9.0. The curated top level is the `__all__` list in `src/battinfo/__init__.py`. Other names still import from `battinfo` with a `DeprecationWarning` (`_LAZY_EXPORTS`), so new code imports them from their home module, for example `from battinfo.authoring import bom`. Retired class names such as `CellSpecification` resolve through `_DEPRECATED_ALIASES`.
 
 The workspace is for describing and publishing. Reading published data goes through `battinfo.registry.Registry` (`list`, `get`, `links`, `files`, `download`, `read`, `catalog`), which is provisional in 0.8; `docs/howto/read-registry-data.md` shows it in use. Importers and exporters for other formats (BPX, Battery Data Commons, battdat, BattInfoConverter JSON-LD, Discovery, the solid-state database, and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats) live in `battinfo.interop`.
 
@@ -156,13 +158,14 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | mapping tables, emitter terms | `assets/vocab/emmo-labels.ttl` | `uv run python scripts/gen_emmo_labels.py` |
 | examples, emitters | `web/lib/showcase.generated.ts`, `web/lib/jsonld.generated.ts` | `scripts/gen_web_examples.py`, `scripts/gen_web_jsonld.py` |
 | schemas, examples, records context | the other `web/lib/*.generated.ts` files | `npm run sync:schemas`, `sync:examples`, `sync:context` in `web/` |
+| the version (`__version__` in `src/battinfo/__init__.py`) | `battinfo.ttl`, `CITATION.cff`, `SECURITY.md`, the `Changelog` URL in `pyproject.toml`, `docs/records/*.md`, `web/lib/showcase.generated.ts` | `uv run python scripts/set_version.py X.Y.Z`; `tests/test_set_version.py` runs its `--check` |
 | EMMO pins in `battinfo.ttl` | `src/battinfo/data/context/domain-battery.context.json`, `tests/fixtures/emmo/closure-terms.json` | set `PINNED_VERSION` in `.tools/quality/refresh_emmo_context.py`, run it, then run `.tools/quality/emmo_closure_terms.py` (both read the release tags online) |
 
 The record-type pages under `docs/records/` run each authoring snippet against the current library and validate the result under the strict policy. A change to a schema, the API or an emitter that alters a reference record must regenerate that chapter in the same commit.
 
 ## Where to write
 
-Transient output goes under `.battinfo/` (gitignored) or a test's temporary directory. Do not edit `src/battinfo/data/` by hand except to copy in a changed schema or mapping table, and edit `examples/` only when the task is about the examples themselves. Keep work logs and planning notes out of commits; `WORK_LOG.md` and `CLAUDE.md` are already in `.gitignore`.
+Transient output goes under `.battinfo/` (gitignored) or a test's temporary directory. Do not edit `src/battinfo/data/` by hand except to copy in a changed schema or mapping table, or to change a file in `src/battinfo/data/samples/`, the tutorials' sample data, which has no other copy. Edit `examples/` only when the task is about the examples themselves. Keep work logs and planning notes out of commits; `WORK_LOG.md` and `CLAUDE.md` are already in `.gitignore`.
 
 Package code deletes folders through `battinfo._fs_guard`: `remove_tree` for a folder a caller named or read from a manifest, passing the operation's inputs, and `remove_temp_tree` for a temporary folder the code made itself. Code that deletes files in a folder but not the folder checks it with `require_apart` against what it reads. An output root BattINFO creates gets the marker from `write_marker`; a new kind of entry at the top of such a root, or a new file name in one of its record or report folders, also needs a place in the layouts in `_fs_guard.py`, which recognise roots made before the marker. `tests/test_fs_guard.py` fails if any other module calls `shutil.rmtree`, or if a root this version builds is not recognised without its marker. A path field in a workspace manifest model goes through `check_relative_path` from the same module, and a file named after a record goes through `entities.save_entity_path`, which takes only a dashed uid (`is_dashed_uid`).
 

@@ -14,12 +14,13 @@ if TYPE_CHECKING:  # jsonschema/referencing are imported lazily so `import batti
     from jsonschema.exceptions import ValidationError
     from referencing import Registry
 
+# profiles/batterypass.schema.json still ships, marked withdrawn, so that its
+# published URL keeps resolving; it is not a validation profile since 0.8.0.
 PROFILE_TO_SCHEMA = {
     "base": "battinfo.base.schema.json",
     "cell-spec": "cell-spec.schema.json",
     "cell-instance": "cell-instance.schema.json",
     "dataset": "dataset.schema.json",
-    "batterypass": "profiles/batterypass.schema.json",
     "test-protocol": "test-protocol.schema.json",
     "test": "test.schema.json",
     "material-spec": "material-spec.schema.json",
@@ -223,6 +224,11 @@ def _enhance_message(error: ValidationError) -> str:
         )
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."
+    if error.validator == "type" and error.validator_value == "number" and isinstance(error.instance, str):
+        # A quantity's value took text before 0.8.0; say where the text goes now.
+        description = error.schema.get("description", "") if isinstance(error.schema, dict) else ""
+        msg = msg.rstrip(".") + ". Write the number without quotes"
+        msg += "; text that is not a number belongs in value_text." if "value_text" in description else "."
     if error.validator in ("pattern", "maxLength") and list(error.path)[-1:] == ["handle"]:
         msg += (
             " A handle is lowercase ASCII segments joined by '/', each made of letters and"

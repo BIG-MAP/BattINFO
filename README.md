@@ -24,10 +24,8 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <br/>
 <!-- Badges · domain alignment -->
 [![Ontology: EMMO domain-battery](https://img.shields.io/badge/ontology-EMMO%20domain--battery-6E4C9F.svg)](https://github.com/emmo-repo/domain-battery)
-[![Battery Pass](https://img.shields.io/badge/Battery%20Pass-v1.2.0-1B998B.svg)](https://thebatterypass.eu/)
 <br/>
 <!-- Badges · learn & cite -->
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BIG-MAP/BattINFO/blob/main/docs/guides/01-concepts.ipynb)
 [![nbviewer](https://img.shields.io/badge/render-nbviewer-F37726?logo=jupyter&logoColor=white)](https://nbviewer.org/github/BIG-MAP/BattINFO/tree/main/docs/guides/)
 <!-- DOI: the Zenodo concept DOI; it resolves to the latest archived release -->
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6304782.svg)](https://doi.org/10.5281/zenodo.6304782)
@@ -50,10 +48,7 @@ BattINFO provides a Python library, a CLI, and a canonical asset suite — JSON
 Schemas, ontology mappings, profiles, and examples — that make it straightforward
 to describe batteries as **valid, machine-readable Linked Data**.
 
-Every record published through BattINFO is a valid RDF document, typed against
-EMMO domain-battery and resolvable through persistent `https://w3id.org/battinfo/`
-IRIs. The result is battery metadata that is interoperable by construction,
-queryable with SPARQL, and Battery Pass-compatible out of the box.
+Every record gets a persistent `https://w3id.org/battinfo/` IRI. The JSON-LD that BattINFO writes for a record (`battinfo.record_to_jsonld`), for a workspace's saved cell specs, cells, test specs, tests and datasets (`ws.export`) and for a Zenodo deposit is valid RDF, typed against EMMO domain-battery and ready to query with SPARQL. What a record's IRI serves from the registry is not yet that model; the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) say what it serves instead.
 
 ## Table of contents
 
@@ -78,11 +73,10 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 - **Write plain JSON or Python** — get validated, EMMO-aligned JSON-LD.
 - **Interoperable by construction** — records share one ontology, one context, and one identifier scheme.
 - **Provenance built in** — a `CellSpec → Cell → Test → Dataset` chain links every measurement back to the cell that produced it.
-- **Standards-ready** — Battery Pass-compatible output, pinned per release.
 
 ## Installation
 
-Requires **Python 3.11+**. 0.8.0 will be the first working release of battinfo on PyPI. Until then, install it from GitHub into a virtual environment:
+Supports **Python 3.11–3.14**. 0.8.0 will be the first working release of battinfo on PyPI. Until then, install it from GitHub into a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -136,7 +130,7 @@ registry (`ws.publish()`, see [Tutorial 6](https://github.com/BIG-MAP/BattINFO/b
 
 Or from the command line:
 
-```powershell
+```bash
 battinfo --help
 ```
 
@@ -159,7 +153,9 @@ shows which surface (workspace, `battinfo.api`, CLI) authors which record types 
 
 Six tutorial notebooks in [`docs/guides/`](https://github.com/BIG-MAP/BattINFO/tree/main/docs/guides) — one story, from the
 record model to a published dataset. Each runs from its own folder and writes
-only to a throwaway `_scratch/` directory next to it.
+only to a throwaway `_scratch/` directory next to it. The example files they read
+ship inside the package, so a pip install is enough to run them (tutorial 6 also
+needs the `processing` extra).
 
 | Tutorial | What you'll learn |
 |---|---|
@@ -174,7 +170,6 @@ only to a throwaway `_scratch/` directory next to it.
 
 - Validates battery metadata as plain JSON (JSON Schema / Pydantic) **and** as semantic RDF (JSON-LD + URDNA2015 normalisation).
 - Maps JSON inputs into domain-battery-aligned JSON-LD using authoritative curated property and unit mappings.
-- Produces **Battery Pass-compatible JSON-LD** (pinned to v1.2.0).
 - Provides profiles, examples, and mapping rules for all common battery record types.
 - Supports a reusable cell-spec library, curated once as BattINFO descriptors and published as generated RDF/JSON-LD.
 - Publishes dataset metadata with a core `CellSpec → Cell → Test → Dataset` provenance chain.
@@ -189,15 +184,15 @@ only to a throwaway `_scratch/` directory next to it.
 | [`src/battinfo/transform/json_to_jsonld.py`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo/validate) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
-Published records use:
+The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write uses:
 
 - `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern)
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
-- `@type` stacking: a cylindrical LFP cell is simultaneously `BatteryCell`, `CylindricalBattery`, `LithiumIonBattery`, `LithiumIronPhosphateBattery`, and `LithiumIonGraphiteBattery`
+- `@type` stacking: the cell that a cylindrical LFP cell spec describes is a `BatteryCell`, a `CylindricalBattery`, a `LithiumIonBattery` and a `LithiumIonIronPhosphateBattery`, taken from its format, chemistry and `positive_electrode_basis`. `LithiumIonGraphiteBattery` is added only when `negative_electrode_basis` is graphite.
 
 ## Project status
 
-> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11 and 3.12, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
+> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11–3.14, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
@@ -207,7 +202,8 @@ Published records use:
 - Reusable cell-spec library flows beyond the walkthrough fixtures.
 
 **In development (no stability promise)**
-- The folder-based batch path: `battinfo push` processes a folder of raw cycler files, packages it and deposits it on Zenodo; `battinfo batch` and `battinfo dataset` run the same steps one at a time.
+- The folder-based batch path: `battinfo push` processes a folder of raw cycler files, packages it and uploads it to the Zenodo sandbox, and `battinfo batch` runs the same steps one at a time. To publish on zenodo.org, use `ws.zenodo()`.
+- `battinfo dataset` is experimental: its init, process and publish flow cannot complete in 0.8.0, so publish a dataset with `ws.zenodo()` instead.
 - Registry administration (`battinfo registry bootstrap`).
 - Large-scale reference validation.
 
@@ -226,10 +222,9 @@ Published records use:
 ## Core principles
 
 - **Domain-battery is the normative ontology** (semantics and terms). BattINFO is non-normative and operational (schemas, mappings, tooling).
-- **The canonical contract is JSON Schema**; Pydantic models are generated for the CLI and Python API.
-- **JSON-LD-first publication**: every record rendered for the resolver or registry is valid RDF aligned to domain-battery.
+- **The JSON Schema is the save-time contract**, and the pydantic models in `bundle.py` are the hand-written authoring surface. `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps, and [AGENTS.md](https://github.com/BIG-MAP/BattINFO/blob/main/AGENTS.md#sources-of-truth-and-generated-files) lists which files are generated and how.
+- **JSON-LD-first publication**: `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write valid RDF aligned to domain-battery.
 - **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
-- Battery Pass JSON-LD outputs are supported and pinned per release.
 - BattINFO does not host or modify the domain-battery ontology.
 
 ## Contributing
@@ -237,7 +232,7 @@ Published records use:
 Contributions are welcome. Please open an issue to discuss substantial changes
 before submitting a pull request, and make sure the full quality gate passes:
 
-```powershell
+```bash
 uv sync --all-extras
 uv run ruff check src tests
 uv run mypy
@@ -246,14 +241,11 @@ uv run pytest -q tests
 
 A shorter acceptance gate runs the acceptance tests, a smoke test of the installed package and a wheel build. It is part of the repository, not of the installed package, so run it from a checkout:
 
-```powershell
+```bash
 uv run python .tools/quality/run_verification.py
 ```
 
-CI runs the same checks across Python 3.11/3.12 on Linux and Windows via the
-[CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside
-[Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and
-[Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
+CI runs the same checks across Python 3.11–3.14 on Linux and Windows via the [CI](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/ci.yml) workflow, alongside [Security](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/security.yml) (pip-audit + CodeQL) and [Docs](https://github.com/BIG-MAP/BattINFO/blob/main/.github/workflows/docs.yml) builds.
 
 ## Citation
 
@@ -278,11 +270,11 @@ each release also gets its own version DOI on Zenodo.
 
 ## License
 
-Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE).
+Distributed under the **Apache License 2.0**. See [`LICENSE`](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE). The package also includes EMMO-derived context files and labels under CC BY 4.0 and five BPX example parameter sets under MIT; [`NOTICE`](https://github.com/BIG-MAP/BattINFO/blob/main/NOTICE) says which files they are.
 
 ## Acknowledgements
 
 Built on the [EMMO](https://github.com/emmo-repo) ontology suite — in particular
 [domain-battery](https://github.com/emmo-repo/domain-battery) and
-domain-electrochemistry — and aligned with the
+domain-electrochemistry — and informed by the
 [Battery Pass](https://thebatterypass.eu/) data content guidance.

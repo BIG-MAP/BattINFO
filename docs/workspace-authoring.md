@@ -84,7 +84,7 @@ The registry URL is looked up the same way, each time it is used. `battinfo.work
 | You want to… | Use | Entry point |
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
-| Create a single record in code and save/publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` — see the [Python API](pages/api-reference.rst) |
+| Create a single record in code and save or publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` for a cell spec; the other models with their `save_*` function. See the [Python API](pages/api-reference.rst) |
 | Register materials and component specs (electrodes, electrolytes, …) | **`battinfo.api` functions** | `create_*` / `save_*` — see the [how-to guides](pages/howto.md) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo._workspace.Workspace` |
 
@@ -117,9 +117,8 @@ commands for materials or components.
   finalizes ids and provenance, and writes the canonical records. The authoring
   workspace delegates to it; script against it directly when you are building
   pipelines rather than working interactively.
-- **The record models** (`CellSpec`, `Cell`, `Test`, `TestSpec`,
-  `Dataset`) are both the canonical source of truth and the authoring input — every
-  field carries a description (`help(battinfo.CellSpec)`), and misspelled
-  arguments get a did-you-mean.
-- **`battinfo.publish(...)`** takes a single model (or a linked graph of them) and
-  writes/publishes the canonical records without a workspace.
+- **The record models** (`CellSpec`, `Cell`, `Test`, `TestSpec`, `Dataset`) are the authoring input, and every save validates their records against the JSON Schema, which is the save-time contract. Every field carries a description (`help(battinfo.CellSpec)`), and misspelled arguments get a did-you-mean.
+- **`battinfo.publish(...)`** takes one `CellSpec` and saves its canonical
+  record without a workspace, or saves and submits it to a registry. A `Cell`,
+  `TestSpec`, `Test` or `Dataset` is saved with `save_cell_instance`,
+  `save_test_spec`, `save_test` or `save_dataset` instead.

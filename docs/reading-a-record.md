@@ -39,8 +39,7 @@ from one source so they cannot drift.
 
 ## Quantities
 
-Every quantity (capacity, voltage, …) uses **one** EMMO encoding everywhere — published
-record and SHACL validation alike:
+Every quantity (capacity, voltage, …) uses **one** EMMO encoding in this graph, in `battinfo.record_to_jsonld` output and in the SHACL shapes that check them:
 
 ```json
 "hasProperty": [{ "@type": "NominalVoltage",
@@ -49,6 +48,8 @@ record and SHACL validation alike:
 ```
 
 Unit IRIs are EMMO where defined; compound units EMMO lacks (`W/kg`, `W/L`) use QUDT.
+
+A unit with no IRI in the unit map, such as `years` for a calendar life, is written as text only, as `schema:unitText` with no `hasMeasurementUnit`. Validation warns `semantic.unit_unmapped` when this happens in a record's `properties` or in the `property` map of a material, material-spec, electrode or electrode-spec record. Units elsewhere, such as those of test conditions, `conditions` maps and the components of a cell spec, are not checked for an IRI.
 
 ## Structured test conditions
 
@@ -71,7 +72,7 @@ conditions as `schema:PropertyValue`s — not just prose — so they are queryab
 Every `@id` either resolves to a node in the document or is a typed stub pointing at the
 authoritative resource (e.g. a remote `BatteryCellSpecification` with `rdfs:isDefinedBy`).
 Registry IRI resolution (`w3id.org/battinfo/spec/…`) and the published context URL are
-handled by the BattINFO registry deployment.
+handled by the BattINFO registry deployment. What a record's IRI serves today is the record body expanded with the records context, not the graph this page describes; see the [known limitations](scope.md#known-limitations-in-080).
 
 ## Round-trip fidelity (`ws.import_`)
 
@@ -87,3 +88,5 @@ round-trip artifact; `battinfo.json` is the semantic-web view. (Closing this gap
 tracked enhancement.)
 
 A test whose cell the deposit only points at (a "defined elsewhere" stub for a cell published in the registry) is not imported, nor are its datasets. They are listed under `skipped` in the counts `import_()` returns, each with its cell and the reason, and the counts of tests and datasets say how many were imported.
+
+The document may come from anyone, so `import_()` keeps only http(s) download URLs. A distribution whose download URL is a `file:` URL or a path, on this computer or another one, is left out with a warning, and a later `ws.zenodo()` of the workspace never reads a file the document named. A dataset left without a file keeps the http(s) page the deposit gives it as its `access_url`, and its notes say which URL was left out. A Zenodo token passed as `token=` goes only over https to the Zenodo host, never to another host and never on a redirect.

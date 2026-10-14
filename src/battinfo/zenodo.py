@@ -9,16 +9,21 @@ References:
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import time
 import urllib.error
 import urllib.request
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from battinfo._deposit_files import kept_copy_problems
 from battinfo._jsonio import write_json
+from battinfo._util import url_segment
 from battinfo.bundle import ZENODO_CELL_RECORD_FILENAME, ZenodoCellRecord
+from battinfo.config import resolve_zenodo_sandbox_token
 
 PathLike = str | Path
 
@@ -43,16 +48,72 @@ def _zenodo_checksum_matches(path: Path, checksum: str | None) -> bool:
     Zenodo reports file checksums as MD5 (sometimes prefixed ``"md5:"``). Any
     missing/non-MD5/mismatching value returns False, so the caller safely re-uploads
     (correctness over optimisation)."""
-    if not checksum:
-        return False
+    listed = _listed_md5(checksum)
+    return bool(listed) and _file_md5(path) == listed
+
+
+def _listed_md5(checksum: object) -> str:
+    """The md5 hex digest in a checksum Zenodo lists (``"md5:<hex>"`` or ``"<hex>"``), or ``""``."""
+    if not isinstance(checksum, str) or not checksum:
+        return ""
     algo, _, digest = checksum.partition(":") if ":" in checksum else ("md5", "", checksum)
-    if algo.lower() not in ("md5", ""):
+    return digest.strip().lower() if algo.lower() in ("md5", "") else ""
+
+
+def deposit_is_published(deposit: object) -> bool:
+    """True when a deposit Zenodo returned is published (state ``done``, or submitted)."""
+    if not isinstance(deposit, dict):
         return False
-    return _file_md5(path) == digest.strip().lower()
+    return str(deposit.get("state") or "").lower() == "done" or deposit.get("submitted") is True
 
 
 class ZenodoError(RuntimeError):
-    """Raised when the Zenodo API returns an error response."""
+    """Raised when the Zenodo API returns an error response.
+
+    ``status`` is the HTTP status Zenodo answered with, or ``None`` when the
+    request got no answer or the error is not an HTTP one.
+    """
+
+    def __init__(self, message: str, *, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
+
+
+class KeptFilesError(ZenodoError):
+    """A deposit does not hold, as given, the files :meth:`ZenodoClient.sync_files` was asked to keep.
+
+    ``files`` maps each such file name to what is wrong (``"is not on it"``,
+    or the md5 it is listed with).
+    """
+
+    def __init__(self, message: str, *, files: Mapping[str, str]) -> None:
+        super().__init__(message)
+        self.files = dict(files)
+
+
+def _metadata_errors(reply: Any) -> list[str]:
+    """The problems a deposit reply lists under ``errors``, one string each.
+
+    An entry is ``{"field": ..., "messages": [...]}`` (InvenioRDM) or
+    ``{"field": ..., "message": ...}`` (the older deposit API), shown as
+    ``field (message; message)``; an entry of any other shape is shown as it is.
+    """
+    errors = reply.get("errors") if isinstance(reply, dict) else None
+    if not errors:
+        return []
+    problems: list[str] = []
+    for error in errors if isinstance(errors, list) else [errors]:
+        if not isinstance(error, dict):
+            problems.append(str(error))
+            continue
+        messages = error.get("messages", error.get("message"))
+        if isinstance(messages, (list, tuple)):
+            text = "; ".join(str(message) for message in messages)
+        else:
+            text = str(messages) if messages else ""
+        field = str(error.get("field") or "metadata")
+        problems.append(f"{field} ({text})" if text else field)
+    return problems
 
 
 class ZenodoClient:
@@ -98,7 +159,7 @@ class ZenodoClient:
                     last_exc = exc
                     time.sleep(0.5 * (2**attempt))
                     continue
-                raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}") from exc
+                raise ZenodoError(f"Zenodo {exc.code} on {method} {url}: {body[:400]}", status=exc.code) from exc
             except (urllib.error.URLError, TimeoutError, OSError) as exc:
                 # Connection reset / DNS / timeout: previously escaped as a raw, opaque exception.
                 # Retry idempotent reads; otherwise surface as a clean ZenodoError.
@@ -134,12 +195,22 @@ class ZenodoClient:
         return self._json("GET", f"/deposit/depositions/{deposit_id}")
 
     def update_metadata(self, deposit_id: int | str, metadata: dict) -> dict:
-        """Update the metadata of an existing draft deposit."""
-        return self._json(
+        """Update the metadata of an existing draft deposit.
+
+        Zenodo answers metadata it does not accept with HTTP 200 and lists the
+        problems under ``errors`` in the reply. A non-empty list raises a
+        :class:`ZenodoError` that names the fields, so the caller stops there
+        instead of going on with a deposit whose metadata was refused.
+        """
+        reply = self._json(
             "PUT",
             f"/deposit/depositions/{deposit_id}",
             {"metadata": metadata},
         )
+        problems = _metadata_errors(reply)
+        if problems:
+            raise ZenodoError(f"Zenodo did not accept the metadata of deposit {deposit_id}: " + "; ".join(problems))
+        return reply
 
     def get_deposit(self, deposit_id: int | str) -> dict:
         return self._json("GET", f"/deposit/depositions/{deposit_id}")
@@ -160,8 +231,7 @@ class ZenodoClient:
                 deposit = self.get_deposit(deposit_id)
             except ZenodoError:
                 raise exc from None
-            state = str(deposit.get("state") or "").lower()
-            if state == "done" or deposit.get("submitted") is True:
+            if deposit_is_published(deposit):
                 return deposit
             raise
 
@@ -213,11 +283,24 @@ class ZenodoClient:
 
         Args:
             deposit_id: The deposit ID.
-            files: Mapping of {local_path: zenodo_filename}.
+            files: Mapping of {local_path: zenodo_filename}. The name goes into
+                the bucket URL percent-encoded, so a space, ``#``, ``?``, ``%``
+                or a non-ASCII character reaches Zenodo as part of the name; a
+                ``/`` in a relative key still separates its folders.
 
         Returns:
             Mapping of {local_path: zenodo_download_url} for each uploaded file.
+
+        Raises:
+            FileNotFoundError: naming each local file that is not there,
+                before anything is sent.
+            ZenodoError: naming the file, when an upload fails.
         """
+        absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
+        if absent:
+            raise FileNotFoundError(f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}.")
+        if not files:
+            return {}
         deposit = self.get_deposit(deposit_id)
         bucket_url = deposit.get("links", {}).get("bucket")
         if not bucket_url:
@@ -226,9 +309,8 @@ class ZenodoClient:
         result: dict[Path, str] = {}
         for local_path, zenodo_name in files.items():
             local_path = Path(local_path)
-            if not local_path.is_file():
-                continue
-            upload_url = f"{bucket_url}/{zenodo_name}"
+            key_path = "/".join(url_segment(part) for part in zenodo_name.split("/"))
+            upload_url = f"{bucket_url}/{key_path}"
             # Zenodo's S3-compatible bucket endpoint requires application/octet-stream
             # regardless of actual file type — it rejects other Content-Type values.
             data = local_path.read_bytes()
@@ -254,11 +336,17 @@ class ZenodoClient:
                     break
                 except urllib.error.HTTPError as exc:
                     body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
-                    raise ZenodoError(f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}") from exc
+                    raise ZenodoError(
+                        f"Upload failed for {zenodo_name}: {exc.code} {body[:300]}", status=exc.code
+                    ) from exc
                 except (urllib.error.URLError, TimeoutError, OSError) as exc:
                     if attempt >= retries:
                         raise ZenodoError(f"Upload of {zenodo_name} failed after {retries} attempts: {exc}") from exc
                     time.sleep(min(30.0, 5.0 * attempt))
+                except (http.client.HTTPException, UnicodeError) as exc:
+                    # A URL or header the HTTP layer will not send, or a reply it
+                    # cannot read: the same on every attempt, so not retried.
+                    raise ZenodoError(f"Upload of {zenodo_name!r} failed: {exc}") from exc
 
             download_url = (
                 file_record.get("links", {}).get("download") or file_record.get("links", {}).get("self") or upload_url
@@ -277,23 +365,51 @@ class ZenodoClient:
         self,
         deposit_id: int | str,
         files: dict[Path, str],
+        *,
+        keep: dict[str, str] | None = None,
     ) -> dict[str, list[str]]:
-        """Make the deposit's files match *files* while re-uploading as little as possible.
+        """Make the deposit's files match *files* and *keep* while re-uploading as little as possible.
 
         Files already on the deposit whose content is unchanged (MD5 match) are kept;
-        changed files are replaced; files no longer present are removed; new files are
-        uploaded. This is what makes a new version cheap — Zenodo copies the prior
-        version's files into the new draft, so unchanged data (often gigabytes) need not
-        be re-uploaded; typically only ``battinfo.json``/``ro-crate-metadata.json`` change.
+        changed files are replaced; new files are uploaded. This is what makes a new
+        version cheap — Zenodo copies the prior version's files into the new draft, so
+        unchanged data (often gigabytes) need not be re-uploaded; typically only
+        ``battinfo.json``/``ro-crate-metadata.json`` change.
 
         ``files`` maps ``{local_path: zenodo_filename}`` (same shape as :meth:`upload_files`).
+        ``keep`` maps ``{zenodo_filename: md5}`` for files the deposit must already
+        hold because there is no local file to send, such as the data files a new
+        version takes over from the one before after their local copies were
+        deleted. Such a copy is kept when its md5 is the one given (any md5 when the
+        one given is empty). A file the deposit holds that neither ``files`` nor
+        ``keep`` names is removed; one they name is never removed.
+
+        Nothing on the deposit changes when a local file in ``files`` is missing
+        (``FileNotFoundError``), or when a file in ``keep`` is not on the deposit or
+        has another md5 there (:class:`KeptFilesError`, a :class:`ZenodoError`
+        naming each).
+
         Returns ``{"uploaded": [...], "kept": [...], "removed": [...]}``.
         """
-        existing = {(f.get("filename") or f.get("key")): f for f in self.list_files(deposit_id)}
+        absent = [f"{name} ({path})" for path, name in files.items() if not Path(path).is_file()]
+        if absent:
+            raise FileNotFoundError(f"Not uploaded to deposit {deposit_id}: no local file for {'; '.join(absent)}.")
+        listing = self.list_files(deposit_id)
+        existing = {(f.get("filename") or f.get("key")): f for f in listing}
         desired = {name: Path(path) for path, name in files.items()}
+        keep = {name: md5 for name, md5 in (keep or {}).items() if name not in desired}
+
+        lacking = kept_copy_problems(listing, keep)
+        if lacking:
+            raise KeptFilesError(
+                f"Deposit {deposit_id} does not hold the files that have no local copy to upload: "
+                + "; ".join(f"{name} {problem}" for name, problem in lacking.items())
+                + ". Nothing on the deposit was changed.",
+                files=lacking,
+            )
 
         to_upload: dict[Path, str] = {}
-        kept: list[str] = []
+        kept: list[str] = list(keep)
         for name, path in desired.items():
             ex = existing.get(name)
             if ex is not None and _zenodo_checksum_matches(path, ex.get("checksum")):
@@ -301,7 +417,7 @@ class ZenodoClient:
             else:
                 to_upload[path] = name
 
-        removed = [name for name in existing if name not in desired]
+        removed = [name for name in existing if name not in desired and name not in keep]
         # A changed file must be deleted before its replacement is uploaded.
         changed = [name for name in to_upload.values() if name in existing]
         for name in removed + changed:
@@ -325,9 +441,25 @@ class ZenodoClient:
 # ── Module-level utilities ─────────────────────────────────────────────────────
 
 
-def _resolve_token(token: str | None) -> str:
+def _resolve_token(token: str | None, *, sandbox: bool = False) -> str:
+    """*token*, else the token for zenodo.org or, with *sandbox*, for the sandbox.
+
+    For zenodo.org that is ``ZENODO_API_TOKEN`` (or the legacy ``ZENODO_TOKEN``).
+    For the sandbox it is ``ZENODO_SANDBOX_TOKEN``, then ``zenodo_sandbox_token``
+    in ``~/.battinfo/config.yaml`` (see
+    :func:`battinfo.config.resolve_zenodo_sandbox_token`), so a zenodo.org
+    token is never sent to the sandbox.
+    """
     if token is not None:
         return token
+    if sandbox:
+        found = resolve_zenodo_sandbox_token(None)
+        if found:
+            return found
+        raise ZenodoError(
+            "No Zenodo sandbox token provided. Pass token=, set ZENODO_SANDBOX_TOKEN, or run "
+            "battinfo config set zenodo_sandbox_token <token>, with a token made on sandbox.zenodo.org."
+        )
     env = os.environ.get("ZENODO_API_TOKEN") or os.environ.get("ZENODO_TOKEN")
     if env:
         return env
@@ -567,6 +699,20 @@ def _type_list(node: dict[str, Any]) -> list[Any]:
     return types if isinstance(types, list) else [types]
 
 
+_BATCH_UPLOAD_SANDBOX_ONLY = (
+    "In this release the batch path (battinfo batch upload, battinfo push) uploads only to the "
+    "Zenodo sandbox: pass --sandbox, or sandbox=True in Python. Uploads to zenodo.org from the "
+    "batch path come in a later release. To publish on zenodo.org now, describe the data with "
+    "battinfo.workspace() and deposit it with ws.zenodo(). Nothing was sent to Zenodo."
+)
+
+
+def _require_sandbox(sandbox: bool) -> None:
+    """Refuse zenodo.org for the batch path, which uploads only to the sandbox in this release."""
+    if not sandbox:
+        raise ValueError(_BATCH_UPLOAD_SANDBOX_ONLY)
+
+
 def upload_zenodo_package(
     staging_dir: PathLike,
     creators: list[dict[str, Any]],
@@ -587,6 +733,11 @@ def upload_zenodo_package(
 ) -> dict[str, Any]:
     """Upload a staged Zenodo package and optionally publish it.
 
+    In this release the package goes only to the Zenodo sandbox: without
+    ``sandbox=True`` the call raises a ``ValueError`` before any request is
+    made. Uploads to zenodo.org from the batch path come in a later release;
+    to publish there now, use ``ws.zenodo()`` from :func:`battinfo.workspace`.
+
     Workflow:
     1. Load ``battinfo.bundle.json`` from *staging_dir* to derive metadata.
     2. Create an empty Zenodo deposit to obtain the pre-reserved record ID.
@@ -599,8 +750,10 @@ def upload_zenodo_package(
         staging_dir: Directory produced by ``build_zenodo_package``.
         creators: Zenodo creator list, e.g.
                   ``[{"name": "Clark, Simon", "affiliation": "SINTEF"}]``.
-        token: Zenodo API token.  Falls back to ``ZENODO_API_TOKEN`` env var.
-        sandbox: Use the Zenodo sandbox instead of production.
+        token: Zenodo token, made on sandbox.zenodo.org. Falls back to
+               ``ZENODO_SANDBOX_TOKEN``, then ``zenodo_sandbox_token`` in
+               ``~/.battinfo/config.yaml``; a zenodo.org token is never read.
+        sandbox: Use the Zenodo sandbox. Required in this release.
         community: Zenodo community identifier for submission
                    (``None`` skips community submission).
         title: Override the auto-derived record title. The staged graph's
@@ -621,12 +774,17 @@ def upload_zenodo_package(
         Dict with ``deposit_id``, ``record_id``, ``record_url``,
         ``deposit_url``, ``doi``, ``patch_counts``, ``uploaded_files``,
         and ``published`` keys.
+
+    Raises:
+        ValueError: without ``sandbox=True``, or with no creators, before
+            any request is made.
     """
+    _require_sandbox(sandbox)
     if not creators:
         raise ValueError("creators must be a non-empty list.")
 
     staging = Path(staging_dir)
-    api_token = _resolve_token(token)
+    api_token = _resolve_token(token, sandbox=sandbox)
     client = ZenodoClient(token=api_token, sandbox=sandbox)
 
     bundle_path = staging / bundle_filename
@@ -695,6 +853,7 @@ def upload_zenodo_package(
 
 
 __all__ = [
+    "KeptFilesError",
     "ZenodoClient",
     "ZenodoError",
     "patch_zenodo_urls",

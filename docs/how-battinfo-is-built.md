@@ -41,16 +41,16 @@ Every record type is one entry in a single registry
 on-disk folder, its IRI namespace. Adding a record type means adding one entry
 there — every dispatch table in the package derives from it.
 
-**2. The pydantic models are the single source of truth.** There is no
-separate "input DTO" layer: `CellSpec`, `Cell`, `Test`,
-`TestSpec`, and `Dataset` (in `src/battinfo/bundle.py`) are simultaneously
+**2. The JSON Schema is the contract, and the pydantic models are how you write to it.** There is no separate "input DTO" layer: `CellSpec`, `Cell`, `Test`, `TestSpec`, and `Dataset`, written by hand in `src/battinfo/bundle.py`, are at once
 
 - the **authoring input** — construct them with flat datasheet-style kwargs
   (`manufacturer=`, `nominal_capacity={"value": 2.5, "unit": "Ah"}`),
 - the **validator** — `extra="forbid"` plus did-you-mean errors, so a typo'd
   field teaches instead of disappearing,
 - the **serializer** — `to_record()` / `from_record()` convert to and from the
-  canonical JSON shape, losslessly.
+  canonical JSON shape.
+
+Every save then validates the record against the JSON Schema in `src/battinfo/data/schemas/`, which is the save-time contract, and `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps.
 
 If you know pydantic, you already know the core of BattINFO.
 
@@ -61,7 +61,7 @@ If you know pydantic, you already know the core of BattINFO.
 | You are… | Use | Module |
 |---|---|---|
 | Working with **data files** (the usual case) | `ws = battinfo.workspace(".")` → `convert / search / add / save / publish` (`ws.quickstart()` prints the recipe) | `ws.py` |
-| **Scripting records** directly — building a cell spec in code, batch-generating records | The record classes (`CellSpec`, `Test`, …) + `battinfo.publish(...)` or the `save_*` functions | `bundle.py`, `api.py` |
+| **Scripting records** directly — building a cell spec in code, batch-generating records | The record classes with their `save_*` functions, or `battinfo.publish(...)` for a `CellSpec` | `bundle.py`, `api.py` |
 
 Both run on the same internal object-graph engine (`_workspace.py`), which
 finalizes links and mints IRIs at save time — an implementation detail, not a
@@ -85,7 +85,7 @@ lands on the same files instead of duplicating them.
 The canonical JSON Schemas (draft 2020-12) live in
 `src/battinfo/data/schemas/` and are enforced in three places, each with a CI
 drift gate: this package (`validate/` — schema, then semantic rules,
-cross-record references, and optional SHACL), the registry's publish gate
+cross-record references, and SHACL), the registry's publish gate
 (vendored copy), and the browser validator at battinfo.org/validate (vendored
 copy compiled with Ajv). Same record, same verdict, everywhere. Details in
 [the infrastructure contract](guarantees.md#the-infrastructure-contract).
@@ -97,15 +97,13 @@ EMMO-aligned JSON-LD. It is **table-driven**: curated mapping files in
 `assets/mappings/domain-battery/` say that the key `nominal_capacity` *is*
 `emmo:NominalCapacity` and the unit `"Ah"` *is* `emmo:AmpereHour`. The
 transform stacks types (a cylindrical LFP cell is simultaneously
-`BatteryCell`, `CylindricalBattery`, `LithiumIronPhosphateBattery`) and emits
+`BatteryCell`, `CylindricalBattery`, `LithiumIonIronPhosphateBattery`) and emits
 the canonical EMMO quantity pattern. No inference, no LLMs, no network —
 deterministic output from those tables, which is why the website can show
 [real before/after pairs](https://battinfo.org/examples) generated at build
 time.
 
-Two files carry the EMMO annotations in Python: `bundle_generated.py` is
-generated from LinkML schemas and holds IRI metadata; application code never
-imports it directly — `bundle_adapter.py` is the one crossing point.
+Two files carry the EMMO annotations in Python. `bundle_generated.py` holds the IRI metadata. It was generated from the LinkML schema once and has been edited by hand since, so do not regenerate it; regenerating or retiring it is planned for 0.9. Most code reaches it through `bundle_adapter.py`.
 
 ### Getting data in and out — `interop/` and BDF
 
@@ -146,13 +144,20 @@ src/battinfo/
 ├── cli.py               typer CLI over the same api functions
 ├── data/schemas/        the canonical JSON Schemas (the contract)
 ├── data/examples/       packaged canonical example records
-└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated)
+└── bundle_generated.py + bundle_adapter.py   EMMO-annotated schema layer (generated once, edited by hand since)
 ```
 
 Supporting cast: `_jsonio.py` (atomic JSON file I/O), `_fs_guard.py` (the
 one place that deletes folders, the checks it makes first, and the check on the paths a workspace manifest names), `_record_index.py`
-(the bulk-save id→path cache), `canonical_aliases.py` (legacy key
-normalisation), `testmethod.py` (structured test-method steps),
+(the bulk-save id→path cache), `_deposit_files.py` (the data files of a
+Zenodo deposit: which locations it may read, names, URLs and checksums, what
+a deposit would leave out, and the check of its files before a publish),
+`_deposit_index.py` (`.battinfo/deposit-files.json`, the local data files a
+workspace registered and the local file behind each copy its deposits and
+uploads made, and `.battinfo/zenodo.json` and `.battinfo/zenodo-sandbox.json`,
+the Zenodo record it continues on zenodo.org and on the sandbox),
+`canonical_aliases.py`
+(legacy key normalisation), `testmethod.py` (structured test-method steps),
 `metadata.py` (CSVW/DCAT dataset enrichment).
 
 ## How it stays correct

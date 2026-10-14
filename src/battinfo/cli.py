@@ -163,7 +163,12 @@ registry_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Manage registry tenants, workspaces, and publishers."
 )
 dataset_app = typer.Typer(
-    add_completion=False, no_args_is_help=True, help="Contribute measurement datasets: init -> process -> publish."
+    add_completion=False,
+    no_args_is_help=True,
+    help=(
+        "Experimental: contribute measurement datasets (init -> process -> publish). "
+        "The flow cannot complete in 0.8.0; publish a dataset with ws.zenodo() instead."
+    ),
 )
 batch_app = typer.Typer(
     add_completion=False, no_args_is_help=True, help="Scaffold and manage multi-cell batch contributions."
@@ -198,7 +203,12 @@ library_app.add_typer(library_template_app, name="template")
 
 
 def _emit_json(data: Any) -> None:
-    typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    try:
+        typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
+    except UnicodeEncodeError:
+        # A terminal that cannot encode a character (a Windows console redirected to a
+        # file writes cp1252, which has no 'Ω') gets the same JSON with \u escapes.
+        typer.echo(json.dumps(data, indent=2))
 
 
 def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
@@ -218,7 +228,7 @@ def _emit_table(items: list[dict[str, Any]], columns: list[str]) -> None:
     typer.echo(header_line)
     typer.echo(sep_line)
     for row in rows:
-        typer.echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
+        _safe_echo(" | ".join(row[i].ljust(widths[i]) for i in range(len(headers))))
 
 
 def _parse_optional_bool(raw: str | None, option_name: str) -> bool | None:
@@ -965,11 +975,25 @@ def notebook_recover(
 @app.command()
 def map(
     input_path: Path = typer.Argument(..., exists=True, readable=True),
-    target: str = typer.Option("batterypass", help="Mapping target ('domain-battery' or 'batterypass')."),
+    target: str = typer.Option(
+        "domain-battery", help="Mapping target: 'domain-battery', or 'converter-compatible' for a cell descriptor."
+    ),
     out: Path = typer.Option(..., help="Output JSON-LD path."),
 ) -> None:
-    """Map canonical JSON to JSON-LD for a target."""
-    data = json.loads(input_path.read_text(encoding="utf-8"))
+    """Map a record to JSON-LD.
+
+    Maps cell-spec, material, electrode, separator, current-collector,
+    electrolyte, housing and parameter-set records. Other record types exit
+    with an error; emit them in Python with battinfo.record_to_jsonld.
+    """
+    try:
+        data = json.loads(input_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        typer.echo(f"{input_path} is not valid JSON: {exc}")
+        raise typer.Exit(code=2) from exc
+    if not isinstance(data, dict):
+        typer.echo(f"{input_path} does not hold a JSON object.")
+        raise typer.Exit(code=2)
     try:
         mapped = run_mapping(data, target=target)
     except ValueError as exc:
@@ -3513,7 +3537,10 @@ def dataset_publish(
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
 ) -> None:
-    """Publish the processed contribution folder.
+    """Experimental: publish the processed contribution folder.
+
+    The init, process and publish flow cannot complete in 0.8.0. Publish a
+    dataset from Python with ws.zenodo() instead.
 
     \b
     Options:
@@ -3924,7 +3951,7 @@ def batch_package(
         typer.echo(f"  {fname.name}")
     typer.echo()
     typer.echo("Upload to Zenodo sandbox with:")
-    typer.echo(f"  battinfo batch upload {staging} --token $ZENODO_TOKEN --sandbox")
+    typer.echo(f"  battinfo batch upload {staging} --sandbox")
 
 
 @batch_app.command("upload")
@@ -3932,8 +3959,17 @@ def batch_upload(
     staging_dir: Path = typer.Argument(
         ..., exists=True, file_okay=False, dir_okay=True, help="Staging directory produced by `batch package`."
     ),
-    token: str | None = typer.Option(None, "--token", help="Zenodo API token. Env: ZENODO_API_TOKEN."),
-    sandbox: bool = typer.Option(False, "--sandbox", help="Use Zenodo sandbox (sandbox.zenodo.org)."),
+    token: str | None = typer.Option(
+        None,
+        "--token",
+        help="Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, "
+        "then zenodo_sandbox_token in the config file.",
+    ),
+    sandbox: bool = typer.Option(
+        False,
+        "--sandbox",
+        help="Upload to the Zenodo sandbox (sandbox.zenodo.org), with a token made there. Required in this release.",
+    ),
     community: str | None = typer.Option(
         None, "--community", help="Zenodo community. Default: value from config or battinfo-reference."
     ),
@@ -3948,7 +3984,12 @@ def batch_upload(
     placeholder: str = typer.Option("ZENODO_RECORD_ID", "--placeholder", help="Placeholder token used in package."),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
-    """Upload a staged Zenodo package to Zenodo (or sandbox).
+    """Upload a staged Zenodo package to the Zenodo sandbox.
+
+    In this release the batch path uploads only to the Zenodo sandbox, so
+    --sandbox is required. Uploads to zenodo.org from the batch path come in
+    a later release; to publish there now, use ws.zenodo() from a
+    battinfo.workspace().
 
     \b
     Workflow:
@@ -3962,15 +4003,25 @@ def batch_upload(
     The deposit URL is printed at the end -- open it to review and publish.
     """
 
-    from battinfo.config import resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_sandbox_token
     from battinfo.zenodo import upload_zenodo_package
 
     cfg = _user_config_or_exit(json_output=json_output)
-    resolved_token = resolve_zenodo_token(token)
+    if not sandbox:
+        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
+
+        if json_output:
+            typer.echo(json.dumps({"ok": False, "error": _BATCH_UPLOAD_SANDBOX_ONLY}))
+        else:
+            typer.echo(f"Error: {_BATCH_UPLOAD_SANDBOX_ONLY}", err=True)
+        raise typer.Exit(code=1)
+
+    resolved_token = resolve_zenodo_sandbox_token(token)
     if not resolved_token:
         typer.echo(
-            "Error: Zenodo token required. Pass --token, set ZENODO_API_TOKEN, or run:\n"
-            "  battinfo config set zenodo_token <token>",
+            "Error: Zenodo sandbox token required. Pass --token, set ZENODO_SANDBOX_TOKEN, or run:\n"
+            "  battinfo config set zenodo_sandbox_token <token>\n"
+            "with a token made on sandbox.zenodo.org.",
             err=True,
         )
         raise typer.Exit(code=1)
@@ -4060,9 +4111,16 @@ def push(
         None, "--creator", "-c", help='Creator: "Family, Given; Affiliation". Falls back to config.'
     ),
     token: str | None = typer.Option(
-        None, "--token", help="Zenodo API token. Falls back to config / ZENODO_API_TOKEN."
+        None,
+        "--token",
+        help="Zenodo sandbox token, made on sandbox.zenodo.org. Falls back to ZENODO_SANDBOX_TOKEN, "
+        "then zenodo_sandbox_token in the config file.",
     ),
-    sandbox: bool = typer.Option(False, "--sandbox", help="Upload to sandbox.zenodo.org instead of production."),
+    sandbox: bool = typer.Option(
+        False,
+        "--sandbox",
+        help="Upload to sandbox.zenodo.org, with a token made there. Every upload needs it in this release.",
+    ),
     community: str | None = typer.Option(None, "--community", help="Zenodo community. Default: from config."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt."),
@@ -4070,22 +4128,27 @@ def push(
     staging: Path | None = typer.Option(None, "--staging", help="Override staging directory."),
     json_output: bool = typer.Option(False, "--json", help="Emit machine-readable JSON to stdout."),
 ) -> None:
-    """Publish battery data to Zenodo in one command.
+    """Package battery data and upload it to the Zenodo sandbox in one command.
+
+    In this release the batch path uploads only to the Zenodo sandbox, so
+    every run except --dry-run needs --sandbox. Uploads to zenodo.org from
+    the batch path come in a later release; to publish there now, use
+    ws.zenodo() from a battinfo.workspace().
 
     \b
     Accepts three layouts:
-      battinfo push ./flat_files/    --cell-spec "Energizer CR2032"   # groups by filename
-      battinfo push ./cell_folders/  --cell-spec "Energizer CR2032"   # one subdir per cell
-      battinfo push ./my_batch/                                        # existing batch.yaml
+      battinfo push ./flat_files/    --cell-spec "Energizer CR2032" --sandbox   # groups by filename
+      battinfo push ./cell_folders/  --cell-spec "Energizer CR2032" --sandbox   # one subdir per cell
+      battinfo push ./my_batch/                                     --sandbox   # existing batch.yaml
 
     \b
-    One-time setup:
+    One-time setup, with a token made on sandbox.zenodo.org:
       battinfo config set creator "Family, Given; Institution"
-      battinfo config set zenodo_token <token>
+      battinfo config set zenodo_sandbox_token <token>
     """
     from rich.console import Console
 
-    from battinfo.config import resolve_creators, resolve_zenodo_token
+    from battinfo.config import resolve_creators, resolve_zenodo_sandbox_token
     from battinfo.contribution import BATCH_MANIFEST, _group_files_by_cell, push_batch
 
     console = Console(highlight=False)
@@ -4098,13 +4161,22 @@ def push(
             console.print(f"[red]Error:[/red] {msg}")
         raise typer.Exit(code=1)
 
+    if not dry_run and not sandbox:
+        from battinfo.zenodo import _BATCH_UPLOAD_SANDBOX_ONLY
+
+        _err(_BATCH_UPLOAD_SANDBOX_ONLY)
+
     creators = resolve_creators(creator)
     if not creators:
         _err('no creator specified. Pass --creator or run: battinfo config set creator "Family, Given; Institution"')
 
-    resolved_token = resolve_zenodo_token(token)
+    # Only the sandbox token: a zenodo.org token is never sent to the sandbox.
+    resolved_token = resolve_zenodo_sandbox_token(token) if sandbox else None
     if not dry_run and not resolved_token:
-        _err("Zenodo token required. Pass --token or run: battinfo config set zenodo_token <token>")
+        _err(
+            "Zenodo sandbox token required. Pass --token, set ZENODO_SANDBOX_TOKEN, or run: "
+            "battinfo config set zenodo_sandbox_token <token> (a token made on sandbox.zenodo.org)"
+        )
 
     effective_community = None if no_community else (community or cfg.get("community", "battinfo-reference"))
 
@@ -4225,7 +4297,7 @@ def _user_config_or_exit(*, json_output: bool = False) -> dict[str, Any]:
 
 @config_app.command("set")
 def config_set(
-    key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token."),
+    key: str = typer.Argument(..., help="Config key: creator, license, community, zenodo_token, zenodo_sandbox_token."),
     value: str = typer.Argument(..., help="Value to store."),
 ) -> None:
     """Set a user preference that is applied as the default across all commands.
@@ -4236,6 +4308,10 @@ def config_set(
       battinfo config set creator "Clark, Simon; SINTEF | Smith, Jane; NTNU"
       battinfo config set license CC-BY-4.0
       battinfo config set community battinfo-reference
+      battinfo config set zenodo_sandbox_token <token>
+
+    zenodo_sandbox_token is a token made on sandbox.zenodo.org, which the
+    batch path (battinfo batch upload, battinfo push) sends to the sandbox.
 
     A secret, such as zenodo_token, is echoed with only its last four
     characters shown, or fully hidden when it is shorter than 12 characters.
@@ -4347,12 +4423,10 @@ def _all_specs_data() -> list[dict[str, Any]]:
     all_names = sorted(schema["$defs"]["SpecSet"]["properties"].keys())
     rows = []
     for name in all_names:
+        # The canonical symbols, as the unit map spells them ('mΩ', '°C', 'µm'); validation
+        # also accepts the usual alternatives ('mOhm', 'degC', 'um').
         units = SPEC_UNIT_COMPATIBILITY.get(name)
-        if units:
-            ascii_units = sorted(u for u in units if u.isascii())
-            display_units = ", ".join(ascii_units) if ascii_units else ", ".join(sorted(units))
-        else:
-            display_units = "any"
+        display_units = ", ".join(units) if units else "any"
         rows.append(
             {
                 "name": name,
@@ -4398,7 +4472,7 @@ def specs_show(
         raise typer.Exit(code=1)
 
     units = SPEC_UNIT_COMPATIBILITY.get(name)
-    canonical_unit = sorted(units)[0] if units else "<unit>"
+    canonical_unit = units[0] if units else "<unit>"  # the first symbol, with a unit IRI where one exists
     example = {"value": 0.0, "unit": canonical_unit}
 
     detail = {
@@ -4410,10 +4484,10 @@ def specs_show(
     if fmt == "json":
         _emit_json(detail)
         return
-    typer.echo(f"name:        {detail['name']}")
-    typer.echo(f"category:    {detail['category']}")
-    typer.echo(f"valid units: {detail['valid_units']}")
-    typer.echo(f"example:     {json.dumps(detail['example'])}")
+    _safe_echo(f"name:        {detail['name']}")
+    _safe_echo(f"category:    {detail['category']}")
+    _safe_echo(f"valid units: {detail['valid_units']}")
+    _safe_echo(f"example:     {json.dumps(detail['example'], ensure_ascii=False)}")
 
 
 @app.command("import-protocol")
