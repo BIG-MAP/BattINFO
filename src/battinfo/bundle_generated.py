@@ -545,7 +545,7 @@ class CellSpecification(ConfiguredBaseModel):
     )
     ct_size_code: Optional[str] = Field(
         default=None,
-        description="""Standardised size code (e.g. \"18650\", \"21700\", \"AA\", \"AAA\").""",
+        description="""Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code.""",
         json_schema_extra={
             "linkml_meta": {
                 "aliases": ["size_code"],

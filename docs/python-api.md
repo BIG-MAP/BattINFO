@@ -122,6 +122,7 @@ Notes:
 - `battinfo.publish.jsonld` is the foundational Schema.org JSON-LD artifact.
 - `ro-crate-metadata.json` and `datacite-metadata.json` are emitted alongside it.
 - `battinfo.dcat.jsonld` is available as an optional export.
+- `load_publication_package` reads a package back into the record objects. Units come back as they were written. Of the cell spec's properties it reads the dimensions, mass, nominal capacity and nominal voltage, and it gives the chemistry as `unknown`.
 
 ## Query and save (`battinfo.api`)
 

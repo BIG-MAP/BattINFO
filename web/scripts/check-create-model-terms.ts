@@ -100,6 +100,28 @@ for (const obj of OBJECT_TYPES) {
   }
 }
 
+// Value guard: a quantity's value holds a number only. Input that is not a number
+// goes to value_text in the record and to hasStringValue in the JSON-LD, never to
+// value or hasNumberValue, which the synced schemas and the package refuse.
+const TEXT = "about 200";
+for (const obj of OBJECT_TYPES) {
+  const props = obj.defaultProperties ?? [];
+  if (!props.length) continue;
+  const withText = props.map((p, i) => (i === 0 ? { ...p, value: TEXT } : p));
+  const record = JSON.stringify(obj.toRecord(obj.defaults, withText));
+  const jsonld = JSON.stringify(obj.toJsonLd(obj.defaults, withText));
+  const python = obj.toPython(obj.defaults, withText);
+  if (!record.includes(`"value_text":"${TEXT}"`) || record.includes(`"value":"${TEXT}"`)) {
+    failures.push(`${obj.key}.toRecord does not put text input in value_text`);
+  }
+  if (!jsonld.includes(`"hasStringValue":"${TEXT}"`) || jsonld.includes(`"hasNumberValue":"${TEXT}"`)) {
+    failures.push(`${obj.key}.toJsonLd does not put text input in hasStringValue`);
+  }
+  if (python.includes(`"value": "${TEXT}"`)) {
+    failures.push(`${obj.key}.toPython puts text input in value`);
+  }
+}
+
 if (failures.length > 0) {
   console.error(`Emitter drift check FAILED (${failures.length} problem(s), ${tokens.length} @type tokens checked):`);
   for (const f of failures) console.error(`  ${f}`);

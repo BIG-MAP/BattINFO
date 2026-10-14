@@ -96,7 +96,7 @@
       "properties": {
         "size_code": {
           "type": "string",
-          "description": "Standard size code of the case; follows the same convention as cell_spec.size_code (e.g. 'CR2032', '18650')."
+          "description": "Size code of the case as its maker gives it, for example '2032' for a coin-cell case. It is not checked. The cell spec's size_code is a different field, which takes the R/P form such as 'R2032'."
         },
         "coating": {
           "type": "string",

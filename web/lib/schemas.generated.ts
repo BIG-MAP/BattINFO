@@ -109,16 +109,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "properties": {
             "value": {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "type": "string",
-                  "minLength": 1
-                }
-              ],
-              "description": "Point value, numeric or as a string when the source value is not purely numeric."
+              "type": "number",
+              "description": "Point numeric value. A value that is not purely numeric belongs in value_text, never as a string here."
             },
             "min_value": {
               "type": "number",
@@ -471,7 +463,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "size_code": {
               "type": "string",
-              "description": "Standard size designation (e.g. '18650')."
+              "description": "Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code."
             },
             "chemistry": {
               "type": "string",
@@ -1767,7 +1759,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "size_code": {
               "type": "string",
               "minLength": 1,
-              "description": "Standard size designation (e.g. '18650', '21700', 'CR2032')."
+              "description": "Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code."
             },
             "iec_code": {
               "type": "string",
@@ -7618,16 +7610,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "additionalProperties": false,
       "properties": {
         "value": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "string",
-              "minLength": 1
-            }
-          ],
-          "description": "Point value, numeric or as a string when the source value is not purely numeric."
+          "type": "number",
+          "description": "Point numeric value. A value that is not purely numeric belongs in value_text, never as a string here."
         },
         "min_value": {
           "type": "number",
@@ -7922,8 +7906,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Optional canonical IRI of a standalone material-spec for the current-collector foil material."
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Optional canonical IRI of a standalone material-spec for the current-collector foil material. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "manufacturer": {
           "type": "string",
@@ -8044,8 +8028,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "properties": {
         "electrode_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials."
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|electrode-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials. A superseded electrode-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "material": {
           "$ref": "material-component.schema.json",
@@ -8196,8 +8180,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-              "description": "Optional canonical IRI of a standalone material-spec for the salt."
+              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+              "description": "Optional canonical IRI of a standalone material-spec for the salt. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
             },
             "cation": {
               "type": "string",
@@ -8383,7 +8367,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "properties": {
             "size_code": {
               "type": "string",
-              "description": "Standard size code of the case; follows the same convention as cell_spec.size_code (e.g. 'CR2032', '18650')."
+              "description": "Size code of the case as its maker gives it, for example '2032' for a coin-cell case. It is not checked. The cell spec's size_code is a different field, which takes the R/P form such as 'R2032'."
             },
             "coating": {
               "type": "string",
@@ -8569,8 +8553,8 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them."
+          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "manufacturer": {
           "type": "string",
@@ -8823,7 +8807,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "size_code": {
           "type": "string",
-          "description": "Standard size designation (e.g. '18650')."
+          "description": "Shape letter plus dimensions, the size part of an IEC 60086 or IEC 61960 designation: 'R' for cylindrical and coin cells, 'P' for prismatic and pouch cells, for example 'R18650', 'R21700', 'R2032' or 'P20/50/50'. The full designation, such as 'CR2032' or 'INR18650', goes in iec_code."
         },
         "construction": {
           "$ref": "construction.schema.json",

@@ -24,6 +24,7 @@ from battinfo._util import (
     file_uri_to_path,
     is_dataset_series,
     is_file_uri,
+    is_real_number,
     url_segment,
 )
 from battinfo.api._shared import PACKAGED_LIBRARY_CELL_SPEC_DIR
@@ -304,23 +305,15 @@ def _upsert_graph_node(graph: list[dict[str, Any]], node: dict[str, Any]) -> Non
     graph.append(node)
 
 
+_SPEC_ITEM_VALUE_KEYS = ("value", "typical_value", "min_value", "max_value", "value_text")
+
+
 def _quantity_to_spec_item(quantity: Any) -> dict[str, Any] | None:
+    """A library property as a cell-spec SpecItem: its value keys and unit, under the same names."""
     if not isinstance(quantity, Mapping):
         return None
-    out: dict[str, Any] = {}
-    if "value" in quantity:
-        out["value"] = quantity["value"]
-    if "typical_value" in quantity:
-        out["value_typical"] = quantity["typical_value"]
-    if "min_value" in quantity:
-        out["value_min"] = quantity["min_value"]
-    if "max_value" in quantity:
-        out["value_max"] = quantity["max_value"]
-    if "value_text" in quantity:
-        out["value_text"] = quantity["value_text"]
-    if "unit" in quantity:
-        out["unit"] = quantity["unit"]
-    has_value = any(key in out for key in ("value", "value_typical", "value_min", "value_max", "value_text"))
+    out = {key: quantity[key] for key in (*_SPEC_ITEM_VALUE_KEYS, "unit") if key in quantity}
+    has_value = any(key in out for key in _SPEC_ITEM_VALUE_KEYS)
     if not has_value or "unit" not in out:
         return None
     return out
@@ -1234,22 +1227,21 @@ def _cell_spec_property_node(name: str, quantity: Any) -> dict[str, Any] | None:
     type_name = PROPERTY_TYPE_MAP.get(name)
     if type_name is None:
         return None
-    value = (
-        quantity.get("value")
-        if "value" in quantity
-        else quantity.get("value_typical")
-        if "value_typical" in quantity
-        else quantity.get("value_max")
-        if "value_max" in quantity
-        else quantity.get("value_min")
+    value = next(
+        (quantity[key] for key in ("value", "typical_value", "max_value", "min_value") if key in quantity),
+        None,
     )
     unit = quantity.get("unit")
     if value is None or not isinstance(unit, str):
         return None
-    node: dict[str, Any] = {
-        "@type": type_name,
-        "hasNumericalPart": {"@type": "RealData", "hasNumberValue": value},
-    }
+    node: dict[str, Any] = {"@type": type_name}
+    # hasNumberValue carries a finite real number only; text stays text.
+    if is_real_number(value):
+        node["hasNumericalPart"] = {"@type": "RealData", "hasNumberValue": value}
+    elif isinstance(value, str) and value.strip():
+        node["hasStringValue"] = value
+    else:
+        return None
     unit_iri = UNIT_IRI_MAP.get(unit)
     if unit_iri:
         node["hasMeasurementUnit"] = unit_iri
@@ -2103,7 +2095,12 @@ def load_publication(path: PathLike) -> BattinfoBundle:
 
 
 def load_publication_package(path: PathLike) -> BattinfoBundle:
-    """Preferred name for loading a locally built publication package."""
+    """Load a locally built publication package back into record objects.
+
+    Units come back as they were written (``mAh`` stays ``mAh``). Of the cell
+    spec's properties, the dimensions, mass, nominal capacity and nominal
+    voltage are read back; the chemistry comes back as ``"unknown"``.
+    """
 
     return load_publication(path)
 
