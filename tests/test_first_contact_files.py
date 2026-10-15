@@ -72,6 +72,17 @@ def test_readme_promises_no_battery_pass_output() -> None:
     assert "thebatterypass.eu" in acknowledgements, "the Battery Pass acknowledgement stays"
 
 
+def test_readme_mapping_counts_match_the_curated_maps() -> None:
+    match = re.search(r"(\d+) curated property→EMMO-IRI mappings and (\d+) unit→EMMO-IRI mappings", _read("README.md"))
+    assert match, "the README no longer states the curated mapping counts"
+    maps = ROOT / "assets" / "mappings" / "domain-battery"
+    counts = tuple(
+        len(json.loads((maps / name).read_text(encoding="utf-8"))["mappings"])
+        for name in ("property_map.curated.json", "unit_map.curated.json")
+    )
+    assert (int(match.group(1)), int(match.group(2))) == counts
+
+
 def test_package_and_citation_keywords_leave_out_battery_pass() -> None:
     """The keywords go into the wheel's metadata and, through CITATION.cff, into the Zenodo record."""
     keywords = {

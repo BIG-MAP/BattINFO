@@ -71,7 +71,7 @@ Battery data is fragmented across spreadsheets, vendor datasheets, and ad-hoc
 JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 - **Write plain JSON or Python** — get validated, EMMO-aligned JSON-LD.
-- **Interoperable by construction** — records share one ontology, one context, and one identifier scheme.
+- **Interoperable by construction** — records share one ontology (EMMO) and one identifier scheme.
 - **Provenance built in** — a `CellSpec → Cell → Test → Dataset` chain links every measurement back to the cell that produced it.
 
 ## Installation
@@ -179,20 +179,20 @@ needs the `processing` extra).
 | Layer | What it provides |
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.21.0 and domain-electrochemistry 0.39.0 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 115 curated property→EMMO-IRI mappings and 63 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 117 curated property→EMMO-IRI mappings and 75 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 25 JSON Schema (draft 2020-12) files: one for each of the 22 record types, plus the shared base, the canonical cell description and the ingest manifest |
 | [`src/battinfo/transform/json_to_jsonld.py`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo/validate) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
 The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write uses:
 
-- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern)
+- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for cell specs, cells, tests, datasets, materials and components; some test-protocol and parameter-set values do not follow it yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
 - `@type` stacking: the cell that a cylindrical LFP cell spec describes is a `BatteryCell`, a `CylindricalBattery`, a `LithiumIonBattery` and a `LithiumIonIronPhosphateBattery`, taken from its format, chemistry and `positive_electrode_basis`. `LithiumIonGraphiteBattery` is added only when `negative_electrode_basis` is graphite.
 
 ## Project status
 
-> **Beta.** The test suite (3,240 tests at the 0.8.0 release) runs in CI on Python 3.11–3.14, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
+> **Beta.** The test suite (more than 5,000 tests at the 0.8.0 release) runs in CI on Python 3.11–3.14, on Linux and Windows. Ontology dependency versions are pinned and verified. See [`docs/scope.md`](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md) for the full capability map and the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080) of this release.
 
 **Supported**
 - Cell-descriptor validation and mapping, canonical record query/save/publish/index flows, JSON-LD-first publication, and validation policies.
