@@ -147,6 +147,7 @@ These paths mint IRIs that no other path reproduces. The [identifier policy](htt
 - `typical_energy` is typed `StoredEnergy`, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed `MetalOxideElectrode`, because its own class is deprecated upstream with no replacement. The electrode's `@type` can move to a new class term once domain-electrochemistry publishes the class. `typical_energy` keeps `StoredEnergy`, because the v1 records context is frozen, until a v2 context.
 - No property key holds a maximum C-rate. Give a current in A, or state a C-rate as `charging_c_rate` or `discharging_c_rate` in the conditions of the value it applies to.
 - In the JSON-LD of materials and components, which uses the EMMO domain-battery context, numbers carry no datatype, so JSON-LD processors disagree on whether 76.0 is an integer or a double. Records under the v1 records context type them `xsd:double`.
+- Not every quantity in a test protocol or a parameter set follows the full EMMO quantity pattern. Temperature conditions in test protocols and `ambient_temperature` in parameter sets are typed only `ConventionalProperty`, with no quantity class, and voltage limits in a test protocol can lack `ConventionalProperty`. The values and units are there. Cell specs, cells, tests, datasets, materials and components follow the full pattern. Planned for 0.8.1.
 
 ### Schemas
 
