@@ -92,7 +92,7 @@ record = create_electrode_spec(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0rc1"
+    "battinfo_version": "0.8.0rc2"
   }
 }
 ```
@@ -239,7 +239,7 @@ record = create_electrode(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0rc1"
+    "battinfo_version": "0.8.0rc2"
   }
 }
 ```
