@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Scope and capabilities &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'scope';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0rc2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="_static/favicon.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Interop scorecard" href="pages/interop-recovery.html" />
+    <link rel="prev" title="Guarantees" href="guarantees.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pages/api-reference.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/cli-reference.html">CLI reference</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="records/index.html">Record types</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="records/materials.html">Materials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/electrodes.html">Electrodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/electrolytes.html">Electrolytes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/separators.html">Separators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/current-collectors.html">Current collectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/housings.html">Housings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/cells.html">Cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/half-cells.html">Half cells &amp; three-electrode cells</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/tests.html">Tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/datasets.html">Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/equipment.html">Equipment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/parameter-sets.html">Parameter sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="records/organizations.html">Organizations</a></li>
+</ul>
+</details></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pages/property-reference.html">Properties and units</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="guarantees.html">Guarantees</a></li>
+</ul>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Scope and capabilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pages/interop-recovery.html">Interop scorecard</a></li>
+</ul>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="pages/glossary.html">Glossary</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="pages/reference.html" class="nav-link">Reference</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Scope and capabilities</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="scope-and-capabilities">
+<h1>Scope and capabilities<a class="headerlink" href="#scope-and-capabilities" title="Link to this heading">#</a></h1>
+<p>This page says what BattINFO covers and how mature each part is: what you can rely on today, what works but may still change, and what is in development.</p>
+<section id="modeling-scope">
+<h2>Modeling scope<a class="headerlink" href="#modeling-scope" title="Link to this heading">#</a></h2>
+<p>BattINFO models the cell level and below. That means materials, electrodes, separators, current collectors, electrolytes and housings, the cells built from them, and the tests, test equipment and datasets around those cells. Modules and packs are on the roadmap; no schema or record type covers them yet.</p>
+<p>Tested runtime support is Python 3.11–3.14, on Linux and Windows. Python 3.15 is not supported yet; the known limitations below say why.</p>
+</section>
+<section id="record-types">
+<h2>Record types<a class="headerlink" href="#record-types" title="Link to this heading">#</a></h2>
+<p>The library registers 22 record types (<code class="docutils literal notranslate"><span class="pre">ENTITY_KINDS</span></code> in <code class="docutils literal notranslate"><span class="pre">src/battinfo/entities.py</span></code>). Each one has a JSON Schema in <code class="docutils literal notranslate"><span class="pre">assets/schemas/</span></code>, is checked by <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, and emits JSON-LD. Most come in pairs: a spec is the reusable description, such as a datasheet, a formulation or a protocol, and an instance is one physical thing or event that points at its spec. The <a class="reference internal" href="records/index.html"><span class="std std-doc">record-type pages</span></a> give a reference example and the field reference for each family.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Spec</p></th>
+<th class="head"><p>Instance</p></th>
+<th class="head"><p>Authored with</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Cells</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cell</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.load(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;cell&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Tests</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test-protocol</span></code> (the test spec)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">test</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.template(&quot;test-spec&quot;,</span> <span class="pre">...)</span></code> then <code class="docutils literal notranslate"><span class="pre">ws.load(...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Datasets</p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dataset</span></code></p></td>
+<td><p>the workspace (<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">data=...)</span></code>), or <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> with <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Materials</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">material</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;material_spec&quot;,</span> <span class="pre">...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;material&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Electrodes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">electrode-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">electrode</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;electrode_spec&quot;,</span> <span class="pre">...)</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;electrode&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Separators, current collectors, electrolytes, housings</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">separator-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">current-collector-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte-spec</span></code>, <code class="docutils literal notranslate"><span class="pre">housing-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">separator</span></code>, <code class="docutils literal notranslate"><span class="pre">current-collector</span></code>, <code class="docutils literal notranslate"><span class="pre">electrolyte</span></code>, <code class="docutils literal notranslate"><span class="pre">housing</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> component functions</p></td>
+</tr>
+<tr class="row-even"><td><p>Equipment</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">equipment-spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">equipment</span></code>, <code class="docutils literal notranslate"><span class="pre">channel</span></code></p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Parameter sets</p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">parameter-set</span></code> (minted under <code class="docutils literal notranslate"><span class="pre">dataset/</span></code>)</p></td>
+<td><p>the workspace: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;parameter_set&quot;,</span> <span class="pre">...)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Organizations</p></td>
+<td><p>none</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">organization</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">battinfo.api.create_organization</span></code> and <code class="docutils literal notranslate"><span class="pre">save_organization</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A dataset collection is not a separate type. It is a <code class="docutils literal notranslate"><span class="pre">dataset</span></code> whose <code class="docutils literal notranslate"><span class="pre">additional_type</span></code> includes <code class="docutils literal notranslate"><span class="pre">DatasetSeries</span></code>, and its members point at it with <code class="docutils literal notranslate"><span class="pre">series_id</span></code>; <a class="reference internal" href="howto/publish-a-dataset-collection.html"><span class="std std-doc">Publish a dataset collection</span></a> walks through one.</p>
+<p>Not every type travels everywhere yet. <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends the specs and instances of cells, tests, materials, electrodes and equipment to the registry, along with datasets, channels and parameter sets. The registry cannot register the four component families, so those records stay local, and organization records are not submitted. A Zenodo deposit graph describes components inline on the cell spec that uses them, and it carries manufacturer and publisher nodes on the records that name them instead of separate organization records.</p>
+</section>
+<section id="supported">
+<h2>Supported<a class="headerlink" href="#supported" title="Link to this heading">#</a></h2>
+<p>These capabilities are covered by tests in CI, documented as supported, and are the primary target for feedback:</p>
+<ul class="simple">
+<li><p>validation of every record type against its JSON Schema, with semantic and cross-reference checks, under the policies <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">strict</span></code>, <code class="docutils literal notranslate"><span class="pre">publisher</span></code> and <code class="docutils literal notranslate"><span class="pre">ingest</span></code> (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">validate</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo.validate_record_report</span></code>)</p></li>
+<li><p>JSON-LD for every record type through <code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld</span></code>, built from the curated property and unit maps and the versioned records context at <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/context/records/v1.json</span></code></p></li>
+<li><p>authoring with <code class="docutils literal notranslate"><span class="pre">battinfo.workspace()</span></code> for cells, test specs, tests, datasets from local data files, materials, electrodes, equipment and channels, and parameter sets, all saved with deterministic IRIs</p></li>
+<li><p>publishing a workspace as a Zenodo deposit (<code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code>, which leaves a draft unless <code class="docutils literal notranslate"><span class="pre">publish=True</span></code>) and submitting it to the registry review queue (<code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code>), with <code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> to run the publication checks on the deposit graph beforehand</p></li>
+<li><p>single cell-spec records with <code class="docutils literal notranslate"><span class="pre">CellSpec</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code>, and single <code class="docutils literal notranslate"><span class="pre">Cell</span></code>, <code class="docutils literal notranslate"><span class="pre">TestSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Test</span></code> and <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> records with <code class="docutils literal notranslate"><span class="pre">save_cell_instance</span></code>, <code class="docutils literal notranslate"><span class="pre">save_test_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">save_test</span></code> and <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code></p></li>
+<li><p>CLI and <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> save, query, index and resolver-publish flows for cell specs, cells, test specs, tests and datasets; <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">record</span></code> saves a record of any type from a JSON file</p></li>
+<li><p>detailed cell descriptions for coin, cylindrical, single-layer pouch, multilayer pouch and prismatic formats, plus half cells and three-electrode cells through <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code></p></li>
+<li><p>test records with a controlled <code class="docutils literal notranslate"><span class="pre">kind</span></code> such as <code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">rate_capability</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, <code class="docutils literal notranslate"><span class="pre">hppc</span></code> or <code class="docutils literal notranslate"><span class="pre">eis</span></code> (the full list is in <code class="docutils literal notranslate"><span class="pre">assets/schemas/test.schema.json</span></code>)</p></li>
+<li><p>dataset collections, as described above</p></li>
+<li><p>the six guide notebooks in <code class="docutils literal notranslate"><span class="pre">docs/guides/</span></code>, which CI executes</p></li>
+</ul>
+</section>
+<section id="preview">
+<h2>Preview<a class="headerlink" href="#preview" title="Link to this heading">#</a></h2>
+<p>Available and expected to work, but interfaces may still be refined:</p>
+<ul class="simple">
+<li><p>Standalone records for separators, current collectors, electrolytes and housings. They validate and emit JSON-LD, but the registry cannot take them yet.</p></li>
+<li><p>Organization records that other records point at.</p></li>
+<li><p>Reading records and data files from a registry with <code class="docutils literal notranslate"><span class="pre">battinfo.registry.Registry</span></code> (<a class="reference internal" href="howto/read-registry-data.html"><span class="std std-doc">how-to</span></a>). Its method names are expected to stay; the catalog columns may grow.</p></li>
+<li><p>The importers and exporters in <code class="docutils literal notranslate"><span class="pre">battinfo.interop</span></code>: BPX, Battery Data Commons, battdat, BattInfoConverter JSON-LD, Discovery, the solid-state database, and the aurora-unicycler, bmgen, PyBaMM and UCP protocol formats. The <a class="reference internal" href="pages/interop-recovery.html"><span class="std std-doc">interop scorecard</span></a> measures how completely the converter and Discovery documents are recovered.</p></li>
+<li><p>Reusable cell-spec library workflows (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">library</span> <span class="pre">...</span></code>) beyond the descriptor fixtures.</p></li>
+</ul>
+<p>Feedback is welcome; regressions here do not block a release unless they break a supported capability.</p>
+</section>
+<section id="in-development">
+<h2>In development<a class="headerlink" href="#in-development" title="Link to this heading">#</a></h2>
+<p>Present but with no stability promise:</p>
+<ul class="simple">
+<li><p>the folder-based CLI batch path (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">...</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span> <span class="pre">...</span></code>) and registry administration (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">registry</span> <span class="pre">...</span></code>)</p></li>
+<li><p>folder ingest with <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">ingest</span> <span class="pre">...</span></code>, whose engine handles only the <code class="docutils literal notranslate"><span class="pre">cell-instance</span></code> resource type so far (see the <a class="reference internal" href="guarantees.html#ingest-manifest-contract"><span class="std std-ref">ingest manifest contract</span></a>)</p></li>
+<li><p>datasheet tooling under <code class="docutils literal notranslate"><span class="pre">.tools/datasheets/</span></code>, which is maintainer-only and has no public contract</p></li>
+<li><p>semantic mapping candidate generation and review (<code class="docutils literal notranslate"><span class="pre">.tools/semantic/</span></code>)</p></li>
+<li><p>reference validation for corpora larger than a repository-scale source tree</p></li>
+<li><p>a Battery Pass crosswalk, from cell records to the Battery Pass Data Model. 0.8.0 has none: the draft <code class="docutils literal notranslate"><span class="pre">batterypass</span></code> mapping target and validation profile are removed, and the draft profile schema stays at its URL, marked withdrawn</p></li>
+</ul>
+</section>
+<section id="known-limitations-in-0-8-0">
+<h2>Known limitations in 0.8.0<a class="headerlink" href="#known-limitations-in-0-8-0" title="Link to this heading">#</a></h2>
+<p>These gaps were known when 0.8.0 was released. Each is planned for a 0.8.x release or for 0.9; where the release is settled, the line names it and says why the gap can wait, and where there is a way around a gap, the line says how.</p>
+<section id="bpx-parameter-files">
+<h3>BPX parameter files<a class="headerlink" href="#bpx-parameter-files" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Blended electrodes (BPX <code class="docutils literal notranslate"><span class="pre">Particle</span></code> blocks) are not modelled: the import names them in a warning and in the record’s <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>, and <code class="docutils literal notranslate"><span class="pre">to_bpx</span></code> returns <code class="docutils literal notranslate"><span class="pre">complete=False</span></code> for such a file.</p></li>
+<li><p>The initial hysteresis state, <code class="docutils literal notranslate"><span class="pre">Degradation</span></code> blocks and <code class="docutils literal notranslate"><span class="pre">Validation</span></code> curves stay in the source file and are listed in <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>.</p></li>
+<li><p>Curve claims, such as an OCP table, are <code class="docutils literal notranslate"><span class="pre">schema:PropertyValue</span></code> nodes with no EMMO class.</p></li>
+<li><p>In a cell spec’s JSON-LD, <code class="docutils literal notranslate"><span class="pre">electrode_area</span></code> and <code class="docutils literal notranslate"><span class="pre">external_surface_area</span></code> are both an <code class="docutils literal notranslate"><span class="pre">Area</span></code> node labelled “Area”, so only the value tells them apart. Parameter sets name the key in <code class="docutils literal notranslate"><span class="pre">schema:propertyID</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_parameter_set(provenance_classes=...)</span></code> silently ignores the name of a part the file does not have.</p></li>
+</ul>
+</section>
+<section id="workspace-and-submission">
+<h3>Workspace and submission<a class="headerlink" href="#workspace-and-submission" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Registry.get</span></code> returns the registry’s entry, not the record, and no helper extracts the record yet; <a class="reference internal" href="howto/read-registry-data.html#get-the-record-out-of-an-entry"><span class="std std-ref">Get the record out of an entry</span></a> shows the one line that does.</p></li>
+<li><p>A new version of a published dataset made with <code class="docutils literal notranslate"><span class="pre">Dataset.from_record</span></code> loses the curve-preview files unless you copy them across from the registry entry, and nothing warns you; <a class="reference internal" href="howto/read-registry-data.html#make-a-new-version-of-a-published-dataset"><span class="std std-ref">Make a new version of a published dataset</span></a> shows how.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> resolves a dataset’s cell and test only against the workspace and the registry records the workspace has looked up, which never include tests, so a new version that keeps a published test link needs <code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code>.</p></li>
+<li><p>Once <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> or <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;)</span></code> has written records in a session, <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends only those, even with <code class="docutils literal notranslate"><span class="pre">submit_all=True</span></code>. Submit records written by <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> or the other <code class="docutils literal notranslate"><span class="pre">save_*</span></code> functions from a new workspace object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;)</span></code> takes no as-run <code class="docutils literal notranslate"><span class="pre">conditions</span></code>, notes or <code class="docutils literal notranslate"><span class="pre">source_url</span></code>, although the <code class="docutils literal notranslate"><span class="pre">Test</span></code> model has them.</p></li>
+<li><p>Lab labels are not scoped to a lab until 0.9. A cell’s IRI comes from its spec and its serial number (or its name, for a cell without one), so two labs that both call a cell of one spec <code class="docutils literal notranslate"><span class="pre">S1</span></code> or <code class="docutils literal notranslate"><span class="pre">C01</span></code> mint one cell IRI, and the tests and datasets on it can share IRIs too. The registry refuses the second lab’s record, and <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> reports that clash with how to rename or pin the record rather than retrying it as a new version. Use the serial printed on the cell, or a label only your lab uses. For the same reason, <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">cell=&quot;C01&quot;)</span></code> can find another lab’s <code class="docutils literal notranslate"><span class="pre">C01</span></code> in the registry when your workspace holds no such cell; it prints the cell’s publisher, and refuses to choose when several cells match.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.search(type=&quot;cell&quot;,</span> <span class="pre">serial=...)</span></code> fetches the registry’s whole cell list on every call; use <code class="docutils literal notranslate"><span class="pre">serials=[...]</span></code> to look up many cells at once.</p></li>
+<li><p>Adding tests to a test spec that is already published sends the spec again, and the registry stores an unchanged copy as a new version.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.pending()</span></code> lists submissions newest first, and approving in that order can publish datasets before the tests and cells they describe. Approve specs, cells and tests first.</p></li>
+<li><p>Saving unchanged records again marks datasets and cells <code class="docutils literal notranslate"><span class="pre">[updated]</span></code> with new timestamps, and a test rebuilt in a new workspace gets a new <code class="docutils literal notranslate"><span class="pre">retrieved_at</span></code>, so a re-submission can create versions whose content did not change.</p></li>
+<li><p>Collection rules are advice, not checks: a member whose <code class="docutils literal notranslate"><span class="pre">series_id</span></code> names a collection that was never saved passes strict validation (only <code class="docutils literal notranslate"><span class="pre">ws.preview_jsonld()</span></code> warns), and a collection with files or an <code class="docutils literal notranslate"><span class="pre">about</span></code> list still saves.</p></li>
+<li><p>The Zenodo deposit graph and <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code> describe tests and datasets differently: <code class="docutils literal notranslate"><span class="pre">schema:about</span></code> against <code class="docutils literal notranslate"><span class="pre">dcterms:subject</span></code> for a dataset’s cell and test, <code class="docutils literal notranslate"><span class="pre">prov:used</span></code> against <code class="docutils literal notranslate"><span class="pre">dcterms:conformsTo</span></code> for a test’s protocol, and different test titles. Neither emits a test’s <code class="docutils literal notranslate"><span class="pre">description</span></code>. The deposit graph’s equipment and channel nodes carry none of their <code class="docutils literal notranslate"><span class="pre">property</span></code> values, which <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code> emits.</p></li>
+<li><p>In JSON-LD, <code class="docutils literal notranslate"><span class="pre">provenance.retrieved_at</span></code> is an untyped <code class="docutils literal notranslate"><span class="pre">prov:generatedAtTime</span></code> literal, not an <code class="docutils literal notranslate"><span class="pre">xsd:dateTime</span></code>.</p></li>
+<li><p>A percent value is published with the unit <code class="docutils literal notranslate"><span class="pre">PercentUnit</span></code> from domain-electrochemistry, the only percent unit in the imported ontologies, and its maintainers have yet to confirm it as the long-term IRI. EMMO’s own <code class="docutils literal notranslate"><span class="pre">Percent</span></code> unit is outside the imported ontologies, and EMMO 1.0.2 gives it a conversion factor of 1 instead of 0.01. A basis the unit states (<code class="docutils literal notranslate"><span class="pre">wt%</span></code>, <code class="docutils literal notranslate"><span class="pre">vol%</span></code>) is not part of the unit: it rides as an extra <code class="docutils literal notranslate"><span class="pre">WeightPercent</span></code> or <code class="docutils literal notranslate"><span class="pre">VolumePercent</span></code> class on the quantity.</p></li>
+<li><p>EMMO has no class for a constant-resistance step or a CC-CV discharge. In a test protocol’s JSON-LD a cr or cccv discharge is typed with the parent class <code class="docutils literal notranslate"><span class="pre">Discharging</span></code>, and a cr charge, or a cr or cccv step with no direction, has no class, only its mode as <code class="docutils literal notranslate"><span class="pre">skos:prefLabel</span></code>; validation warns <code class="docutils literal notranslate"><span class="pre">semantic.method_step_unmapped</span></code>.</p></li>
+<li><p>A cell record lists its dataset with role <code class="docutils literal notranslate"><span class="pre">raw</span></code> even when the dataset’s main file is the processed table.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TestSpec.experiment</span></code> writes a constant-current step that has a cutoff but no current as “Discharge until 0.9 V”, which the step grammar does not read back.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> prints “ERROR: … failed validation” for some records it does write, such as a parameter set still minted under <code class="docutils literal notranslate"><span class="pre">spec/</span></code>.</p></li>
+<li><p>Display papercuts: <code class="docutils literal notranslate"><span class="pre">ws.search()</span></code> shows manufacturer and model in lower case, <code class="docutils literal notranslate"><span class="pre">ws.list(verbose=True)</span></code> shows cells by file name, the <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> summary cuts titles at about 36 characters and collapses after 20 records, and <code class="docutils literal notranslate"><span class="pre">battinfo.naming.title_for()</span></code> writes an all-lowercase method in capitals (“CYCLING test”).</p></li>
+<li><p>Submission reporting: outcomes and journal entries carry an empty <code class="docutils literal notranslate"><span class="pre">iri</span></code>, a deduplicated re-submission is reported as live, and <code class="docutils literal notranslate"><span class="pre">ws.status()</span></code> lists every submission in the shared registry workspace.</p></li>
+</ul>
+</section>
+<section id="identifiers">
+<h3>Identifiers<a class="headerlink" href="#identifiers" title="Link to this heading">#</a></h3>
+<p>These paths mint IRIs that no other path reproduces. The <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md">identifier policy</a> (section 5.4) keeps them outside the identity contract until 0.9, which moves every minting path onto the shared seed builders in <code class="docutils literal notranslate"><span class="pre">battinfo.entities</span></code>; an IRI they minted in 0.8 stays findable then.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">create_component_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">create_component_instance</span></code> and their per-family wrappers (separators, current collectors, electrolytes and housings), <code class="docutils literal notranslate"><span class="pre">create_equipment_spec</span></code> and <code class="docutils literal notranslate"><span class="pre">create_equipment</span></code> give a record without <code class="docutils literal notranslate"><span class="pre">uid=</span></code> or <code class="docutils literal notranslate"><span class="pre">id=</span></code> a random IRI, a new one on every call, so saving their output again saves a second record. Pass a uid derived from the part’s natural key, as <a class="reference internal" href="howto/build-a-cell-from-components.html"><span class="std std-doc">Build a cell from components</span></a> does; <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;)</span></code> mints equipment from its spec and serial number.</p></li>
+<li><p>The BattInfoConverter, solid-state database and Discovery importers, and the Battery Data Commons bridge, mint from their own seeds. Importing one source again gives the same IRIs, but a cell imported from two sources, or imported and also authored in the workspace, gets two.</p></li>
+<li><p>On the batch path, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">init</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">add</span></code> give a cell without a serial number a random IRI, recorded in its <code class="docutils literal notranslate"><span class="pre">battinfo.yaml</span></code>. Keep that file, or pass <code class="docutils literal notranslate"><span class="pre">--serials</span></code> (or <code class="docutils literal notranslate"><span class="pre">--iris</span></code>).</p></li>
+<li><p>The publication package (<code class="docutils literal notranslate"><span class="pre">publish_publication_package</span></code>, <code class="docutils literal notranslate"><span class="pre">build_publication_package</span></code>) and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> seed a dataset from its folder and title rather than its file, so the same data saved from a workspace gets another dataset IRI, and so does a test with data in the publication package. There, <code class="docutils literal notranslate"><span class="pre">Dataset(id=...)</span></code> and <code class="docutils literal notranslate"><span class="pre">Test(id=...)</span></code> keep an IRI you published. <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> seeds a test from its raw file’s path in the cell folder, so it matches the workspace only when the workspace’s data file has that path in the workspace folder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">init</span> <span class="pre">--batch-id</span></code> seeds a cell from its serial number and its batch. <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;cell&quot;)</span></code> takes no batch, so it gives the same cell another IRI unless the batch cell has no batch id; pin one with <code class="docutils literal notranslate"><span class="pre">iris=</span></code> or <code class="docutils literal notranslate"><span class="pre">--iris</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">save_test()</span></code> and a save of a record without an id never see a data file, so a test with data files gets another IRI there than in the workspace; pass <code class="docutils literal notranslate"><span class="pre">id=</span></code> (or an <code class="docutils literal notranslate"><span class="pre">id</span></code> in the record). A save of a dataset without an id leaves its cell and test out of its seed, so give a dataset of a test its <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p></li>
+</ul>
+</section>
+<section id="linked-data-at-record-iris">
+<h3>Linked data at record IRIs<a class="headerlink" href="#linked-data-at-record-iris" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>A record’s <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/</span></code> IRI serves the record body expanded with the v1 records context, not the EMMO model that <code class="docutils literal notranslate"><span class="pre">battinfo.record_to_jsonld</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.export</span></code> and the Zenodo deposit graph write. In that body a quantity key such as <code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code> is a property named by its EMMO class IRI, with <code class="docutils literal notranslate"><span class="pre">schema:value</span></code> and <code class="docutils literal notranslate"><span class="pre">schema:unitText</span></code>, and the record’s own id is a <code class="docutils literal notranslate"><span class="pre">schema:identifier</span></code> literal. For the EMMO model, run <code class="docutils literal notranslate"><span class="pre">record_to_jsonld</span></code> on the record or read the deposit’s <code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>. The record body is not normative, and a future v2 context drops it. Serving the EMMO model at record IRIs is planned for 0.9, since it changes what the registry returns for every published record.</p></li>
+<li><p>The registry serves a record as it was stored. Several hundred cell specs and <code class="docutils literal notranslate"><span class="pre">organization</span></code> records published in April 2026 were stored with camelCase keys, such as <code class="docutils literal notranslate"><span class="pre">cellFormat</span></code> and <code class="docutils literal notranslate"><span class="pre">sameAs</span></code>, and keep serving them until they are published again in snake_case under the same IRIs, after the registry update for 0.8.0.</p></li>
+</ul>
+</section>
+<section id="command-line">
+<h3>Command line<a class="headerlink" href="#command-line" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">dataset</span></code> is experimental: its <code class="docutils literal notranslate"><span class="pre">init</span></code>, <code class="docutils literal notranslate"><span class="pre">process</span></code> and <code class="docutils literal notranslate"><span class="pre">publish</span></code> steps cannot take a contribution through to a published dataset in 0.8.0. Publish a dataset from Python with <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">data=...)</span></code> and <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> instead.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">batch</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">publish</span> <span class="pre">batch</span></code>, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">index</span> <span class="pre">build</span> <span class="pre">--validate</span></code> and the <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">editorial</span></code> validators exit 0 when records fail validation. Read the failed count, or <code class="docutils literal notranslate"><span class="pre">ok:</span> <span class="pre">false</span></code>, in their output, which reports every failure. Planned for 0.8.1.</p></li>
+<li><p>On Windows, a command that prints JSON can stop with <code class="docutils literal notranslate"><span class="pre">UnicodeEncodeError</span></code> when its output is redirected or piped and holds a character outside the console’s code page, such as Ω. Set <code class="docutils literal notranslate"><span class="pre">PYTHONUTF8=1</span></code> to avoid it. Planned for 0.8.1.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">query</span> <span class="pre">cell-spec</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo.api.query_cell_specs</span></code> compare the capacity and voltage range filters with the number a record stores, whatever its unit, so a capacity stored in mAh is compared as if it were in Ah. Give the filter in the unit your records use. Planned for 0.8.1; a query changes no record.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">save</span> <span class="pre">batch</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">publish</span> <span class="pre">batch</span></code> without <code class="docutils literal notranslate"><span class="pre">--source-dir</span></code> copy BattINFO’s packaged example records into your records root, where queries then list them as <code class="docutils literal notranslate"><span class="pre">local</span></code>. Pass <code class="docutils literal notranslate"><span class="pre">--source-dir</span></code>. Planned for 0.8.1.</p></li>
+</ul>
+</section>
+<section id="tutorials">
+<h3>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The tutorials have no “Open in Colab” link in 0.8.0. A hosted notebook service such as Colab starts without BattINFO, so install it in a cell first with the <code class="docutils literal notranslate"><span class="pre">%pip</span></code> line that <a class="reference internal" href="pages/getting-started.html"><span class="std std-doc">Getting started</span></a> gives; tutorial 6 needs the one with the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra.</p></li>
+</ul>
+</section>
+<section id="records-and-the-python-api">
+<h3>Records and the Python API<a class="headerlink" href="#records-and-the-python-api" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>A record model drops the fields it does not represent when it reads a record and writes it again (<code class="docutils literal notranslate"><span class="pre">from_record()</span></code>, then <code class="docutils literal notranslate"><span class="pre">to_record()</span></code>), such as a cell spec’s <code class="docutils literal notranslate"><span class="pre">brand</span></code> and <code class="docutils literal notranslate"><span class="pre">battery_category</span></code>, and nothing warns. Edit such a record as JSON instead. Planned for 0.8.1; only fields the model has no attribute for are lost, and only when the model writes the record back.</p></li>
+<li><p>A tuple, set, generator or NumPy array passed to a list field of a record model, such as <code class="docutils literal notranslate"><span class="pre">links</span></code>, <code class="docutils literal notranslate"><span class="pre">keywords</span></code>, <code class="docutils literal notranslate"><span class="pre">notes</span></code> or <code class="docutils literal notranslate"><span class="pre">creators</span></code>, becomes an empty list. Pass a list; a single string is kept. Planned for 0.8.1; a list, the form the documentation uses, is kept as given.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.convert()</span></code> skips a second input file whose output would have the same name as another’s in the same run, links the wrong raw file to that output, and keeps a truncated output when run again. It prints a <code class="docutils literal notranslate"><span class="pre">skip</span> <span class="pre">(exists)</span></code> line for the second file; rename one of the two inputs. Planned for 0.8.1.</p></li>
+<li><p>A cell spec with a <code class="docutils literal notranslate"><span class="pre">reference_electrode</span></code> and no <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> is published as a <code class="docutils literal notranslate"><span class="pre">HalfCellDevice</span></code> with two reference electrodes. State <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> (<code class="docutils literal notranslate"><span class="pre">full_cell</span></code>, <code class="docutils literal notranslate"><span class="pre">half_cell</span></code> or <code class="docutils literal notranslate"><span class="pre">three_electrode_cell</span></code>) to avoid it. Planned for 0.8.1; every place that infers a half cell does so only when <code class="docutils literal notranslate"><span class="pre">cell_configuration</span></code> is empty, so stating it is enough.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.import_()</span></code> leaves out a property that a deposit states as text only, with <code class="docutils literal notranslate"><span class="pre">hasStringValue</span></code> and no number. Planned for 0.8.1; only the records rebuilt from a deposit lack the value, and the deposit itself keeps it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.interop.import_bmgen_jsonld</span></code> reads steps only from a flat <code class="docutils literal notranslate"><span class="pre">&#64;graph</span></code>, which bmgen does not write, so a real bmgen file imports as a test spec with no steps. Planned for 0.8.1; the importers are in preview.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">load_publication_package()</span></code> recognises seven property classes and reads a cell spec’s chemistry back as <code class="docutils literal notranslate"><span class="pre">unknown</span></code>. Planned for 0.8.1; the package’s JSON-LD keeps every value, and only the objects rebuilt from it lose them.</p></li>
+<li><p>BattINFO writes its progress messages with <code class="docutils literal notranslate"><span class="pre">print()</span></code> rather than the <code class="docutils literal notranslate"><span class="pre">logging</span></code> module and raises built-in exception types, so a caller cannot silence its output through logging or catch its errors by one exception class. Both change in 0.9, since they touch every module.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo.bundle_generated</span></code>, the model layer generated from the LinkML schema, has been edited by hand since it was generated, and nothing regenerates it; the record models in <code class="docutils literal notranslate"><span class="pre">battinfo</span></code> are the authoring surface. 0.9 regenerates it or retires it.</p></li>
+</ul>
+</section>
+<section id="vocabularies-and-classes">
+<h3>Vocabularies and classes<a class="headerlink" href="#vocabularies-and-classes" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Material specs for sodium, sulfur, solid electrolytes such as LLZO and LPSCl, and other materials beyond Li-ion fail validation: <code class="docutils literal notranslate"><span class="pre">material_kinds.json</span></code> has no kind for them, and <code class="docutils literal notranslate"><span class="pre">semantic.material_kind_unknown</span></code> is an error under every policy. So Na-ion, Li-S and solid-state cells cannot be described down to their materials yet. Planned for 0.8.1, which adds the kinds the pinned ontologies already have classes for; the registry validates against the same vocabulary, so its copy is updated before that release.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">typical_energy</span></code> is typed <code class="docutils literal notranslate"><span class="pre">StoredEnergy</span></code>, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed <code class="docutils literal notranslate"><span class="pre">MetalOxideElectrode</span></code>, because its own class is deprecated upstream with no replacement. The electrode’s <code class="docutils literal notranslate"><span class="pre">&#64;type</span></code> can move to a new class term once domain-electrochemistry publishes the class. <code class="docutils literal notranslate"><span class="pre">typical_energy</span></code> keeps <code class="docutils literal notranslate"><span class="pre">StoredEnergy</span></code>, because the v1 records context is frozen, until a v2 context.</p></li>
+<li><p>No property key holds a maximum C-rate. Give a current in A, or state a C-rate as <code class="docutils literal notranslate"><span class="pre">charging_c_rate</span></code> or <code class="docutils literal notranslate"><span class="pre">discharging_c_rate</span></code> in the conditions of the value it applies to.</p></li>
+<li><p>In the JSON-LD of materials and components, which uses the EMMO domain-battery context, numbers carry no datatype, so JSON-LD processors disagree on whether 76.0 is an integer or a double. Records under the v1 records context type them <code class="docutils literal notranslate"><span class="pre">xsd:double</span></code>.</p></li>
+<li><p>Not every quantity in a test protocol or a parameter set follows the full EMMO quantity pattern. Temperature conditions in test protocols and <code class="docutils literal notranslate"><span class="pre">ambient_temperature</span></code> in parameter sets are typed only <code class="docutils literal notranslate"><span class="pre">ConventionalProperty</span></code>, with no quantity class, and voltage limits in a test protocol can lack <code class="docutils literal notranslate"><span class="pre">ConventionalProperty</span></code>. The values and units are there. Cell specs, cells, tests, datasets, materials and components follow the full pattern. Planned for 0.8.1.</p></li>
+</ul>
+</section>
+<section id="schemas">
+<h3>Schemas<a class="headerlink" href="#schemas" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>From 0.8.0 a schema served under <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/schema/</span></code> changes in place only in its descriptions, titles and examples (<a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md#111-served-artifact-immutability">identifier policy, section 11.1</a>). Any other change, a new optional property included, needs a new versioned schema URL, and the layout of those URLs and what <code class="docutils literal notranslate"><span class="pre">schema_version</span></code> promises are defined in 0.9. Until then no 0.8.x release changes what a schema accepts.</p></li>
+</ul>
+</section>
+<section id="cli-batch-path">
+<h3>CLI batch path<a class="headerlink" href="#cli-batch-path" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code> stops with <code class="docutils literal notranslate"><span class="pre">FileExistsError</span></code> on its flat and sub-folder layouts. Use <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code>, the route that works. Planned for 0.8.2, since <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code> is in development.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code> and <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">push</span></code> upload only to the Zenodo sandbox, so an upload needs <code class="docutils literal notranslate"><span class="pre">--sandbox</span></code>; without it they stop before contacting Zenodo. They send a sandbox token: <code class="docutils literal notranslate"><span class="pre">--token</span></code>, else <code class="docutils literal notranslate"><span class="pre">ZENODO_SANDBOX_TOKEN</span></code>, else <code class="docutils literal notranslate"><span class="pre">zenodo_sandbox_token</span></code> in the config file (<code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">config</span> <span class="pre">set</span> <span class="pre">zenodo_sandbox_token</span> <span class="pre">&lt;token&gt;</span></code>). Uploads to zenodo.org from the batch path come in 0.8.1, once a retry no longer carries the first upload’s record id and the batch path reads the DOI from the deposit; to publish there now, use <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> from <code class="docutils literal notranslate"><span class="pre">battinfo.workspace()</span></code>.</p></li>
+<li><p>Run <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">package</span></code> again before you retry <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">upload</span></code>: a retry of the same staging folder carries the record id of the first upload. The fix comes in 0.8.1.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra requires <code class="docutils literal notranslate"><span class="pre">batterydf[nda,excel,mat]&gt;=0.2.0rc2,&lt;0.3</span></code>, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyshacl</span></code>, which runs the SHACL shapes and is a core dependency, requires <code class="docutils literal notranslate"><span class="pre">rdflib</span></code> below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.</p></li>
+<li><p>Python 3.15 is not supported yet. <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">tabular</span></code> extra requires pandas 3.0.5 or later and pyarrow 25 or later, so it cannot be installed into an environment held to pandas 2.</p></li>
+<li><p>CI tests Linux and Windows. macOS is not tested until 0.8.1 adds a macOS job.</p></li>
+</ul>
+</section>
+</section>
+<section id="verification">
+<h2>Verification<a class="headerlink" href="#verification" title="Link to this heading">#</a></h2>
+<p>A release is considered ready when:</p>
+<ul class="simple">
+<li><p>the supported workflows install and run from a clean environment (CI builds the wheel and runs <code class="docutils literal notranslate"><span class="pre">tests/installed_smoke.py</span></code> against it)</p></li>
+<li><p>supported validation behavior is documented and machine-readable</p></li>
+<li><p>CI passes on the supported Python versions</p></li>
+<li><p>the top-level docs do not promise more than the preview and in-development items deliver</p></li>
+</ul>
+<p>To run the verification gate locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>sync<span class="w"> </span>--all-extras
+uv<span class="w"> </span>run<span class="w"> </span>python<span class="w"> </span>.tools/quality/run_verification.py
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="guarantees.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Guarantees</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="pages/interop-recovery.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Interop scorecard</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#modeling-scope">Modeling scope</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#record-types">Record types</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#supported">Supported</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preview">Preview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#in-development">In development</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#known-limitations-in-0-8-0">Known limitations in 0.8.0</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bpx-parameter-files">BPX parameter files</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#workspace-and-submission">Workspace and submission</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#identifiers">Identifiers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linked-data-at-record-iris">Linked data at record IRIs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#command-line">Command line</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tutorials">Tutorials</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#records-and-the-python-api">Records and the Python API</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vocabularies-and-classes">Vocabularies and classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#schemas">Schemas</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cli-batch-path">CLI batch path</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#verification">Verification</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

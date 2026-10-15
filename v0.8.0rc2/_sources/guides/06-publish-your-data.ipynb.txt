@@ -1,0 +1,501 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "1cb77488",
+   "metadata": {},
+   "source": [
+    "# Guide 6 — Publish your first dataset\n",
+    "\n",
+    "**The tutorial version of the [publishing journey](https://battinfo.org/publish):** you start\n",
+    "with a raw cycler export and finish with validated, linked records, a citable archive, and a\n",
+    "place in the Battery Genome registry. Every code cell here executes in CI, against the sample\n",
+    "Neware CSV that ships inside the battinfo package — swap in your own files and the recipe is identical.\n",
+    "\n",
+    "The five stages:\n",
+    "\n",
+    "1. **Convert** — instrument files → tidy BDF tables\n",
+    "2. **Identify** — name the physical cells you tested\n",
+    "3. **Link** — attach each test and its data to its cell\n",
+    "4. **Save & validate** — canonical records with stable IRIs\n",
+    "5. **Publish** — a DOI on Zenodo + the registry review queue\n",
+    "\n",
+    "**Prerequisites:** Stage 1 uses the `processing` extra, which brings the `batterydf` BDF converter and the plotting libraries: `pip install \"battinfo[processing]\"`. The extra currently installs the batterydf 0.2 release candidate from PyPI. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.\n",
+    "\n",
+    "*New words? The [plain-language glossary](../pages/glossary.md) decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "e43cee13",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:04.690617Z",
+     "iopub.status.busy": "2026-10-14T12:31:04.690093Z",
+     "iopub.status.idle": "2026-10-14T12:31:05.980612Z",
+     "shell.execute_reply": "2026-10-14T12:31:05.975587Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import shutil\n",
+    "from importlib.resources import files\n",
+    "from pathlib import Path\n",
+    "\n",
+    "# This notebook runs from its own folder (docs/guides); fresh scratch every run.\n",
+    "SCRATCH = Path(\"_scratch/guide-06\").resolve()\n",
+    "if SCRATCH.exists():\n",
+    "    shutil.rmtree(SCRATCH)\n",
+    "SCRATCH.mkdir(parents=True)\n",
+    "\n",
+    "# Your starting point: a folder with raw cycler exports. Here, the sample\n",
+    "# Neware CSV that ships inside the battinfo package (one CC charge + discharge cycle).\n",
+    "sample = files(\"battinfo.data\") / \"samples\" / \"neware-sample.csv\"\n",
+    "(SCRATCH / \"neware-sample.csv\").write_bytes(sample.read_bytes())\n",
+    "\n",
+    "import battinfo\n",
+    "\n",
+    "ws = battinfo.workspace(root=SCRATCH)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "699b18ce",
+   "metadata": {},
+   "source": [
+    "## Stage 1 — Convert\n",
+    "\n",
+    "Every instrument speaks its own format; BDF (Battery Data Format) is the one tidy,\n",
+    "documented table they all become. NEWARE `.ndax`, Biologic `.mpt`, Excel and MATLAB\n",
+    "exports are auto-detected by `ws.convert()`; CSV exports use an explicit pattern.\n",
+    "\n",
+    "No reader for your instrument (Arbin, Maccor, an in-house export)? Save a CSV from the instrument software and map its headers yourself: `ws.bdf_columns()` prints the canonical column names, and `ws.convert_csv(path, hints={\"Voltage(V)\": \"voltage_volt\", ...})` does the rename. Check the validation report it prints — a measured column listed under `extras` is unmapped and will be invisible downstream."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "e2c1ddca",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:05.986630Z",
+     "iopub.status.busy": "2026-10-14T12:31:05.986630Z",
+     "iopub.status.idle": "2026-10-14T12:31:19.416553Z",
+     "shell.execute_reply": "2026-10-14T12:31:19.413541Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  neware-sample.csv  ->  neware-sample.bdf.csv  (0.0 MB, via neware_csv)\n",
+      "  Left out a column that only numbers the rows: Record. The row order of neware-sample.bdf.csv holds the same information.\n",
+      "\n",
+      "Converted 1 file(s) -> <repo>\\docs\\guides\\_scratch\\guide-06\\bdf\n",
+      "\n",
+      "BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle_count,step_id,step_time_second,step_charging_capacity_ah,step_discharging_capacity_ah\n"
+     ]
+    }
+   ],
+   "source": [
+    "converted = ws.convert(\"*.csv\")\n",
+    "\n",
+    "bdf_file = sorted((SCRATCH / \"bdf\").glob(\"*.bdf.csv\"))[0]\n",
+    "print()\n",
+    "print(\"BDF columns:\", bdf_file.read_text(encoding=\"utf-8\").splitlines()[0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "79357b4c",
+   "metadata": {},
+   "source": [
+    "## Stage 2 — Identify\n",
+    "\n",
+    "Your measurements are about *specific physical cells*. Search the registry for the\n",
+    "cell product you tested; if you are offline (or the cell is not registered yet),\n",
+    "describe it yourself — the same object works either way."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "c7d97399",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:19.422593Z",
+     "iopub.status.busy": "2026-10-14T12:31:19.421597Z",
+     "iopub.status.idle": "2026-10-14T12:31:22.163231Z",
+     "shell.execute_reply": "2026-10-14T12:31:22.161222Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "No cell-spec match for 'molicel inr21700 p45b'.\n",
+      "  Tip: ws.template('cell-spec', manufacturer='...', model='...')\n",
+      "  cell: MYLAB-P45B-001  (IRI auto-assigned)\n"
+     ]
+    }
+   ],
+   "source": [
+    "hits = ws.search(\"molicel inr21700 p45b\")\n",
+    "\n",
+    "if hits:\n",
+    "    spec = hits[0]           # found in the registry — reuse its identity\n",
+    "else:\n",
+    "    # Offline / unregistered: describe the product yourself.\n",
+    "    spec = battinfo.CellSpec(\n",
+    "        manufacturer=\"Molicel\",\n",
+    "        model=\"INR21700-P45B\",\n",
+    "        format=\"cylindrical\",\n",
+    "        chemistry=\"Li-ion\",\n",
+    "        nominal_capacity={\"value\": 4.5, \"unit\": \"Ah\"},\n",
+    "    )\n",
+    "\n",
+    "# The serial printed on the cell, or a label only your lab uses: a cell's IRI\n",
+    "# comes from its spec and serial, so a bare \"S1\" would be every lab's S1.\n",
+    "cells = ws.add(\"cell\", spec=spec, serial_numbers=[\"MYLAB-P45B-001\"])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dfce791f",
+   "metadata": {},
+   "source": [
+    "## Stage 3 — Link\n",
+    "\n",
+    "Data without its test conditions is trivia. The chain **cell → test → dataset** is\n",
+    "what lets someone who was never in your lab reuse the numbers. `ws.add(\"test\", ...)`\n",
+    "creates the test record and a dataset record pointing at the converted file.\n",
+    "\n",
+    "(To also record *which cycler channel* ran the test, register your equipment once — [How-to: register equipment](../howto/register-equipment.md) — and pass `channel=...` here.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "d9a22b72",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:22.168775Z",
+     "iopub.status.busy": "2026-10-14T12:31:22.168775Z",
+     "iopub.status.idle": "2026-10-14T12:31:22.267518Z",
+     "shell.execute_reply": "2026-10-14T12:31:22.253895Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  test [cycling] on MYLAB-P45B-001  +1 dataset(s)  (+1 raw source)\n"
+     ]
+    }
+   ],
+   "source": [
+    "tests = ws.add(\"test\", type=\"cycling\", cell=\"MYLAB-P45B-001\", data=str(bdf_file))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b9c7835d",
+   "metadata": {},
+   "source": [
+    "## Stage 4 — Save & validate\n",
+    "\n",
+    "Before saving, set two workspace defaults that get stamped onto every record:\n",
+    "who made the data, and how anyone may use it.\n",
+    "\n",
+    "`ws.contributor(orcid, name=...)` tags the workspace with a person by ORCID;\n",
+    "contributors **accumulate**, so call it once per author. Each is written onto\n",
+    "every record you save (as a `Person` carrying the ORCID) and into the\n",
+    "publication bundle — so a two-author dataset credits both, not just the last one.\n",
+    "\n",
+    "`ws.license(\"cc-by-4.0\")` sets the workspace's default license. Set it here, at\n",
+    "the start — before `ws.save()` — so **every locally saved record carries a\n",
+    "license, not just the Zenodo deposit**. A per-record `ws.add(..., license=...)`\n",
+    "overrides the default for that record, and the `license=` you pass to\n",
+    "`ws.zenodo(...)` in Stage 5 wins for the deposit itself (precedence: explicit\n",
+    "`ws.zenodo` license > explicit `ws.add` license > workspace default). A record\n",
+    "saved without any license still validates, but the gold-standard panel nudges\n",
+    "you to set one.\n",
+    "\n",
+    "`ws.save()` then validates every record against the canonical JSON Schemas and\n",
+    "writes them with stable `w3id.org/battinfo/...` IRIs, minted deterministically\n",
+    "from each record's identity — re-running an identical save is a no-op, never a\n",
+    "duplicate."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "241ee167",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:22.272481Z",
+     "iopub.status.busy": "2026-10-14T12:31:22.272481Z",
+     "iopub.status.idle": "2026-10-14T12:31:24.381262Z",
+     "shell.execute_reply": "2026-10-14T12:31:24.378399Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Workspace license: cc-by-4.0\n",
+      "  Saved to .battinfo/workspace.json; stamped onto records on ws.save().\n",
+      "Workspace contributor: Ada Lovelace (https://orcid.org/0000-0002-1825-0097)\n",
+      "  Saved to .battinfo/workspace.json; stamped onto records on ws.save().\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Workspace contributors (2):\n",
+      "  - Ada Lovelace (https://orcid.org/0000-0002-1825-0097)\n",
+      "  - Alan Turing (https://orcid.org/0000-0001-5109-3700)\n",
+      "  Saved to .battinfo/workspace.json; stamped onto records on ws.save().\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Saved 4 record(s) under <repo>\\docs\\guides\\_scratch\\guide-06\\.battinfo\\records:\n",
+      "  cell spec   Molicel INR21700-P45B                [created]  .battinfo\\records\\cell-spec\\cell-spec-vgwn-7exg-09tt-zwq3.json\n",
+      "  cell        MYLAB-P45B-001                       [created]  .battinfo\\records\\cell-instance\\cell-fhcx-9qtr-3vep-wahx.json\n",
+      "  test        MYLAB-P45B-001 cycling               [created]  .battinfo\\records\\test\\test-04bx-fcf2-hxm2-rtva.json\n",
+      "  dataset     MYLAB-P45B-001 data                  [created]  .battinfo\\records\\dataset\\dataset-s34m-fyym-c479-hfge.json\n",
+      "\n",
+      "  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.\n",
+      "cell-instance/cell-fhcx-9qtr-3vep-wahx.json\n",
+      "cell-spec/cell-spec-vgwn-7exg-09tt-zwq3.json\n",
+      "dataset/dataset-s34m-fyym-c479-hfge.json\n",
+      "test/test-04bx-fcf2-hxm2-rtva.json\n"
+     ]
+    }
+   ],
+   "source": [
+    "# The workspace default license — stamped onto every record from here on.\n",
+    "ws.license(\"cc-by-4.0\")\n",
+    "\n",
+    "# Credit both authors by ORCID — contributors accumulate across calls.\n",
+    "ws.contributor(\"0000-0002-1825-0097\", name=\"Ada Lovelace\")\n",
+    "ws.contributor(\"0000-0001-5109-3700\", name=\"Alan Turing\")\n",
+    "\n",
+    "ws.save()\n",
+    "\n",
+    "records_root = SCRATCH / \".battinfo/records\"\n",
+    "for record_file in sorted(records_root.rglob(\"*.json\")):\n",
+    "    print(f\"{record_file.parent.name}/{record_file.name}\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "03b2dfb0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:24.387186Z",
+     "iopub.status.busy": "2026-10-14T12:31:24.386335Z",
+     "iopub.status.idle": "2026-10-14T12:31:24.396875Z",
+     "shell.execute_reply": "2026-10-14T12:31:24.395359Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "  \"id\": \"https://w3id.org/battinfo/cell/fhcx-9qtr-3vep-wahx\",\n",
+      "  \"short_id\": \"fhcx9q\",\n",
+      "  \"cell_spec_id\": \"https://w3id.org/battinfo/spec/vgwn-7exg-09tt-zwq3\",\n",
+      "  \"name\": \"MYLAB-P45B-001\",\n",
+      "  \"serial_number\": \"MYLAB-P45B-001\"\n",
+      "}\n",
+      "...\n",
+      "provenance: {\n",
+      "  \"source_type\": \"measurement\",\n",
+      "  \"retrieved_at\": 1791981082,\n",
+      "  \"battinfo_version\": \"0.8.0\"\n",
+      "}\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Look inside one: the cell record, linked to its spec, stamped with provenance.\n",
+    "import json\n",
+    "cell_record_file = next((records_root / \"cell-instance\").glob(\"*.json\"))\n",
+    "cell_record = json.loads(cell_record_file.read_text(encoding=\"utf-8\"))\n",
+    "print(json.dumps(cell_record[\"cell_instance\"], indent=2)[:400])\n",
+    "print(\"...\")\n",
+    "print(\"provenance:\", json.dumps(cell_record[\"provenance\"], indent=2))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4c25c91e",
+   "metadata": {},
+   "source": [
+    "## Stage 5 — Publish\n",
+    "\n",
+    "The payoff, in two halves. The DOI needs no registry account, so it is the primary path here, and it comes first: the registry takes only records whose data files are already online.\n",
+    "\n",
+    "- **A citable DOI (Zenodo) — primary.** Needs only a Zenodo token, no registry\n",
+    "  account. `ws.zenodo()` archives the records and data files; pass\n",
+    "  `creators=[...]` to credit the authors on the deposit itself; without it,\n",
+    "  the contributors you tagged in Stage 4 are its creators. Either way their\n",
+    "  ORCIDs travel into the archived metadata. The deposit\n",
+    "  inherits the license you set with `ws.license(...)` in Stage 4; pass\n",
+    "  `license=` here only to choose a different one for the archive (an explicit\n",
+    "  `ws.zenodo(license=...)` wins over the workspace default). It leaves a\n",
+    "  reviewable draft by default — click Publish on Zenodo (or pass `publish=True`)\n",
+    "  to mint the DOI. Use a [Zenodo sandbox](https://sandbox.zenodo.org) token for\n",
+    "  a dry run (`sandbox=True`); drop it for the real thing. A sandbox deposit\n",
+    "  leaves the records pointing at the files on this computer, and the workspace\n",
+    "  remembers the sandbox record in `.battinfo/zenodo-sandbox.json`, apart from\n",
+    "  the record on zenodo.org in `.battinfo/zenodo.json`, so nothing needs\n",
+    "  deleting before the real deposit.\n",
+    "- **The Battery Genome registry (`ws.publish()`) — optional.** Submits your\n",
+    "  records to the review queue, where a curator promotes them to the public\n",
+    "  index. This needs a registry API key (`ws.login(api_key=\"bk_...\")`). During\n",
+    "  the soft launch keys are granted by the operators — start from\n",
+    "  [battinfo.org/publish](https://battinfo.org/publish) and say who you are and\n",
+    "  what you plan to publish. The registry refuses records that still point at files on this computer, since it would publish those paths as the download links. Deposit on Zenodo first, which points each record at its deposited copy, or call `ws.publish(zenodo=True)`, which does both in one go.\n",
+    "\n",
+    "Both cells are guarded no-ops until you provide the credential, so the\n",
+    "notebook runs fully offline without them. They ask the workspace with\n",
+    "`ws.has_credential(...)`, which also finds a token kept in the workspace's\n",
+    "`.battinfo/credentials` file, not only one in the environment."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "5e115f9a",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:24.401771Z",
+     "iopub.status.busy": "2026-10-14T12:31:24.401771Z",
+     "iopub.status.idle": "2026-10-14T12:31:24.411179Z",
+     "shell.execute_reply": "2026-10-14T12:31:24.409292Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.\n",
+      "Get a token at https://sandbox.zenodo.org, then re-run this cell.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# DOI path (primary) — Zenodo only, no registry key needed.\n",
+    "# The deposit inherits the workspace license from Stage 4; creators credit the\n",
+    "# authors on the deposit. A click on Zenodo (or publish=True) mints the DOI.\n",
+    "# Here we leave a reviewable draft.\n",
+    "if ws.has_credential(\"ZENODO_SANDBOX_TOKEN\"):\n",
+    "    deposit = ws.zenodo(\n",
+    "        sandbox=True,\n",
+    "        creators=[\n",
+    "            {\"name\": \"Lovelace, Ada\", \"orcid\": \"0000-0002-1825-0097\"},\n",
+    "            {\"name\": \"Turing, Alan\", \"orcid\": \"0000-0001-5109-3700\"},\n",
+    "        ],\n",
+    "    )\n",
+    "    print(\"Zenodo draft:\", deposit.draft_url)\n",
+    "else:\n",
+    "    print(\"No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.\")\n",
+    "    print(\"Get a token at https://sandbox.zenodo.org, then re-run this cell.\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "7f208a76",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-14T12:31:24.416391Z",
+     "iopub.status.busy": "2026-10-14T12:31:24.415791Z",
+     "iopub.status.idle": "2026-10-14T12:31:24.427645Z",
+     "shell.execute_reply": "2026-10-14T12:31:24.426168Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Records are saved and validated locally.\n",
+      "To submit to the registry: ws.login(api_key='bk_...') then re-run.\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Registry path — needs the API key granted by the operators (link above).\n",
+    "if ws.has_credential(\"BATTINFO_API_KEY\"):\n",
+    "    outcomes = ws.publish(note=\"My first BattINFO dataset\")\n",
+    "    ws.status()\n",
+    "else:\n",
+    "    print(\"Records are saved and validated locally.\")\n",
+    "    print(\"To submit to the registry: ws.login(api_key='bk_...') then re-run.\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "14a2d8d8",
+   "metadata": {},
+   "source": [
+    "## What you have now\n",
+    "\n",
+    "```\n",
+    "_scratch/guide-06/\n",
+    "├── neware-sample.csv           # your raw export (untouched)\n",
+    "├── bdf/neware-sample.bdf.csv   # the tidy, shareable table\n",
+    "└── .battinfo/records/ # validated, linked records with stable IRIs\n",
+    "    ├── cell-spec/  ├── cell-instance/  ├── test/  └── dataset/\n",
+    "```\n",
+    "\n",
+    "Re-run this notebook from the top: same IRIs, no duplicates — that determinism is\n",
+    "what makes the workflow safe to automate.\n",
+    "\n",
+    "**Next steps**\n",
+    "\n",
+    "- [Guide 1 — Concepts](01-concepts.ipynb): the data model behind what you just did\n",
+    "- [Guide 3 — Linked records](03-linked-records.ipynb): the full provenance chain in depth\n",
+    "- [battinfo.org/validate](https://battinfo.org/validate): check any record in the browser\n",
+    "- `ws.quickstart()` — this whole recipe, printed in your terminal"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

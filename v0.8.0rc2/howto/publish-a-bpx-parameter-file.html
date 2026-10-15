@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Publish a BPX parameter file &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/publish-a-bpx-parameter-file';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0rc2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Name your records: titles and handles" href="name-your-records.html" />
+    <link rel="prev" title="Publish a dataset collection" href="publish-a-dataset-collection.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Recipes</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-materials.html">Register the materials in your lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build-a-cell-from-components.html">Build a cell from components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find-existing-records.html">Find what already exists</a></li>
+<li class="toctree-l1"><a class="reference internal" href="read-registry-data.html">Read data from the registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish-a-dataset-collection.html">Publish a dataset collection</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Publish a BPX parameter file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="name-your-records.html">Name your records: titles and handles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Publish a BPX parameter file</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="publish-a-bpx-parameter-file">
+<h1>Publish a BPX parameter file<a class="headerlink" href="#publish-a-bpx-parameter-file" title="Link to this heading">#</a></h1>
+<p>A <a class="reference external" href="https://github.com/FaradayInstitution/BPX">BPX</a> file is a battery-model parameter set in the JSON format the PyBaMM project defined. In BattINFO one BPX file becomes one parameter-set record. The record holds every value of the file as claims grouped by part (cell, each electrode’s material and build, separator, electrolyte, state), carries the file itself, and gets an IRI derived from the file’s parameters. Anyone can then hand that IRI to a solver and run exactly those parameters, and search finds the file’s graphite claims next to every other source’s.</p>
+<p>This page imports a small file, links it to its cell, attaches the file and publishes the record through a workspace. The last sections cover corrections, who owns an IRI, and how a reader gets from the IRI to a PyBaMM simulation.</p>
+<section id="read-the-file">
+<h2>1. Read the file<a class="headerlink" href="#read-the-file" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">from_bpx_parameters</span></code> reads the file and says what it holds. The example writes a small partial file so the page runs offline; pass the path of your own file instead.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.interop</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_bpx_parameters</span>
+
+<span class="n">bpx_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;example-cell.bpx.json&quot;</span><span class="p">)</span>
+<span class="n">bpx_file</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
+    <span class="s2">&quot;Header&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;BPX&quot;</span><span class="p">:</span> <span class="s2">&quot;1.1.0&quot;</span><span class="p">,</span> <span class="s2">&quot;Title&quot;</span><span class="p">:</span> <span class="s2">&quot;Example pouch cell&quot;</span><span class="p">,</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="s2">&quot;Partial&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;Parameterisation&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;Cell&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;Nominal cell capacity [A.h]&quot;</span><span class="p">:</span> <span class="mf">5.0</span><span class="p">,</span>
+            <span class="s2">&quot;Lower voltage cut-off [V]&quot;</span><span class="p">:</span> <span class="mf">2.5</span><span class="p">,</span>
+            <span class="s2">&quot;Upper voltage cut-off [V]&quot;</span><span class="p">:</span> <span class="mf">4.2</span><span class="p">,</span>
+            <span class="s2">&quot;Electrode area [m2]&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+            <span class="s2">&quot;Number of electrode pairs connected in parallel to make a cell&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;Negative electrode&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;Particle radius [m]&quot;</span><span class="p">:</span> <span class="mf">5.86e-6</span><span class="p">,</span>
+            <span class="s2">&quot;Thickness [m]&quot;</span><span class="p">:</span> <span class="mf">8.52e-5</span><span class="p">,</span>
+            <span class="s2">&quot;Minimum stoichiometry&quot;</span><span class="p">:</span> <span class="mf">0.03</span><span class="p">,</span>
+            <span class="s2">&quot;Maximum stoichiometry&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+            <span class="s2">&quot;Maximum concentration [mol.m-3]&quot;</span><span class="p">:</span> <span class="mi">33133</span><span class="p">,</span>
+            <span class="s2">&quot;Surface area per unit volume [m-1]&quot;</span><span class="p">:</span> <span class="mi">383959</span><span class="p">,</span>
+            <span class="s2">&quot;Diffusivity [m2.s-1]&quot;</span><span class="p">:</span> <span class="mf">3.3e-14</span><span class="p">,</span>
+            <span class="s2">&quot;Reaction rate constant [mol.m-2.s-1]&quot;</span><span class="p">:</span> <span class="mf">6.7e-11</span><span class="p">,</span>
+            <span class="s2">&quot;OCP [V]&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]},</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;State&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Initial conditions&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Initial state-of-charge&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}},</span>
+<span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">from_bpx_parameters</span><span class="p">(</span><span class="n">bpx_file</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">file_uid</span><span class="p">())</span>                       <span class="c1"># the record&#39;s uid, known before the record exists</span>
+<span class="nb">print</span><span class="p">([</span><span class="n">part</span><span class="p">[</span><span class="s2">&quot;part&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">parts</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">not_imported</span><span class="p">)</span>                     <span class="c1"># BPX paths of values the record will not hold</span>
+<span class="k">for</span> <span class="n">warning</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">warning</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The uid comes from the SHA-256 of the file’s canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record’s IRI is <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/dataset/&lt;uid&gt;</span></code>: a parameter set is a dataset, one piece of data from one source, so it shares the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.</p>
+<p>Some values have no home in a record yet: the <code class="docutils literal notranslate"><span class="pre">Particle</span></code> blocks of a blended electrode, the initial hysteresis state, <code class="docutils literal notranslate"><span class="pre">Degradation</span></code> and <code class="docutils literal notranslate"><span class="pre">Validation</span></code>. They are named in the warnings and listed in <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>, which the record keeps, so a reader knows what only the file holds. <code class="docutils literal notranslate"><span class="pre">to_bpx(record)</span></code> says so too, and sets <code class="docutils literal notranslate"><span class="pre">complete=False</span></code> on its result.</p>
+<p>A transport value of zero or less (an ionic conductivity, a diffusivity, a transference number) cannot drive a physics model, and in published files it usually marks a placeholder for a model kept elsewhere, such as in <code class="docutils literal notranslate"><span class="pre">User-defined</span></code>. Such a value is read as the file states it, so the record still says exactly what the file says, and a warning names its BPX path and value. The claim gets no provenance class, and validating the record warns about it every time (<code class="docutils literal notranslate"><span class="pre">semantic.parameter_transport_not_positive</span></code>).</p>
+</section>
+<section id="say-which-cell-the-file-describes">
+<h2>2. Say which cell the file describes<a class="headerlink" href="#say-which-cell-the-file-describes" title="Link to this heading">#</a></h2>
+<p>BattINFO never guesses the cell. Pass exactly one link:</p>
+<ul class="simple">
+<li><p>The cell is in the genome: <code class="docutils literal notranslate"><span class="pre">cell_spec_id=</span></code> its cell spec IRI, or <code class="docutils literal notranslate"><span class="pre">cell_instance_id=</span></code> the one physical cell a fit was made on. Search first (<code class="docutils literal notranslate"><span class="pre">ws.search(...)</span></code>, or <a class="reference internal" href="find-existing-records.html"><span class="std std-doc">Find existing records</span></a>).</p></li>
+<li><p>It is a real cell that is not in the genome yet: search for a duplicate by maker and model. If there is none, describe the cell spec with its identity only (name, maker, model, format, chemistry) and, if the maker has no organization record, create that too. Then link the new spec. The file’s numbers (capacity, cut-offs, geometry, temperatures) stay on the parameter set as cell claims; they do not go on the spec.</p></li>
+<li><p>There is no real cell, as for an example file or a made-up design: <code class="docutils literal notranslate"><span class="pre">virtual_cell=True</span></code>.</p></li>
+</ul>
+<p>The rest of this page takes the second path, as if the example file described a real cell, Example Lab’s EX-5. A cell spec written as a draft file gets its IRI only when the workspace saves it, so save it before you build the parameter set. The search below runs offline and only looks in the workspace; with the default <code class="docutils literal notranslate"><span class="pre">registry_url</span></code> it searches the genome as well.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;bpx-lab&quot;</span><span class="p">,</span> <span class="n">registry_url</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">license</span><span class="p">(</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;Example Lab EX-5&quot;</span><span class="p">))</span>  <span class="c1"># []: the cell is not described yet</span>
+
+<span class="n">draft</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;bpx-lab&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;example-lab-ex-5.cell-spec.json&quot;</span>
+<span class="n">draft</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Example Lab EX-5&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;manufacturer&quot;</span><span class="p">:</span> <span class="s2">&quot;Example Lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="s2">&quot;EX-5&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;pouch&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chemistry&quot;</span><span class="p">:</span> <span class="s2">&quot;li-ion&quot;</span><span class="p">,</span>
+<span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">draft</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># a relative draft path resolves against the workspace root</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>                   <span class="c1"># the draft gets its IRI here</span>
+<span class="n">cell_spec_id</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">id</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cell_spec_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>BPX does not name its materials, so name each electrode’s material with <code class="docutils literal notranslate"><span class="pre">materials=</span></code> to make its claims findable by material. A value is a material kind (<code class="docutils literal notranslate"><span class="pre">battinfo.materials.material_kind_keys()</span></code> lists them) or a material-spec IRI. Leave out an electrode that is blended: its per-particle values are not imported yet, so there is no material part to name.</p>
+<p>Each claim can say how its value was obtained. BPX does not say, so the claims of the <code class="docutils literal notranslate"><span class="pre">cell</span></code> and <code class="docutils literal notranslate"><span class="pre">state</span></code> parts get no provenance class: a file’s capacity, cut-offs, geometry and temperatures may be datasheet values or conventions as easily as fits. The material, electrode, separator and electrolyte claims are marked <code class="docutils literal notranslate"><span class="pre">fitted</span></code> (<code class="docutils literal notranslate"><span class="pre">default_provenance_class=</span></code> changes that), except a zero or negative transport placeholder, which gets no class either. If you know where a part’s values came from, say so by part name, for example <code class="docutils literal notranslate"><span class="pre">provenance_classes={&quot;cell&quot;:</span> <span class="pre">&quot;measured&quot;}</span></code>.</p>
+</section>
+<section id="put-the-file-where-a-solver-can-fetch-it">
+<h2>3. Put the file where a solver can fetch it<a class="headerlink" href="#put-the-file-where-a-solver-can-fetch-it" title="Link to this heading">#</a></h2>
+<p>The record points at the file’s exact bytes, with their SHA-256, at an https URL whose content never changes. There are two ways to get such a URL today:</p>
+<ul class="simple">
+<li><p>The registry’s artifact store. Uploads are run by a registry operator for now (<code class="docutils literal notranslate"><span class="pre">scripts/publish_artifact_release.py</span></code> in battinfo-registry). The files land under <code class="docutils literal notranslate"><span class="pre">parameter-sets/&lt;uid&gt;/v1/&lt;file</span> <span class="pre">name&gt;</span></code>, which is why <code class="docutils literal notranslate"><span class="pre">result.file_uid()</span></code> is useful before the record exists.</p></li>
+<li><p>Any https archive at a fixed version: a Zenodo record version, a GitHub raw URL pinned to a commit (not to a branch), an institutional repository. Not a URL whose content can change. A GitHub or GitLab raw-file URL that names a branch or a tag instead of a commit earns a warning.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">bpx_file_distribution</span></code> hashes the bytes and builds the entry. <code class="docutils literal notranslate"><span class="pre">check_bpx</span></code> records whether the official <code class="docutils literal notranslate"><span class="pre">bpx</span></code> parser accepts the file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.interop</span><span class="w"> </span><span class="kn">import</span> <span class="n">bpx_file_distribution</span><span class="p">,</span> <span class="n">check_bpx</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="n">bpx_file_distribution</span><span class="p">(</span>
+    <span class="n">bpx_file</span><span class="p">,</span>
+    <span class="n">content_url</span><span class="o">=</span><span class="s2">&quot;https://files.example.org/parameter-sets/example-cell.bpx.json&quot;</span><span class="p">,</span>
+    <span class="n">checks</span><span class="o">=</span><span class="p">[</span><span class="n">check_bpx</span><span class="p">(</span><span class="n">bpx_file</span><span class="p">)],</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s2">&quot;checksum&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;checks&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;passed&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>A passing <code class="docutils literal notranslate"><span class="pre">bpx_parse</span></code> check means the parser accepts the file, not that a solver runs it. If you ran a simulation, say a 1C discharge in PyBaMM, record it as a second check named <code class="docutils literal notranslate"><span class="pre">simulation_smoke</span></code>.</p>
+<p>Some files need software beyond BPX itself. About:Energy’s files made with AEPyBaMM keep functions in their <code class="docutils literal notranslate"><span class="pre">User-defined</span></code> block that only that package evaluates, so their entry says <code class="docutils literal notranslate"><span class="pre">software_requirements=[&quot;aepybamm&gt;=0.2.3&quot;]</span></code>.</p>
+<section id="a-runnable-copy-when-the-parser-rejects-the-file">
+<h3>A runnable copy, when the parser rejects the file<a class="headerlink" href="#a-runnable-copy-when-the-parser-rejects-the-file" title="Link to this heading">#</a></h3>
+<p>Some exporters write a file that declares BPX 1.0 or later but keeps the v0.x layout, with the temperatures in <code class="docutils literal notranslate"><span class="pre">Cell</span></code> and the initial electrolyte concentration in <code class="docutils literal notranslate"><span class="pre">Electrolyte</span></code>. The BattMo export of Schmitt et al. 2026 is one. Every parser since BPX 1.0 rejects such a file. <code class="docutils literal notranslate"><span class="pre">upgrade_bpx</span></code> rewrites it in the v1 layout: it moves those fields into <code class="docutils literal notranslate"><span class="pre">State</span></code> and adds the State values the bpx package’s own v0-to-v1 migration adds (an initial state of charge of 1, and the temperatures it resolves), naming each one. Upload the result next to the source and attach it with role <code class="docutils literal notranslate"><span class="pre">runnable</span></code>:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.interop</span><span class="w"> </span><span class="kn">import</span> <span class="n">upgrade_bpx</span>
+
+<span class="n">upgraded</span> <span class="o">=</span> <span class="n">upgrade_bpx</span><span class="p">(</span><span class="s2">&quot;schmitt2026_hydra.json&quot;</span><span class="p">)</span>
+<span class="n">upgraded</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;schmitt2026_hydra.runnable.bpx.json&quot;</span><span class="p">)</span>
+<span class="n">runnable</span> <span class="o">=</span> <span class="n">bpx_file_distribution</span><span class="p">(</span>
+    <span class="s2">&quot;schmitt2026_hydra.runnable.bpx.json&quot;</span><span class="p">,</span>
+    <span class="n">content_url</span><span class="o">=</span><span class="s2">&quot;https://files.example.org/parameter-sets/&lt;uid&gt;/v1/schmitt2026_hydra.runnable.bpx.json&quot;</span><span class="p">,</span>
+    <span class="n">role</span><span class="o">=</span><span class="s2">&quot;runnable&quot;</span><span class="p">,</span>
+    <span class="n">derived_from</span><span class="o">=</span><span class="n">source</span><span class="p">[</span><span class="s2">&quot;checksum&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span>
+    <span class="n">conversion</span><span class="o">=</span><span class="n">upgraded</span><span class="o">.</span><span class="n">conversion_note</span><span class="p">(</span><span class="s2">&quot;battinfo 0.8.0&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>A runnable copy is only ever that conversion. <code class="docutils literal notranslate"><span class="pre">to_parameter_set(...,</span> <span class="pre">runnable_file=...)</span></code> refuses a copy whose parameters differ from <code class="docutils literal notranslate"><span class="pre">upgrade_bpx</span></code> of the source, and the registry checks the same thing when it downloads the files. Make one only when the parser rejects the source; next to a source that parses, it earns a warning.</p>
+</section>
+<section id="mirrors">
+<h3>Mirrors<a class="headerlink" href="#mirrors" title="Link to this heading">#</a></h3>
+<p>The same bytes served from another place go in with role <code class="docutils literal notranslate"><span class="pre">mirror</span></code>. Build the entry from the same file, so the checksum matches the source’s: <code class="docutils literal notranslate"><span class="pre">bpx_file_distribution(bpx_file,</span> <span class="pre">content_url=...,</span> <span class="pre">role=&quot;mirror&quot;)</span></code>.</p>
+</section>
+</section>
+<section id="build-the-record-and-publish-it">
+<h2>4. Build the record and publish it<a class="headerlink" href="#build-the-record-and-publish-it" title="Link to this heading">#</a></h2>
+<p>The record goes into a workspace like any other: <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;parameter_set&quot;,</span> <span class="pre">record=...)</span></code> queues it, <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> validates and writes it, and <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends what the last save wrote to the registry’s review queue.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> validates every record under the <code class="docutils literal notranslate"><span class="pre">publisher</span></code> policy before it contacts the registry, and that policy requires the file. A record without its source saves for local work (the default policy says nothing, <code class="docutils literal notranslate"><span class="pre">strict</span></code> warns) but is refused at submission, and nothing is sent. The credentials below are placeholders that are never used, because the check comes first:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.ws</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubmitError</span>
+
+<span class="n">draft</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_parameter_set</span><span class="p">(</span><span class="n">cell_spec_id</span><span class="o">=</span><span class="n">cell_spec_id</span><span class="p">,</span> <span class="n">materials</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;negative&quot;</span><span class="p">:</span> <span class="s2">&quot;graphite&quot;</span><span class="p">})</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">draft</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ws</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+        <span class="n">registry_url</span><span class="o">=</span><span class="s2">&quot;https://registry.example.org&quot;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;placeholder&quot;</span><span class="p">,</span>
+        <span class="n">workspace_id</span><span class="o">=</span><span class="s2">&quot;placeholder&quot;</span><span class="p">,</span> <span class="n">publisher_id</span><span class="o">=</span><span class="s2">&quot;placeholder&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">SubmitError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">failed</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;error&quot;</span><span class="p">])</span>  <span class="c1"># &quot;a parameter file is published with its file: attach the source&quot;</span>
+</pre></div>
+</div>
+<p>Attach the file and add the record again. It has the same IRI, because it is the same file, so it replaces the draft:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">record</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_parameter_set</span><span class="p">(</span>
+    <span class="n">cell_spec_id</span><span class="o">=</span><span class="n">cell_spec_id</span><span class="p">,</span>
+    <span class="n">materials</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;negative&quot;</span><span class="p">:</span> <span class="s2">&quot;graphite&quot;</span><span class="p">},</span>
+    <span class="n">distributions</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>With your registry credentials (from <code class="docutils literal notranslate"><span class="pre">ws.login(...)</span></code> or the <code class="docutils literal notranslate"><span class="pre">BATTINFO_*</span></code> environment variables), submit it:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The checks that bind the record to its file are errors under every policy: the IRI must be the one <code class="docutils literal notranslate"><span class="pre">parameters_sha256</span></code> gives, a runnable copy must name the source’s checksum, and a mirror must carry the source’s checksum. The registry also downloads the files and checks them itself: the source’s checksum and fingerprint, the runnable copy against the conversion of the source, and each mirror’s checksum.</p>
+</section>
+<section id="corrections">
+<h2>Corrections<a class="headerlink" href="#corrections" title="Link to this heading">#</a></h2>
+<p>A corrected file has other parameters, so it is a new record with a new IRI. The old IRI keeps resolving to the old file, because a solver may already have been handed it. Name the record the new one replaces:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">record</span> <span class="o">=</span> <span class="n">from_bpx_parameters</span><span class="p">(</span><span class="s2">&quot;corrected.bpx.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_parameter_set</span><span class="p">(</span>
+    <span class="n">virtual_cell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">distributions</span><span class="o">=</span><span class="p">[</span><span class="n">corrected_source</span><span class="p">],</span>
+    <span class="n">supersedes</span><span class="o">=</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;old uid&gt;&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Only the publisher of the old record can supersede it. The registry refuses a <code class="docutils literal notranslate"><span class="pre">supersedes</span></code> from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.</p>
+</section>
+<section id="records-published-under-spec">
+<h2>Records published under spec/<a class="headerlink" href="#records-published-under-spec" title="Link to this heading">#</a></h2>
+<p>Parameter sets published before 2026-10-11 have <code class="docutils literal notranslate"><span class="pre">spec/</span></code> IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning <code class="docutils literal notranslate"><span class="pre">semantic.parameter_set_legacy_namespace</span></code>, which names the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> IRI of its replacement. Nothing is published under <code class="docutils literal notranslate"><span class="pre">spec/</span></code> any more, though, so the <code class="docutils literal notranslate"><span class="pre">publisher</span></code> policy makes that warning an error, and <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> and <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> refuse the record. Its new version is a new <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> record that supersedes it, and <code class="docutils literal notranslate"><span class="pre">supersede_parameter_set</span></code> builds it. The IRI is minted from the current seeds (a file’s from its <code class="docutils literal notranslate"><span class="pre">parameters_sha256</span></code>, a claim batch’s from its target, scope and name), <code class="docutils literal notranslate"><span class="pre">supersedes</span></code> names the old IRI, and everything else is copied as it is, the file entries included, since a file’s URL is not its identity. For the Schmitt et al. 2026 file:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.api</span><span class="w"> </span><span class="kn">import</span> <span class="n">supersede_parameter_set</span>
+
+<span class="n">old</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;parameter-set-szxp-xwnx-vhyf-rvm0.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+<span class="n">new</span> <span class="o">=</span> <span class="n">supersede_parameter_set</span><span class="p">(</span><span class="n">old</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">][</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>          <span class="c1"># https://w3id.org/battinfo/dataset/7jnc-cjtw-5h3a-5t52</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">new</span><span class="p">[</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">][</span><span class="s2">&quot;supersedes&quot;</span><span class="p">])</span>  <span class="c1"># https://w3id.org/battinfo/spec/szxp-xwnx-vhyf-rvm0</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;parameter_set&quot;</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Do not move the old uid to <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> by editing the IRI. A uid is never reused, not even under another namespace, so a <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> record that keeps the uid it had under <code class="docutils literal notranslate"><span class="pre">spec/</span></code> is refused under every policy, whether or not it names the old record in <code class="docutils literal notranslate"><span class="pre">supersedes</span></code>. Once both records sit in a workspace, <code class="docutils literal notranslate"><span class="pre">query_parameter_sets</span></code> and <code class="docutils literal notranslate"><span class="pre">collate_claims</span></code> return the new one only, and <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> deposits the new one and leaves the old one out, saying so. You can keep the old file; there is no need to delete it.</p>
+</section>
+<section id="who-owns-a-file-s-iri">
+<h2>Who owns a file’s IRI<a class="headerlink" href="#who-owns-a-file-s-iri" title="Link to this heading">#</a></h2>
+<p>The first publisher to submit a file owns its IRI. Another publisher submitting the same parameters, in any formatting, is refused. The owner can publish new versions of the record (a corrected cell link or material name, say), but the source file stays the one first given: a new version keeps the same source checksum. Values that differ only beyond double precision (<code class="docutils literal notranslate"><span class="pre">0.1000000000000000001</span></code> and <code class="docutils literal notranslate"><span class="pre">0.1</span></code>) are the same number in JSON, so they share an IRI.</p>
+</section>
+<section id="from-the-iri-to-pybamm">
+<h2>From the IRI to PyBaMM<a class="headerlink" href="#from-the-iri-to-pybamm" title="Link to this heading">#</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">battery-genome</span></code> client reads the record, downloads its BPX file (the runnable copy when there is one), checks the bytes against the record’s SHA-256 and returns the JSON, which PyBaMM takes as it is:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battery_genome</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pybamm</span>
+
+<span class="n">doc</span> <span class="o">=</span> <span class="n">bg</span><span class="o">.</span><span class="n">bpx</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;uid&gt;&quot;</span><span class="p">)</span>
+<span class="n">parameter_values</span> <span class="o">=</span> <span class="n">pybamm</span><span class="o">.</span><span class="n">ParameterValues</span><span class="o">.</span><span class="n">create_from_bpx_obj</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Without Python, ask the IRI for the file. curl does not check the checksum; the client does.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;https://w3id.org/battinfo/dataset/&lt;uid&gt;?format=bpx&quot;</span><span class="w"> </span>-o<span class="w"> </span>cell.bpx.json
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="publish-a-dataset-collection.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Publish a dataset collection</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="name-your-records.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Name your records: titles and handles</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#read-the-file">1. Read the file</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#say-which-cell-the-file-describes">2. Say which cell the file describes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#put-the-file-where-a-solver-can-fetch-it">3. Put the file where a solver can fetch it</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-runnable-copy-when-the-parser-rejects-the-file">A runnable copy, when the parser rejects the file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#mirrors">Mirrors</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#build-the-record-and-publish-it">4. Build the record and publish it</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#corrections">Corrections</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#records-published-under-spec">Records published under spec/</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#who-owns-a-file-s-iri">Who owns a file’s IRI</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#from-the-iri-to-pybamm">From the IRI to PyBaMM</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

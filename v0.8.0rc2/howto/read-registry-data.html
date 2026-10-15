@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Read data from the registry &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'howto/read-registry-data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0rc2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bulk-ingest thousands of records" href="bulk-ingest.html" />
+    <link rel="prev" title="Find what already exists" href="find-existing-records.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Recipes</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../workspace-authoring.html">Workspace authoring</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-materials.html">Register the materials in your lab</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build-a-cell-from-components.html">Build a cell from components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="label-your-cells.html">Label your cells — names, serials, and QR codes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="register-equipment.html">Register your lab equipment and log which channel ran a test</a></li>
+<li class="toctree-l1"><a class="reference internal" href="find-existing-records.html">Find what already exists</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Read data from the registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulk-ingest.html">Bulk-ingest thousands of records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish-a-dataset-collection.html">Publish a dataset collection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="publish-a-bpx-parameter-file.html">Publish a BPX parameter file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="name-your-records.html">Name your records: titles and handles</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fix-validation-errors.html">Fix the five classic validation errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resume-a-submission.html">Resume an interrupted bulk submission</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tag-funding-and-orcid.html">Tag your work with a grant and your ORCID</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pages/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/howto.html" class="nav-link">How-to guides</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Read data from the registry</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="read-data-from-the-registry">
+<h1>Read data from the registry<a class="headerlink" href="#read-data-from-the-registry" title="Link to this heading">#</a></h1>
+<p>The workspace is for describing and publishing. <code class="docutils literal notranslate"><span class="pre">battinfo.registry.Registry</span></code> goes the other way: it finds what a registry holds and loads the measurement files for analysis. Use it when you want to build a data pipeline on published datasets.</p>
+<p>A registry is an index. It stores records and the links between them, and each dataset record points at its files with a URL, a size and a checksum. The files themselves live wherever the publisher put them.</p>
+<p>Listing and looking up records needs only the core install. Loading files and building the catalog return pandas objects:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span>
+</pre></div>
+</div>
+<section id="start-from-the-catalog">
+<h2>Start from the catalog<a class="headerlink" href="#start-from-the-catalog" title="Link to this heading">#</a></h2>
+<p>The catalog is one table with a row per dataset, already joined with the test that produced it, the cell it was measured on and that cell’s spec. Filter it before you download anything.</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">battinfo.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
+
+<span class="n">reg</span> <span class="o">=</span> <span class="n">Registry</span><span class="p">()</span>            <span class="c1"># the public registry; pass a URL for another one</span>
+<span class="n">catalog</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">catalog</span><span class="p">()</span>
+
+<span class="n">cycling</span> <span class="o">=</span> <span class="n">catalog</span><span class="p">[(</span><span class="n">catalog</span><span class="o">.</span><span class="n">test_kind</span> <span class="o">==</span> <span class="s2">&quot;cycling&quot;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">catalog</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s2">&quot;coin&quot;</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cycling</span><span class="p">[[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;chemistry&quot;</span><span class="p">,</span> <span class="s2">&quot;positive_electrode_basis&quot;</span><span class="p">,</span> <span class="s2">&quot;nominal_capacity_ah&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Building the catalog reads every dataset record once, which takes a few minutes on a large registry. The result is cached and reused until the registry reports a change. Pass <code class="docutils literal notranslate"><span class="pre">refresh=True</span></code> to rebuild it regardless.</p>
+<p>The columns are:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Columns</p></th>
+<th class="head"><p>What they hold</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dataset_id</span></code>, <code class="docutils literal notranslate"><span class="pre">title</span></code>, <code class="docutils literal notranslate"><span class="pre">license</span></code>, <code class="docutils literal notranslate"><span class="pre">doi</span></code></p></td>
+<td><p>The dataset record</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">file_url</span></code>, <code class="docutils literal notranslate"><span class="pre">file_name</span></code>, <code class="docutils literal notranslate"><span class="pre">media_type</span></code>, <code class="docutils literal notranslate"><span class="pre">sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">size_bytes</span></code></p></td>
+<td><p>Its measurement file. <code class="docutils literal notranslate"><span class="pre">sha256</span></code> is filled only when the record states a SHA-256 checksum</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test_id</span></code>, <code class="docutils literal notranslate"><span class="pre">test_kind</span></code></p></td>
+<td><p>The test that produced it (<code class="docutils literal notranslate"><span class="pre">cycling</span></code>, <code class="docutils literal notranslate"><span class="pre">capacity_check</span></code>, <code class="docutils literal notranslate"><span class="pre">gitt</span></code>, …)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cell_id</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_name</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_spec_id</span></code></p></td>
+<td><p>The physical cell and its spec</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">manufacturer</span></code>, <code class="docutils literal notranslate"><span class="pre">model</span></code>, <code class="docutils literal notranslate"><span class="pre">format</span></code>, <code class="docutils literal notranslate"><span class="pre">chemistry</span></code>, <code class="docutils literal notranslate"><span class="pre">positive_electrode_basis</span></code>, <code class="docutils literal notranslate"><span class="pre">negative_electrode_basis</span></code></p></td>
+<td><p>Cell description</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nominal_capacity_ah</span></code>, <code class="docutils literal notranslate"><span class="pre">nominal_capacity_source</span></code></p></td>
+<td><p>Stated capacity in Ah, and the property it was read from: <code class="docutils literal notranslate"><span class="pre">nominal_capacity</span></code>, <code class="docutils literal notranslate"><span class="pre">rated_capacity</span></code>, <code class="docutils literal notranslate"><span class="pre">typical_capacity</span></code> or <code class="docutils literal notranslate"><span class="pre">minimum_capacity</span></code>, the first one the cell (or else its spec) states, in that order</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">checksum_algorithm</span></code>, <code class="docutils literal notranslate"><span class="pre">checksum_value</span></code></p></td>
+<td><p>The checksum the record states for the file (<code class="docutils literal notranslate"><span class="pre">sha256</span></code>, <code class="docutils literal notranslate"><span class="pre">md5</span></code>, …), which <code class="docutils literal notranslate"><span class="pre">download()</span></code> and <code class="docutils literal notranslate"><span class="pre">read()</span></code> verify</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A cell with no stated capacity has an empty <code class="docutils literal notranslate"><span class="pre">nominal_capacity_ah</span></code>. Nothing is estimated from the data.</p>
+</section>
+<section id="load-one-dataset">
+<h2>Load one dataset<a class="headerlink" href="#load-one-dataset" title="Link to this heading">#</a></h2>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cycling</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dataset_id</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<span class="c1"># [&#39;test_time_second&#39;, &#39;voltage_volt&#39;, &#39;current_ampere&#39;, &#39;cycle_count&#39;, &#39;step_index&#39;, ...]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">read</span></code> downloads the file, checks it against the checksum in the record, keeps a local copy and returns a DataFrame. The second call for the same dataset reads the local copy, after checking it again.</p>
+<p>The check uses whichever algorithm the record states, as long as Python’s <code class="docutils literal notranslate"><span class="pre">hashlib</span></code> provides it. That covers SHA-256 and MD5, which is what Zenodo records give. A download that does not match raises <code class="docutils literal notranslate"><span class="pre">OSError</span></code>, and a local copy that no longer matches is fetched again. Some records state no checksum, or one in an algorithm <code class="docutils literal notranslate"><span class="pre">hashlib</span></code> does not provide: such a file is used unchecked, and a <code class="docutils literal notranslate"><span class="pre">UserWarning</span></code> names it the first time.</p>
+<p>Files come from many publishers and do not all spell their columns the same way. By default <code class="docutils literal notranslate"><span class="pre">read</span></code> renames columns to machine-readable BDF names, so <code class="docutils literal notranslate"><span class="pre">Voltage</span> <span class="pre">/</span> <span class="pre">V</span></code> becomes <code class="docutils literal notranslate"><span class="pre">voltage_volt</span></code> and a file that logs time in milliseconds comes back with <code class="docutils literal notranslate"><span class="pre">test_time_second</span></code>. Columns it does not recognise are left as they are, and it never invents one: a file with no step column still has none. Pass <code class="docutils literal notranslate"><span class="pre">bdf_names=False</span></code> to get the file exactly as published.</p>
+<p>To fetch a file without loading it:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">path</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">)</span>             <span class="c1"># into the cache</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">dataset_id</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;data/raw&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="check-what-the-columns-mean">
+<h2>Check what the columns mean<a class="headerlink" href="#check-what-the-columns-mean" title="Link to this heading">#</a></h2>
+<p>Renaming makes the names agree. It does not make every file mean the same thing by them, so check these before you compute features across sources:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">current_ampere</span></code> is negative while the cell discharges and positive while it charges.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cycle_count</span></code> starts at 0 in some files and at 1 in others, depending on the cycler and the converter that wrote them. Take the first cycle from the data (<code class="docutils literal notranslate"><span class="pre">df.cycle_count.min()</span></code>) rather than assuming it is 1.</p></li>
+<li><p>Which capacity columns a file has depends on its source, and some published files do not follow the BDF definitions. Files from one publisher reset <code class="docutils literal notranslate"><span class="pre">cumulative_capacity_ah</span></code> at every step, so it holds a per-step capacity rather than a running total. Files from another reset <code class="docutils literal notranslate"><span class="pre">charging_capacity_ah</span></code> and <code class="docutils literal notranslate"><span class="pre">discharging_capacity_ah</span></code> every cycle. <code class="docutils literal notranslate"><span class="pre">step_capacity_ah</span></code>, a name from an earlier BDF version, does not always reset at a step boundary.</p></li>
+</ul>
+<p>When in doubt, compute capacity from current and time yourself. Per-cycle discharge capacity by coulomb counting:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dt_h</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">test_time_second</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+<span class="n">discharge_ah</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">df</span><span class="o">.</span><span class="n">current_ampere</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt_h</span>
+<span class="n">per_cycle_discharge_ah</span> <span class="o">=</span> <span class="n">discharge_ah</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">cycle_count</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="process-many-datasets">
+<h2>Process many datasets<a class="headerlink" href="#process-many-datasets" title="Link to this heading">#</a></h2>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;features&quot;</span><span class="p">)</span>
+<span class="n">out</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cycling</span><span class="o">.</span><span class="n">itertuples</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c1"># a data file read() does not load, such as .xlsx</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;skipped </span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">err</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">continue</span>
+    <span class="n">per_cycle</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;cycle_count&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span>
+        <span class="n">v_min</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;voltage_volt&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">),</span>
+        <span class="n">v_max</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;voltage_volt&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
+        <span class="n">duration_s</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;test_time_second&quot;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">t</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+    <span class="p">)</span>
+    <span class="n">per_cycle</span><span class="o">.</span><span class="n">to_parquet</span><span class="p">(</span><span class="n">out</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">dataset_id</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">.parquet&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">read()</span></code> loads <code class="docutils literal notranslate"><span class="pre">.parquet</span></code> and <code class="docutils literal notranslate"><span class="pre">.csv</span></code> files and raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for anything else, such as the spreadsheets (<code class="docutils literal notranslate"><span class="pre">.xlsx</span></code>) a few publishers share, so the loop skips those and says which instead of stopping at the first one.</p>
+<p>Keep the <code class="docutils literal notranslate"><span class="pre">dataset_id</span></code> with anything you derive. It is the persistent identifier to cite, and it is how you get back to the cell and test descriptions later.</p>
+</section>
+<section id="look-at-individual-records">
+<h2>Look at individual records<a class="headerlink" href="#look-at-individual-records" title="Link to this heading">#</a></h2>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">)</span>          <span class="c1"># summaries, all pages</span>
+<span class="n">entry</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tests</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>                         <span class="c1"># the registry&#39;s entry for the test</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">links</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>                                  <span class="c1"># e.g. {&#39;cell&#39;: [&#39;https://w3id.org/battinfo/cell/...&#39;]}</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code> accepts any record type (<code class="docutils literal notranslate"><span class="pre">dataset</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">cell</span></code>, <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">test_spec</span></code>, …). <code class="docutils literal notranslate"><span class="pre">get</span></code> takes an IRI, or a summary returned by <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">links</span></code> groups the IRIs a record points at by the type of the record they name, as the registry indexed them. Which keys appear depends on the record: a test has <code class="docutils literal notranslate"><span class="pre">cell</span></code>, plus <code class="docutils literal notranslate"><span class="pre">test_spec</span></code> only when it names its test spec; a dataset has <code class="docutils literal notranslate"><span class="pre">cell</span></code> and <code class="docutils literal notranslate"><span class="pre">test</span></code>; a cell has <code class="docutils literal notranslate"><span class="pre">cell_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">dataset</span></code>. A type the record has no link to is left out rather than given an empty list, so read it with <code class="docutils literal notranslate"><span class="pre">reg.links(entry).get(&quot;test_spec&quot;,</span> <span class="pre">[])</span></code>.</p>
+</section>
+<section id="get-the-record-out-of-an-entry">
+<h2>Get the record out of an entry<a class="headerlink" href="#get-the-record-out-of-an-entry" title="Link to this heading">#</a></h2>
+<p>The entry that <code class="docutils literal notranslate"><span class="pre">get</span></code> returns is the registry’s view of a record: its IRI, title and status, the links and files the registry indexed, and the record as it was published. The entry itself is not a BattINFO record, so <code class="docutils literal notranslate"><span class="pre">Dataset.from_record</span></code> and the other <code class="docutils literal notranslate"><span class="pre">from_record</span></code> methods cannot take it. The record sits inside it, under the entry’s <code class="docutils literal notranslate"><span class="pre">resource_type</span></code>:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">entry</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50&quot;</span><span class="p">)</span>
+<span class="n">record</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;semantic_payload&quot;</span><span class="p">][</span><span class="s2">&quot;battinfo_records&quot;</span><span class="p">][</span><span class="n">entry</span><span class="p">[</span><span class="s2">&quot;resource_type&quot;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>The same line works for every record type. A cell’s entry keeps its record under <code class="docutils literal notranslate"><span class="pre">&quot;cell&quot;</span></code> (the body inside is <code class="docutils literal notranslate"><span class="pre">cell_instance</span></code>) and a copy of the cell’s spec under <code class="docutils literal notranslate"><span class="pre">&quot;cell_spec&quot;</span></code>.</p>
+</section>
+<section id="make-a-new-version-of-a-published-dataset">
+<h2>Make a new version of a published dataset<a class="headerlink" href="#make-a-new-version-of-a-published-dataset" title="Link to this heading">#</a></h2>
+<p>To change a published dataset, for example to link it to a different test, rebuild it from its record, change what needs changing, save it and submit it. The registry keeps it as a new version of the same IRI.</p>
+<p>The curve preview the registry shows for a dataset does not come along by itself. Its two files, a Plotly figure (<code class="docutils literal notranslate"><span class="pre">.plot.json</span></code>, role <code class="docutils literal notranslate"><span class="pre">plot_data</span></code>) and an image (<code class="docutils literal notranslate"><span class="pre">.png</span></code>, role <code class="docutils literal notranslate"><span class="pre">plot_static</span></code>), are listed in the entry’s <code class="docutils literal notranslate"><span class="pre">distributions</span></code> but not in the record, so a version made from the record alone is published without them, and nothing warns you. Copy them across before you save:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">files</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;distributions&quot;</span><span class="p">,</span> <span class="p">[]))</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">}</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s2">&quot;distributions&quot;</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;role&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span> <span class="s2">&quot;plot_static&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">],</span> <span class="s2">&quot;content_url&quot;</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;access_url&quot;</span><span class="p">],</span> <span class="s2">&quot;encoding_format&quot;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;media_type&quot;</span><span class="p">)})</span>
+
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_record</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">test_id</span> <span class="o">=</span> <span class="n">new_test_iri</span>            <span class="c1"># the change this version makes</span>
+<span class="n">dataset</span><span class="o">.</span><span class="n">distributions</span> <span class="o">=</span> <span class="n">files</span>
+<span class="n">battinfo</span><span class="o">.</span><span class="n">save_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;lab/.battinfo/records&quot;</span><span class="p">,</span> <span class="n">validation_policy</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> recognises the copied files by their names and lists them as <code class="docutils literal notranslate"><span class="pre">plot_data</span></code> and <code class="docutils literal notranslate"><span class="pre">plot_static</span></code> again, with the image as the preview. The record keeps only the measurement files, as the published one does.</p>
+<p><code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> checks that the cell and test the dataset is about are known in the workspace. A cell the workspace has looked up in the registry counts, for example one given by IRI to <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">cell=...)</span></code> when you make the new test. A cell or test that exists only in the registry and was never looked up does not, so for a version that keeps its published links, pass <code class="docutils literal notranslate"><span class="pre">resolve_references=False</span></code>.</p>
+<p>Once <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> or <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;equipment&quot;)</span></code> has written records in a session, <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code> sends only those, even with <code class="docutils literal notranslate"><span class="pre">submit_all=True</span></code>, and a dataset written by <code class="docutils literal notranslate"><span class="pre">save_dataset</span></code> is not one of them. Submit the dataset from a new workspace object:</p>
+<!-- doc-snippet: skip -->
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;lab&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">only</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">,</span> <span class="n">submit_all</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="where-things-are-kept">
+<h2>Where things are kept<a class="headerlink" href="#where-things-are-kept" title="Link to this heading">#</a></h2>
+<p>Downloads and the catalog go to the user cache directory (<code class="docutils literal notranslate"><span class="pre">~/.cache/battinfo</span></code>, or <code class="docutils literal notranslate"><span class="pre">%LOCALAPPDATA%\battinfo</span></code> on Windows). Set <code class="docutils literal notranslate"><span class="pre">BATTINFO_CACHE_DIR</span></code>, or pass <code class="docutils literal notranslate"><span class="pre">cache_dir=</span></code> to <code class="docutils literal notranslate"><span class="pre">Registry</span></code>, to put them somewhere else. <code class="docutils literal notranslate"><span class="pre">BATTINFO_REGISTRY_URL</span></code> changes the default registry.</p>
+<p>The public registry can take half a minute to answer the first request after it has been idle. Later requests are fast.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="find-existing-records.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Find what already exists</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="bulk-ingest.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Bulk-ingest thousands of records</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#start-from-the-catalog">Start from the catalog</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-one-dataset">Load one dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-what-the-columns-mean">Check what the columns mean</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#process-many-datasets">Process many datasets</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#look-at-individual-records">Look at individual records</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#get-the-record-out-of-an-entry">Get the record out of an entry</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#make-a-new-version-of-a-published-dataset">Make a new version of a published dataset</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-things-are-kept">Where things are kept</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

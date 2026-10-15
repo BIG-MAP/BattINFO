@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Guide 6 — Publish your first dataset &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <link rel="stylesheet" type="text/css" href="../_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'guides/06-publish-your-data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0rc2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="../_static/favicon.svg"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How-to guides" href="../pages/howto.html" />
+    <link rel="prev" title="Guide 5 — Cell descriptors" href="05-descriptors.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="../_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-concepts.html">Guide 1 — Concepts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-first-cell-type.html">Guide 2 — Describing a cell</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-linked-records.html">Guide 3 — Linked records: cells, tests, and datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04-semantic-layer.html">Guide 4 — The semantic layer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05-descriptors.html">Guide 5 — Cell descriptors</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Guide 6 — Publish your first dataset</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../pages/guides.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Guide 6 — Publish your first dataset</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="Guide-6-—-Publish-your-first-dataset">
+<h1>Guide 6 — Publish your first dataset<a class="headerlink" href="#Guide-6-—-Publish-your-first-dataset" title="Link to this heading">#</a></h1>
+<p><strong>The tutorial version of the</strong> <a class="reference external" href="https://battinfo.org/publish">publishing journey</a><strong>:</strong> you start with a raw cycler export and finish with validated, linked records, a citable archive, and a place in the Battery Genome registry. Every code cell here executes in CI, against the sample Neware CSV that ships inside the battinfo package — swap in your own files and the recipe is identical.</p>
+<p>The five stages:</p>
+<ol class="arabic simple">
+<li><p><strong>Convert</strong> — instrument files → tidy BDF tables</p></li>
+<li><p><strong>Identify</strong> — name the physical cells you tested</p></li>
+<li><p><strong>Link</strong> — attach each test and its data to its cell</p></li>
+<li><p><strong>Save &amp; validate</strong> — canonical records with stable IRIs</p></li>
+<li><p><strong>Publish</strong> — a DOI on Zenodo + the registry review queue</p></li>
+</ol>
+<p><strong>Prerequisites:</strong> Stage 1 uses the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra, which brings the <code class="docutils literal notranslate"><span class="pre">batterydf</span></code> BDF converter and the plotting libraries: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;battinfo[processing]&quot;</span></code>. The extra currently installs the batterydf 0.2 release candidate from PyPI. Stage 5 needs credentials and is guarded so the notebook runs fully offline without them.</p>
+<p><em>New words? The</em> <a class="reference internal" href="../pages/glossary.html"><span class="doc">plain-language glossary</span></a> <em>decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.</em></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="c1"># This notebook runs from its own folder (docs/guides); fresh scratch every run.</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;_scratch/guide-06&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">SCRATCH</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">SCRATCH</span><span class="p">)</span>
+<span class="n">SCRATCH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Your starting point: a folder with raw cycler exports. Here, the sample</span>
+<span class="c1"># Neware CSV that ships inside the battinfo package (one CC charge + discharge cycle).</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;battinfo.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;samples&quot;</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span>
+<span class="p">(</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;neware-sample.csv&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
+
+<span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="n">SCRATCH</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="Stage-1-—-Convert">
+<h2>Stage 1 — Convert<a class="headerlink" href="#Stage-1-—-Convert" title="Link to this heading">#</a></h2>
+<p>Every instrument speaks its own format; BDF (Battery Data Format) is the one tidy, documented table they all become. NEWARE <code class="docutils literal notranslate"><span class="pre">.ndax</span></code>, Biologic <code class="docutils literal notranslate"><span class="pre">.mpt</span></code>, Excel and MATLAB exports are auto-detected by <code class="docutils literal notranslate"><span class="pre">ws.convert()</span></code>; CSV exports use an explicit pattern.</p>
+<p>No reader for your instrument (Arbin, Maccor, an in-house export)? Save a CSV from the instrument software and map its headers yourself: <code class="docutils literal notranslate"><span class="pre">ws.bdf_columns()</span></code> prints the canonical column names, and <code class="docutils literal notranslate"><span class="pre">ws.convert_csv(path,</span> <span class="pre">hints={&quot;Voltage(V)&quot;:</span> <span class="pre">&quot;voltage_volt&quot;,</span> <span class="pre">...})</span></code> does the rename. Check the validation report it prints — a measured column listed under <code class="docutils literal notranslate"><span class="pre">extras</span></code> is unmapped and will be invisible downstream.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">converted</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;*.csv&quot;</span><span class="p">)</span>
+
+<span class="n">bdf_file</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;bdf&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.bdf.csv&quot;</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BDF columns:&quot;</span><span class="p">,</span> <span class="n">bdf_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  neware-sample.csv  -&gt;  neware-sample.bdf.csv  (0.0 MB, via neware_csv)
+  Left out a column that only numbers the rows: Record. The row order of neware-sample.bdf.csv holds the same information.
+
+Converted 1 file(s) -&gt; &lt;repo&gt;\docs\guides\_scratch\guide-06\bdf
+
+BDF columns: test_time_second,voltage_volt,current_ampere,unix_time_second,cycle_count,step_id,step_time_second,step_charging_capacity_ah,step_discharging_capacity_ah
+</pre></div></div>
+</div>
+</section>
+<section id="Stage-2-—-Identify">
+<h2>Stage 2 — Identify<a class="headerlink" href="#Stage-2-—-Identify" title="Link to this heading">#</a></h2>
+<p>Your measurements are about <em>specific physical cells</em>. Search the registry for the cell product you tested; if you are offline (or the cell is not registered yet), describe it yourself — the same object works either way.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hits</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;molicel inr21700 p45b&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">hits</span><span class="p">:</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">hits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>           <span class="c1"># found in the registry — reuse its identity</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Offline / unregistered: describe the product yourself.</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">CellSpec</span><span class="p">(</span>
+        <span class="n">manufacturer</span><span class="o">=</span><span class="s2">&quot;Molicel&quot;</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">=</span><span class="s2">&quot;INR21700-P45B&quot;</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;cylindrical&quot;</span><span class="p">,</span>
+        <span class="n">chemistry</span><span class="o">=</span><span class="s2">&quot;Li-ion&quot;</span><span class="p">,</span>
+        <span class="n">nominal_capacity</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mf">4.5</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="s2">&quot;Ah&quot;</span><span class="p">},</span>
+    <span class="p">)</span>
+
+<span class="c1"># The serial printed on the cell, or a label only your lab uses: a cell&#39;s IRI</span>
+<span class="c1"># comes from its spec and serial, so a bare &quot;S1&quot; would be every lab&#39;s S1.</span>
+<span class="n">cells</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;cell&quot;</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">serial_numbers</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;MYLAB-P45B-001&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No cell-spec match for &#39;molicel inr21700 p45b&#39;.
+  Tip: ws.template(&#39;cell-spec&#39;, manufacturer=&#39;...&#39;, model=&#39;...&#39;)
+  cell: MYLAB-P45B-001  (IRI auto-assigned)
+</pre></div></div>
+</div>
+</section>
+<section id="Stage-3-—-Link">
+<h2>Stage 3 — Link<a class="headerlink" href="#Stage-3-—-Link" title="Link to this heading">#</a></h2>
+<p>Data without its test conditions is trivia. The chain <strong>cell → test → dataset</strong> is what lets someone who was never in your lab reuse the numbers. <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">...)</span></code> creates the test record and a dataset record pointing at the converted file.</p>
+<p>(To also record <em>which cycler channel</em> ran the test, register your equipment once — <a class="reference internal" href="../howto/register-equipment.html"><span class="doc">How-to: register equipment</span></a> — and pass <code class="docutils literal notranslate"><span class="pre">channel=...</span></code> here.)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tests</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;cycling&quot;</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="s2">&quot;MYLAB-P45B-001&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">bdf_file</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+  test [cycling] on MYLAB-P45B-001  +1 dataset(s)  (+1 raw source)
+</pre></div></div>
+</div>
+</section>
+<section id="Stage-4-—-Save-&amp;-validate">
+<h2>Stage 4 — Save &amp; validate<a class="headerlink" href="#Stage-4-—-Save-&-validate" title="Link to this heading">#</a></h2>
+<p>Before saving, set two workspace defaults that get stamped onto every record: who made the data, and how anyone may use it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.contributor(orcid,</span> <span class="pre">name=...)</span></code> tags the workspace with a person by ORCID; contributors <strong>accumulate</strong>, so call it once per author. Each is written onto every record you save (as a <code class="docutils literal notranslate"><span class="pre">Person</span></code> carrying the ORCID) and into the publication bundle — so a two-author dataset credits both, not just the last one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.license(&quot;cc-by-4.0&quot;)</span></code> sets the workspace’s default license. Set it here, at the start — before <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> — so <strong>every locally saved record carries a license, not just the Zenodo deposit</strong>. A per-record <code class="docutils literal notranslate"><span class="pre">ws.add(...,</span> <span class="pre">license=...)</span></code> overrides the default for that record, and the <code class="docutils literal notranslate"><span class="pre">license=</span></code> you pass to <code class="docutils literal notranslate"><span class="pre">ws.zenodo(...)</span></code> in Stage 5 wins for the deposit itself (precedence: explicit <code class="docutils literal notranslate"><span class="pre">ws.zenodo</span></code> license &gt; explicit <code class="docutils literal notranslate"><span class="pre">ws.add</span></code> license &gt; workspace default). A record saved without any
+license still validates, but the gold-standard panel nudges you to set one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ws.save()</span></code> then validates every record against the canonical JSON Schemas and writes them with stable <code class="docutils literal notranslate"><span class="pre">w3id.org/battinfo/...</span></code> IRIs, minted deterministically from each record’s identity — re-running an identical save is a no-op, never a duplicate.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># The workspace default license — stamped onto every record from here on.</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">license</span><span class="p">(</span><span class="s2">&quot;cc-by-4.0&quot;</span><span class="p">)</span>
+
+<span class="c1"># Credit both authors by ORCID — contributors accumulate across calls.</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Ada Lovelace&quot;</span><span class="p">)</span>
+<span class="n">ws</span><span class="o">.</span><span class="n">contributor</span><span class="p">(</span><span class="s2">&quot;0000-0001-5109-3700&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Alan Turing&quot;</span><span class="p">)</span>
+
+<span class="n">ws</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+<span class="n">records_root</span> <span class="o">=</span> <span class="n">SCRATCH</span> <span class="o">/</span> <span class="s2">&quot;.battinfo/records&quot;</span>
+<span class="k">for</span> <span class="n">record_file</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">records_root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">record_file</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Workspace license: cc-by-4.0
+  Saved to .battinfo/workspace.json; stamped onto records on ws.save().
+Workspace contributor: Ada Lovelace (https://orcid.org/0000-0002-1825-0097)
+  Saved to .battinfo/workspace.json; stamped onto records on ws.save().
+Workspace contributors (2):
+  - Ada Lovelace (https://orcid.org/0000-0002-1825-0097)
+  - Alan Turing (https://orcid.org/0000-0001-5109-3700)
+  Saved to .battinfo/workspace.json; stamped onto records on ws.save().
+Saved 4 record(s) under &lt;repo&gt;\docs\guides\_scratch\guide-06\.battinfo\records:
+  cell spec   Molicel INR21700-P45B                [created]  .battinfo\records\cell-spec\cell-spec-vgwn-7exg-09tt-zwq3.json
+  cell        MYLAB-P45B-001                       [created]  .battinfo\records\cell-instance\cell-fhcx-9qtr-3vep-wahx.json
+  test        MYLAB-P45B-001 cycling               [created]  .battinfo\records\test\test-04bx-fcf2-hxm2-rtva.json
+  dataset     MYLAB-P45B-001 data                  [created]  .battinfo\records\dataset\dataset-s34m-fyym-c479-hfge.json
+
+  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.
+cell-instance/cell-fhcx-9qtr-3vep-wahx.json
+cell-spec/cell-spec-vgwn-7exg-09tt-zwq3.json
+dataset/dataset-s34m-fyym-c479-hfge.json
+test/test-04bx-fcf2-hxm2-rtva.json
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Look inside one: the cell record, linked to its spec, stamped with provenance.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="n">cell_record_file</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">records_root</span> <span class="o">/</span> <span class="s2">&quot;cell-instance&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">&quot;*.json&quot;</span><span class="p">))</span>
+<span class="n">cell_record</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">cell_record_file</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cell_record</span><span class="p">[</span><span class="s2">&quot;cell_instance&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:</span><span class="mi">400</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;...&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;provenance:&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cell_record</span><span class="p">[</span><span class="s2">&quot;provenance&quot;</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{
+  &#34;id&#34;: &#34;https://w3id.org/battinfo/cell/fhcx-9qtr-3vep-wahx&#34;,
+  &#34;short_id&#34;: &#34;fhcx9q&#34;,
+  &#34;cell_spec_id&#34;: &#34;https://w3id.org/battinfo/spec/vgwn-7exg-09tt-zwq3&#34;,
+  &#34;name&#34;: &#34;MYLAB-P45B-001&#34;,
+  &#34;serial_number&#34;: &#34;MYLAB-P45B-001&#34;
+}
+...
+provenance: {
+  &#34;source_type&#34;: &#34;measurement&#34;,
+  &#34;retrieved_at&#34;: 1791981082,
+  &#34;battinfo_version&#34;: &#34;0.8.0&#34;
+}
+</pre></div></div>
+</div>
+</section>
+<section id="Stage-5-—-Publish">
+<h2>Stage 5 — Publish<a class="headerlink" href="#Stage-5-—-Publish" title="Link to this heading">#</a></h2>
+<p>The payoff, in two halves. The DOI needs no registry account, so it is the primary path here, and it comes first: the registry takes only records whose data files are already online.</p>
+<ul class="simple">
+<li><p><strong>A citable DOI (Zenodo) — primary.</strong> Needs only a Zenodo token, no registry account. <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> archives the records and data files; pass <code class="docutils literal notranslate"><span class="pre">creators=[...]</span></code> to credit the authors on the deposit itself; without it, the contributors you tagged in Stage 4 are its creators. Either way their ORCIDs travel into the archived metadata. The deposit inherits the license you set with <code class="docutils literal notranslate"><span class="pre">ws.license(...)</span></code> in Stage 4; pass <code class="docutils literal notranslate"><span class="pre">license=</span></code> here only to choose a different one for the archive (an explicit
+<code class="docutils literal notranslate"><span class="pre">ws.zenodo(license=...)</span></code> wins over the workspace default). It leaves a reviewable draft by default — click Publish on Zenodo (or pass <code class="docutils literal notranslate"><span class="pre">publish=True</span></code>) to mint the DOI. Use a <a class="reference external" href="https://sandbox.zenodo.org">Zenodo sandbox</a> token for a dry run (<code class="docutils literal notranslate"><span class="pre">sandbox=True</span></code>); drop it for the real thing. A sandbox deposit leaves the records pointing at the files on this computer, and the workspace remembers the sandbox record in <code class="docutils literal notranslate"><span class="pre">.battinfo/zenodo-sandbox.json</span></code>, apart from the record on zenodo.org in
+<code class="docutils literal notranslate"><span class="pre">.battinfo/zenodo.json</span></code>, so nothing needs deleting before the real deposit.</p></li>
+<li><p><strong>The Battery Genome registry (``ws.publish()``) — optional.</strong> Submits your records to the review queue, where a curator promotes them to the public index. This needs a registry API key (<code class="docutils literal notranslate"><span class="pre">ws.login(api_key=&quot;bk_...&quot;)</span></code>). During the soft launch keys are granted by the operators — start from <a class="reference external" href="https://battinfo.org/publish">battinfo.org/publish</a> and say who you are and what you plan to publish. The registry refuses records that still point at files on this computer, since it would publish those
+paths as the download links. Deposit on Zenodo first, which points each record at its deposited copy, or call <code class="docutils literal notranslate"><span class="pre">ws.publish(zenodo=True)</span></code>, which does both in one go.</p></li>
+</ul>
+<p>Both cells are guarded no-ops until you provide the credential, so the notebook runs fully offline without them. They ask the workspace with <code class="docutils literal notranslate"><span class="pre">ws.has_credential(...)</span></code>, which also finds a token kept in the workspace’s <code class="docutils literal notranslate"><span class="pre">.battinfo/credentials</span></code> file, not only one in the environment.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># DOI path (primary) — Zenodo only, no registry key needed.</span>
+<span class="c1"># The deposit inherits the workspace license from Stage 4; creators credit the</span>
+<span class="c1"># authors on the deposit. A click on Zenodo (or publish=True) mints the DOI.</span>
+<span class="c1"># Here we leave a reviewable draft.</span>
+<span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">has_credential</span><span class="p">(</span><span class="s2">&quot;ZENODO_SANDBOX_TOKEN&quot;</span><span class="p">):</span>
+    <span class="n">deposit</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">zenodo</span><span class="p">(</span>
+        <span class="n">sandbox</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">creators</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lovelace, Ada&quot;</span><span class="p">,</span> <span class="s2">&quot;orcid&quot;</span><span class="p">:</span> <span class="s2">&quot;0000-0002-1825-0097&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Turing, Alan&quot;</span><span class="p">,</span> <span class="s2">&quot;orcid&quot;</span><span class="p">:</span> <span class="s2">&quot;0000-0001-5109-3700&quot;</span><span class="p">},</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Zenodo draft:&quot;</span><span class="p">,</span> <span class="n">deposit</span><span class="o">.</span><span class="n">draft_url</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Get a token at https://sandbox.zenodo.org, then re-run this cell.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+No ZENODO_SANDBOX_TOKEN set - skipping the DOI dry run.
+Get a token at https://sandbox.zenodo.org, then re-run this cell.
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Registry path — needs the API key granted by the operators (link above).</span>
+<span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">has_credential</span><span class="p">(</span><span class="s2">&quot;BATTINFO_API_KEY&quot;</span><span class="p">):</span>
+    <span class="n">outcomes</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">note</span><span class="o">=</span><span class="s2">&quot;My first BattINFO dataset&quot;</span><span class="p">)</span>
+    <span class="n">ws</span><span class="o">.</span><span class="n">status</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Records are saved and validated locally.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;To submit to the registry: ws.login(api_key=&#39;bk_...&#39;) then re-run.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Records are saved and validated locally.
+To submit to the registry: ws.login(api_key=&#39;bk_...&#39;) then re-run.
+</pre></div></div>
+</div>
+</section>
+<section id="What-you-have-now">
+<h2>What you have now<a class="headerlink" href="#What-you-have-now" title="Link to this heading">#</a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>_scratch/guide-06/
+├── neware-sample.csv           # your raw export (untouched)
+├── bdf/neware-sample.bdf.csv   # the tidy, shareable table
+└── .battinfo/records/ # validated, linked records with stable IRIs
+    ├── cell-spec/  ├── cell-instance/  ├── test/  └── dataset/
+</pre></div>
+</div>
+<p>Re-run this notebook from the top: same IRIs, no duplicates — that determinism is what makes the workflow safe to automate.</p>
+<p><strong>Next steps</strong></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="01-concepts.html"><span class="doc">Guide 1 — Concepts</span></a>: the data model behind what you just did</p></li>
+<li><p><a class="reference internal" href="03-linked-records.html"><span class="doc">Guide 3 — Linked records</span></a>: the full provenance chain in depth</p></li>
+<li><p><a class="reference external" href="https://battinfo.org/validate">battinfo.org/validate</a>: check any record in the browser</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ws.quickstart()</span></code> — this whole recipe, printed in your terminal</p></li>
+</ul>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="05-descriptors.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Guide 5 — Cell descriptors</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../pages/howto.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">How-to guides</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stage-1-—-Convert">Stage 1 — Convert</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stage-2-—-Identify">Stage 2 — Identify</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stage-3-—-Link">Stage 3 — Link</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stage-4-—-Save-&amp;-validate">Stage 4 — Save &amp; validate</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#Stage-5-—-Publish">Stage 5 — Publish</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#What-you-have-now">What you have now</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

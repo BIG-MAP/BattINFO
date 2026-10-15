@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Identifiers &amp; PURLs &#8212; BattINFO  documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=64cc4de3f052d77215f0" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/tokens.css?v=ff8d36bc" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=2911d74e" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=64cc4de3f052d77215f0"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0" />
+
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'identifiers';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.22.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0rc2';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="icon" href="_static/favicon.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Anatomy of a published BattINFO record (battinfo.json)" href="reading-a-record.html" />
+    <link rel="prev" title="How BattINFO is built" href="how-battinfo-is-built.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class=" navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo-horizontal.svg" class="logo__image only-light" alt="BattINFO"/>
+    <img src="_static/logo-horizontal-on-dark.svg" class="logo__image only-dark pst-js-only" alt="BattINFO"/>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class=" navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button"
+                data-bs-toggle="dropdown" aria-expanded="false"
+                aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class=" ">
+  <a class="nav-link dropdown-item nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+        <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/getting-started.html">
+    Get Started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/guides.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/howto.html">
+    How-to guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="pages/reference.html">
+    Reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="pages/concepts.html">
+    Concepts
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org">
+    Home
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/validate">
+    Validate
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-external" href="https://battinfo.org/convert">
+    Convert
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+          <div class="navbar-item">
+
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/BIG-MAP/BattINFO" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
+        <div class="sidebar-primary-item">
+
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="how-battinfo-is-built.html">How BattINFO is built</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Identifiers &amp; PURLs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reading-a-record.html">Anatomy of a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ontology-profile-architecture.html">BattINFO / Domain-Battery Target Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-federation.html">Data federation</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="pages/concepts.html" class="nav-link">Concepts</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Identifiers &amp; PURLs</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="identifiers-purls">
+<h1>Identifiers &amp; PURLs<a class="headerlink" href="#identifiers-purls" title="Link to this heading">#</a></h1>
+<p>Every BattINFO record has one canonical identifier — an IRI of the form:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>https://w3id.org/battinfo/&lt;namespace&gt;/&lt;uid&gt;
+└──────┬──────┘ └──┬───┘ └───┬────┘ └─┬─┘
+   PURL host     project   record     16-char UID
+                           namespace  (Crockford Base32)
+</pre></div>
+</div>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0</span></code></p>
+<section id="the-three-promises">
+<h2>The three promises<a class="headerlink" href="#the-three-promises" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Opaque</strong> — the IRI carries no embedded meaning: no manufacturer names, no
+dates, no chemistry codes. Anything meaningful would eventually be wrong
+(products get renamed, records get corrected), and identifiers must outlive
+every such change.</p></li>
+<li><p><strong>Stable</strong> — once minted, an IRI never changes and is never reused. It is
+safe to cite in a paper, store in a database, or print on a label.</p></li>
+<li><p><strong>Deterministic where it matters</strong> — BattINFO mints an IRI on your machine, when the record is saved, from the record’s identity, so re-saving the same records is an update, never a duplicate (<code class="docutils literal notranslate"><span class="pre">tests/test_idempotent_minting.py</span></code> guards this). The registry mints one only for a submission that carries none. Free text in an identity (a manufacturer, model, name, serial number or batch) is normalised first: surrounding and repeated whitespace, a no-break space and a decomposed accent do not change an IRI, but case does. A cell spec’s chemistry counts by its vocabulary key, so <code class="docutils literal notranslate"><span class="pre">Li-ion</span></code> and <code class="docutils literal notranslate"><span class="pre">li-ion</span></code> give one cell spec. A material spec lifted out of a cell spec is minted from its manufacturer, product, grade and kind, as <code class="docutils literal notranslate"><span class="pre">ws.add(&quot;material_spec&quot;,</span> <span class="pre">...)</span></code> mints it, so the same material lifts to the same spec IRI across cells, and one material from two suppliers to two. A test names one run: it is minted from its cell, its kind, its protocol (the protocol’s IRI whenever it has one) and the location of its first data file, or a start time you pass for a test without data (<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">...,</span> <span class="pre">started_at=...)</span></code>), or else the name you give it. A title BattINFO generates (<code class="docutils literal notranslate"><span class="pre">C01</span> <span class="pre">cycling</span></code>) never enters, so renaming a test with data or a start time keeps its IRI, and a second run of one kind on one cell, with its own data, start time or name, gets its own. A record keeps an IRI it already has: one pinned (<code class="docutils literal notranslate"><span class="pre">iris=</span></code>, <code class="docutils literal notranslate"><span class="pre">iri=</span></code>, an <code class="docutils literal notranslate"><span class="pre">id</span></code> in a draft), imported with <code class="docutils literal notranslate"><span class="pre">ws.import_()</span></code> or given by an earlier <code class="docutils literal notranslate"><span class="pre">ws.save()</span></code>, in this session or an earlier one in the same folder, is never minted again. (A record saved by an earlier session is recognised by its content, so pin one you edit in the same save in which a colliding record joins.) When another record’s identity fields mint the same IRI, that newcomer is minted from its content instead, and two records that already had one IRI are refused. A few paths mint outside this until 0.9: the component and equipment builders (<code class="docutils literal notranslate"><span class="pre">create_component_spec</span></code>, <code class="docutils literal notranslate"><span class="pre">create_equipment</span></code> and the like) give a record without <code class="docutils literal notranslate"><span class="pre">uid=</span></code> or <code class="docutils literal notranslate"><span class="pre">id=</span></code> a random IRI, <code class="docutils literal notranslate"><span class="pre">battinfo</span> <span class="pre">batch</span> <span class="pre">init</span></code> gives a cell without a serial number a random IRI recorded in its <code class="docutils literal notranslate"><span class="pre">battinfo.yaml</span></code>, and the interop importers mint from their own seeds. The <a class="reference internal" href="scope.html#identifiers"><span class="std std-ref">known limitations</span></a> list them, with what to do on each.</p></li>
+</ul>
+</section>
+<section id="the-uid">
+<h2>The UID<a class="headerlink" href="#the-uid" title="Link to this heading">#</a></h2>
+<p>The 16-character UID uses the <strong>Crockford Base32 alphabet</strong>
+(<code class="docutils literal notranslate"><span class="pre">0-9</span> <span class="pre">a-h</span> <span class="pre">j</span> <span class="pre">k</span> <span class="pre">m</span> <span class="pre">n</span> <span class="pre">p-t</span> <span class="pre">v-z</span></code>) — no <code class="docutils literal notranslate"><span class="pre">i</span></code>, <code class="docutils literal notranslate"><span class="pre">l</span></code>, <code class="docutils literal notranslate"><span class="pre">o</span></code>, or <code class="docutils literal notranslate"><span class="pre">u</span></code>, so a UID survives
+being read aloud, handwritten on a cell wrapper, or retyped from a photo. It
+is displayed in four dash-separated groups (<code class="docutils literal notranslate"><span class="pre">pge5-wer6-2q82-v9k0</span></code>); the first
+six characters form the <code class="docutils literal notranslate"><span class="pre">short_id</span></code> used in filenames and for matching data
+files to cells (<code class="docutils literal notranslate"><span class="pre">ws.add(&quot;test&quot;,</span> <span class="pre">datasets=&quot;glob&quot;)</span></code>).</p>
+</section>
+<section id="namespaces">
+<h2>Namespaces<a class="headerlink" href="#namespaces" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Namespace</p></th>
+<th class="head"><p>Record type(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/spec/</span></code></p></td>
+<td><p>Every reusable <em>description</em> — cell, test, material, and component specs</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/cell/</span></code></p></td>
+<td><p>Physical cells (instances)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/test/</span></code></p></td>
+<td><p>Test executions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/dataset/</span></code></p></td>
+<td><p>Datasets and parameter sets (both are data from one source)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">/material/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode/</span></code>, <code class="docutils literal notranslate"><span class="pre">/separator/</span></code>, …</p></td>
+<td><p>Material and component instances</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">/equipment/</span></code>, <code class="docutils literal notranslate"><span class="pre">/channel/</span></code></p></td>
+<td><p>Physical equipment units and their channels</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The full map is code, not convention: <code class="docutils literal notranslate"><span class="pre">battinfo.entities.iri_namespace_map()</span></code>.</p>
+<p>A namespace can hold more than one record type: <code class="docutils literal notranslate"><span class="pre">/spec/</span></code> holds every kind of description, and <code class="docutils literal notranslate"><span class="pre">/dataset/</span></code> holds dataset records and parameter sets. Tooling never infers a record’s type from the segment; the type lives in the record.</p>
+<p>More segment rules keep old links alive and new ones honest:</p>
+<ul class="simple">
+<li><p><strong>Legacy segments are permanent aliases.</strong> Superseded namespaces
+(<code class="docutils literal notranslate"><span class="pre">/material-spec/</span></code>, <code class="docutils literal notranslate"><span class="pre">/electrode-spec/</span></code>, the older <code class="docutils literal notranslate"><span class="pre">/cell-type/</span></code> forms, …)
+keep resolving forever — anything ever minted stays dereferenceable.</p></li>
+<li><p><strong>Parameter sets minted under <code class="docutils literal notranslate"><span class="pre">/spec/</span></code> before 2026-10-11 keep their IRIs.</strong> Each resolves as a superseded record that points at its replacement, a new <code class="docutils literal notranslate"><span class="pre">/dataset/</span></code> record with a uid of its own. A uid is never reused under another namespace.</p></li>
+<li><p><strong>Reserved segments</strong> (<code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">ontology</span></code>, <code class="docutils literal notranslate"><span class="pre">vocab</span></code>, <code class="docutils literal notranslate"><span class="pre">doc</span></code>, <code class="docutils literal notranslate"><span class="pre">context</span></code>,
+<code class="docutils literal notranslate"><span class="pre">resolver</span></code>, <code class="docutils literal notranslate"><span class="pre">twin</span></code>, <code class="docutils literal notranslate"><span class="pre">w3id</span></code>, <code class="docutils literal notranslate"><span class="pre">raw</span></code>, <code class="docutils literal notranslate"><span class="pre">inferred</span></code>, <code class="docutils literal notranslate"><span class="pre">turtle</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
+<code class="docutils literal notranslate"><span class="pre">source</span></code>) can never become record namespaces — they are claimed by the
+resolver and ontology infrastructure
+(<code class="docutils literal notranslate"><span class="pre">battinfo.entities.RESERVED_NAMESPACE_SEGMENTS</span></code>).</p></li>
+</ul>
+</section>
+<section id="why-w3id-org-the-purl-layer">
+<h2>Why w3id.org (the PURL layer)<a class="headerlink" href="#why-w3id-org-the-purl-layer" title="Link to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">w3id.org</span></code> is the W3C Permanent Identifier Community Group’s redirect
+service: a community-maintained, permanently-hosted layer of indirection.
+The <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/...</span></code> IRIs redirect to wherever the registry
+resolver actually lives today — so records cite an address that outlives any
+single server, domain, or hosting decision.</p>
+<p>Dereferencing follows linked-data convention: a record IRI names the <em>thing</em>
+(a cell, a test), not a document, so the resolver answers with a <strong>303
+redirect</strong> to a representation chosen by content negotiation — JSON-LD (or
+Turtle) for machines, a human-readable landing page for browsers.</p>
+<p>Records also never disappear. A withdrawn record gets a <strong>tombstone</strong> — the
+resource stays dereferenceable, marked <code class="docutils literal notranslate"><span class="pre">owl:deprecated</span></code> and pointing at its
+replacement where one exists — never a 404. An IRI that once resolved always
+resolves.</p>
+<blockquote>
+<div><p><strong>Status:</strong> the resolver and content negotiation are live for published
+records — a request with <code class="docutils literal notranslate"><span class="pre">Accept:</span> <span class="pre">application/ld+json</span></code> (or <code class="docutils literal notranslate"><span class="pre">text/turtle</span></code>)
+returns the machine-readable record with no login. In a <em>browser</em>, the
+human landing page sits behind the platform’s sign-in gate during the soft
+launch, so a scanned label may show a sign-in prompt while a harvester gets
+data from the same IRI. Records that were never published to the registry
+return <code class="docutils literal notranslate"><span class="pre">404</span> <span class="pre">Record</span> <span class="pre">not</span> <span class="pre">found</span></code>.</p>
+</div></blockquote>
+</section>
+<section id="enforcement">
+<h2>Enforcement<a class="headerlink" href="#enforcement" title="Link to this heading">#</a></h2>
+<p>The policy is linted, not aspirational:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.tools/quality/lint_identifier_policy.py</span></code> checks every canonical record’s
+IRIs, UID shapes, and <code class="docutils literal notranslate"><span class="pre">short_id</span></code>s in CI.</p></li>
+<li><p>Records carry <code class="docutils literal notranslate"><span class="pre">id</span></code> (the IRI), <code class="docutils literal notranslate"><span class="pre">short_id</span></code>, and <code class="docutils literal notranslate"><span class="pre">identifier</span></code>
+(<code class="docutils literal notranslate"><span class="pre">&lt;entity-type&gt;:&lt;uid&gt;</span></code>) — all derived, never hand-authored. Draft inputs
+omit them; saving canonizes them.</p></li>
+</ul>
+</section>
+<section id="handles-and-titles-are-not-identifiers">
+<h2>Handles and titles are not identifiers<a class="headerlink" href="#handles-and-titles-are-not-identifiers" title="Link to this heading">#</a></h2>
+<p>A record may also carry a <code class="docutils literal notranslate"><span class="pre">handle</span></code>, a short readable slug such as <code class="docutils literal notranslate"><span class="pre">flores-ocv/graphite-aq-1-063b77-cell</span></code> that is unique within one registry workspace, and a <code class="docutils literal notranslate"><span class="pre">name</span></code>, its title. Both are display text: they can be corrected without touching the IRI, and nothing should be derived from them. <a class="reference internal" href="howto/name-your-records.html"><span class="std std-doc">Name your records</span></a> shows how to build them and how to pin an IRI when a title changes.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="how-battinfo-is-built.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">How BattINFO is built</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="reading-a-record.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Anatomy of a published BattINFO record (<code class="docutils literal notranslate"><span class="pre">battinfo.json</span></code>)</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-three-promises">The three promises</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-uid">The UID</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#namespaces">Namespaces</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-w3id-org-the-purl-layer">Why w3id.org (the PURL layer)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#enforcement">Enforcement</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#handles-and-titles-are-not-identifiers">Handles and titles are not identifiers</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=64cc4de3f052d77215f0"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=64cc4de3f052d77215f0"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2021-2026, Simon Clark.
+      <br/>
+    
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,61 @@
+/* ── Brand tokens → pydata theme ─────────────────────────────────────────
+   Brand values come from /brand/tokens.css (loaded first via html_css_files).
+   Here we only MAP those --bi-* tokens onto pydata-sphinx-theme variables —
+   never re-declare hex values. Edit the palette in brand/tokens.css.        */
+/* One mapping for both modes: the --bi-* tokens themselves flip by data-theme
+   (brand/tokens.css v1.1), so referencing them here gives docs a coherent dark
+   mode for free. Selector uses html[data-theme=...] to win over pydata defaults. */
+html[data-theme="light"],
+html[data-theme="dark"] {
+    --pst-color-primary:        var(--bi-brand-text);
+    --pst-color-link:           var(--bi-brand-text);
+    --pst-color-link-hover:     var(--bi-text-primary);
+    --pst-color-inline-code:    var(--bi-brand-text);
+    --pst-color-background:     var(--bi-bg-base);
+    --pst-color-on-background:  var(--bi-bg-surface);
+    --pst-color-text-base:      var(--bi-text-primary);
+    --pst-color-text-muted:     var(--bi-text-muted);
+    --pst-color-border:         var(--bi-border);
+    --pst-color-success:        var(--bi-success);
+    --pst-color-warning:        var(--bi-warning);
+    --pst-color-danger:         var(--bi-error);
+    --pst-color-info:           var(--bi-info);
+}
+
+:root {
+    --pst-font-family-base: "Plus Jakarta Sans", system-ui, sans-serif;
+    --pst-font-family-monospace: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* ── Landing page hero ───────────────────────────────────────────────── */
+.bd-main .bd-content h1:first-of-type {
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+/* ── Card grid spacing ───────────────────────────────────────────────── */
+.sd-card {
+    border-radius: 6px;
+}
+
+/* ── Code blocks ─────────────────────────────────────────────────────── */
+.highlight pre {
+    border-radius: 4px;
+}
+
+/* ── Table formatting ────────────────────────────────────────────────── */
+td, th {
+    vertical-align: top;
+}
+
+/* ── Dark mode iframe fix (e.g. JSON-LD Playground embeds) ───────────── */
+html[data-theme="dark"] iframe[src*="json-ld.org/playground"] {
+    filter: invert(0.9);
+}
+
+/* ── Sidebar logo text ───────────────────────────────────────────────── */
+.navbar-brand span {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}

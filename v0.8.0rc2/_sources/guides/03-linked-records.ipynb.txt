@@ -1,0 +1,651 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "e7179e7d",
+   "metadata": {},
+   "source": [
+    "# Guide 3 — Linked records: cells, tests, and datasets\n",
+    "\n",
+    "Guide 2 described a *product*. This guide records what happened in the *lab*:\n",
+    "the physical cells you tested, the procedure you ran, and the data it produced\n",
+    "— the full provenance chain, built with the one `workspace` object:\n",
+    "\n",
+    "```\n",
+    "CellSpec ─► Cell ─► Test ─► Dataset\n",
+    "                      │\n",
+    "                  TestSpec (the procedure the test followed)\n",
+    "```\n",
+    "\n",
+    "**Estimated time:** 20 minutes\n",
+    "**Prerequisites:** [Guide 2 — Describing a cell](02-first-cell-type.ipynb)\n",
+    "\n",
+    "Everything writes to `_scratch/guide-03/`. This is the depth version of\n",
+    "[Guide 6 — Publish your first dataset](06-publish-your-data.ipynb), which runs\n",
+    "the same chain from a raw cycler file in five minutes.\n",
+    "\n",
+    "*New words? The [plain-language glossary](../pages/glossary.md) decodes EMMO, IRI, JSON-LD, and the rest in two sentences each.*"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "49487b5d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.059284Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.059284Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.779071Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.776542Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "import json\n",
+    "import shutil\n",
+    "from pathlib import Path\n",
+    "\n",
+    "# Throwaway scratch folder next to this notebook — fresh on every run, so the\n",
+    "# outputs below are exactly what a first run produces.\n",
+    "SCRATCH = Path(\"_scratch/guide-03\").resolve()\n",
+    "if SCRATCH.exists():\n",
+    "    shutil.rmtree(SCRATCH)\n",
+    "SCRATCH.mkdir(parents=True)\n",
+    "\n",
+    "import battinfo\n",
+    "\n",
+    "ws = battinfo.workspace(root=SCRATCH)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c0b916e5",
+   "metadata": {},
+   "source": [
+    "## Step 1 — The cell spec\n",
+    "\n",
+    "In a connected session you would reuse the registry's identity for the product\n",
+    "(`spec = ws.search(\"samsung inr21700 50e\")[0]` — Guide 6 shows that path).\n",
+    "Offline, describe it yourself with the `CellSpec` model — the same object\n",
+    "works either way:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "d5e7a580",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.784586Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.784586Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.796649Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.796649Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Cell spec: Samsung SDI INR21700-50E\n"
+     ]
+    }
+   ],
+   "source": [
+    "spec = battinfo.CellSpec(\n",
+    "    manufacturer=\"Samsung SDI\",\n",
+    "    model=\"INR21700-50E\",\n",
+    "    format=\"cylindrical\",\n",
+    "    chemistry=\"Li-ion\",\n",
+    "    positive_electrode_basis=\"NMC\",\n",
+    "    negative_electrode_basis=\"graphite\",\n",
+    "    properties={\n",
+    "        \"nominal_capacity\": {\"value\": 5.0,  \"unit\": \"Ah\"},\n",
+    "        \"nominal_voltage\":  {\"value\": 3.6,  \"unit\": \"V\"},\n",
+    "        \"rated_energy\":     {\"value\": 18.0, \"unit\": \"Wh\"},\n",
+    "        \"mass\":             {\"value\": 68.0, \"unit\": \"g\"},\n",
+    "    },\n",
+    ")\n",
+    "\n",
+    "print(\"Cell spec:\", spec.manufacturer, spec.model)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6438764c",
+   "metadata": {},
+   "source": [
+    "## Step 2 — The physical cells\n",
+    "\n",
+    "A `Cell` is one specific physical item with a serial number, always linked to\n",
+    "its spec. Register every cell you actually tested:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "05b87289",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.802437Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.802437Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.811781Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.811781Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  cell: A001  (IRI auto-assigned)\n",
+      "  cell: A002  (IRI auto-assigned)\n"
+     ]
+    }
+   ],
+   "source": [
+    "cells = ws.add(\n",
+    "    \"cell\",\n",
+    "    spec=spec,\n",
+    "    serial_numbers=[\"A001\", \"A002\"],\n",
+    "    production_date=\"2026-01-15\",\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6a9854ac",
+   "metadata": {},
+   "source": [
+    "## Step 3 — The test spec\n",
+    "\n",
+    "A `TestSpec` is the reusable procedure definition — *what you planned to do*,\n",
+    "independent of any one cell. Steps use PyBaMM experiment syntax, and\n",
+    "`protocol.experiment` lists them with the cycles already unrolled, which is the\n",
+    "list `pybamm.Experiment` takes; each step also receives an EMMO\n",
+    "electrochemistry process type when it can be determined unambiguously from\n",
+    "the step text.\n",
+    "\n",
+    "Test specs are authored as small draft files (`ws.template(\"test-spec\")`\n",
+    "writes a skeleton to fill in). Here we write the draft directly and load it:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "3f90949f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.819374Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.818373Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.832846Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.830836Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Test spec: 1C cycle life at 25 °C\n",
+      "  1. Discharge at 1C for 10 hours or until 2.5 V\n",
+      "  2. Rest for 10 minutes\n",
+      "  3. Charge at 1C until 4.2 V\n",
+      "  4. Hold at 4.2 V until C/20\n",
+      "  5. Rest for 10 minutes\n",
+      "  6. Discharge at 1C for 10 hours or until 2.5 V\n",
+      "  7. Rest for 10 minutes\n",
+      "  8. Charge at 1C until 4.2 V\n",
+      "  9. Hold at 4.2 V until C/20\n",
+      "  10. Rest for 10 minutes\n",
+      "  11. Discharge at 1C for 10 hours or until 2.5 V\n",
+      "  12. Rest for 10 minutes\n",
+      "  13. Charge at 1C until 4.2 V\n",
+      "  14. Hold at 4.2 V until C/20\n",
+      "  15. Rest for 10 minutes\n"
+     ]
+    }
+   ],
+   "source": [
+    "PROTOCOL_STEPS = [\n",
+    "    \"Discharge at 1C for 10 hours or until 2.5 V\",\n",
+    "    \"Rest for 10 minutes\",\n",
+    "    \"Charge at 1C until 4.2 V\",\n",
+    "    \"Hold at 4.2 V until C/20\",\n",
+    "    \"Rest for 10 minutes\",\n",
+    "]\n",
+    "\n",
+    "draft_path = SCRATCH / \"cycle-life.test-spec.json\"\n",
+    "draft_path.write_text(json.dumps({\n",
+    "    \"name\": \"1C cycle life at 25 °C\",\n",
+    "    \"type\": \"cycling\",\n",
+    "    \"steps\": PROTOCOL_STEPS,\n",
+    "    \"cycles\": 3,\n",
+    "    \"description\": (\n",
+    "        \"1C CC-CV charge (4.2 V, C/20 cut-off) / 1C CC discharge (2.5 V cut-off). \"\n",
+    "        \"10-minute rest periods. 25 ± 2 °C. PyBaMM-compatible step syntax.\"\n",
+    "    ),\n",
+    "}, indent=2), encoding=\"utf-8\")\n",
+    "\n",
+    "protocol = ws.load(draft_path)\n",
+    "print(\"Test spec:\", protocol.name)\n",
+    "for i, step in enumerate(protocol.experiment, 1):\n",
+    "    print(f\"  {i}. {step}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0b121542",
+   "metadata": {},
+   "source": [
+    "> **How much semantics should a protocol carry?** EMMO can express a CC-CV\n",
+    "> protocol as a full step-by-step process graph — machine-replicable and\n",
+    "> queryable at step level — but authoring one is heavy. The trade-offs and the\n",
+    "> current recommendation are discussed in\n",
+    "> [Test specs — semantic depth](../records/tests.md)."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d74cb4b8",
+   "metadata": {},
+   "source": [
+    "## Step 4 — The test and its data\n",
+    "\n",
+    "A `Test` is one execution of the test spec on one cell. Passing `data=`\n",
+    "attaches the measured file, and the workspace creates the linked `Dataset`\n",
+    "record for it in the same call:\n",
+    "\n",
+    "Testing on a multi-channel cycler? Register the unit once and name the channel on each test (`channel=\"Cycler 1/CH2\"`) so the record keeps which slot produced the data — see [How-to: register equipment](../howto/register-equipment.md)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "0ae05fc8",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.838954Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.836936Z",
+     "iopub.status.idle": "2026-10-13T16:13:32.870934Z",
+     "shell.execute_reply": "2026-10-13T16:13:32.869925Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  test [cycling] on A001  +1 dataset(s)\n"
+     ]
+    }
+   ],
+   "source": [
+    "data_dir = SCRATCH / \"inputs\"\n",
+    "data_dir.mkdir(exist_ok=True)\n",
+    "csv_path = data_dir / \"sdi-a001-cycle-life.csv\"\n",
+    "csv_path.write_text(\n",
+    "    \"cycle,capacity_ah,coulombic_efficiency\\n\"\n",
+    "    \"1,4.98,0.934\\n2,4.95,0.998\\n3,4.93,0.998\\n\",\n",
+    "    encoding=\"utf-8\",\n",
+    ")\n",
+    "\n",
+    "tests = ws.add(\n",
+    "    \"test\",\n",
+    "    cell=\"A001\",\n",
+    "    spec=protocol,\n",
+    "    data=csv_path,\n",
+    "    instrument=\"Biologic VMP-300\",\n",
+    "    name=\"1C cycle life, cell A001\",\n",
+    "    license=\"CC-BY-4.0\",\n",
+    "    description=\"1C cycle-life test on cell A001, April 2026.\",\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dac02242",
+   "metadata": {},
+   "source": [
+    "## Step 5 — Save\n",
+    "\n",
+    "`ws.save()` validates every record against the canonical JSON Schemas\n",
+    "(policy `strict`) and writes them with stable `w3id.org/battinfo/...` IRIs,\n",
+    "minted deterministically from each record's identity — re-running an\n",
+    "identical save updates in place, never duplicates:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "f739b75c",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:32.876833Z",
+     "iopub.status.busy": "2026-10-13T16:13:32.875852Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.119126Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.119126Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Saved 6 record(s) under <repo>\\docs\\guides\\_scratch\\guide-03\\.battinfo\\records:\n",
+      "  cell spec   Samsung SDI INR21700-50E             [created]  .battinfo\\records\\cell-spec\\cell-spec-emsr-6n63-eczr-sh42.json\n",
+      "  cell        A001                                 [created]  .battinfo\\records\\cell-instance\\cell-jsv8-svfk-kfd5-njgh.json\n",
+      "  cell        A002                                 [created]  .battinfo\\records\\cell-instance\\cell-4czq-jph8-m6bw-6wae.json\n",
+      "  test spec   1C cycle life at 25 °C               [created]  .battinfo\\records\\test-protocol\\test-protocol-kxwy-5f5f-f682-hhch.json\n",
+      "  test        1C cycle life, cell A001             [created]  .battinfo\\records\\test\\test-m5hs-nwxh-znk0-rmpg.json\n",
+      "  dataset     1C cycle life, cell A001 data        [created]  .battinfo\\records\\dataset\\dataset-yhrn-nttt-28da-vq24.json\n",
+      "\n",
+      "  Next: ws.list(verbose=True) to inspect, or ws.publish() to publish.\n",
+      "\n",
+      "  cell-instance/cell-4czq-jph8-m6bw-6wae.json\n",
+      "  cell-instance/cell-jsv8-svfk-kfd5-njgh.json\n",
+      "  cell-spec/cell-spec-emsr-6n63-eczr-sh42.json\n",
+      "  dataset/dataset-yhrn-nttt-28da-vq24.json\n",
+      "  test/test-m5hs-nwxh-znk0-rmpg.json\n",
+      "  test-protocol/test-protocol-kxwy-5f5f-f682-hhch.json\n"
+     ]
+    }
+   ],
+   "source": [
+    "result = ws.save()\n",
+    "\n",
+    "records_root = SCRATCH / \".battinfo/records\"\n",
+    "print()\n",
+    "for record_file in sorted(records_root.rglob(\"*.json\")):\n",
+    "    print(f\"  {record_file.parent.name}/{record_file.name}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ceb9b131",
+   "metadata": {},
+   "source": [
+    "## Step 6 — Inspect the chain\n",
+    "\n",
+    "The links are ordinary fields in the saved records — the dataset knows its\n",
+    "cell and its test, the test knows its spec. Validation is layered (JSON Schema\n",
+    "→ Pydantic → JSON-LD; see Guide 1), and `validate_record_report` gives the\n",
+    "machine-readable report for any record:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "b1bde293",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:34.124202Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.124202Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.136963Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.136963Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\n",
+      "  \"id\": \"https://w3id.org/battinfo/dataset/yhrn-nttt-28da-vq24\",\n",
+      "  \"short_id\": \"yhrnnt\",\n",
+      "  \"identifier\": \"dataset:yhrn-nttt-28da-vq24\",\n",
+      "  \"name\": \"1C cycle life, cell A001 data\",\n",
+      "  \"license\": \"CC-BY-4.0\",\n",
+      "  \"access_url\": \"file:///<repo>/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv\",\n",
+      "  \"created_at\": 1791908012,\n",
+      "  \"modified_at\": 1791908012,\n",
+      "  \"published_at\": 1791908012,\n",
+      "  \"about\": [\n",
+      "    \"https://w3id.org/battinfo/cell/jsv8-svfk-kfd5-njgh\",\n",
+      "    \"https://w3id.org/battinfo/test/m5hs-nwxh-znk0-rmpg\"\n",
+      "  ],\n",
+      "  \"distributions\": [\n",
+      "    {\n",
+      "      \"type\": \"DataDownload\",\n",
+      "      \"content_url\": \"file:///<repo>/docs/guides/_scratch/guide-03/inputs/sdi-a001-cycle-life.csv\",\n",
+      "      \"enco\n",
+      "  ...\n",
+      "\n",
+      "ok: True | errors: 0 | warnings: 0\n"
+     ]
+    }
+   ],
+   "source": [
+    "from battinfo import validate_record_report\n",
+    "\n",
+    "dataset_file = next((records_root / \"dataset\").glob(\"*.json\"))\n",
+    "dataset_doc = json.loads(dataset_file.read_text(encoding=\"utf-8\"))\n",
+    "\n",
+    "print(json.dumps(dataset_doc[\"dataset\"], indent=2)[:800])\n",
+    "print(\"  ...\")\n",
+    "\n",
+    "report = validate_record_report(dataset_doc, source_root=records_root)\n",
+    "print(\"\\nok:\", report.ok, \"| errors:\", len(report.errors),\n",
+    "      \"| warnings:\", len(report.warnings))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a573976a",
+   "metadata": {},
+   "source": [
+    "## Step 7 — Preview the publication\n",
+    "\n",
+    "`ws.preview_jsonld()` builds the exact JSON-LD document that publishing would\n",
+    "produce — one `@graph` with every linked record — without creating any\n",
+    "deposit. Until a deposit exists, the catalog node carries the placeholder id\n",
+    "`RECORD_ID`, which the Zenodo record id replaces. `ws.export(\"ttl\")` serialises\n",
+    "the workspace as Turtle or any other RDF format:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "bac15f6f",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:34.143105Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.143105Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.750211Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.746671Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  Gold-standard: PASS (no validation issues)\n",
+      "  Written: <repo>\\docs\\guides\\_scratch\\guide-03\\battinfo.preview.jsonld\n",
+      "  Graph nodes: 7\n",
+      "  Data files:  1\n",
+      "  dcat:Catalog/schema:DataCatalog               RECORD_ID\n",
+      "  dcat:Dataset/schema:Dataset                   yhrn-nttt-28da-vq24\n",
+      "  BatteryCellSpecification/schema:ProductModel  emsr-6n63-eczr-sh42\n",
+      "  prov:Plan/schema:HowTo                        kxwy-5f5f-f682-hhch\n",
+      "  BatteryCell/CylindricalBattery                4czq-jph8-m6bw-6wae\n",
+      "  BatteryCell/CylindricalBattery                jsv8-svfk-kfd5-njgh\n",
+      "  BatteryTest/schema:Action                     m5hs-nwxh-znk0-rmpg\n"
+     ]
+    }
+   ],
+   "source": [
+    "preview_path = ws.preview_jsonld(\n",
+    "    title=\"INR21700-50E cycle-life walkthrough\",\n",
+    "    license=\"CC-BY-4.0\",\n",
+    "    creators=[{\"name\": \"Jane Smith\", \"orcid\": \"0000-0002-1825-0097\"}],\n",
+    ")\n",
+    "preview = json.loads(preview_path.read_text(encoding=\"utf-8\"))\n",
+    "\n",
+    "for node in preview[\"@graph\"]:\n",
+    "    types = node.get(\"@type\", \"?\")\n",
+    "    label = types if isinstance(types, str) else \"/\".join(types[:2])\n",
+    "    uid = str(node.get(\"@id\", \"\")).rsplit(\"/\", 1)[-1]\n",
+    "    print(f\"  {label:45s} {uid[:40]}\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e5115a73",
+   "metadata": {},
+   "source": [
+    "## Step 8 — Publish\n",
+    "\n",
+    "`ws.publish()` submits the records to the registry review queue (staged — a\n",
+    "curator promotes them to the public index); `zenodo=True` archives the data\n",
+    "with a citable DOI first. Both need credentials, so this cell is a guarded\n",
+    "no-op without them. (Publishing goes to the Battery Genome registry at battery-genome.org; during the soft launch, API keys are granted by the registry operators — there is no self-service key page yet.) The cell asks the workspace with `ws.has_credential(...)`, which looks where the workspace itself looks: a `ws.login()` in this session, the environment, then `.battinfo/credentials`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "17b1abe0",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:34.756223Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.755716Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.769386Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.765339Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Records are saved and validated locally.\n",
+      "To publish: ws.login(api_key='...') then ws.publish() — see ws.quickstart().\n"
+     ]
+    }
+   ],
+   "source": [
+    "if ws.has_credential(\"BATTINFO_API_KEY\"):\n",
+    "    ws.publish(note=\"Guide 3 walkthrough — INR21700-50E cycle life\")\n",
+    "    ws.status()\n",
+    "else:\n",
+    "    print(\"Records are saved and validated locally.\")\n",
+    "    print(\"To publish: ws.login(api_key='...') then ws.publish() — see ws.quickstart().\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "44839ab5",
+   "metadata": {},
+   "source": [
+    "## What the workspace holds"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "2647bdf5",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-10-13T16:13:34.779634Z",
+     "iopub.status.busy": "2026-10-13T16:13:34.778637Z",
+     "iopub.status.idle": "2026-10-13T16:13:34.801401Z",
+     "shell.execute_reply": "2026-10-13T16:13:34.799379Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Workspace: <repo>\\docs\\guides\\_scratch\\guide-03\\.battinfo\\records\n",
+      "  6 record(s) across 5 type(s):\n",
+      "\n",
+      "  cell-spec (1)\n",
+      "    Samsung SDI INR21700-50E\n",
+      "  cell-instance (2)\n",
+      "    A002, A001\n",
+      "  test (1)\n",
+      "    1C cycle life, cell A001\n",
+      "  dataset (1)\n",
+      "    1C cycle life, cell A001 data\n",
+      "  test-protocol (1)\n",
+      "    1C cycle life at 25 °C\n",
+      "\n",
+      "  * 6 record(s) from this session (will be submitted by ws.submit())\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "{'cell-spec': [{'name': 'Samsung SDI INR21700-50E',\n",
+       "   'id': 'https://w3id.org/battinfo/spec/emsr-6n63-eczr-sh42',\n",
+       "   'file': 'cell-spec-emsr-6n63-eczr-sh42.json',\n",
+       "   'session': True}],\n",
+       " 'cell-instance': [{'name': 'A002',\n",
+       "   'id': 'https://w3id.org/battinfo/cell/4czq-jph8-m6bw-6wae',\n",
+       "   'file': 'cell-4czq-jph8-m6bw-6wae.json',\n",
+       "   'session': True},\n",
+       "  {'name': 'A001',\n",
+       "   'id': 'https://w3id.org/battinfo/cell/jsv8-svfk-kfd5-njgh',\n",
+       "   'file': 'cell-jsv8-svfk-kfd5-njgh.json',\n",
+       "   'session': True}],\n",
+       " 'test': [{'name': '1C cycle life, cell A001',\n",
+       "   'id': 'https://w3id.org/battinfo/test/m5hs-nwxh-znk0-rmpg',\n",
+       "   'file': 'test-m5hs-nwxh-znk0-rmpg.json',\n",
+       "   'session': True}],\n",
+       " 'dataset': [{'name': '1C cycle life, cell A001 data',\n",
+       "   'id': 'https://w3id.org/battinfo/dataset/yhrn-nttt-28da-vq24',\n",
+       "   'file': 'dataset-yhrn-nttt-28da-vq24.json',\n",
+       "   'session': True}],\n",
+       " 'test-protocol': [{'name': '1C cycle life at 25 °C',\n",
+       "   'id': 'https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch',\n",
+       "   'file': 'test-protocol-kxwy-5f5f-f682-hhch.json',\n",
+       "   'session': True}]}"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "ws.list()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0b531ba9",
+   "metadata": {},
+   "source": [
+    "## Next\n",
+    "\n",
+    "- **[Guide 4 — Semantic layer](04-semantic-layer.ipynb)**: the JSON-LD behind\n",
+    "  these records, and how to work with it as RDF\n",
+    "- **[Guide 6 — Publish your first dataset](06-publish-your-data.ipynb)**: this\n",
+    "  same chain, built from a raw cycler export in five stages"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
