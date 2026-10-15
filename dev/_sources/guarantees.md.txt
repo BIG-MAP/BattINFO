@@ -30,9 +30,7 @@ Three versions exist in the wild, and consumers should accept all three:
 | `1.0.0` | An interim stamp used briefly before the numbering was consolidated |
 | `0.2.0` | The current shape: snake_case keys throughout, `properties` (ex `specs`), organizations use `same_as` |
 
-The differences are additive/renaming only — no field changed meaning. New
-records always stamp the current version; old records validate against the
-same schemas (the keys they use are all still accepted).
+New records always stamp the current version. The value names a record shape, not a revision of the schemas: records of all three versions are checked against the one set of schemas served under `https://w3id.org/battinfo/schema/`, and those schemas changed in place before 0.8.0, as the [erratum to section 11.1 of the identifier policy](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md#erratum-changes-made-in-place-before-080) lists. So a record written before 0.8.0 does not always validate against the 0.8.0 schemas. The schemas no longer take `specs` or `sameAs`, so a `0.1.0` record that uses them fails (some other older spellings, such as `legalName` and `co_type`, are still accepted), and so does a record with text in a quantity's `value` or a date string that is not `YYYY`, `YYYY-MM` or `YYYY-MM-DD`. battinfo's record models still accept `specs` and `sameAs` as input and write the current names, and its readers move text in `value` to `value_text`, so reading such a record with battinfo and saving it again fixes both; a date string in another form has to be rewritten. From the v0.8.0 tag the schemas served at each URL no longer change, apart from their descriptions; what a new `schema_version` value will say about the schemas is to be defined in 0.9.
 
 ### Records are attributable
 
