@@ -69,7 +69,12 @@ jobs:
       run:
         shell: bash
     steps:
+      # The full history brings the release tags, so tests/test_context_v1_freeze.py
+      # and tests/test_schema_freeze.py check v1 and the schemas against each
+      # release the commit contains, instead of skipping.
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:

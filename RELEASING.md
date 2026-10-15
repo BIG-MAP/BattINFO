@@ -39,6 +39,8 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 
    `check_distribution.py` checks that the wheel and the sdist carry the licence expression, project URLs, keywords and classifiers of `pyproject.toml`, which an index keeps as uploaded, and that the sdist has no `tests/` folder. CI and the release build run it too.
 
+   For 0.8.0, `python scripts/gen_context.py --check` must also report `0 added since the 0.8.0 snapshot`, so that the snapshot holds every v1 term the release ships ([The frozen v1 records context](#the-frozen-v1-records-context)). CI enforces this for the `release/0.8.0` branch and the `v0.8.0` tags, release candidates included: there `tests/test_context_v1_freeze.py` fails while v1 has a term the snapshot lacks.
+
 5. Push the branch and rehearse on TestPyPI. The workflow runs the CI suite and the install gate, builds the distribution and uploads it. On a manual run the hosted check only reports, since a rehearsal usually runs before the registry has the new copies:
 
    ```bash
@@ -77,6 +79,23 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
 9. Once the docs workflow has deployed the tag, check that the ontology IRIs serve the release's `battinfo.ttl` (next section), and that the next run of `hosted-files.yml` is green.
 
 Never delete a published tag or a PyPI release, because downstream users and the Zenodo archive refer to them. A bad release is fixed by publishing a patch release.
+
+## The frozen v1 records context
+
+`src/battinfo/data/context/records.context.v1.json` is the bundled copy of `https://w3id.org/battinfo/context/records/v1.json`, and it is append-only from the v0.8.0 tag: a term it defines keeps its definition, and a new meaning needs a new term or a v2 context. `tests/fixtures/context/records-v1-0.8.0.json` holds every v1 term as 0.8.0 ships it. `tests/test_context_v1_freeze.py` fails when v1 changes or drops one of those terms, and `scripts/gen_context.py` refuses to write such a v1, whether the change comes from a hand edit or a source table. Added terms pass, except a JSON-LD keyword such as `@vocab` or `@language`, which changes how every document expands. `PRE_RELEASE_CORRECTIONS` in `gen_context.py` is closed: the build no longer applies it, v1 carries each of its entries, and it stays as the record the erratum below draws on.
+
+The snapshot is taken last, in the freeze pull request, once every change to v1 for 0.8.0 is on `main`, the pre-release corrections included. Until then `gen_context.py --check` fails on any correction the snapshot does not hold yet, and the command that retakes it is:
+
+```bash
+python scripts/gen_context.py --write-snapshot
+python scripts/gen_context.py --check
+```
+
+The first command writes v1 and the snapshot from the same build; commit both. The second should then report `0 added since the 0.8.0 snapshot`. A term added to v1 after the snapshot, by a soak fix for instance, passes the guard but is not frozen, so if the count is not 0, run the first command again before the tag; CI on the release branch and tags fails until you do. A correction ruled before the tag is made by editing v1, adding an entry to `PRE_RELEASE_CORRECTIONS` for the record, and running the same two commands. `--write-snapshot` refuses once the checkout has the `v0.8.0` tag, and from then on the guard blocks every correction of a frozen term. Later releases add terms without retaking this snapshot.
+
+The snapshot sits in the same tree as v1, so a pull request could change both. Against each release tag from `v0.8.0` on that the checked-out commit contains, `tests/test_context_v1_freeze.py` therefore also checks that v1 keeps every term the tag's v1 defines, which covers terms added after 0.8.0, and that the snapshot equals the tagged copy. `tests/test_schema_freeze.py` checks each schema a tag holds in `src/battinfo/data/schemas/` in the same way: it may differ only in `description`, `title`, `$comment` or `examples`. The CI test job fetches the full history with the tags, so both checks run on every pull request; a shallow clone or an sdist has no tags, and there they skip. A tag that only a later line contains, such as `v0.9.0` seen from a `release/0.8.x` branch, is left out.
+
+Section 11.1 of `IDENTIFIER_POLICY.md` says how many terms 0.8.0 freezes, and its erratum lists every term changed in place before the tag. After a retake, bring both up to date: the number of terms is the count `--write-snapshot` prints less one, since `@version` is not a term, and each term it reports as changed belongs in the erratum's table. `tests/test_identifier_policy_erratum.py` fails when an entry of `PRE_RELEASE_CORRECTIONS` is missing from that table, or when a changelog entry mentions the erratum without linking to it.
 
 ## The ontology at its w3id IRIs
 

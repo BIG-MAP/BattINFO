@@ -131,6 +131,8 @@ Emitters and the validator use `src/battinfo/data/context/records.context.v1.jso
 
 `records.context.json` in the same folder is a different file. `scripts/assemble_context.py` builds it from the `slot_uri` declarations in the LinkML modules under `schema/`, and `tests/test_context_property_iris.py` fails if its property terms disagree with the curated property map.
 
+The v1 context and the schemas are frozen from the v0.8.0 tag (IDENTIFIER_POLICY.md section 11.1), and both rules are enforced. `tests/fixtures/context/records-v1-0.8.0.json` holds every v1 term as 0.8.0 ships it: `tests/test_context_v1_freeze.py` fails when v1 changes or drops one of them or adds a JSON-LD keyword such as `@vocab`, and `gen_context.py` refuses to write such a v1. `PRE_RELEASE_CORRECTIONS` in that script is closed, and the build no longer applies it. RELEASING.md says when the snapshot is taken. A schema under `src/battinfo/data/schemas/`, which the registry serves at its `$id`, changes in place only in `description`, `title`, `$comment` or `examples`; any other change, a new optional property included, needs a new versioned URL, so do not edit what a released schema in `assets/schemas/` accepts. Against each release tag from v0.8.0 on that the commit contains, `tests/test_context_v1_freeze.py` also checks v1 against the tag's v1 and snapshot, and `tests/test_schema_freeze.py` checks each tagged schema. The CI test job fetches the tags for this; a shallow clone skips both.
+
 ## Naming keys and labels
 
 - Keys are snake_case.
@@ -150,6 +152,7 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | `examples/` | `src/battinfo/data/examples/` | `uv run python scripts/sync_examples.py` |
 | `schema/*.yaml` (LinkML) | `src/battinfo/data/context/records.context.json` | `uv run python scripts/assemble_context.py` |
 | emitter terms | `src/battinfo/data/context/records.context.v1.json` | `uv run python scripts/gen_context.py` |
+| `records.context.v1.json`, before the v0.8.0 tag | `tests/fixtures/context/records-v1-0.8.0.json` | `uv run python scripts/gen_context.py --write-snapshot`, which also writes v1 and refuses once the tag exists; `tests/test_context_v1_freeze.py` checks v1 against it |
 | `docs/records/_fragments/`, schemas, emitters | `docs/records/*.md` | `uv run python scripts/gen_reference_records.py` |
 | CLI commands | `docs/pages/cli-reference.md` | `uv run python scripts/gen_cli_reference.py` |
 | mapping tables | `docs/pages/property-reference.md` | `uv run python scripts/gen_property_reference.py` |
