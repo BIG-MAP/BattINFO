@@ -32,7 +32,7 @@ from battinfo.publication import publish as publish_publication_package
 from battinfo.validate import validate_record, validate_record_report
 from battinfo.ws import AuthoringWorkspace, workspace
 
-__version__ = "0.8.0"
+__version__ = "0.8.0rc1"
 
 __all__ = [
     "__version__",

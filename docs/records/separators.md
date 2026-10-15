@@ -66,7 +66,7 @@ record = create_separator_spec(
   "provenance": {
     "source_type": "datasheet",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0"
+    "battinfo_version": "0.8.0rc1"
   }
 }
 ```
@@ -163,7 +163,7 @@ record = create_separator(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0"
+    "battinfo_version": "0.8.0rc1"
   }
 }
 ```
