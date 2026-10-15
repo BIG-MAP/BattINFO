@@ -767,7 +767,8 @@ def build_curated_cell_spec_submission(
     if source_path is not None:
         workspace = {
             "editorial": {
-                "record_path": str(source_path),
+                # The record's folder and file name, never its path on this computer.
+                "record_path": f"{source_path.parent.name}/{source_path.name}",
                 "record_id": resolved_source_local_id,
             }
         }

@@ -125,7 +125,9 @@ def submit_publication_package(
     registry only.
 
     The local workspace folder (``workspace.root``), which packages built by
-    earlier versions carry, is left out of what is sent.
+    earlier versions carry, is left out of what is sent, and an editorial
+    record path (``workspace.editorial.record_path``) is cut to the record's
+    folder and file name.
     """
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
@@ -136,9 +138,15 @@ def submit_publication_package(
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
     request_payload = dict(payload)
     workspace = request_payload.get("workspace")
-    if isinstance(workspace, Mapping) and "root" in workspace:
-        # A package built by an earlier version names the local workspace folder.
-        request_payload["workspace"] = {key: value for key, value in workspace.items() if key != "root"}
+    if isinstance(workspace, Mapping):
+        # A package built by an earlier version names the local workspace folder
+        # and the absolute path of an editorial record; neither leaves this computer.
+        cleaned = {key: value for key, value in workspace.items() if key != "root"}
+        editorial = cleaned.get("editorial")
+        if isinstance(editorial, Mapping) and isinstance(editorial.get("record_path"), str):
+            parts = [part for part in re.split(r"[\\/]", editorial["record_path"]) if part]
+            cleaned["editorial"] = {**editorial, "record_path": "/".join(parts[-2:])}
+        request_payload["workspace"] = cleaned
     request_body = json.dumps(request_payload, ensure_ascii=False).encode("utf-8")
     headers = {"Content-Type": "application/json", api_key_header: api_key}
 

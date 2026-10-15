@@ -267,6 +267,42 @@ def test_submit_publication_package_leaves_out_a_workspace_root(monkeypatch: pyt
     assert envelope["workspace"]["root"] == "C:\\Users\\someone\\release"  # the caller's package is unchanged
 
 
+def test_submit_publication_package_cuts_an_editorial_record_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A curated package built by an earlier version sends the record's folder and file name only."""
+    sent: list[dict] = []
+
+    def fake_urlopen(request, timeout=None):  # noqa: ANN001
+        sent.append(json.loads(request.data.decode("utf-8")))
+        return _Resp({"status": "validated"})
+
+    monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
+    envelope = _envelope("https://zenodo.org/records/1/files/C1.bdf.csv")
+    record_path = "C:\\Users\\someone\\records\\cell-spec\\a123--x\\record.json"
+    envelope["workspace"] = {"editorial": {"record_path": record_path, "record_id": "a123--x"}}
+
+    submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
+
+    assert sent[0]["workspace"] == {"editorial": {"record_path": "a123--x/record.json", "record_id": "a123--x"}}
+    assert envelope["workspace"]["editorial"]["record_path"] == record_path  # the caller's package is unchanged
+
+
+def test_curated_cell_spec_submission_names_no_local_path(tmp_path: Path) -> None:
+    from battinfo.api import build_curated_cell_spec_submission
+
+    source = Path(__file__).resolve().parents[1] / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
+    record_file = tmp_path / "a123--anr26650m1-b--2012" / "record.json"
+    record_file.parent.mkdir()
+    record_file.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+    package = build_curated_cell_spec_submission(
+        record_file, workspace_id="battinfo-records", publisher_id="battinfo-records-bot", source_version="t"
+    )
+
+    assert package["workspace"]["editorial"]["record_path"] == "a123--anr26650m1-b--2012/record.json"
+    assert str(tmp_path) not in json.dumps(package)
+    assert tmp_path.as_posix() not in json.dumps(package)
+
+
 def test_demo_pipeline_refuses_its_local_file_by_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     from battinfo.demo import run_demo_pipeline
 

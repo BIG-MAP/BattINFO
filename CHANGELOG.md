@@ -209,6 +209,8 @@ Every change in this release is described in detail in the [changelog](https://g
 
 ### Fixed
 
+- **A curated cell-spec submission no longer sends the record's local path.** `battinfo editorial publish-curated-cell-spec` put the absolute path of the record file in `workspace.editorial.record_path`; it now sends the record's folder and file name, and a package built by an earlier version has the path cut the same way before it is sent.
+
 - **Property keys type as the curated property map says.** The emitter read `property_map.candidates.json`, which is generated review input, before the curated map, and the candidate entry won wherever both held a key: `charging_time` was typed as the `Charging` process and `min_capacity` as `Capacity`, two terms the records context does not define, so both expanded against the document base. The emitter now reads the curated map, then the hand-kept table for keys the curated map lacks, and never the candidates. The two keys only the candidate map held, `nominal_continuous_charging_current` and `nominal_continuous_discharging_current`, are curated as `ChargingCurrent` and `DischargingCurrent`, so they keep their class and no longer warn `semantic.property_unmapped`; their LinkML `slot_uri`s move off the maximum-current classes with them.
 
 - **The v1 records context is corrected term by term before the first release.** An audit of every record-body term against the pinned closure found fifteen to correct. Each is corrected in place under the pre-release ruling (`PRE_RELEASE_CORRECTIONS` in `scripts/gen_context.py`, now 25 entries), and `records.context.json`, the LinkML `slot_uri`s and the curated maps follow, so they agree with v1. Records already published keep the old IRIs until the registry re-renders them.
