@@ -127,6 +127,11 @@
         "url": {
           "type": "string",
           "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
         }
       }
     },

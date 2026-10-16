@@ -65,11 +65,11 @@
       "description": "Functional additives (e.g. VC, FEC). Each carries its mass_fraction of the total electrolyte under property, unless the component comment states another basis."
     },
     "manufacturer": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {
@@ -135,11 +135,11 @@
           "description": "Connectivity SMILES of the salt (dot-disconnected ionic form; identity lives in inchikey)."
         },
         "manufacturer": {
-          "type": "string",
+          "$ref": "../common/organization-ref.schema.json",
           "description": "Manufacturer of the item."
         },
         "supplier": {
-          "type": "string",
+          "$ref": "../common/organization-ref.schema.json",
           "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {

@@ -6,7 +6,8 @@
     "manufacturer": {
       "type": "Organization",
       "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
-      "name": "Empa"
+      "name": "Empa",
+      "same_as": "http://www.wikidata.org/entity/Q683116"
     },
     "model": "R2032 NMC622-graphite",
     "cell_format": "coin",
@@ -30,7 +31,11 @@
     ]
   },
   "positive_electrode": {
-    "manufacturer": "Customcells",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Customcells",
+      "same_as": "http://www.wikidata.org/entity/Q120784603"
+    },
     "product_id": "100000030",
     "current_collector": {
       "name": "Aluminium",
@@ -153,7 +158,11 @@
     }
   },
   "negative_electrode": {
-    "manufacturer": "Customcells",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Customcells",
+      "same_as": "http://www.wikidata.org/entity/Q120784603"
+    },
     "product_id": "11113, A-1594",
     "current_collector": {
       "name": "Copper",
@@ -276,7 +285,11 @@
   },
   "electrolyte": {
     "family": "organic",
-    "manufacturer": "Solvionic",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Solvionic",
+      "same_as": "http://www.wikidata.org/entity/Q30285492"
+    },
     "solvent": [
       {
         "name": "EC",
@@ -362,7 +375,11 @@
   },
   "separator": {
     "material": "PP",
-    "manufacturer": "Celgard",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Celgard",
+      "same_as": "http://www.wikidata.org/entity/Q122199856"
+    },
     "product_id": "2500",
     "property": {
       "thickness": {
@@ -387,7 +404,11 @@
     "case": {
       "size_code": "R2032",
       "material": "Stainless steel",
-      "manufacturer": "Hohsen",
+      "manufacturer": {
+        "type": "Organization",
+        "name": "Hohsen",
+        "same_as": "http://www.wikidata.org/entity/Q138782243"
+      },
       "product_id": "2032, SUS316L"
     },
     "cap": {

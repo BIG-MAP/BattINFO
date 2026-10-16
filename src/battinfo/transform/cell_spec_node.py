@@ -48,6 +48,7 @@ from battinfo.transform.json_to_jsonld import (
     _FORMAT_CASE_TYPE,
     _FRACTION_PROPERTY_TERMS,
     _HARDWARE_PART_TYPE,
+    _agent_text_node,
     _apply_specification_composition,
     _apply_specification_structure_and_refs,
     _cell_configuration_key,
@@ -545,11 +546,7 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if cell.get("model"):
         node["schema:model"] = cell["model"]
     if manufacturer_name:
-        org: dict[str, Any] = {"@type": "schema:Organization", "schema:name": manufacturer_name}
-        # The organization record it points at carries the external IRIs (ROR, Wikidata).
-        if isinstance(manufacturer, Mapping) and manufacturer.get("id"):
-            org = {"@id": manufacturer["id"], **org}
-        node["schema:manufacturer"] = org
+        node["schema:manufacturer"] = _agent_text_node(manufacturer)
     if tail:
         node["schema:url"] = f"{REGISTRY_SPEC_URL_BASE}{tail}"
     # isDescriptionFor links the spec (an information artifact) to the described

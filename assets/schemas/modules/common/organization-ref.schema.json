@@ -1,0 +1,51 @@
+{
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/modules/common/organization-ref.schema.json",
+  "title": "Organization reference",
+  "description": "An organization, as either a plain name string or a structured Organization object that can carry a canonical organization IRI and an external one (ROR, Wikidata).",
+  "oneOf": [
+    {
+      "type": "string",
+      "minLength": 1
+    },
+    {
+      "$ref": "#/$defs/Organization"
+    }
+  ],
+  "$defs": {
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization",
+          "description": "JSON-LD type discriminator."
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Organization name."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Homepage URL."
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
+        }
+      },
+      "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
+    }
+  }
+}

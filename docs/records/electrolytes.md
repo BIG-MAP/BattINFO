@@ -458,6 +458,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       },
       "hasMeasurementUnit": "https://w3id.org/emmo#MilliSiemensPerCentiMetre"
     },
+    "schema:manufacturer": {
+      "@id": "https://w3id.org/battinfo/organization/9rfa-w6b3-dv1x-vj4z",
+      "@type": "schema:Organization",
+      "schema:name": "Canrud"
+    },
     "skos:prefLabel": "1M LiPF6 in EC:EMC 3:7",
     "@id": "https://w3id.org/battinfo/spec/gpkh-74nj-6sdb-vcsc#described"
   },

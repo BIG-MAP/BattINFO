@@ -1057,13 +1057,18 @@ def _canonical_main_entity(value: Any) -> dict[str, Any] | None:
     return out
 
 
+# A component's manufacturer or supplier: a name, or an Organization object
+# ({name, id, url, same_as}) as modules/common/organization-ref.schema.json defines.
+OrgRef = str | dict[str, Any]
+
+
 class MaterialComponent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
     material_spec_id: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     molecular_formula: str | None = None
     label: str | None = Field(
@@ -1096,8 +1101,8 @@ class Coating(BaseModel):
     # True when the current collector is coated on both sides, false for a
     # single-side coating.
     double_sided: bool | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1130,8 +1135,8 @@ class CurrentCollector(BaseModel):
         default=None,
         description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.",
     )
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1148,8 +1153,8 @@ class CurrentCollectorTab(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, length, weld_width, tape_width
     comment: str | None = None
@@ -1199,8 +1204,8 @@ class Electrode(BaseModel):
     material: MaterialComponent | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1215,8 +1220,8 @@ class SolventMixture(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: list[MaterialComponent] = Field(default_factory=list)
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1237,8 +1242,8 @@ class Salt(BaseModel):
     )
     cation: str | None = None
     anion: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     label: str | None = Field(
         default=None,
@@ -1273,8 +1278,8 @@ class Separator(BaseModel):
     material_spec_id: str | None = None
     structure: str | None = None  # monolayer | bilayer | trilayer | composite | other | unknown
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1296,8 +1301,8 @@ class Electrolyte(BaseModel):
     # One salt, or a list for a multi-salt electrolyte.
     salt: Salt | list[Salt] | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1325,8 +1330,8 @@ class Terminal(BaseModel):
     polarity: str | None = None  # "positive" | "negative"
     type: str | None = None  # tab | rivet | stud | threaded_post | other
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, weld_width, tape_width, length
     comment: str | None = None
@@ -1343,8 +1348,8 @@ class Seal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # single_channel_thickness, top_corner_thickness
     comment: str | None = None
@@ -1363,8 +1368,8 @@ class Case(BaseModel):
     size_code: str | None = None
     material: str | None = None
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # wall_thickness, weight, available_volume, filling_ratio
     comment: str | None = None
@@ -1383,8 +1388,8 @@ class HardwarePart(BaseModel):
     type: str | None = None  # e.g. "cap", "lid", "can", "spring", "spacer"
     material: str | None = None
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None

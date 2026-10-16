@@ -1605,10 +1605,12 @@ def contributor_to_jsonld(contributor: Any) -> list[dict] | None:
         name = person.get("name")
         if isinstance(name, str) and name.strip():
             node["schema:name"] = name
-        aff = person.get("affiliation")
-        aff = _agent_to_jsonld({**aff, "type": "Organization"}) if isinstance(aff, dict) else None
-        if aff:
-            node["schema:affiliation"] = aff
+        # One affiliation, or a list of them.
+        affs = person.get("affiliation")
+        affs = [affs] if isinstance(affs, dict) else affs if isinstance(affs, list) else []
+        orgs = [o for a in affs if isinstance(a, dict) if (o := _agent_to_jsonld({**a, "type": "Organization"}))]
+        if orgs:
+            node["schema:affiliation"] = orgs[0] if len(orgs) == 1 else orgs
         if len(node) > 1:  # more than the bare @type
             out.append(node)
     return out or None
@@ -1622,10 +1624,9 @@ def _agent_to_jsonld(agent: Any) -> dict | None:
     if agent.get("type") != "Organization":
         people = contributor_to_jsonld([agent])
         return people[0] if people else None
-    node: dict = {"@type": "schema:Organization", "schema:name": agent["name"]}
-    if agent.get("same_as"):
-        node = {"@id": agent["same_as"], **node}
-    return node
+    from battinfo.transform.json_to_jsonld import organization_ref_node  # noqa: PLC0415
+
+    return organization_ref_node(agent)
 
 
 def _material_to_jsonld(record: dict) -> dict:

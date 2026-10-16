@@ -127,11 +127,23 @@
         "type": "Person",
         "name": "Corsin Battaglia",
         "same_as": "https://orcid.org/0000-0002-5003-1134",
-        "affiliation": {
-          "type": "Organization",
-          "name": "Empa",
-          "same_as": "http://www.wikidata.org/entity/Q683116"
-        }
+        "affiliation": [
+          {
+            "type": "Organization",
+            "name": "Empa",
+            "same_as": "http://www.wikidata.org/entity/Q683116"
+          },
+          {
+            "type": "Organization",
+            "name": "ETH Zurich",
+            "same_as": "http://www.wikidata.org/entity/Q11942"
+          },
+          {
+            "type": "Organization",
+            "name": "EPFL",
+            "same_as": "http://www.wikidata.org/entity/Q262760"
+          }
+        ]
       }
     ],
     "distributions": [

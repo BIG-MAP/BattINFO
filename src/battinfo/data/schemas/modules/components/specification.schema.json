@@ -146,11 +146,11 @@
           "description": "Surface coating applied to the base membrane, e.g. 'Al2O3', 'SiO2', 'PVDF', 'ceramic'."
         },
         "manufacturer": {
-          "type": "string",
+          "$ref": "../common/organization-ref.schema.json",
           "description": "Manufacturer of the item."
         },
         "supplier": {
-          "type": "string",
+          "$ref": "../common/organization-ref.schema.json",
           "description": "Supplier or vendor the item was sourced from."
         },
         "product_id": {

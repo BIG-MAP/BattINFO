@@ -6,7 +6,8 @@
     "manufacturer": {
       "type": "Organization",
       "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
-      "name": "Empa"
+      "name": "Empa",
+      "same_as": "http://www.wikidata.org/entity/Q683116"
     },
     "model": "R2032 NMC622 half cell",
     "cell_format": "coin",

@@ -1412,9 +1412,31 @@ def _manufacturer_to_jsonld(manufacturer: Any) -> dict[str, Any] | None:
 
 
 def _agent_text_node(name: Any) -> dict[str, Any] | None:
+    """A manufacturer or supplier (a name, or an Organization object) as a schema:Organization node."""
+    if isinstance(name, Mapping):
+        return organization_ref_node(name)
     if isinstance(name, str) and name.strip():
         return {"@type": "schema:Organization", "schema:name": name}
     return None
+
+
+def organization_ref_node(org: Mapping[str, Any]) -> dict[str, Any] | None:
+    """An Organization object as a schema:Organization node. Its BattINFO organization IRI
+    (``id``) is the node's ``@id``; an external one (``same_as``: ROR, Wikidata) is
+    ``schema:sameAs``, or the ``@id`` when there is no BattINFO one."""
+    if not org.get("name"):
+        return None
+    node: dict[str, Any] = {"@type": "schema:Organization", "schema:name": org["name"]}
+    if org.get("id"):
+        node = {"@id": org["id"], **node}
+    if org.get("same_as"):
+        if "@id" in node:
+            node["schema:sameAs"] = {"@id": org["same_as"]}
+        else:
+            node = {"@id": org["same_as"], **node}
+    if org.get("url"):
+        node["schema:url"] = org["url"]
+    return node
 
 
 def _comment_value(comment: Any) -> list[str] | str | None:
