@@ -653,6 +653,11 @@
           "type": "string",
           "format": "uri",
           "description": "Homepage URL."
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
         }
       },
       "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
@@ -828,8 +833,19 @@
           "description": "External identifier IRI, typically an ORCID (https://orcid.org/...)."
         },
         "affiliation": {
-          "$ref": "#/$defs/Organization",
-          "description": "Organization the person is affiliated with."
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Organization"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Organization"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Organization(s) the person is affiliated with: one, or a list."
         }
       },
       "description": "A person, in schema.org Person terms; an ORCID may be given in same_as."

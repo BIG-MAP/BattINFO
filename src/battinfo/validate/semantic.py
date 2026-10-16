@@ -1653,7 +1653,12 @@ def _validate_substance_resolution(
         electrolyte_bodies.append((cell_body["electrolyte"], "cell_spec.electrolyte"))
 
     for body, prefix in electrolyte_bodies:
-        _check(body.get("salt"), "salt", f"{prefix}.salt")
+        salts = body.get("salt")
+        if isinstance(salts, list):
+            for idx, salt in enumerate(salts):
+                _check(salt, "salt", f"{prefix}.salt[{idx}]")
+        else:
+            _check(salts, "salt", f"{prefix}.salt")
         mixture = body.get("solvent_mixture")
         if isinstance(mixture, Mapping):
             for idx, comp in enumerate(mixture.get("component") or []):

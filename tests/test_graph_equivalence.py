@@ -192,21 +192,22 @@ def _term_iri(term: str) -> str:
 
 def test_cell_instances_state_their_spec_conformance(corpus_graph) -> None:
     """Q1: 'which spec does this physical cell conform to?' — every cell
-    instance carries dcterms:conformsTo, and every target is a spec IRI that
-    the corpus actually describes."""
+    instance links its spec through schema:isVariantOf, and every target is a
+    spec IRI that the corpus actually describes."""
     rows = list(
         corpus_graph.query(
             """
         SELECT ?cell ?spec WHERE {
-            ?cell <http://purl.org/dc/terms/conformsTo> ?spec .
-            FILTER(isIRI(?spec))  # a parameter file's "BPX 1.0" conformsTo is a literal
+            ?cell <https://schema.org/isVariantOf> ?spec .
+            FILTER(STRSTARTS(STR(?cell), "https://w3id.org/battinfo/cell/"))
         }
         """
         )
     )
     cell_instances = len(list((EXAMPLES / "cell-instance").glob("*.json")))
     assert cell_instances > 0
-    assert len(rows) >= cell_instances, f"{cell_instances} cell instances but only {len(rows)} conformsTo edges"
+    linked = {str(cell) for cell, _spec in rows}
+    assert len(linked) == cell_instances, f"{cell_instances} cell instances but {len(linked)} link a spec"
     subjects = {str(s) for s in corpus_graph.subjects()}
     for _cell, spec in rows:
         assert str(spec).startswith("https://w3id.org/battinfo/spec/"), str(spec)

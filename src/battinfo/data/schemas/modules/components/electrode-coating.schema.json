@@ -57,11 +57,11 @@
       "description": "True when the current collector is coated on both sides, false for a single-side coating. Loadings and thicknesses elsewhere in this block are per-side values unless their own descriptions say otherwise."
     },
     "manufacturer": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {

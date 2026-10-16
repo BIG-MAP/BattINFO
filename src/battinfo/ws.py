@@ -8413,6 +8413,7 @@ class AuthoringWorkspace:
         from battinfo.jsonld import (
             checksum_node,
             dataset_series_edges,
+            dataset_to_jsonld,
             electrode_role_links,
             funding_to_jsonld,
             schema_checksum_terms,
@@ -9084,11 +9085,20 @@ class AuthoringWorkspace:
                 _lic_value = _license_value(_member_license)
                 member["schema:license"] = _lic_value
                 member["dcterms:license"] = _lic_value
-            if creators:
+            # What the dataset record states about itself wins over the deposit, as
+            # its licence does above: its own creators, publisher, publication and
+            # DOI, read through the record's own JSON-LD writer.
+            _own = dataset_to_jsonld(
+                {"dataset": {k: _ds[k] for k in ("creators", "publisher", "citations", "same_as") if k in _ds}}
+            )
+            for _term in ("dcterms:publisher", "schema:citation", "schema:sameAs"):
+                if _term in _own:
+                    member[_term] = _own[_term]
+            if _own.get("dcterms:creator") or creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
                 # lifted out of the catalog, and so creators without an ORCID @id are
                 # still carried.
-                member["schema:creator"] = [_agent_node(c) for c in creators]
+                member["schema:creator"] = _own.get("dcterms:creator") or [_agent_node(c) for c in creators or []]
             if _ds.get("keywords"):
                 member["schema:keywords"] = list(_ds["keywords"])
             if _ds.get("version"):

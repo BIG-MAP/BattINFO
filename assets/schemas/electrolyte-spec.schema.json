@@ -146,6 +146,11 @@
           "type": "string",
           "format": "uri",
           "description": "Homepage URL."
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
         }
       },
       "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."

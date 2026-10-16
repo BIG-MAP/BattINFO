@@ -1,0 +1,89 @@
+{
+  "schema_version": "0.2.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/xj15-1cpp-amcv-kyxz",
+    "name": "Positive electrode half-cell rated capacity vs Li/Li+",
+    "kind": "capacity_check",
+    "description": "Rated-capacity measurement of the positive electrode in a half cell with a lithium reference electrode, as in the Empa coin cell template (CatINFO converter, CoinCellSchema 2.0.0)."
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "current_density": {
+          "value": 0.1,
+          "unit": "mA/cm2"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        },
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ]
+    },
+    {
+      "mode": "cv",
+      "direction": "charge",
+      "setpoints": {
+        "voltage": {
+          "value": 4.2,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "current",
+          "value": 0.01,
+          "unit": "mA/cm2",
+          "direction": "below"
+        },
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        }
+      ]
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "current_density": {
+          "value": 0.1,
+          "unit": "mA/cm2"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 2.5,
+          "unit": "V",
+          "direction": "below"
+        },
+        {
+          "quantity": "voltage",
+          "value": 4.2,
+          "unit": "V",
+          "direction": "above"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

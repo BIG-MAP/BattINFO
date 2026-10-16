@@ -218,6 +218,15 @@
       "emmo_class": "VinyleneCarbonate"
     },
     {
+      "symbol": "TMSPi",
+      "aliases": [
+        "tmspi",
+        "ttspi",
+        "tris(trimethylsilyl) phosphite"
+      ],
+      "emmo_class": "TrisTrimethylsilyPhosphite"
+    },
+    {
       "symbol": "VEC",
       "aliases": [
         "vec",
@@ -257,6 +266,15 @@
         "cu"
       ],
       "emmo_class": "Copper"
+    },
+    {
+      "symbol": "Stainless steel",
+      "aliases": [
+        "stainless steel",
+        "stainlesssteel",
+        "ss"
+      ],
+      "emmo_class": "StainlessSteel"
     },
     {
       "symbol": "EMC",

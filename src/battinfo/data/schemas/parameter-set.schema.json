@@ -778,6 +778,11 @@
         "url": {
           "type": "string",
           "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
         }
       }
     },
@@ -936,7 +941,19 @@
           "format": "uri"
         },
         "affiliation": {
-          "$ref": "#/$defs/Organization"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Organization"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Organization"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Organization(s) the person is affiliated with: one, or a list."
         }
       }
     },

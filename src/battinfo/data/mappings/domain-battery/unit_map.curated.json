@@ -697,6 +697,15 @@
       "unit_pref_label": "Day",
       "unit_label": "day",
       "confidence": 1.0
+    },
+    {
+      "symbol": "µL",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#MicroLitre",
+      "unit_qname": "emmo:MicroLitre",
+      "unit_pref_label": "MicroLitre",
+      "unit_label": "µL",
+      "confidence": 1.0
     }
   ]
 }

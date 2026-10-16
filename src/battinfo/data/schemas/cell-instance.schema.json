@@ -523,8 +523,19 @@
           "description": "External identifier IRI, typically an ORCID (https://orcid.org/...)."
         },
         "affiliation": {
-          "$ref": "#/$defs/Organization",
-          "description": "Organization the person is affiliated with."
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Organization"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Organization"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Organization(s) the person is affiliated with: one, or a list."
         }
       },
       "description": "A person, in schema.org Person terms; an ORCID may be given in same_as."

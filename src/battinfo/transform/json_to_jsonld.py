@@ -953,6 +953,7 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "discharge_c_rate": "CRate",
     "charge_c_rate": "CRate",
     "current": "ElectricCurrent",
+    "current_density": "ElectricCurrentDensity",
     "temperature": "CelsiusTemperature",
     "lower_voltage_limit": "LowerVoltageLimit",
     "upper_voltage_limit": "UpperVoltageLimit",
@@ -1411,9 +1412,31 @@ def _manufacturer_to_jsonld(manufacturer: Any) -> dict[str, Any] | None:
 
 
 def _agent_text_node(name: Any) -> dict[str, Any] | None:
+    """A manufacturer or supplier (a name, or an Organization object) as a schema:Organization node."""
+    if isinstance(name, Mapping):
+        return organization_ref_node(name)
     if isinstance(name, str) and name.strip():
         return {"@type": "schema:Organization", "schema:name": name}
     return None
+
+
+def organization_ref_node(org: Mapping[str, Any]) -> dict[str, Any] | None:
+    """An Organization object as a schema:Organization node. Its BattINFO organization IRI
+    (``id``) is the node's ``@id``; an external one (``same_as``: ROR, Wikidata) is
+    ``schema:sameAs``, or the ``@id`` when there is no BattINFO one."""
+    if not org.get("name"):
+        return None
+    node: dict[str, Any] = {"@type": "schema:Organization", "schema:name": org["name"]}
+    if org.get("id"):
+        node = {"@id": org["id"], **node}
+    if org.get("same_as"):
+        if "@id" in node:
+            node["schema:sameAs"] = {"@id": org["same_as"]}
+        else:
+            node = {"@id": org["same_as"], **node}
+    if org.get("url"):
+        node["schema:url"] = org["url"]
+    return node
 
 
 def _comment_value(comment: Any) -> list[str] | str | None:
@@ -1600,6 +1623,8 @@ def _descriptor_housing_to_jsonld(housing: Any, fmt: Any) -> dict[str, Any]:
             node["schema:size"] = case["size_code"]
         if not mat_class and case.get("material"):
             node["schema:material"] = case["material"]
+        if case.get("coating"):
+            node["hasCoating"] = {"schema:material": case["coating"]}
         _converter_component_metadata(node, case)
         props = _descriptor_property_nodes(case.get("property"))
         if props:
@@ -1862,10 +1887,20 @@ def _converter_electrolyte_node(electrolyte: dict[str, Any] | None) -> dict[str,
             _converter_component_metadata(solvent_node, solvent_mixture)
             node["hasSolvent"] = solvent_node
     solute_node: dict[str, Any] | None = None
-    salt = electrolyte.get("salt")
-    if isinstance(salt, dict):
-        solute_component = _converter_named_node(salt, property_types=CONVERTER_PROPERTY_TYPES)
-        solute_node = {"@type": "Solute", "hasConstituent": solute_component}
+    salts = electrolyte.get("salt")
+    if isinstance(salts, dict):
+        salts = [salts]
+    solute_components = [
+        c
+        for salt in (salts if isinstance(salts, list) else [])
+        if isinstance(salt, dict)
+        if (c := _converter_named_node(salt, property_types=CONVERTER_PROPERTY_TYPES))
+    ]
+    if solute_components:
+        solute_node = {
+            "@type": "Solute",
+            "hasConstituent": solute_components[0] if len(solute_components) == 1 else solute_components,
+        }
     additives = electrolyte.get("additive")
     if isinstance(additives, list):
         additive_items = [
@@ -2359,11 +2394,18 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     elyte_type = _ELECTROLYTE_FAMILY_TYPES.get(family, "ElectrolyteSolution")
     node: dict[str, Any] = {"@type": elyte_type}
 
-    salt = electrolyte.get("salt")
-    if isinstance(salt, dict) and salt.get("name"):
-        salt_node = _typed_constituent_node(salt, "Solute", "Concentration")
-        if salt_node:
-            node["hasSolute"] = salt_node
+    # `salt` is one salt or a list of them.
+    salts = electrolyte.get("salt")
+    if isinstance(salts, dict):
+        salts = [salts]
+    salt_nodes = [
+        c
+        for s in (salts if isinstance(salts, list) else [])
+        if isinstance(s, dict) and s.get("name")
+        if (c := _typed_constituent_node(s, "Solute", "Concentration")) is not None
+    ]
+    if salt_nodes:
+        node["hasSolute"] = salt_nodes[0] if len(salt_nodes) == 1 else salt_nodes
 
     # `solvent` is one component or a list of them; the deprecated
     # solvent_mixture {component: [...]} wrapper stays readable.
@@ -2389,6 +2431,7 @@ def _descriptor_electrolyte_to_jsonld(electrolyte: dict[str, Any] | None) -> dic
     if prop_nodes:
         node["hasProperty"] = prop_nodes[0] if len(prop_nodes) == 1 else prop_nodes
 
+    _converter_component_metadata(node, {k: v for k, v in electrolyte.items() if k != "comment"})
     comment = electrolyte.get("comment")
     if comment:
         node["schema:description"] = comment
@@ -2465,6 +2508,7 @@ def _electrode_holder_body(electrode_data: Any) -> dict[str, Any]:
     holder_spec_ref = electrode_data.get("electrode_spec_id")
     if isinstance(holder_spec_ref, str) and holder_spec_ref:
         node["schema:isVariantOf"] = {"@id": holder_spec_ref}
+    _converter_component_metadata(node, electrode_data)
     return node
 
 
