@@ -413,6 +413,14 @@ def test_a_component_manufacturer_carries_its_external_iri() -> None:
     }
 
 
+def test_a_component_manufacturer_may_name_its_organization_record() -> None:
+    from battinfo.validate import validate_record_report
+
+    record = json.loads((ROOT / "examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json").read_text(encoding="utf-8"))
+    record["electrolyte"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    assert validate_record_report(record, policy="strict").ok
+
+
 def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:
     ws = _new_ws(tmp_path)
     ws.add("test", type="capacity_check", cell="SN-1", data="f.csv")

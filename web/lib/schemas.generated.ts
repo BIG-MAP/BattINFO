@@ -7701,6 +7701,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           },
           "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
+        },
+        "OrganizationIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
         }
       }
     }
