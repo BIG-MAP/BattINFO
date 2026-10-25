@@ -64,7 +64,7 @@
           "description": "Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name."
         },
         "active_material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri",
+          "$ref": "#/$defs/MaterialSpecRefIri",
           "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
         },
         "material": {
@@ -142,11 +142,12 @@
   "$defs": {
     "ComponentSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
-    "MaterialSpecIri": {
+    "MaterialSpecRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "ShortId": {
       "type": "string",
@@ -189,10 +190,10 @@
         }
       }
     },
-    "OrganizationIri": {
+    "OrganizationRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -206,7 +207,7 @@
           "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri",
+          "$ref": "#/$defs/OrganizationRefIri",
           "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {

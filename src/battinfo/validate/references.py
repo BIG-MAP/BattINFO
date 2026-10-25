@@ -11,7 +11,7 @@ from battinfo.entities import (
     entity_types_for_namespace,
     kind_for_doc,
 )
-from battinfo.namespace import record_iri_pattern
+from battinfo.namespace import parse_thing_iri, record_iri_pattern
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -21,13 +21,13 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 
-SPEC_IRI_RE = record_iri_pattern("spec")
+SPEC_IRI_RE = record_iri_pattern("spec", both_shapes=True)
 # Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_SPEC_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = record_iri_pattern("cell")
-DATASET_IRI_RE = record_iri_pattern("dataset")
-TEST_IRI_RE = record_iri_pattern("test")
+CELL_IRI_RE = record_iri_pattern("cell", both_shapes=True)
+DATASET_IRI_RE = record_iri_pattern("dataset", both_shapes=True)
+TEST_IRI_RE = record_iri_pattern("test", both_shapes=True)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -111,6 +111,10 @@ def _check_reference(
     mismatch_message: str,
     allow_missing: bool = False,
 ) -> None:
+    if parse_thing_iri(ref_id) is not None:
+        # A shared thing (https://w3id.org/battinfo/id/{uid}) is minted and kept by
+        # the registry, never saved in a workspace; the schema decides where one may stand.
+        return
     found = _find_record(ref_id, source_root)
     if found is None:
         if allow_missing:

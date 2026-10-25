@@ -32,9 +32,11 @@ This module is the one place that builds and recognises these shapes::
 
 Nothing mints the prefixed form yet. Every builder calls :func:`record_iri`
 without a prefix, so minted IRIs keep the old form until minting takes its
-base from the workspace, and the recognisers built with
-:func:`record_iri_pattern` accept the old form only until the v1 schemas
-accept both shapes.
+base from the workspace. Every recogniser accepts both shapes
+(``both_shapes=True``), as the v1 JSON Schemas do, and a field that
+references a maker, a product model or a material also accepts a shared
+thing (``things=True``). The IRI patterns of the schemas are built here too:
+``scripts/sync_schema_iri_patterns.py`` writes them.
 
 The publisher prefixes come from the register in
 ``data/namespace/prefixes.json`` (:data:`PUBLISHER_PREFIXES`), and the
@@ -96,7 +98,7 @@ UID_PATTERN = UID_DASHED_RE.pattern.removeprefix("^").removesuffix("$")
 #: A record segment such as ``spec``, ``cell`` or ``current-collector``.
 SEGMENT_PATTERN = r"[a-z][a-z0-9-]*"
 #: A publisher prefix: a number of four or more digits, never a name.
-PREFIX_PATTERN = r"[0-9]{4,}"
+PREFIX_PATTERN = r"[1-9][0-9]{3,}"
 
 
 class PublisherPrefix(NamedTuple):
@@ -288,22 +290,27 @@ def _record_key(parsed: RecordIri) -> tuple[str, str, str]:
     return parsed.prefix or _OLD_FORM_PREFIX, parsed.segment, parsed.uid
 
 
-def record_iri_regex(*segments: str, both_shapes: bool = False) -> str:
+def record_iri_regex(*segments: str, both_shapes: bool = False, things: bool = False) -> str:
     """The anchored regular expression that a record IRI under one of *segments* matches in full.
 
-    Without *both_shapes* it matches the old form only, as every recogniser
-    has; with it, the prefixed form under any prefix as well. The expression
-    has no capturing groups and uses only syntax that a JSON Schema
-    ``pattern`` shares with Python's ``re``.
+    Without *both_shapes* it matches the old form only; with it, the prefixed
+    form under any prefix as well. With *things* it also matches a shared
+    thing, ``https://w3id.org/battinfo/id/{uid}``, which a field that
+    references a maker, a product model or a material accepts (ruling
+    decision 4). The expression has no capturing groups and uses only syntax
+    that a JSON Schema ``pattern`` shares with Python's ``re``.
     """
     if not segments:
         raise ValueError("record_iri_regex needs at least one segment.")
     names = [_checked_segment(segment) for segment in segments]
     alternation = names[0] if len(names) == 1 else "(?:" + "|".join(names) + ")"
     prefix = rf"(?:id/{PREFIX_PATTERN}/)?" if both_shapes else ""
-    return rf"^{_ROOT_PATTERN}{prefix}{alternation}/{UID_PATTERN}$"
+    record = f"{prefix}{alternation}/"
+    if things:
+        record = f"(?:{record}|id/)"
+    return rf"^{_ROOT_PATTERN}{record}{UID_PATTERN}$"
 
 
-def record_iri_pattern(*segments: str, both_shapes: bool = False) -> re.Pattern[str]:
+def record_iri_pattern(*segments: str, both_shapes: bool = False, things: bool = False) -> re.Pattern[str]:
     """:func:`record_iri_regex` compiled, for ``fullmatch`` or ``match``."""
-    return re.compile(record_iri_regex(*segments, both_shapes=both_shapes))
+    return re.compile(record_iri_regex(*segments, both_shapes=both_shapes, things=things))

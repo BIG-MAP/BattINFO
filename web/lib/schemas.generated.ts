@@ -1031,7 +1031,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         }
       }
     }
@@ -1070,7 +1070,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Canonical IRI of this cell instance."
             },
             "cell_spec_id": {
-              "$ref": "#/$defs/SpecIri",
+              "$ref": "#/$defs/CellSpecRefIri",
               "description": "IRI of the cell spec this physical cell realizes."
             },
             "working_electrode_id": {
@@ -1386,12 +1386,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "CellIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -1419,13 +1419,14 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "SpecIri": {
+        "CellSpecRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a cell spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a product model as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "ElectrodeIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",
@@ -2228,7 +2229,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this manufacturer to its organization record."
             },
             "name": {
@@ -2261,7 +2262,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this brand to its organization record."
             },
             "name": {
@@ -2290,28 +2291,28 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "ElectrodeSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ElectrolyteSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "SeparatorSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "HousingSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",
@@ -2519,11 +2520,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ChannelIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "EquipmentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -2657,7 +2658,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+              "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
             },
             "property": {
               "$ref": "modules/common/quantitative-properties.schema.json",
@@ -2697,7 +2698,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -2715,10 +2716,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "minimum": 0,
           "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -2732,7 +2733,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -2927,12 +2928,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/current-collector/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?current-collector/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the current-collector/ namespace (https://w3id.org/battinfo/current-collector/xxxx-xxxx-xxxx-xxxx)."
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -2965,7 +2966,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -2993,10 +2994,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -3010,7 +3011,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -3537,22 +3538,22 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "CellTypeIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
         },
         "CellIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
         },
         "TestIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the test/ namespace (https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx)."
         },
         "AboutRef": {
@@ -4254,7 +4255,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name."
             },
             "active_material_spec_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry."
             },
             "material": {
@@ -4332,11 +4333,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
-        "MaterialSpecIri": {
+        "MaterialSpecRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "ShortId": {
           "type": "string",
@@ -4379,10 +4381,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           }
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -4396,7 +4398,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -4740,12 +4742,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the electrode/ namespace (https://w3id.org/battinfo/electrode/xxxx-xxxx-xxxx-xxxx)."
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -4778,7 +4780,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -4806,10 +4808,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -4823,7 +4825,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -5129,7 +5131,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -5147,10 +5149,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "minimum": 0,
           "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -5164,7 +5166,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -5359,12 +5361,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/electrolyte/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?electrolyte/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the electrolyte/ namespace (https://w3id.org/battinfo/electrolyte/xxxx-xxxx-xxxx-xxxx)."
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -5397,7 +5399,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -5425,10 +5427,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -5442,7 +5444,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -5631,7 +5633,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -5647,9 +5649,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "type": "integer",
           "minimum": 0
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -5662,7 +5665,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "const": "Organization"
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri"
+              "$ref": "#/$defs/OrganizationRefIri"
             },
             "name": {
               "type": "string",
@@ -5829,11 +5832,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "EquipmentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -6038,7 +6041,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -6056,10 +6059,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "minimum": 0,
           "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -6073,7 +6076,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -6392,12 +6395,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/housing/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?housing/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the housing/ namespace (https://w3id.org/battinfo/housing/xxxx-xxxx-xxxx-xxxx)."
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -6430,7 +6433,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -6458,10 +6461,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -6475,7 +6478,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -6956,12 +6959,17 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "MaterialSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
-        "OrganizationIri": {
+        "MaterialSpecRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+        },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -6975,7 +6983,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -7119,7 +7127,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "properties": {
             "material_spec_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "IRI of the material-spec record being referenced."
             },
             "name": {
@@ -7151,7 +7159,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "properties": {
             "base_material_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "Parent/base material this grade derives from (e.g. base NMC811 for an Al2O3-coated grade)."
             },
             "coatings": {
@@ -7228,7 +7236,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "$ref": "#/$defs/MaterialIri"
             },
             "material_spec_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "IRI of the material-spec this physical lot realizes."
             },
             "short_id": {
@@ -7456,16 +7464,17 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "MaterialIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the material/ namespace (https://w3id.org/battinfo/material/xxxx-xxxx-xxxx-xxxx)."
         },
-        "MaterialSpecIri": {
+        "MaterialSpecRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -7493,10 +7502,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -7510,7 +7519,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -7681,7 +7690,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -7702,10 +7711,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "An organization referenced by name, with an optional canonical BattINFO organization IRI."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         }
       }
     }
@@ -7984,7 +7993,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO cell IRI, when the cell has a record."
         },
         "serial_number": {
@@ -8106,7 +8115,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec for the current-collector foil material. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "manufacturer": {
@@ -8228,7 +8237,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "properties": {
         "electrode_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|electrode-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|electrode-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone electrode-spec this inline holder realizes. Lets a cell-spec cite the designed electrode while keeping its embedded fields; the same reference seam material-component.schema.json gives materials. A superseded electrode-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "material": {
@@ -8429,7 +8438,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+              "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
               "description": "Optional canonical IRI of a standalone material-spec for the salt. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
             },
             "cation": {
@@ -8538,10 +8547,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         }
       },
       "$defs": {
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -8555,7 +8564,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -8780,7 +8789,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "manufacturer": {
@@ -8903,7 +8912,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?spec/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec for the separator base material."
         },
         "structure": {
@@ -8966,7 +8975,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI of the cell spec (spec/ namespace)."
         },
         "name": {
@@ -9075,7 +9084,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+              "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
               "description": "IRI of the material-spec this separator base material realizes."
             },
             "structure": {
@@ -9284,7 +9293,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "parentOrganization": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/OrganizationIri"
+                  "$ref": "#/$defs/OrganizationRefIri"
                 },
                 {
                   "type": "object",
@@ -9294,7 +9303,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   ],
                   "properties": {
                     "id": {
-                      "$ref": "#/$defs/OrganizationIri",
+                      "$ref": "#/$defs/OrganizationRefIri",
                       "description": "Canonical IRI of the parent organization record."
                     },
                     "name": {
@@ -9341,7 +9350,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "parent_organization": {
               "anyOf": [
                 {
-                  "$ref": "#/$defs/OrganizationIri"
+                  "$ref": "#/$defs/OrganizationRefIri"
                 },
                 {
                   "type": "object",
@@ -9351,7 +9360,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
                   ],
                   "properties": {
                     "id": {
-                      "$ref": "#/$defs/OrganizationIri",
+                      "$ref": "#/$defs/OrganizationRefIri",
                       "description": "Canonical IRI of the parent organization record."
                     },
                     "name": {
@@ -9426,8 +9435,13 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "OrganizationIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+        },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "ShortId": {
           "type": "string",
@@ -9507,11 +9521,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Claim-batch target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind."
             },
             "material_spec_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry."
             },
             "cell_spec_id": {
-              "$ref": "#/$defs/SpecIri",
+              "$ref": "#/$defs/CellSpecRefIri",
               "description": "The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises."
             },
             "cell_instance_id": {
@@ -9884,24 +9898,30 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+        },
+        "CellSpecRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?spec/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a cell spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a product model as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "SupersededParameterSetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "A parameter-set IRI: under dataset/, or under spec/ for one minted before 2026-10-11."
         },
-        "MaterialSpecIri": {
+        "MaterialSpecRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "CellIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "A physical cell (cell instance) IRI."
         },
         "ShortId": {
@@ -10071,7 +10091,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "Material parts only: the curated material kind the claims are about."
             },
             "material_spec_id": {
-              "$ref": "#/$defs/MaterialSpecIri",
+              "$ref": "#/$defs/MaterialSpecRefIri",
               "description": "Material parts only: the material spec the claims are about."
             },
             "claims": {
@@ -10206,9 +10226,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           }
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -10221,7 +10242,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "const": "Organization"
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri"
+              "$ref": "#/$defs/OrganizationRefIri"
             },
             "name": {
               "type": "string",
@@ -10734,7 +10755,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             },
             "material_spec_id": {
               "type": "string",
-              "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+              "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
             },
             "property": {
               "$ref": "modules/common/quantitative-properties.schema.json",
@@ -10774,7 +10795,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -10792,10 +10813,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "minimum": 0,
           "description": "Unix timestamp in whole seconds since 1970-01-01T00:00:00Z."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -10809,7 +10830,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -11004,12 +11025,12 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
       "$defs": {
         "ComponentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/separator/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?separator/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the separator/ namespace (https://w3id.org/battinfo/separator/xxxx-xxxx-xxxx-xxxx)."
         },
         "ComponentSpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ShortId": {
           "type": "string",
@@ -11042,7 +11063,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetLink": {
@@ -11070,10 +11091,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "Link to a dataset record, with the role the dataset plays for this record."
         },
-        "OrganizationIri": {
+        "OrganizationRefIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-          "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
         },
         "Organization": {
           "type": "object",
@@ -11087,7 +11108,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "description": "JSON-LD type discriminator."
             },
             "id": {
-              "$ref": "#/$defs/OrganizationIri",
+              "$ref": "#/$defs/OrganizationRefIri",
               "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
@@ -11514,7 +11535,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Quantity": {
           "type": "object",
@@ -12341,30 +12362,30 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
         },
         "CellIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
         },
         "DatasetIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
         },
         "TestIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Canonical BattINFO IRI in the test/ namespace (https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx)."
         },
         "SpecIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "EquipmentIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "ChannelIri": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+          "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
         },
         "Funding": {
           "type": "object",

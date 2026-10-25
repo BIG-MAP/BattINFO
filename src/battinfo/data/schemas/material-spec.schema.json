@@ -246,12 +246,17 @@
     },
     "MaterialSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
-    "OrganizationIri": {
+    "MaterialSpecRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "OrganizationRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -265,7 +270,7 @@
           "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri",
+          "$ref": "#/$defs/OrganizationRefIri",
           "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
@@ -409,7 +414,7 @@
       "additionalProperties": false,
       "properties": {
         "material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri",
+          "$ref": "#/$defs/MaterialSpecRefIri",
           "description": "IRI of the material-spec record being referenced."
         },
         "name": {
@@ -441,7 +446,7 @@
       "additionalProperties": false,
       "properties": {
         "base_material_id": {
-          "$ref": "#/$defs/MaterialSpecIri",
+          "$ref": "#/$defs/MaterialSpecRefIri",
           "description": "Parent/base material this grade derives from (e.g. base NMC811 for an Al2O3-coated grade)."
         },
         "coatings": {

@@ -21,6 +21,7 @@ from battinfo.api._shared import (
     DUPLICATE_POLICY_ERROR,
     MATERIAL_IRI_RE,
     MATERIAL_SPEC_IRI_RE,
+    MATERIAL_SPEC_REF_IRI_RE,
     REGISTER_MODE_CREATE_ONLY,
     TEMPLATE_CELL_SPEC_ID,
     PathLike,
@@ -352,7 +353,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
 
 
 def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
-    if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.material_spec_id):
+    if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(draft.material_spec_id):
         raise ValueError("material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if draft.id is not None:
         if not MATERIAL_IRI_RE.fullmatch(draft.id):
@@ -601,7 +602,9 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
         )
         entity_id = record_iri("spec", dashed_uid)
 
-    if draft.active_material_spec_id is not None and not MATERIAL_SPEC_IRI_RE.fullmatch(draft.active_material_spec_id):
+    if draft.active_material_spec_id is not None and not MATERIAL_SPEC_REF_IRI_RE.fullmatch(
+        draft.active_material_spec_id
+    ):
         raise ValueError("active_material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
 
     spec: dict[str, Any] = {

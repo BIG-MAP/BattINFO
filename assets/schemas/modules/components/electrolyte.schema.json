@@ -100,7 +100,7 @@
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "Optional canonical IRI of a standalone material-spec for the salt. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
         },
         "cation": {

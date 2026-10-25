@@ -10,7 +10,7 @@ from typing import Any, Mapping
 from battinfo._util import is_dataset_series
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import kind_for_doc
-from battinfo.namespace import RecordIri, parse_record_iri, record_base, record_iri
+from battinfo.namespace import parse_record_iri, parse_thing_iri, record_iri
 from battinfo.naming import is_valid_handle, kind_word
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -223,11 +223,10 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "state_of_health": {"%": (0.0, 100.0)},
 }
 
-CELL_IRI_PREFIX = record_base() + "cell/"
-CELL_TYPE_IRI_PREFIX = record_base() + "spec/"  # cell specs use the spec/ namespace
-# A material dataset (powder XRD, say) is about a material lot or its material
-# spec rather than a cell; material specs share the spec/ namespace.
-MATERIAL_IRI_PREFIX = record_base() + "material/"
+# The record segments a dataset's about can name to link it to a cell: a cell,
+# a cell spec (spec/), or, for a material dataset (powder XRD, say), a material
+# lot or its material spec, which shares spec/. Either record shape counts.
+_BATTERY_LINK_SEGMENTS = frozenset({"cell", "spec", "material"})
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-spec": ("cell_spec", "cell_spec"),
@@ -1283,6 +1282,19 @@ def _validate_specs(
             )
 
 
+def _is_battery_link(item: object) -> bool:
+    """Whether an entry of a dataset's about links it to a cell, a cell spec or a material.
+
+    A record IRI of either shape under one of those segments does, and so does
+    a shared thing (``https://w3id.org/battinfo/id/{uid}``), which stands for a
+    product model or a material.
+    """
+    parsed = parse_record_iri(item)
+    if parsed is not None:
+        return parsed.segment in _BATTERY_LINK_SEGMENTS
+    return parse_thing_iri(item) is not None
+
+
 def _validate_dataset_semantics(
     dataset: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1293,14 +1305,13 @@ def _validate_dataset_semantics(
     related_entities = dataset.get("related_entities")
     has_battery_link = False
     if isinstance(about, list):
-        has_battery_link = any(
-            isinstance(item, str) and item.startswith((CELL_IRI_PREFIX, CELL_TYPE_IRI_PREFIX, MATERIAL_IRI_PREFIX))
-            for item in about
-        )
+        has_battery_link = any(_is_battery_link(item) for item in about)
     elif isinstance(related_entities, Mapping):
         cell_ids = related_entities.get("cell_ids")
         if isinstance(cell_ids, list):
-            has_battery_link = any(isinstance(item, str) and item.startswith(CELL_IRI_PREFIX) for item in cell_ids)
+            has_battery_link = any(
+                (parsed := parse_record_iri(item)) is not None and parsed.segment == "cell" for item in cell_ids
+            )
     # A series-flavored dataset (dcat:DatasetSeries) is a grouping record: its
     # member datasets carry the cell links and point here via series_id, so
     # requiring a direct cell link on the collection would force redundancy.
@@ -1668,12 +1679,6 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
-def _old_form_record_iri(value: object) -> RecordIri | None:
-    """*value* taken apart as a record IRI of the old form, the only form validated until the schemas accept both."""
-    parsed = parse_record_iri(value)
-    return parsed if parsed is not None and parsed.prefix is None else None
-
-
 def _list_or_empty(value: Any) -> list[Any]:
     """The value when it is a list, else an empty list: a malformed field is a schema
     finding, never a crash in the semantic pass."""
@@ -1700,7 +1705,7 @@ def _validate_parameter_set_identity(
     from battinfo.api._parameters import legacy_parameter_set_uid, parameter_set_uid  # noqa: PLC0415
 
     record_id = body.get("id")
-    own = _old_form_record_iri(record_id)
+    own = parse_record_iri(record_id)
     if own is None:
         return  # the schema reports a malformed id
     if own.segment == "spec":
@@ -1737,7 +1742,7 @@ def _validate_parameter_set_identity(
             resource_type=resource_type,
         )
         return
-    old = _old_form_record_iri(supersedes)
+    old = parse_record_iri(supersedes)
     if old is not None and old.uid == own.uid:
         _append_issue(
             issues,

@@ -148,6 +148,7 @@ Edit the source, then regenerate. A CI step or a test fails when a generated cop
 | Edit | Generated or copied into | How |
 |---|---|---|
 | `assets/schemas/` | `src/battinfo/data/schemas/` | copy the file; `tests/test_schema_assets_sync.py` compares the trees |
+| `battinfo.namespace` | the record IRI `pattern`s in `assets/schemas/`, `src/battinfo/data/schemas/` and the cell-spec profile | `uv run python scripts/sync_schema_iri_patterns.py`; `tests/test_schema_iri_patterns.py` fails on drift |
 | `assets/mappings/domain-battery/` | `src/battinfo/data/mappings/domain-battery/` | copy the file; `tests/test_mapping_governance.py` compares them |
 | `examples/` | `src/battinfo/data/examples/` | `uv run python scripts/sync_examples.py` |
 | `schema/*.yaml` (LinkML) | `src/battinfo/data/context/records.context.json` | `uv run python scripts/assemble_context.py` |

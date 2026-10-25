@@ -55,11 +55,11 @@
           "description": "Claim-batch target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind."
         },
         "material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri",
+          "$ref": "#/$defs/MaterialSpecRefIri",
           "description": "Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry."
         },
         "cell_spec_id": {
-          "$ref": "#/$defs/SpecIri",
+          "$ref": "#/$defs/CellSpecRefIri",
           "description": "The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises."
         },
         "cell_instance_id": {
@@ -432,24 +432,30 @@
   "$defs": {
     "SpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "CellSpecRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?spec/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a cell spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a product model as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "DatasetIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "SupersededParameterSetIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "A parameter-set IRI: under dataset/, or under spec/ for one minted before 2026-10-11."
     },
-    "MaterialSpecIri": {
+    "MaterialSpecRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "CellIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "A physical cell (cell instance) IRI."
     },
     "ShortId": {
@@ -619,7 +625,7 @@
           "description": "Material parts only: the curated material kind the claims are about."
         },
         "material_spec_id": {
-          "$ref": "#/$defs/MaterialSpecIri",
+          "$ref": "#/$defs/MaterialSpecRefIri",
           "description": "Material parts only: the material spec the claims are about."
         },
         "claims": {
@@ -754,9 +760,10 @@
         }
       }
     },
-    "OrganizationIri": {
+    "OrganizationRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "Organization": {
       "type": "object",
@@ -769,7 +776,7 @@
           "const": "Organization"
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri"
+          "$ref": "#/$defs/OrganizationRefIri"
         },
         "name": {
           "type": "string",

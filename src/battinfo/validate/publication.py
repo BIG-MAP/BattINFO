@@ -5,7 +5,7 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
-from battinfo.namespace import BATTINFO_ROOT, record_base
+from battinfo.namespace import BATTINFO_ROOT, parse_record_iri
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -22,6 +22,11 @@ SHA256_RE = re.compile(r"^[A-Fa-f0-9]{64}$")
 
 # SHACL shapes constraining the assembled gold-standard publication graph.
 _PUBLICATION_SHAPES_FILENAME = "publication.shapes.ttl"
+
+
+def _is_record_reference(ref_id: str) -> bool:
+    """Whether *ref_id* names a BattINFO record, of either shape, or a node of one (``{iri}#described``)."""
+    return parse_record_iri(ref_id.partition("#")[0]) is not None
 
 
 def _shacl_not_run_severity(policy: ValidationPolicy) -> ValidationSeverity:
@@ -371,9 +376,10 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
         # file), and 6.1 reads a record's kind from the record, not its IRI. Nor
         # can a marker on parameter-set nodes: the checks would then hang on the
         # emitter always writing it, and in one shape.
+        node_iri = parse_record_iri(node_id)
         is_battinfo_dataset = (
-            isinstance(node_id, str)
-            and node_id.startswith(record_base() + "dataset/")
+            node_iri is not None
+            and node_iri.segment == "dataset"
             and any(t in _DATASET_RECORD_TYPES for t in node_types)
         )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
@@ -414,7 +420,8 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                 # Only enforce intra-graph referential integrity inside a @graph publication
                 # package.  Resolver documents are single-node and carry cross-document
                 # references to external BattINFO records — those are expected to be absent.
-                if has_graph and ref_id.startswith(BATTINFO_ROOT) and ref_id not in node_ids:
+                # A shared thing (/id/{uid}) is the registry's, never a node of a package.
+                if has_graph and _is_record_reference(ref_id) and ref_id not in node_ids:
                     _append_issue(
                         issues,
                         code="publication.reference_missing_node",
