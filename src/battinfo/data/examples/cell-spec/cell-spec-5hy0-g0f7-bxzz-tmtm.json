@@ -1,0 +1,460 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/5hy0-g0f7-bxzz-tmtm",
+    "name": "Empa R2032 coin cell, NMC622 | graphite",
+    "manufacturer": {
+      "type": "Organization",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
+      "name": "Empa",
+      "same_as": "http://www.wikidata.org/entity/Q683116"
+    },
+    "model": "R2032 NMC622-graphite",
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "positive_electrode_basis": "NMC",
+    "negative_electrode_basis": "graphite",
+    "size_code": "R2032"
+  },
+  "construction": {
+    "assembly_type": "stacked",
+    "layering": "not_applicable",
+    "assembly_sequence": [
+      "CellCan",
+      "NegativeElectrode",
+      "Separator",
+      "30.0 uL Electrolyte",
+      "PositiveElectrode",
+      "1.0 mm Spacer",
+      "Spring",
+      "CellLid"
+    ]
+  },
+  "positive_electrode": {
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Customcells",
+      "same_as": "http://www.wikidata.org/entity/Q120784603"
+    },
+    "product_id": "100000030",
+    "current_collector": {
+      "name": "Aluminium",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "NMC",
+            "molecular_formula": "LiNi0.6Mn0.2Co0.2O2",
+            "property": {
+              "mass_fraction": {
+                "value": 96,
+                "unit": "%"
+              },
+              "loading": {
+                "value": 6.6,
+                "unit": "mg/cm2"
+              },
+              "d50_particle_size": {
+                "value": 8,
+                "unit": "um"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 2,
+                "unit": "%"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 2,
+                "unit": "%"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "thickness": {
+          "value": 16,
+          "unit": "um"
+        },
+        "porosity": {
+          "value": 35,
+          "unit": "%"
+        },
+        "tortuosity": {
+          "value": 2.5,
+          "unit": "1"
+        }
+      }
+    },
+    "property": {
+      "diameter": {
+        "value": 14,
+        "unit": "mm"
+      },
+      "rated_areal_discharge_capacity": {
+        "value": 1.056,
+        "unit": "mAh/cm2",
+        "value_basis": "Measured",
+        "conditions": {
+          "lower_voltage_limit": {
+            "value": 2.5,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.2,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
+      },
+      "rated_specific_discharge_capacity": {
+        "value": 160,
+        "unit": "mAh/g",
+        "value_basis": "Measured",
+        "conditions": {
+          "lower_voltage_limit": {
+            "value": 2.5,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 4.2,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
+      }
+    }
+  },
+  "negative_electrode": {
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Customcells",
+      "same_as": "http://www.wikidata.org/entity/Q120784603"
+    },
+    "product_id": "11113, A-1594",
+    "current_collector": {
+      "name": "Copper",
+      "property": {
+        "thickness": {
+          "value": 15,
+          "unit": "um"
+        }
+      }
+    },
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Graphite",
+            "property": {
+              "mass_fraction": {
+                "value": 95,
+                "unit": "%"
+              },
+              "loading": {
+                "value": 3.4,
+                "unit": "mg/cm2"
+              },
+              "d50_particle_size": {
+                "value": 10,
+                "unit": "um"
+              }
+            }
+          }
+        ],
+        "binder": [
+          {
+            "name": "PVDF",
+            "property": {
+              "mass_fraction": {
+                "value": 3,
+                "unit": "%"
+              }
+            }
+          }
+        ],
+        "additive": [
+          {
+            "name": "Carbon black",
+            "property": {
+              "mass_fraction": {
+                "value": 2,
+                "unit": "%"
+              }
+            }
+          }
+        ]
+      },
+      "property": {
+        "thickness": {
+          "value": 20,
+          "unit": "um"
+        },
+        "porosity": {
+          "value": 35,
+          "unit": "%"
+        },
+        "tortuosity": {
+          "value": 2.5,
+          "unit": "1"
+        }
+      }
+    },
+    "property": {
+      "diameter": {
+        "value": 15,
+        "unit": "mm"
+      },
+      "rated_areal_discharge_capacity": {
+        "value": 1.19,
+        "unit": "mAh/cm2",
+        "value_basis": "Measured",
+        "conditions": {
+          "lower_voltage_limit": {
+            "value": 0.01,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 1,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
+      },
+      "rated_specific_discharge_capacity": {
+        "value": 350,
+        "unit": "mAh/g",
+        "value_basis": "Measured",
+        "conditions": {
+          "lower_voltage_limit": {
+            "value": 0.01,
+            "unit": "V"
+          },
+          "upper_voltage_limit": {
+            "value": 1,
+            "unit": "V"
+          },
+          "current_density": {
+            "value": 0.1,
+            "unit": "mA/cm2"
+          },
+          "voltage_reference": {
+            "value_text": "Li/Li+"
+          }
+        }
+      }
+    }
+  },
+  "electrolyte": {
+    "family": "organic",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Solvionic",
+      "same_as": "http://www.wikidata.org/entity/Q30285492"
+    },
+    "solvent": [
+      {
+        "name": "EC",
+        "property": {
+          "volume_fraction": {
+            "value": 30,
+            "unit": "%"
+          }
+        }
+      },
+      {
+        "name": "EMC",
+        "property": {
+          "volume_fraction": {
+            "value": 70,
+            "unit": "%"
+          }
+        }
+      }
+    ],
+    "salt": [
+      {
+        "name": "LiPF6",
+        "property": {
+          "concentration": {
+            "value": 1,
+            "unit": "mol/L"
+          }
+        }
+      },
+      {
+        "name": "LiFSI",
+        "property": {
+          "concentration": {
+            "value": 0,
+            "unit": "mol/L"
+          }
+        }
+      }
+    ],
+    "additive": [
+      {
+        "name": "VC",
+        "property": {
+          "concentration": {
+            "value": 0.16,
+            "unit": "mol/L"
+          }
+        }
+      },
+      {
+        "name": "TMSPi",
+        "property": {
+          "concentration": {
+            "value": 0,
+            "unit": "mol/L"
+          }
+        }
+      }
+    ],
+    "property": {
+      "ionic_conductivity": {
+        "value": 8,
+        "unit": "mS/cm"
+      },
+      "viscosity": {
+        "value": 3,
+        "unit": "mPa.s"
+      },
+      "density": {
+        "value": 1.3,
+        "unit": "g/cm3"
+      },
+      "temperature": {
+        "value": 25,
+        "unit": "°C"
+      },
+      "volume": {
+        "value": 30,
+        "unit": "uL"
+      }
+    }
+  },
+  "separator": {
+    "material": "PP",
+    "manufacturer": {
+      "type": "Organization",
+      "name": "Celgard",
+      "same_as": "http://www.wikidata.org/entity/Q122199856"
+    },
+    "product_id": "2500",
+    "property": {
+      "thickness": {
+        "value": 25,
+        "unit": "um"
+      },
+      "porosity": {
+        "value": 55,
+        "unit": "%"
+      },
+      "tortuosity": {
+        "value": 2.5,
+        "unit": "1"
+      },
+      "diameter": {
+        "value": 16,
+        "unit": "mm"
+      }
+    }
+  },
+  "housing": {
+    "case": {
+      "size_code": "R2032",
+      "material": "Stainless steel",
+      "manufacturer": {
+        "type": "Organization",
+        "name": "Hohsen",
+        "same_as": "http://www.wikidata.org/entity/Q138782243"
+      },
+      "product_id": "2032, SUS316L"
+    },
+    "cap": {
+      "type": "lid",
+      "coating": "Aluminium"
+    },
+    "parts": [
+      {
+        "type": "can",
+        "coating": "Aluminium"
+      },
+      {
+        "type": "spring",
+        "property": {
+          "diameter": {
+            "value": 15,
+            "unit": "mm"
+          },
+          "thickness": {
+            "value": 1.4,
+            "unit": "mm"
+          }
+        }
+      },
+      {
+        "type": "spacer",
+        "property": {
+          "diameter": {
+            "value": 16,
+            "unit": "mm"
+          },
+          "thickness": {
+            "value": 1,
+            "unit": "mm"
+          }
+        }
+      }
+    ]
+  },
+  "notes": [
+    "Project: Battery2030+/PREMISE"
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

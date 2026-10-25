@@ -1,0 +1,201 @@
+{
+  "schema_version": "0.2.0",
+  "dataset": {
+    "id": "https://w3id.org/battinfo/dataset/tfzq-e0gq-f8xd-m6h2",
+    "identifier": "dataset:tfzq-e0gq-f8xd-m6h2",
+    "name": "Dataset for publication \"Toward an autonomous robotic battery materials research platform powered by automated workflow and ontologized findable, accessible, interoperable, and reusable data management\"",
+    "description": "This dataset comprises detailed data from 199 coin cell batteries featuring either NMC//graphite or LFP//graphite chemistries cycled for 1000 cycles. All batteries were assembled and cycled using the automated robotic battery materials research platform, Aurora, at Empa, the Swiss Federal Laboratories for Materials Science and Technology, within the Laboratory for Materials for Energy Conversion.",
+    "access_url": "https://doi.org/10.5281/zenodo.15481956",
+    "same_as": [
+      "https://doi.org/10.5281/zenodo.15481956"
+    ],
+    "publisher": {
+      "type": "Organization",
+      "name": "Empa",
+      "same_as": "http://www.wikidata.org/entity/Q683116"
+    },
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "published_at": 1748736000,
+    "creators": [
+      {
+        "type": "Person",
+        "name": "Enea Svaluto-Ferro",
+        "same_as": "https://orcid.org/0009-0004-4673-7806",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Graham Kimbell",
+        "same_as": "https://orcid.org/0000-0001-9610-3589",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "YeonJu Kim",
+        "same_as": "https://orcid.org/0000-0003-3024-6370",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Nukorn Plainpan",
+        "same_as": "https://orcid.org/0009-0002-6447-8057",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Benjamin Kunz",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Lina Schulz",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Raphael Läubli",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Maximilian Becker",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "David Reber",
+        "same_as": "https://orcid.org/0000-0002-4426-8717",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Peter Kraus",
+        "same_as": "https://orcid.org/0000-0002-4359-5003",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Ruben-Simon Kühnel",
+        "same_as": "https://orcid.org/0000-0003-1542-2970",
+        "affiliation": {
+          "type": "Organization",
+          "name": "Empa",
+          "same_as": "http://www.wikidata.org/entity/Q683116"
+        }
+      },
+      {
+        "type": "Person",
+        "name": "Corsin Battaglia",
+        "same_as": "https://orcid.org/0000-0002-5003-1134",
+        "affiliation": [
+          {
+            "type": "Organization",
+            "name": "Empa",
+            "same_as": "http://www.wikidata.org/entity/Q683116"
+          },
+          {
+            "type": "Organization",
+            "name": "ETH Zurich",
+            "same_as": "http://www.wikidata.org/entity/Q11942"
+          },
+          {
+            "type": "Organization",
+            "name": "EPFL",
+            "same_as": "http://www.wikidata.org/entity/Q262760"
+          }
+        ]
+      }
+    ],
+    "distributions": [
+      {
+        "type": "DataDownload",
+        "name": "Dataset-rocrate.zip",
+        "content_url": "https://zenodo.org/records/15481956/files/Dataset-rocrate.zip",
+        "encoding_format": "application/zip",
+        "description": "All data files of the dataset."
+      },
+      {
+        "type": "DataDownload",
+        "name": "empa__ccid000001/empa__ccid000001.bdf.parquet",
+        "content_url": "https://zenodo.org/records/15481956/files/Dataset-rocrate.zip#empa__ccid000001/empa__ccid000001.bdf.parquet",
+        "encoding_format": "application/vnd.apache.parquet",
+        "role": "processed",
+        "description": "Time series electrochemical data as parquet with Battery Data Format columns"
+      },
+      {
+        "type": "DataDownload",
+        "name": "empa__ccid000001/empa__ccid000001.bdf.csv",
+        "content_url": "https://zenodo.org/records/15481956/files/Dataset-rocrate.zip#empa__ccid000001/empa__ccid000001.bdf.csv",
+        "encoding_format": "text/csv",
+        "role": "processed",
+        "description": "Time series electrochemical data as csv with Battery Data Format columns"
+      },
+      {
+        "type": "DataDownload",
+        "name": "empa__ccid000001/empa__ccid000001_GCPL_C01.mpr",
+        "content_url": "https://zenodo.org/records/15481956/files/Dataset-rocrate.zip#empa__ccid000001/empa__ccid000001_GCPL_C01.mpr",
+        "encoding_format": "application/octet-stream",
+        "role": "raw",
+        "description": "Raw cycling data, Biologic EC-Lab binary mpr format"
+      }
+    ],
+    "citations": [
+      {
+        "kind": "article",
+        "name": "Toward an Autonomous Robotic Battery Materials Research Platform Powered by Automated Workflow and Ontologized Findable, Accessible, Interoperable, and Reusable Data Management",
+        "doi": "10.1002/batt.202500155",
+        "url": "https://doi.org/10.1002/batt.202500155"
+      }
+    ],
+    "about": [
+      "https://w3id.org/battinfo/cell/cfdv-7qzr-ne91-2y8x",
+      "https://w3id.org/battinfo/test/5dm7-r3s1-s7w5-4m1r"
+    ]
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

@@ -21,11 +21,11 @@
       "description": "Optional canonical IRI of a standalone material-spec record this embedded holder realizes. Lets a cell-spec dedup materials by reference instead of/in addition to inlining them. A superseded material-spec/ IRI, minted before 0.8.0, is accepted too."
     },
     "manufacturer": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {

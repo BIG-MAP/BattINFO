@@ -45,3 +45,21 @@ def test_salt_with_molecular_formula_refuses_instead_of_dropping() -> None:
 def test_string_salt_with_concentration_still_works() -> None:
     e = electrolyte_recipe(family="organic", salt="LiPF6", salt_concentration={"value": 1.0, "unit": "mol/L"})
     assert e.salt is not None and e.salt.name == "LiPF6"
+
+
+def test_multi_salt_electrolyte_validates_and_emits_every_salt() -> None:
+    import json
+
+    from battinfo.transform import to_jsonld
+    from battinfo.validate import validate_record
+
+    example = ROOT / "src/battinfo/data/examples/cell-spec/research/coin-detailed.example.json"
+    record = json.loads(example.read_text(encoding="utf-8"))
+    record["electrolyte"]["salt"] = [
+        {"name": "LiPF6", "property": {"concentration": {"value": 1.0, "unit": "mol/L"}}},
+        {"name": "LiFSI", "property": {"concentration": {"value": 0.2, "unit": "mol/L"}}},
+    ]
+    assert validate_record(record).ok
+
+    solutes = to_jsonld(record)["@graph"][0]["isDescriptionFor"]["hasElectrolyte"]["hasSolute"]
+    assert [s["schema:name"] for s in solutes] == ["LiPF6", "LiFSI"]

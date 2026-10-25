@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.2.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/5dm7-r3s1-s7w5-4m1r",
+    "identifier": "test:5dm7-r3s1-s7w5-4m1r",
+    "cell_id": "https://w3id.org/battinfo/cell/cfdv-7qzr-ne91-2y8x",
+    "name": "Coin cell cycling",
+    "kind": "cycling",
+    "status": "completed",
+    "dataset_ids": [
+      "https://w3id.org/battinfo/dataset/tfzq-e0gq-f8xd-m6h2"
+    ]
+  },
+  "notes": [
+    "The template gives no cycling parameters, so this test names no protocol."
+  ],
+  "provenance": {
+    "source_type": "measurement",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}
