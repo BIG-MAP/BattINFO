@@ -51,11 +51,7 @@ More segment rules keep old links alive and new ones honest:
   (`/material-spec/`, `/electrode-spec/`, the older `/cell-type/` forms, ...)
   keep resolving forever — anything ever minted stays dereferenceable.
 - **Parameter sets minted under `/spec/` before 2026-10-11 keep their IRIs.** Each resolves as a superseded record that points at its replacement, a new `/dataset/` record with a uid of its own. A uid is never reused under another namespace.
-- **Reserved segments** (`id`, `ontology`, `vocab`, `doc`, `context`,
-  `resolver`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`,
-  `source`) can never become record namespaces — they are claimed by the
-  resolver and ontology infrastructure
-  (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
+- **Reserved segments** (`id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`) can never become record namespaces. The standard, the resolver and the publisher branches use them. The list, with a reason for each, is `src/battinfo/data/namespace/reserved-segments.json` (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
 
 ## Why w3id.org (the PURL layer)
 
