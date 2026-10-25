@@ -489,11 +489,14 @@ def _schema_agent_node(value: Any) -> dict[str, Any] | None:
     same_as = value.get("same_as") or value.get("sameAs")
     if isinstance(same_as, str):
         node["schema:sameAs"] = same_as
-    affiliation = value.get("affiliation")
-    if isinstance(affiliation, Mapping):
-        nested = _schema_agent_node(affiliation)
-        if nested is not None:
-            node["schema:affiliation"] = nested
+    # One affiliation, or a list of them.
+    affiliations = value.get("affiliation")
+    if isinstance(affiliations, Mapping):
+        affiliations = [affiliations]
+    if isinstance(affiliations, list):
+        nested = [org for item in affiliations if (org := _schema_agent_node(item)) is not None]
+        if nested:
+            node["schema:affiliation"] = nested[0] if len(nested) == 1 else nested
     return node
 
 

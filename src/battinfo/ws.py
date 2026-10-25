@@ -982,12 +982,15 @@ def _agent_node(c: dict) -> dict:
     node: dict = {"@type": ["schema:Person", "prov:Agent"], "schema:name": c.get("name", "")}
     if c.get("orcid"):
         node["@id"] = f"https://orcid.org/{c['orcid']}"
-    if c.get("affiliation"):
-        org: dict = {"@type": "schema:Organization", "schema:name": c["affiliation"]}
-        # ROR gives the organisation a globally-resolvable identifier.
+    # One affiliation, or a list of them: one Organization node each.
+    orgs: list[dict] = [
+        {"@type": "schema:Organization", "schema:name": name} for name in _affiliation_names(c.get("affiliation"))
+    ]
+    if orgs:
+        # ROR gives the organisation a globally-resolvable identifier (the first, for a list).
         if c.get("affiliation_ror"):
-            org["@id"] = _ror_url(c["affiliation_ror"])
-        node["schema:affiliation"] = org
+            orgs[0]["@id"] = _ror_url(c["affiliation_ror"])
+        node["schema:affiliation"] = orgs[0] if len(orgs) == 1 else orgs
     if c.get("type"):
         node["schema:roleName"] = c["type"]
     return node
@@ -999,25 +1002,30 @@ def _ror_url(ror: str) -> str:
     return ror if ror.startswith("http") else f"https://ror.org/{ror.rsplit('/', 1)[-1]}"
 
 
+def _affiliation_names(value: Any) -> list[str]:
+    """The organisation names of an affiliation: a name, an ``Organization`` dict, or a list of them."""
+    items = value if isinstance(value, list) else [value]
+    names = [item.get("name") if isinstance(item, dict) else item for item in items]
+    return [name for name in names if isinstance(name, str) and name]
+
+
 def _agent_from_record_contributor(c: dict) -> dict:
     """Map a record's stamped ``contributor`` Person dict to the ``_agent_node``
     input shape ``{name, orcid, affiliation}``.
 
     Record contributors carry the ORCID in ``same_as`` and the affiliation as a
-    nested ``Organization``; the publication emitter's agent builder wants the bare
-    ORCID and a plain affiliation name.
+    nested ``Organization`` or a list of them; the publication emitter's agent
+    builder wants the bare ORCID and a plain affiliation name, or a list of names.
     """
     same_as = str(c.get("same_as") or "")
     tail = same_as.rstrip("/").rsplit("/", 1)[-1]
     orcid = tail if _ORCID_RE.match(tail) else None
-    affiliation = c.get("affiliation")
-    if isinstance(affiliation, dict):
-        affiliation = affiliation.get("name")
+    affiliations = _affiliation_names(c.get("affiliation"))
     out: dict = {"name": c.get("name", "")}
     if orcid:
         out["orcid"] = orcid
-    if affiliation:
-        out["affiliation"] = affiliation
+    if affiliations:
+        out["affiliation"] = affiliations[0] if len(affiliations) == 1 else affiliations
     return out
 
 
@@ -1358,8 +1366,9 @@ def _resolve_project_openaire(identifier: str, *, timeout: float = 15.0) -> dict
 def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> tuple[str, str]:
     """Best-effort publishing organisation: the first affiliation (name, ror) among agents."""
     for c in (creators or []) + (contributors or []):
-        if c.get("affiliation"):
-            return c["affiliation"], c.get("affiliation_ror", "")
+        names = _affiliation_names(c.get("affiliation"))
+        if names:
+            return names[0], c.get("affiliation_ror", "")
     return "", ""
 
 
