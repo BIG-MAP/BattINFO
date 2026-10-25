@@ -399,6 +399,89 @@ def test_a_person_may_have_several_affiliations() -> None:
     ]
 
 
+def _author_with_several_affiliations() -> dict:
+    """The Empa dataset example's creator who has three affiliations."""
+    record = json.loads((ROOT / "examples/dataset/dataset-tfzq-e0gq-f8xd-m6h2.json").read_text(encoding="utf-8"))
+    return next(c for c in record["dataset"]["creators"] if isinstance(c.get("affiliation"), list))
+
+
+def _schema_org(org: dict) -> dict:
+    return {"@type": "schema:Organization", "schema:name": org["name"], "schema:sameAs": org["same_as"]}
+
+
+def test_several_affiliations_reach_the_deposit_graph() -> None:
+    author = _author_with_several_affiliations()
+    rs = {
+        "cell-spec": [],
+        "cell-instance": [
+            {"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1", "name": "c1"}, "contributor": [author]}
+        ],
+        "test": [],
+        "test-protocol": [],
+        "dataset": [],
+    }
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        title="t",
+        description="d",
+    )
+    catalog = next(n for n in doc["@graph"] if "dcat:Catalog" in (n.get("@type") or []))
+    person = next(p for p in catalog["schema:contributor"] if p.get("@id") == author["same_as"])
+    assert person["schema:affiliation"] == [
+        {"@type": "schema:Organization", "schema:name": name} for name in ("Empa", "ETH Zurich", "EPFL")
+    ]
+    provider = next(n for n in doc["@graph"] if {"prov:Agent", "schema:Organization"} <= set(n.get("@type") or []))
+    assert provider["schema:name"] == "Empa"
+
+
+def test_record_contributor_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.ws import _agent_from_record_contributor, _agent_node, _provider
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+
+    agent = _agent_from_record_contributor(one)
+    assert agent["affiliation"] == "Empa"
+    assert _agent_node(agent)["schema:affiliation"] == {"@type": "schema:Organization", "schema:name": "Empa"}
+
+    agent = _agent_from_record_contributor(many)
+    assert agent["affiliation"] == ["Empa", "ETH Zurich", "EPFL"]
+    assert _agent_node(agent)["schema:affiliation"] == [
+        {"@type": "schema:Organization", "schema:name": name} for name in ("Empa", "ETH Zurich", "EPFL")
+    ]
+    assert _provider([agent], None) == ("Empa", "")
+
+
+def test_canonical_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.bundle import _canonical_agent
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _canonical_agent(one)["affiliation"] == many["affiliation"][0]
+    assert _canonical_agent(many)["affiliation"] == many["affiliation"]
+
+
+def test_publication_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.publication import _schema_agent_node
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _schema_agent_node(one)["schema:affiliation"] == _schema_org(many["affiliation"][0])
+    assert _schema_agent_node(many)["schema:affiliation"] == [_schema_org(org) for org in many["affiliation"]]
+
+
+def test_resolver_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.api._resolver import _schema_agent_value
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _schema_agent_value(one)["schema:affiliation"] == _schema_org(many["affiliation"][0])
+    assert _schema_agent_value(many)["schema:affiliation"] == [_schema_org(org) for org in many["affiliation"]]
+
+
 def test_a_component_manufacturer_carries_its_external_iri() -> None:
     from battinfo.jsonld import record_to_jsonld
     from battinfo.validate import validate_record_report

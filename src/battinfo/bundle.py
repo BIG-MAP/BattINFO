@@ -805,11 +805,14 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str) and "://" in same_as:
         out["same_as"] = same_as
-    affiliation = value.get("affiliation") or value.get("schema:affiliation")
-    if isinstance(affiliation, Mapping):
-        nested = _canonical_agent(affiliation)
-        if nested is not None:
-            out["affiliation"] = nested
+    # One affiliation, or a list of them.
+    affiliations = value.get("affiliation") or value.get("schema:affiliation")
+    if isinstance(affiliations, Mapping):
+        affiliations = [affiliations]
+    if isinstance(affiliations, list):
+        nested = [org for item in affiliations if (org := _canonical_agent(item)) is not None]
+        if nested:
+            out["affiliation"] = nested[0] if len(nested) == 1 else nested
     return out
 
 

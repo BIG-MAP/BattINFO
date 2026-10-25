@@ -68,10 +68,14 @@ def _schema_agent_value(value: Any) -> dict[str, Any] | None:
         out["schema:familyName"] = value["family_name"]
     if isinstance(value.get("same_as"), str):
         out["schema:sameAs"] = value["same_as"]
-    if isinstance(value.get("affiliation"), Mapping):
-        nested = _schema_agent_value(value["affiliation"])
-        if nested is not None:
-            out["schema:affiliation"] = nested
+    # One affiliation, or a list of them.
+    affiliations = value.get("affiliation")
+    if isinstance(affiliations, Mapping):
+        affiliations = [affiliations]
+    if isinstance(affiliations, list):
+        nested = [org for item in affiliations if (org := _schema_agent_value(item)) is not None]
+        if nested:
+            out["schema:affiliation"] = nested[0] if len(nested) == 1 else nested
     return out
 
 
