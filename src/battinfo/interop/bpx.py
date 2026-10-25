@@ -51,6 +51,7 @@ from battinfo._bpx_layout import (
 )
 from battinfo._jcs import _from_numpy, canonical_json_bytes
 from battinfo._jcs import loads as _loads_json
+from battinfo.namespace import BATTINFO_ROOT
 
 PathLike = str | Path
 
@@ -2146,7 +2147,7 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
     kind = resolve_material_kind(value) if isinstance(value, str) else None
     if kind is not None:
         return {"material_kind": kind}
-    if isinstance(value, str) and value.startswith("https://w3id.org/battinfo/"):
+    if isinstance(value, str) and value.startswith(BATTINFO_ROOT):
         return {"material_spec_id": value}
     raise ValueError(
         f"materials[{side!r}] is {value!r}, which is neither a curated material kind nor a "

@@ -256,7 +256,9 @@ def keep_legacy_uid(
     differs from *uid*, nothing is saved under *uid*, and the record saved
     under *legacy_uid* has the same identity (*same_identity* of its body),
     that record keeps its IRI and *legacy_uid* is returned. Otherwise *uid*.
-    *saved* returns the body of the record saved under a uid, or ``None``.
+    *saved* returns the body of the record saved under a uid, or ``None``;
+    either form of the record's IRI counts (:func:`saved_record_document`), so
+    the IRI to keep is the one that body carries.
     """
     if legacy_uid == uid or saved(uid) is not None:
         return uid
@@ -269,13 +271,15 @@ def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path
 
     Looks at the file a save writes (:func:`save_entity_path`) in each root
     and returns the whole document (its body and the sections beside it, such
-    as a cell spec's ``properties``) only when the body carries the IRI *uid*
-    names.
+    as a cell spec's ``properties``) only when the body carries an IRI of the
+    record *uid* names, in whichever form it was saved: the old form or the
+    ``/id/1001/`` form (``namespace.same_record``). That IRI is the one the
+    record keeps.
     """
     from battinfo._jsonio import read_record_json  # noqa: PLC0415
+    from battinfo.namespace import record_iri, same_record  # noqa: PLC0415
 
     kind = ENTITY_BY_TYPE[entity_type]
-    iri = f"https://w3id.org/battinfo/{kind.iri_namespace}/{uid}"
     for root in roots:
         path = save_entity_path(entity_type, uid, Path(root))
         if not path.is_file():
@@ -285,7 +289,7 @@ def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path
         except (OSError, ValueError):
             continue
         body = doc.get(kind.record_key) if isinstance(doc, Mapping) else None
-        if isinstance(body, Mapping) and body.get("id") == iri:
+        if isinstance(body, Mapping) and same_record(body.get("id"), record_iri(kind.iri_namespace, uid)):
             return doc
     return None
 

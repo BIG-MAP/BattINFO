@@ -12,6 +12,7 @@ from battinfo._util import is_real_number
 from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, ProvenanceInfo, Test, TestSpec
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
+from battinfo.namespace import record_iri
 
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
@@ -1436,7 +1437,7 @@ _IRI_NAMESPACE: dict[str, str] = {
 
 def _entity_iri(entity_type: str, seed: str) -> str:
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
+    return record_iri(namespace, _stable_uid(seed))
 
 
 # ---------------------------------------------------------------------------

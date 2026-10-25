@@ -10,6 +10,7 @@ from typing import Any, Mapping
 from battinfo._util import is_dataset_series
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import kind_for_doc
+from battinfo.namespace import RecordIri, parse_record_iri, record_base, record_iri
 from battinfo.naming import is_valid_handle, kind_word
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -222,11 +223,11 @@ SPEC_PLAUSIBILITY_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
     "state_of_health": {"%": (0.0, 100.0)},
 }
 
-CELL_IRI_PREFIX = "https://w3id.org/battinfo/cell/"
-CELL_TYPE_IRI_PREFIX = "https://w3id.org/battinfo/spec/"  # cell specs use the spec/ namespace
+CELL_IRI_PREFIX = record_base() + "cell/"
+CELL_TYPE_IRI_PREFIX = record_base() + "spec/"  # cell specs use the spec/ namespace
 # A material dataset (powder XRD, say) is about a material lot or its material
 # spec rather than a cell; material specs share the spec/ namespace.
-MATERIAL_IRI_PREFIX = "https://w3id.org/battinfo/material/"
+MATERIAL_IRI_PREFIX = record_base() + "material/"
 
 INTERNAL_IDENTIFIER_PREFIX: dict[str, tuple[str, ...]] = {
     "cell-spec": ("cell_spec", "cell_spec"),
@@ -1667,9 +1668,10 @@ def _validate_substance_resolution(
             _check(comp, "additive", f"{prefix}.additive[{idx}]")
 
 
-_BATTINFO_RECORD_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/([a-z][a-z0-9-]*)/([0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3})$"
-)
+def _old_form_record_iri(value: object) -> RecordIri | None:
+    """*value* taken apart as a record IRI of the old form, the only form validated until the schemas accept both."""
+    parsed = parse_record_iri(value)
+    return parsed if parsed is not None and parsed.prefix is None else None
 
 
 def _list_or_empty(value: Any) -> list[Any]:
@@ -1698,10 +1700,10 @@ def _validate_parameter_set_identity(
     from battinfo.api._parameters import legacy_parameter_set_uid, parameter_set_uid  # noqa: PLC0415
 
     record_id = body.get("id")
-    own = _BATTINFO_RECORD_IRI_RE.fullmatch(record_id) if isinstance(record_id, str) else None
+    own = _old_form_record_iri(record_id)
     if own is None:
         return  # the schema reports a malformed id
-    if own.group(1) == "spec":
+    if own.segment == "spec":
         replacement_uid = parameter_set_uid(body)
         replacement = (
             f"its replacement is https://w3id.org/battinfo/dataset/{replacement_uid}, a new record "
@@ -1735,15 +1737,15 @@ def _validate_parameter_set_identity(
             resource_type=resource_type,
         )
         return
-    old = _BATTINFO_RECORD_IRI_RE.fullmatch(supersedes) if isinstance(supersedes, str) else None
-    if old is not None and old.group(2) == own.group(2):
+    old = _old_form_record_iri(supersedes)
+    if old is not None and old.uid == own.uid:
         _append_issue(
             issues,
             code="semantic.parameter_set_uid_reused",
             severity="error",
             path="parameter_set.id",
             message=(
-                f"this record reuses the uid {own.group(2)} of the record it supersedes "
+                f"this record reuses the uid {own.uid} of the record it supersedes "
                 f"({supersedes}). A uid is never reused, not even under another namespace "
                 "(IDENTIFIER_POLICY 6.3 and 10): leave id out so the record mints its own uid "
                 "from the current seeds, or build it with battinfo.api.supersede_parameter_set()."
@@ -1751,8 +1753,8 @@ def _validate_parameter_set_identity(
             resource_type=resource_type,
         )
         return
-    if own.group(1) == "dataset" and own.group(2) == legacy_parameter_set_uid(body):
-        legacy_iri = f"https://w3id.org/battinfo/spec/{own.group(2)}"
+    if own.segment == "dataset" and own.uid == legacy_parameter_set_uid(body):
+        legacy_iri = record_iri("spec", own.uid)
         replacement_uid = parameter_set_uid(body)
         _append_issue(
             issues,
@@ -1760,7 +1762,7 @@ def _validate_parameter_set_identity(
             severity="error",
             path="parameter_set.id",
             message=(
-                f"this record reuses the uid {own.group(2)} of {legacy_iri}, the IRI the seeds of "
+                f"this record reuses the uid {own.uid} of {legacy_iri}, the IRI the seeds of "
                 "before 2026-10-11 give these fields under spec/. A uid is never reused, not even "
                 "under another namespace (IDENTIFIER_POLICY 6.3 and 10): the dataset/ record for "
                 f"these fields is https://w3id.org/battinfo/dataset/{replacement_uid}, minted from "

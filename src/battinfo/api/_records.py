@@ -80,6 +80,7 @@ from battinfo.entities import (
     kind_for_doc,
     save_entity_path,
 )
+from battinfo.namespace import record_iri, same_record
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.pydantic import validate_json
@@ -198,7 +199,7 @@ def _library_cell_spec_uid(specification: Mapping[str, Any], library_root: Path)
         except (OSError, ValueError):
             return None
         held = doc.get("specification") if isinstance(doc, Mapping) else None
-        if isinstance(held, Mapping) and held.get("id") == f"https://w3id.org/battinfo/spec/{uid}":
+        if isinstance(held, Mapping) and same_record(held.get("id"), record_iri("spec", uid)):
             return held
         return None
 
@@ -238,7 +239,7 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
             _assert_id_matches_uid(draft_id, _normalized_dashed_uid(uid))
         entity_id = draft_id
     else:
-        entity_id = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(uid)}"
+        entity_id = record_iri("spec", _normalized_dashed_uid(uid))
 
     specification: dict[str, Any] = {
         "id": entity_id,
@@ -1005,7 +1006,7 @@ def create_cell_instance(
         dashed_uid = stable_uid(identity_seed) if identity_seed is not None else _normalized_dashed_uid(None)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-    instance_id = f"https://w3id.org/battinfo/cell/{dashed_uid}"
+    instance_id = record_iri("cell", dashed_uid)
 
     out: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -1350,7 +1351,7 @@ def _mint_cell_spec_record(spec: CellSpec, *, source_root: PathLike | None = Non
             if spec.uid is not None
             else _cell_spec_minted_uid(spec, source_root=source_root)
         )
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed}"
+        entity_id = record_iri("spec", dashed)
     # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the
     # caller. source_type is schema-required, so an unprovided one takes the documented
     # category default; source_file is optional and is recorded only when the author provided
@@ -1379,7 +1380,7 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
         dashed = (
             _normalized_dashed_uid(instance.uid) if instance.uid is not None else _identity_minted_uid("cell", instance)
         )
-        entity_id = f"https://w3id.org/battinfo/cell/{dashed}"
+        entity_id = record_iri("cell", dashed)
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = instance.model_copy(deep=True)
     finalized.id = entity_id
@@ -1619,7 +1620,7 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
     uid = _canonical_identity_uid(kind.entity_type, body, workspace_root=workspace_root, record_roots=record_roots)
     if uid is None:
         raise ValueError(_unmintable_record_message(kind.entity_type, kind.record_key))
-    entity_id = f"https://w3id.org/battinfo/{kind.iri_namespace}/{uid}"
+    entity_id = record_iri(kind.iri_namespace, uid)
     minted: dict[str, Any] = {"id": entity_id, "short_id": _short_id_from_iri(entity_id)}
     prefix = _DERIVED_IDENTIFIER_PREFIX.get(kind.entity_type)
     if prefix is not None and not body.get("identifier"):
@@ -1643,7 +1644,7 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
             if dataset.uid is not None
             else _identity_minted_uid("dataset", dataset, workspace_root=workspace_root)
         )
-        entity_id = f"https://w3id.org/battinfo/dataset/{dashed}"
+        entity_id = record_iri("dataset", dashed)
 
     related_cells = [*dataset.related_cell_ids, *([dataset.cell_instance_id] if dataset.cell_instance_id else [])]
     for cell_id in related_cells:
@@ -1706,7 +1707,7 @@ def _record_from_test(test: Test, *, source_root: PathLike | None = None) -> dic
             if test.uid is not None
             else _test_minted_uid(test, record_roots=[source_root] if source_root is not None else [])
         )
-        entity_id = f"https://w3id.org/battinfo/test/{dashed}"
+        entity_id = record_iri("test", dashed)
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = test.model_copy(deep=True)
     finalized.id = entity_id
@@ -1729,7 +1730,7 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
         dashed = (
             _normalized_dashed_uid(spec.uid) if spec.uid is not None else _identity_minted_uid("test-protocol", spec)
         )
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed}"
+        entity_id = record_iri("spec", dashed)
 
     # The model already parses the PyBaMM-style experiment/steps authoring input into the
     # canonical `method` and computes `facets` in to_record(); the builder only mints the id
@@ -2589,7 +2590,7 @@ def save_library_cell_spec(
         minted_uid = _library_cell_spec_uid(specification, library_root_path)
         if minted_uid is None:
             raise ValueError(_unmintable_record_message("cell-spec", "specification"))
-        specification = {"id": f"https://w3id.org/battinfo/spec/{minted_uid}", **specification}
+        specification = {"id": record_iri("spec", minted_uid), **specification}
         doc = {**doc, "specification": specification}
     elif is_placeholder_iri(specification.get("id")):
         raise ValueError(

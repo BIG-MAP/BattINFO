@@ -48,6 +48,7 @@ from battinfo.entities import (
     test_identity_seed,
 )
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
+from battinfo.namespace import BATTINFO_ROOT, record_iri
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -245,23 +246,21 @@ _PUB_IRI_NAMESPACE: dict[str, str] = {
     "material": "material",
 }
 
-_BATTINFO_BASE = "https://w3id.org/battinfo/"
-
 
 def _entity_iri(entity_type: str, seed: str) -> str:
     """The IRI an identity seed mints, through the shared primitive ``entities.stable_uid``."""
     namespace = _PUB_IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"{_BATTINFO_BASE}{namespace}/{stable_uid(seed)}"
+    return record_iri(namespace, stable_uid(seed))
 
 
 def _cell_specification_iri(entity_id: str) -> str:
-    if entity_id.startswith(_BATTINFO_BASE):
+    if entity_id.startswith(BATTINFO_ROOT):
         return entity_id
     return _entity_iri("cell-specification", entity_id)
 
 
 def _cell_spec_iri(entity_id: str) -> str:
-    if entity_id.startswith(_BATTINFO_BASE):
+    if entity_id.startswith(BATTINFO_ROOT):
         return entity_id
     return _entity_iri("cell-spec", entity_id)
 

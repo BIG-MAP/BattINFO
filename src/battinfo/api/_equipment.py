@@ -36,6 +36,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import stable_uid
+from battinfo.namespace import record_iri
 from battinfo.validate.core import DEFAULT_POLICY
 
 EQUIPMENT_IRI_RE = _component_iri_re("equipment")
@@ -103,7 +104,7 @@ def _record_from_equipment_spec(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = record_iri("spec", dashed_uid)
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     if handle is not None:
@@ -173,7 +174,7 @@ def _record_from_equipment(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/equipment/{dashed_uid}"
+        entity_id = record_iri("equipment", dashed_uid)
 
     equipment: dict[str, Any] = {
         "id": entity_id,
@@ -241,13 +242,13 @@ def _record_from_channel(
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/channel/{dashed_uid}"
+        entity_id = record_iri("channel", dashed_uid)
     else:
         # Deterministic identity: the same (equipment, index) always mints the
         # same channel IRI, so re-registration is idempotent.
         _, equipment_uid = _iri_tail(equipment_id)
         dashed_uid = stable_uid(f"channel:{equipment_uid}:{index}")
-        entity_id = f"https://w3id.org/battinfo/channel/{dashed_uid}"
+        entity_id = record_iri("channel", dashed_uid)
 
     channel: dict[str, Any] = {
         "id": entity_id,

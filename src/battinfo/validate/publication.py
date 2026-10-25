@@ -5,6 +5,7 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
+from battinfo.namespace import BATTINFO_ROOT, record_base
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -287,7 +288,7 @@ def _series_issues(
             message="Publication dcat:inSeries must be an object with an @id string.",
         )
         return
-    if not has_graph or not ref_id.startswith("https://w3id.org/battinfo/"):
+    if not has_graph or not ref_id.startswith(BATTINFO_ROOT):
         return
     if ref_id not in node_ids:
         _append_issue(
@@ -372,7 +373,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
         # emitter always writing it, and in one shape.
         is_battinfo_dataset = (
             isinstance(node_id, str)
-            and node_id.startswith("https://w3id.org/battinfo/dataset/")
+            and node_id.startswith(record_base() + "dataset/")
             and any(t in _DATASET_RECORD_TYPES for t in node_types)
         )
         # A collection (dcat:DatasetSeries) groups member datasets: it is about
@@ -413,7 +414,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
                 # Only enforce intra-graph referential integrity inside a @graph publication
                 # package.  Resolver documents are single-node and carry cross-document
                 # references to external BattINFO records — those are expected to be absent.
-                if has_graph and ref_id.startswith("https://w3id.org/battinfo/") and ref_id not in node_ids:
+                if has_graph and ref_id.startswith(BATTINFO_ROOT) and ref_id not in node_ids:
                     _append_issue(
                         issues,
                         code="publication.reference_missing_node",

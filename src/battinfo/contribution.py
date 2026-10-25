@@ -23,6 +23,7 @@ from battinfo.ingest import (
     _resolve_kind_map,
     build_ingest_workspace,
 )
+from battinfo.namespace import record_iri, record_iri_regex
 
 # Extended token → BatteryTestType mapping for package_batch file scanning.
 # Keys are lowercase substrings matched against the filename.
@@ -573,10 +574,7 @@ def _patch_intake_urls(intake: dict, file_map: dict[Path, str], dist: Path) -> d
 # ── Shipment init ──────────────────────────────────────────────────────────────
 
 BATCH_MANIFEST = "batch.yaml"
-_CELL_TYPE_IRI_PATTERN = (
-    r"^https://w3id\.org/battinfo/(?:cell|spec)/[0-9a-hjkmnp-tv-z]{4}"
-    r"(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+_CELL_TYPE_IRI_PATTERN = record_iri_regex("cell", "spec")
 
 
 def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:
@@ -685,7 +683,7 @@ def _generate_cell_iri(
         else None
     )
     uid = stable_uid(seed) if seed is not None else _normalized_dashed_uid()
-    return f"https://w3id.org/battinfo/cell/{uid}"
+    return record_iri("cell", uid)
 
 
 def _recorded_cell_iris(

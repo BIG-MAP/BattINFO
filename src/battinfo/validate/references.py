@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -12,6 +11,7 @@ from battinfo.entities import (
     entity_types_for_namespace,
     kind_for_doc,
 )
+from battinfo.namespace import record_iri_pattern
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -21,13 +21,13 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 
-SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+SPEC_IRI_RE = record_iri_pattern("spec")
 # Aliases kept for clarity — cell specs and test protocols both use spec/ namespace
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_SPEC_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-TEST_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+CELL_IRI_RE = record_iri_pattern("cell")
+DATASET_IRI_RE = record_iri_pattern("dataset")
+TEST_IRI_RE = record_iri_pattern("test")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
