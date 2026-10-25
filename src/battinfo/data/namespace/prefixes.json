@@ -1,0 +1,29 @@
+{
+  "description": "The register of publisher prefixes under https://w3id.org/battinfo/ (IDENTIFIER_POLICY.md 6.4). A publisher mints records under id/{prefix}/ when records is true, and defines its own terms under def/{prefix}/. resolver is where the publisher's addresses are served, or null when the BattINFO registry dispatches them. landing is the host of the publisher's own record pages, or null; a browser that opens one of its record IRIs is sent to the record's page only when that page is on this host. Validated by prefixes.schema.json.",
+  "prefixes": [
+    {
+      "prefix": "1000",
+      "holder": "BattINFO",
+      "records": false,
+      "resolver": null,
+      "landing": null,
+      "allocated": "2026-10-22"
+    },
+    {
+      "prefix": "1001",
+      "holder": "Battery Genome registry",
+      "records": true,
+      "resolver": null,
+      "landing": null,
+      "allocated": "2026-10-22"
+    },
+    {
+      "prefix": "1002",
+      "holder": "Battery Data Commons",
+      "records": true,
+      "resolver": null,
+      "landing": "https://batterydatacommons.org/",
+      "allocated": "2026-10-25"
+    }
+  ]
+}

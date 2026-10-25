@@ -180,11 +180,9 @@ Superseded segments (`material-spec/`, `electrode-spec/`, `separator-spec/`,
 older `cell-type/`, `cell_type/`, `test_protocol/` forms) remain permanent
 resolver aliases — anything ever minted resolves forever.
 
-Reserved segments (never usable as entity namespaces): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
-`turtle`, `latest`, `source`. The last five are claimed by the ontology
-block in the upstream w3id.org `.htaccess`, so requests to those paths can
-never reach the record resolver.
+Reserved segments (never usable as entity namespaces): `id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`.
+
+The list, with the reason each segment is held, is kept as data in `src/battinfo/data/namespace/reserved-segments.json`, and code that builds or serves BattINFO IRIs reads it from there. `id` and `def` are the branches for prefixed records and publishers' definitions (6.4). `raw`, `inferred`, `turtle`, `latest` and `source` are claimed by the ontology rules in the upstream w3id.org `.htaccess`, so requests to those paths never reach the record resolver.
 
 ### 6.2 Equipment and channels (ratified 2026-07-08)
 
@@ -213,6 +211,18 @@ A claim batch's uid mints deterministically from its target, scope, electrode po
 A legacy `spec/` parameter-set IRI is accepted read-only (ruling 2026-10-12). The published schema keeps validating such a record, so the records already published under it stay valid (section 11.1), and tooling still finds a record by its `spec/` IRI; validators warn that it is legacy and name its replacement, and the publisher policy refuses it, so nothing is published or minted under `spec/` again. A uid is never reused across namespaces (section 10): a `dataset/` record never takes the uid of a `spec/` record, and a record whose uid is that of the record it supersedes, or that supersedes itself, is invalid under every policy.
 
 **Amendment, 2026-10-07, revised 2026-10-11: a parameter file is one record, addressed by its parameters.** A parameter file (a BPX file today) becomes exactly one parameter-set record, holding every value of the file grouped by part. Its uid is `stable_uid("parameter-file:<parameters_sha256>")`, minted under `dataset/`, where `parameters_sha256` is the SHA-256 of the file's canonical JSON; there are no per-part or per-block records and no other seeds. Canonical means RFC 8785, the JSON Canonicalization Scheme: numbers written as ECMAScript writes doubles, object keys sorted by UTF-16 code units, minimal string escaping, no whitespace, UTF-8. Names, the cell the file is linked to and the materials its parts are mapped to do not enter the seed. The IRI therefore names the canonical parameters, not the bytes of one copy. The same parameters in any formatting share an IRI, whether a copy is re-indented, has CRLF line endings, orders its keys differently or spells `1.0` as `1`, and any changed value mints a new IRI; a corrected file is a new record that supersedes the old. A file holding a value JSON cannot express (NaN, an infinity) gets no IRI. The reason is that a solver can be handed the record's IRI, and the parameters behind it must never change. The record stores the fingerprint as `parameters_sha256`, so anyone holding a file can check it against the IRI, and it carries the file itself under `distributions` (exactly one source, each entry with its sha256), so the IRI resolves to a file with exactly those parameters. The registry keeps the first copy of the file it is given; a later copy with the same parameters resolves to that record and its stored bytes. The first publisher to submit a file owns its IRI: a submission of the same parameters by another publisher is refused, and the owner's later versions of the record keep the same source file. The registry checks every file itself, downloading it and recomputing its checksum and fingerprint, and a validator refuses a record whose `id` is not the one its `parameters_sha256` gives, under every policy. Which cell or material a curator maps the file to is description: it can be corrected in a new version of the record without touching the identity. A corrected file has other parameters, so it is a new record with a new IRI that names the old record in `supersedes`; only the publisher of the old record may do that, the registry then marks the old record superseded (section 10), and the old IRI keeps resolving to its file. Two files whose values differ only beyond double precision (`0.1000000000000000001` and `0.1`) hold the same JSON numbers, so they share an IRI.
+
+### 6.4 Publisher prefixes (ruled 2026-10-22)
+
+A publisher prefix is a four-digit number held by one minting authority, such as a registry. The publisher mints records under `https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}` and defines its own terms under `https://w3id.org/battinfo/def/{prefix}/`. A prefix is a number, never a name, so renaming a publisher never moves its addresses.
+
+- The register is `src/battinfo/data/namespace/prefixes.json`. Each entry gives the number, its holder, whether records are minted under it, the resolver that serves it (or none), the host of its own record pages (or none) and the date it was allocated.
+- The maintainers of the battinfo entry on w3id.org allocate prefixes. A publisher asks for one by pull request to this repository.
+- Numbers are given out in sequence from 1000. A number is never reused or passed to another holder.
+- 1000 is BattINFO's own and holds definitions only: no record is minted under `id/1000/`. 1001 is the Battery Genome registry, and 1002 is Battery Data Commons.
+- A publisher may register the host of its own record pages. A browser that opens one of its record IRIs is then sent to that record's page, but only when the page is on the registered host; for any other publisher, and any other address, the resolver shows its own page with a link out.
+- A prefix records who minted an IRI and never changes afterwards. If a publisher closes, its prefix is pointed at an archived copy of what it published, so its IRIs keep resolving.
+- A publisher that runs its own resolver also gets its own line in the w3id rules, so its addresses do not depend on another publisher's resolver.
 
 ## 7. Resolver and Dereferencing Policy
 
@@ -436,9 +446,7 @@ to sub-namespaces granted under `w3id.org/battinfo/` (e.g. `/twin`): quantity
 terms resolve to EMMO or go upstream; only structural terms may be minted
 locally, hand-defined.
 
-Reserved namespace segments (never usable as entity types): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
-`turtle`, `latest`, `source`.
+Reserved namespace segments (never usable as entity types): `id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`.
 
 ## 15. Design Principles
 
