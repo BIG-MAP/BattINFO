@@ -35,14 +35,23 @@ without a prefix, so minted IRIs keep the old form until minting takes its
 base from the workspace, and the recognisers built with
 :func:`record_iri_pattern` accept the old form only until the v1 schemas
 accept both shapes.
+
+The publisher prefixes come from the register in
+``data/namespace/prefixes.json`` (:data:`PUBLISHER_PREFIXES`), and the
+segments that are never record segments from
+``data/namespace/reserved-segments.json``
+(``entities.RESERVED_NAMESPACE_SEGMENTS``).
 """
 
 from __future__ import annotations
 
 import re
-from typing import NamedTuple
+from collections.abc import Mapping
+from datetime import date
+from types import MappingProxyType
+from typing import Any, NamedTuple
 
-from battinfo.entities import UID_DASHED_RE
+from battinfo.entities import RESERVED_NAMESPACE_SEGMENTS, UID_DASHED_RE, _namespace_file
 
 __all__ = [
     "BATTERY_GENOME_PREFIX",
@@ -51,6 +60,8 @@ __all__ = [
     "CONTEXT_BASE",
     "ID_BASE",
     "PREFIX_PATTERN",
+    "PUBLISHER_PREFIXES",
+    "PublisherPrefix",
     "RecordIri",
     "SCHEMA_BASE",
     "SEGMENT_PATTERN",
@@ -58,6 +69,7 @@ __all__ = [
     "VOCABULARY_NAMESPACE",
     "parse_record_iri",
     "parse_thing_iri",
+    "publisher_prefix",
     "record_base",
     "record_iri",
     "record_iri_pattern",
@@ -79,21 +91,6 @@ SCHEMA_BASE = BATTINFO_ROOT + "schema/"
 #: The branch that holds records of the prefixed form and shared things.
 ID_BASE = BATTINFO_ROOT + "id/"
 
-# Publisher prefixes (ruling decision 3). These constants stand in for the
-# prefix register, a data file in this package that is to replace them; until
-# it exists they are the only list.
-#: BattINFO itself. It holds definitions only (``def/1000/``), never records.
-BATTINFO_PREFIX = "1000"
-#: The Battery Genome registry, and the SDK's own prefix.
-BATTERY_GENOME_PREFIX = "1001"
-# Prefixes that hold definitions only: no record is minted under them.
-_DEFINITIONS_ONLY_PREFIXES = frozenset({BATTINFO_PREFIX})
-# The prefix an IRI of the old form counts as when two IRIs are compared. The
-# old form and the ``/id/1001/`` form of one segment and uid are one record
-# (ruling decision 5); under any other prefix the same uid is another record
-# (decision 3).
-_OLD_FORM_PREFIX = BATTERY_GENOME_PREFIX
-
 #: A uid: the grammar of ``entities.UID_DASHED_RE``, without its anchors.
 UID_PATTERN = UID_DASHED_RE.pattern.removeprefix("^").removesuffix("$")
 #: A record segment such as ``spec``, ``cell`` or ``current-collector``.
@@ -101,11 +98,86 @@ SEGMENT_PATTERN = r"[a-z][a-z0-9-]*"
 #: A publisher prefix: a number of four or more digits, never a name.
 PREFIX_PATTERN = r"[0-9]{4,}"
 
-# The branch names at the root: id/ holds records of the prefixed form and
-# shared things, def/ publishers' definitions, which nothing here mints.
-# Neither is ever a record segment, so ``https://w3id.org/battinfo/id/{uid}``
-# is a shared thing, not a record.
-_BRANCHES = frozenset({"id", "def"})
+
+class PublisherPrefix(NamedTuple):
+    """One entry of the publisher prefix register (``data/namespace/prefixes.json``).
+
+    *records* is false for a prefix that holds definitions only, and
+    *resolver* is ``None`` when the BattINFO registry dispatches the
+    publisher's addresses rather than a resolver of its own.
+    """
+
+    prefix: str
+    holder: str
+    records: bool
+    resolver: str | None
+    allocated: date
+
+
+_REGISTER_PREFIX_RE = re.compile(r"[1-9][0-9]{3}")
+_FIRST_PREFIX = 1000
+
+
+def _register_entry(entry: Any) -> PublisherPrefix:
+    if not isinstance(entry, Mapping) or set(entry) != set(PublisherPrefix._fields):
+        raise ValueError(f"a prefix register entry has the fields {', '.join(PublisherPrefix._fields)}: {entry!r}")
+    prefix, holder, records, resolver = entry["prefix"], entry["holder"], entry["records"], entry["resolver"]
+    if not isinstance(prefix, str) or not _REGISTER_PREFIX_RE.fullmatch(prefix):
+        raise ValueError(f"register prefix {prefix!r} is not a four-digit number")
+    if not isinstance(holder, str) or not holder.strip() or not isinstance(records, bool):
+        raise ValueError(f"register prefix {prefix} needs a holder and a true or false records")
+    if resolver is not None and not (isinstance(resolver, str) and resolver.startswith("https://")):
+        raise ValueError(f"register prefix {prefix} has a resolver that is not an https URL: {resolver!r}")
+    allocated = entry["allocated"]
+    if not isinstance(allocated, str):
+        raise ValueError(f"register prefix {prefix} needs its allocation date as YYYY-MM-DD: {allocated!r}")
+    return PublisherPrefix(prefix, holder, records, resolver, date.fromisoformat(allocated))
+
+
+def _load_prefix_register(document: Any) -> Mapping[str, PublisherPrefix]:
+    """The register in *document*, keyed by prefix, checked to be numbered in sequence from 1000."""
+    entries = [_register_entry(entry) for entry in document["prefixes"]]
+    expected = [str(number) for number in range(_FIRST_PREFIX, _FIRST_PREFIX + len(entries))]
+    if [entry.prefix for entry in entries] != expected:
+        raise ValueError(
+            f"the prefix register must number its entries in sequence from {_FIRST_PREFIX}, "
+            f"with no gap or repeat: {[entry.prefix for entry in entries]}"
+        )
+    return MappingProxyType({entry.prefix: entry for entry in entries})
+
+
+#: The publisher prefix register (ruling decision 3), keyed by prefix, in the
+#: order the numbers were given out.
+PUBLISHER_PREFIXES: Mapping[str, PublisherPrefix] = _load_prefix_register(_namespace_file("prefixes.json"))
+
+
+def publisher_prefix(prefix: str) -> PublisherPrefix | None:
+    """The register entry of *prefix*, or ``None`` for a number nobody holds."""
+    return PUBLISHER_PREFIXES.get(prefix)
+
+
+#: BattINFO itself. It holds definitions only (``def/1000/``), never records.
+BATTINFO_PREFIX = "1000"
+#: The Battery Genome registry, and the SDK's own prefix.
+BATTERY_GENOME_PREFIX = "1001"
+# A holder's name may change in the register; its number never does.
+if BATTINFO_PREFIX not in PUBLISHER_PREFIXES or PUBLISHER_PREFIXES[BATTINFO_PREFIX].records:
+    raise ValueError(f"the prefix register must hold {BATTINFO_PREFIX} for definitions only")
+if BATTERY_GENOME_PREFIX not in PUBLISHER_PREFIXES or not PUBLISHER_PREFIXES[BATTERY_GENOME_PREFIX].records:
+    raise ValueError(f"the prefix register must hold {BATTERY_GENOME_PREFIX} for records")
+# Prefixes that hold definitions only: no record is minted under them.
+_DEFINITIONS_ONLY_PREFIXES = frozenset(entry.prefix for entry in PUBLISHER_PREFIXES.values() if not entry.records)
+# The prefix an IRI of the old form counts as when two IRIs are compared. The
+# old form and the ``/id/1001/`` form of one segment and uid are one record
+# (ruling decision 5); under any other prefix the same uid is another record
+# (decision 3).
+_OLD_FORM_PREFIX = BATTERY_GENOME_PREFIX
+
+# The segments that are never record segments, id and def among them: id/
+# holds records of the prefixed form and shared things, def/ publishers'
+# definitions, which nothing here mints. So
+# ``https://w3id.org/battinfo/id/{uid}`` is a shared thing, not a record.
+_RESERVED_SEGMENTS = RESERVED_NAMESPACE_SEGMENTS
 _ROOT_PATTERN = re.escape(BATTINFO_ROOT)
 _SEGMENT_RE = re.compile(SEGMENT_PATTERN)
 _UID_RE = re.compile(UID_PATTERN)
@@ -125,10 +197,10 @@ class RecordIri(NamedTuple):
 
 
 def _checked_segment(segment: str) -> str:
-    if not isinstance(segment, str) or not _SEGMENT_RE.fullmatch(segment) or segment in _BRANCHES:
+    if not isinstance(segment, str) or not _SEGMENT_RE.fullmatch(segment) or segment in _RESERVED_SEGMENTS:
         raise ValueError(
             f"{segment!r} is not a record segment: a segment is a lower-case word such as spec, cell or "
-            "current-collector, and never id or def."
+            "current-collector, and never a reserved segment such as id, def or context."
         )
     return segment
 
@@ -176,7 +248,7 @@ def parse_record_iri(value: object) -> RecordIri | None:
     if not isinstance(value, str):
         return None
     match = _RECORD_IRI_RE.fullmatch(value)
-    if match is None or match["segment"] in _BRANCHES:
+    if match is None or match["segment"] in _RESERVED_SEGMENTS:
         return None
     return RecordIri(match["prefix"], match["segment"], match["uid"])
 

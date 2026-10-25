@@ -16,10 +16,12 @@ copy-pasted across ``api.py``, ``validate/record.py``, ``validate/references.py`
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from importlib import resources
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping, Optional
@@ -845,26 +847,25 @@ def record_set_dirs() -> tuple[str, ...]:
     return tuple(kind.subdir for kind in ENTITY_KINDS)
 
 
+def _namespace_file(name: str) -> Any:
+    """The JSON file *name* in ``battinfo/data/namespace``, parsed.
+
+    The folder holds the lists that the SDK and the registry share: the
+    reserved segments (``reserved-segments.json``) and the publisher prefix
+    register (``prefixes.json``).
+    """
+    return json.loads(resources.files("battinfo").joinpath("data", "namespace", name).read_text(encoding="utf-8"))
+
+
+#: Path segments under ``https://w3id.org/battinfo/`` that are never record
+#: segments (IDENTIFIER_POLICY.md 6.1), read from
+#: ``data/namespace/reserved-segments.json``, where each has its reason.
 RESERVED_NAMESPACE_SEGMENTS = frozenset(
-    {
-        "id",
-        "ontology",
-        "vocab",
-        "doc",
-        "context",
-        "resolver",
-        "twin",
-        "w3id",
-        # Claimed by the ontology block in the upstream w3id.org .htaccess —
-        # requests to these paths can never reach the record resolver.
-        "raw",
-        "inferred",
-        "turtle",
-        "latest",
-        "source",
-    }
+    entry["segment"] for entry in _namespace_file("reserved-segments.json")["segments"]
 )
-_reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {k.iri_namespace for k in ENTITY_KINDS}
+_reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {
+    namespace for kind in ENTITY_KINDS for namespace in (kind.iri_namespace, *kind.legacy_iri_namespaces)
+}
 if _reserved_clash:  # fail at import: a reserved segment can never become an entity namespace
     raise RuntimeError(f"reserved namespace segment(s) used by ENTITY_KINDS: {sorted(_reserved_clash)}")
 
