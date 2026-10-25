@@ -153,7 +153,7 @@ validation warns `semantic.property_unmapped`.
 | `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
-## Units (75)
+## Units (76)
 
 Every percent spelling (`%`, `percent`, `pct`, `wt%`, `wt.%`, `vol%`,
 `vol.%`, `v/v%`) is the unit PercentUnit. A spelling that states a basis
@@ -244,6 +244,7 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `Wh/kg` | [WattHourPerKilogram](https://w3id.org/emmo#WattHourPerKilogram) |
 | `Wh/L` | [WattHourPerLitre](https://w3id.org/emmo#WattHourPerLitre) |
 | `°C` | [DegreeCelsius](https://w3id.org/emmo#DegreeCelsius) |
+| `µL` | [MicroLitre](https://w3id.org/emmo#MicroLitre) |
 | `µm` | [MicroMetre](https://w3id.org/emmo#MicroMetre) |
 | `Ω` | [Ohm](https://w3id.org/emmo#Ohm) |
 

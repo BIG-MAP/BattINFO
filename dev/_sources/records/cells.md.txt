@@ -239,6 +239,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:IndividualProduct"
   ],
   "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
+  "schema:name": "LAB-2026-0001",
   "schema:serialNumber": "LAB-2026-0001",
   "hasDescription": {
     "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
@@ -313,6 +314,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "A123 ANR26650M1-B",
   "schema:model": "ANR26650M1-B",
   "schema:manufacturer": {
+    "@id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7",
     "@type": "schema:Organization",
     "schema:name": "A123"
   },

@@ -112,9 +112,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "hasConstituent": [
       {
-        "@type": "CoinCase",
+        "@type": [
+          "CoinCase",
+          "StainlessSteel"
+        ],
         "schema:size": "2032",
-        "schema:material": "Stainless steel",
         "hasProperty": [
           {
             "@type": [
@@ -279,9 +281,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     ],
     "hasConstituent": [
       {
-        "@type": "CoinCase",
+        "@type": [
+          "CoinCase",
+          "StainlessSteel"
+        ],
         "schema:size": "2032",
-        "schema:material": "Stainless steel",
         "hasProperty": [
           {
             "@type": [

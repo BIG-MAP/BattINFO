@@ -96,6 +96,10 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "Separator"
     ],
     "schema:name": "PP",
+    "schema:manufacturer": {
+      "@type": "schema:Organization",
+      "schema:name": "Celgard"
+    },
     "hasProperty": [
       {
         "@type": [
@@ -246,6 +250,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "Separator"
     ],
     "schema:name": "polypropylene",
+    "schema:manufacturer": {
+      "@id": "https://w3id.org/battinfo/organization/9jcc-71jq-m4vk-r8jm",
+      "@type": "schema:Organization",
+      "schema:name": "Celgard"
+    },
     "hasProperty": [
       {
         "@type": [
