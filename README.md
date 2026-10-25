@@ -111,7 +111,7 @@ result = publish(
     root=".battinfo/my-library",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/id/1001/spec/xxxx-xxxx-xxxx-xxxx
 ```
 
 That IRI is **permanent, but not yet resolvable on the web** — opening it in a

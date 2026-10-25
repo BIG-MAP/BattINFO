@@ -76,7 +76,7 @@ def test_submit_refuses_local_paths_and_sends_nothing(tmp_path: Path, fake: _Fak
     assert "Nothing was sent" in message
     assert "ws.zenodo()" in message and "allow_local_files=True" in message
     # Each record and field is named.
-    assert "dataset-" in message and "https://w3id.org/battinfo/dataset/" in message
+    assert "dataset-" in message and "https://w3id.org/battinfo/id/1001/dataset/" in message
     for field in ("dataset.access_url", "dataset.distributions[0].content_url", "provenance.source_url"):
         assert field in message
     assert (tmp_path / "ws" / "bdf" / "C1.bdf.csv").resolve().as_uri() in message
@@ -98,7 +98,7 @@ def test_submit_allow_partial_sends_the_records_without_local_files(tmp_path: Pa
     ws = _workspace_with_local_data(tmp_path / "ws")
     outcomes = ws.submit(allow_partial=True, **_CREDS)
     refused = [o for o in outcomes if o["status"] == "local_files"]
-    assert len(refused) == 1 and refused[0]["iri"].startswith("https://w3id.org/battinfo/dataset/")
+    assert len(refused) == 1 and refused[0]["iri"].startswith("https://w3id.org/battinfo/id/1001/dataset/")
     sent_types = {p["resource"]["resource_type"] for p in fake.payloads}
     assert "dataset" not in sent_types and {"cell_spec", "cell", "test"} <= sent_types
     assert "file:" not in json.dumps(fake.payloads)

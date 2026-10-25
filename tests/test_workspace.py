@@ -201,7 +201,7 @@ def test_workspace_loads_cell_spec_from_authoring_json_and_canonizes_on_save(tmp
 
     assert save_result["index"]["cell_spec_count"] == 1
     assert isinstance(cell_spec.id, str)
-    assert cell_spec.id.startswith("https://w3id.org/battinfo/spec/")
+    assert cell_spec.id.startswith("https://w3id.org/battinfo/id/1001/spec/")
     record_path = (
         tmp_path / "workspace" / "examples" / "cell-spec" / f"cell-spec-{cell_spec.id.rsplit('/', 1)[-1]}.json"
     )

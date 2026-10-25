@@ -18,8 +18,18 @@ every call is recorded as ``random``, and one that refuses to mint as
 ``refused``. A case with several records lists their IRIs, sorted and
 comma-separated.
 
+Every IRI in the table has the old form, ``https://w3id.org/battinfo/{segment}/{uid}``,
+which every path minted until new records moved under ``/id/1001/`` (IRI
+ruling of 22 October 2026, decision 5; BIG-MAP/BattINFO#482). The cases run
+twice. :func:`mint_all` with the old base pins the table: each path is given
+``base="https://w3id.org/battinfo/"``, and each workspace is one created
+before the switch, a folder whose ``.battinfo/`` records no base. Run with no
+base, in fresh folders, every path mints ``/id/1001/`` and the same uid
+(:func:`test_fresh_containers_mint_the_golden_uids_under_1001`): a uid never
+depends on the base.
+
 Running this module as a script prints the table for the code it runs
-against; it was run once, at 057b66a0, to write the fixture.
+against, with the old base; it was run once, at 057b66a0, to write the fixture.
 """
 
 from __future__ import annotations
@@ -42,6 +52,7 @@ import battinfo  # noqa: E402
 from battinfo import api  # noqa: E402
 from battinfo._workspace import Workspace  # noqa: E402
 from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, Dataset, Test, TestSpec  # noqa: E402
+from battinfo.namespace import BATTERY_GENOME_PREFIX, OLD_FORM_BASE, parse_record_iri, record_iri  # noqa: E402
 
 GOLDEN_PATH = ROOT / "tests" / "fixtures" / "identity" / "golden-iris.json"
 RANDOM = "random"
@@ -477,11 +488,18 @@ def _org(name: str | None) -> dict[str, str] | None:
     return {"type": "Organization", "name": name} if name else None
 
 
-def _save_record_id(body_key: str, body: dict[str, Any], root: Path) -> str:
+def _base(base: str | None) -> dict[str, str]:
+    """The ``base=`` keyword a path is given: none with no base, so the path takes its default."""
+    return {} if base is None else {"base": base}
+
+
+def _save_record_id(body_key: str, body: dict[str, Any], root: Path, base: str | None) -> str:
     """The IRI a save of *body* without an id mints, or ``refused``."""
     doc = {"schema_version": SCHEMA_VERSION, body_key: {k: v for k, v in body.items() if v is not None}}
     try:
-        return api.save_record(doc, source_root=root, validate=False, dry_run=True, resolve_references=False)["id"]
+        return api.save_record(
+            doc, source_root=root, validate=False, dry_run=True, resolve_references=False, **_base(base)
+        )["id"]
     except ValueError as exc:
         if "without an id" in str(exc):
             return REFUSED
@@ -493,7 +511,7 @@ def _random_or(first: str, second: str) -> str:
     return RANDOM if first != second else first
 
 
-def _publication(root: Path, **parts: Any) -> Any:
+def _publication(root: Path, base: str | None, **parts: Any) -> Any:
     """The finalized publication bundle for one cell, test and dataset folder."""
     from battinfo.publication import _finalize_publication_bundle  # noqa: PLC0415
 
@@ -504,6 +522,7 @@ def _publication(root: Path, **parts: Any) -> Any:
         cell_instance=parts.get("cell") or Cell(serial_number="P01"),
         test=parts.get("test") or Test(test_kind="cycling"),
         dataset=parts.get("dataset") or Dataset(dataset_path=str(run)),
+        **_base(base),
     )
     return bundle
 
@@ -524,14 +543,27 @@ def _batch_library(root: Path, spec_iri: str) -> Iterator[None]:
         yield
 
 
-def _workspace(root: Path) -> Any:
+def _workspace(root: Path, base: str | None) -> Any:
+    """A ``battinfo.workspace()`` in *root*: a new one with no base, else one created before the switch.
+
+    With the old base, *root* already holds a ``.battinfo/`` folder that records
+    no base, as a workspace created before 0.8.0 does, and the workspace is
+    opened without ``base=``, so it takes the old form from its folder.
+    """
     root.mkdir(parents=True, exist_ok=True)
+    if base is not None:
+        assert base == OLD_FORM_BASE, "a workspace that exists keeps its base; only the old form is pinned"
+        (root / ".battinfo").mkdir()
     return battinfo.workspace(root, registry_url=None)
 
 
-def _engine_spec_iri(root: Path) -> str:
+def _engine(root: Path, base: str | None) -> Workspace:
+    return Workspace(root, **_base(base))
+
+
+def _engine_spec_iri(root: Path, base: str | None) -> str:
     """The IRI the engine mints for :data:`SPEC`, which every cell case links to."""
-    engine = Workspace(root)
+    engine = _engine(root, base)
     spec = engine.cell_spec(**SPEC)
     engine.render()
     return str(spec.id)
@@ -544,15 +576,15 @@ def _cell_spec_fields(case: str) -> dict[str, str]:
 # ── Cases, grouped by the records they mint ──────────────────────────────────
 
 
-def _cell_specs(root: Path) -> dict[str, str]:
+def _cell_specs(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
 
-    engine = Workspace(root / "engine")
+    engine = _engine(root / "engine", base)
     made = {case: engine.cell_spec(**_cell_spec_fields(case)) for case in CELL_SPEC_CASES}
     engine.render()
     rows.update({f"cell-spec | engine | {case}": str(spec.id) for case, spec in made.items()})
 
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     loaded = {}
     for case in CELL_SPEC_CASES:
         draft = root / "ws" / f"{case.replace(' ', '-')}.cell-spec.json"
@@ -563,7 +595,9 @@ def _cell_specs(root: Path) -> dict[str, str]:
 
     for case in CELL_SPEC_CASES:
         fields = _cell_spec_fields(case)
-        rows[f"cell-spec | save | {case}"] = api.save_cell_spec(dict(fields), source_root=root / "save")["id"]
+        rows[f"cell-spec | save | {case}"] = api.save_cell_spec(dict(fields), source_root=root / "save", **_base(base))[
+            "id"
+        ]
         body = {
             "manufacturer": _org(fields["manufacturer"]),
             "model": fields["model"],
@@ -571,23 +605,23 @@ def _cell_specs(root: Path) -> dict[str, str]:
             "chemistry": fields["chemistry"],
             "size_code": fields.get("size_code"),
         }
-        rows[f"cell-spec | save_record | {case}"] = _save_record_id("cell_spec", body, root / "save-record")
-        bundle = _publication(root / "publication" / case.replace(" ", "-"), cell_spec=CellSpec(**fields))
+        rows[f"cell-spec | save_record | {case}"] = _save_record_id("cell_spec", body, root / "save-record", base)
+        bundle = _publication(root / "publication" / case.replace(" ", "-"), base, cell_spec=CellSpec(**fields))
         rows[f"cell-spec | publication | {case}"] = str(bundle.cell_spec.id)
     return rows
 
 
-def _cells(root: Path) -> dict[str, str]:
+def _cells(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
 
-    engine = Workspace(root / "engine")
+    engine = _engine(root / "engine", base)
     spec = engine.cell_spec(**SPEC)
     made = {case: engine.cell(spec, **fields) for case, fields in CELL_CASES.items()}
     engine.render()
     rows.update({f"cell | engine | {case}": str(cell.id) for case, cell in made.items()})
     spec_iri = str(spec.id)
 
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     ws_spec = CellSpec(**SPEC)
     by_case = {
         "serial": ws.add("cell", spec=ws_spec, serial_numbers=["C01"])[0],
@@ -599,13 +633,13 @@ def _cells(root: Path) -> dict[str, str]:
 
     for case, fields in CELL_CASES.items():
         draft = {"cell_spec_id": spec_iri, **fields}
-        saved = api.save_cell_instance(dict(draft), source_root=root / "save", resolve_references=False)
+        saved = api.save_cell_instance(dict(draft), source_root=root / "save", resolve_references=False, **_base(base))
         rows[f"cell | save | {case}"] = saved["id"]
-        rows[f"cell | save_record | {case}"] = _save_record_id("cell_instance", draft, root / "save-record")
-        bundle = _publication(root / "publication" / case.replace(" ", "-").replace(",", ""), cell=Cell(**fields))
+        rows[f"cell | save_record | {case}"] = _save_record_id("cell_instance", draft, root / "save-record", base)
+        bundle = _publication(root / "publication" / case.replace(" ", "-").replace(",", ""), base, cell=Cell(**fields))
         rows[f"cell | publication | {case}"] = str(bundle.cell_instance.id)
 
-    created = api.create_cell_instance(cell_spec_id=spec_iri, serial_number="C01", validate=False)
+    created = api.create_cell_instance(cell_spec_id=spec_iri, serial_number="C01", validate=False, **_base(base))
     rows["cell | create | serial"] = created["cell_instance"]["id"]
 
     from battinfo.contribution import init_batch  # noqa: PLC0415
@@ -616,9 +650,9 @@ def _cells(root: Path) -> dict[str, str]:
             ", ".join(
                 sorted(
                     cell["cell_iri"]
-                    for cell in init_batch(root / "batch" / f"{folder}-{n}", cell_spec=spec_iri, count=count, **kwargs)[
-                        "cells"
-                    ]
+                    for cell in init_batch(
+                        root / "batch" / f"{folder}-{n}", cell_spec=spec_iri, count=count, **kwargs, **_base(base)
+                    )["cells"]
                 )
             )
             for n in (1, 2)
@@ -633,13 +667,13 @@ def _cells(root: Path) -> dict[str, str]:
     return rows
 
 
-def _batch_packages(root: Path) -> dict[str, str]:
+def _batch_packages(root: Path, base: str | None) -> dict[str, str]:
     """The test and dataset a ``battinfo batch`` package mints for one data file."""
     from battinfo.contribution import init_batch, package_batch  # noqa: PLC0415
 
-    spec_iri = _engine_spec_iri(root / "engine")
+    spec_iri = _engine_spec_iri(root / "engine", base)
     with _batch_library(root, spec_iri):
-        made = init_batch(root / "batch", cell_spec=spec_iri, count=1, serial_numbers=["C01"])
+        made = init_batch(root / "batch", cell_spec=spec_iri, count=1, serial_numbers=["C01"], **_base(base))
         data = root / "batch" / made["cells"][0]["folder"] / "data" / "C01_cycling.csv"
         data.parent.mkdir(parents=True, exist_ok=True)
         data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
@@ -651,15 +685,15 @@ def _batch_packages(root: Path) -> dict[str, str]:
     }
 
 
-def _test_protocols(root: Path) -> dict[str, str]:
+def _test_protocols(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
 
-    engine = Workspace(root / "engine")
+    engine = _engine(root / "engine", base)
     made = {case: engine.test_spec(type="cycling", **fields) for case, fields in TEST_PROTOCOL_CASES.items()}
     engine.render()
     rows.update({f"test-protocol | engine | {case}": str(spec.id) for case, spec in made.items()})
 
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     loaded = {}
     for case, fields in TEST_PROTOCOL_CASES.items():
         draft = root / "ws" / f"{case.replace(' ', '-')}.test-spec.json"
@@ -669,18 +703,18 @@ def _test_protocols(root: Path) -> dict[str, str]:
     rows.update({f"test-protocol | ws | {case}": str(spec.id) for case, spec in loaded.items()})
 
     for case, fields in TEST_PROTOCOL_CASES.items():
-        saved = api.save_test_spec({**fields, "kind": "cycling"}, source_root=root / "save")
+        saved = api.save_test_spec({**fields, "kind": "cycling"}, source_root=root / "save", **_base(base))
         rows[f"test-protocol | save | {case}"] = saved["id"]
         rows[f"test-protocol | save_record | {case}"] = _save_record_id(
-            "test_spec", {**fields, "kind": "cycling"}, root / "save-record"
+            "test_spec", {**fields, "kind": "cycling"}, root / "save-record", base
         )
     return rows
 
 
-def _tests_and_datasets(root: Path) -> dict[str, str]:
+def _tests_and_datasets(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
 
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     data = root / "ws" / "data" / "C01.csv"
     data.parent.mkdir(parents=True)
     data.write_text("time_s,voltage_V\n0,3.0\n", encoding="utf-8")
@@ -700,7 +734,7 @@ def _tests_and_datasets(root: Path) -> dict[str, str]:
     rows["test | ws | protocol by IRI, not saved here"] = str(protocol_iri.id)
     rows["dataset | ws | local file"] = ", ".join(sorted(str(d.id) for d in ws._ws.datasets))
 
-    engine = Workspace(root / "engine")
+    engine = _engine(root / "engine", base)
     spec = engine.cell_spec(**SPEC)
     cell = engine.cell(spec, serial_number="C01")
     engine_tests = {
@@ -726,13 +760,15 @@ def _tests_and_datasets(root: Path) -> dict[str, str]:
         "named": Test(cell_instance_id=cell_iri, test_kind="formation", name="C01 formation run"),
         "protocol name": Test(cell_instance_id=cell_iri, test_kind="rate_capability", protocol={"name": "CCCV 1C"}),
     }.items():
-        rows[f"test | save | {case}"] = api.save_test(test, source_root=save_root, resolve_references=False)["id"]
+        rows[f"test | save | {case}"] = api.save_test(
+            test, source_root=save_root, resolve_references=False, **_base(base)
+        )["id"]
     for case, body in {
         "unnamed": {"cell_id": cell_iri, "kind": "cycling"},
         "named": {"cell_id": cell_iri, "kind": "formation", "name": "C01 formation run"},
         "protocol name": {"cell_id": cell_iri, "kind": "rate_capability", "protocol_name": "CCCV 1C"},
     }.items():
-        rows[f"test | save_record | {case}"] = _save_record_id("test", body, root / "save-record")
+        rows[f"test | save_record | {case}"] = _save_record_id("test", body, root / "save-record", base)
 
     save_data = save_root / "data" / "C01.csv"
     save_data.parent.mkdir(parents=True, exist_ok=True)
@@ -747,16 +783,18 @@ def _tests_and_datasets(root: Path) -> dict[str, str]:
         ),
         source_root=save_root,
         resolve_references=False,
+        **_base(base),
     )
     remote_saved = api.save_dataset(
         Dataset(name="C01 remote run", cell_instance_id=cell_iri, test_id=test_iri, access_url=REMOTE_URL),
         source_root=save_root,
         resolve_references=False,
+        **_base(base),
     )
     rows["dataset | save | local file"] = local_saved["id"]
     rows["dataset | save | remote URL"] = remote_saved["id"]
     rows["dataset | save_record | remote URL"] = _save_record_id(
-        "dataset", {"name": "C01 remote run", "access_url": REMOTE_URL}, root / "save-record"
+        "dataset", {"name": "C01 remote run", "access_url": REMOTE_URL}, root / "save-record", base
     )
 
     for case, test in {
@@ -764,35 +802,39 @@ def _tests_and_datasets(root: Path) -> dict[str, str]:
         "named": Test(test_kind="formation", name="P01 formation run"),
         "protocol name": Test(test_kind="rate_capability", protocol={"name": "CCCV 1C"}),
     }.items():
-        bundle = _publication(root / "publication" / case.replace(" ", "-"), test=test)
+        bundle = _publication(root / "publication" / case.replace(" ", "-"), base, test=test)
         rows[f"test | publication | {case}"] = str(bundle.test.id)
         if case == "unnamed":
             rows["dataset | publication | dataset folder"] = str(bundle.dataset.id)
     return rows
 
 
-def _material_specs(root: Path) -> dict[str, str]:
+def _material_specs(root: Path, base: str | None) -> dict[str, str]:
     from battinfo.materials import extract_material_specs, material_spec_from_component  # noqa: PLC0415
 
     rows: dict[str, str] = {}
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     for case, fields in MATERIAL_SPEC_CASES.items():
         rows[f"material-spec | ws | {case}"] = ws.add("material_spec", **fields)[0]["material_spec"]["id"]
-        rows[f"material-spec | create | {case}"] = api.create_material_spec(validate=False, **fields)["material_spec"][
-            "id"
-        ]
+        rows[f"material-spec | create | {case}"] = api.create_material_spec(validate=False, **fields, **_base(base))[
+            "material_spec"
+        ]["id"]
         rows[f"material-spec | save | {case}"] = api.save_material_spec(
-            dict(fields), source_root=root / "save", validate=False
+            dict(fields), source_root=root / "save", validate=False, **_base(base)
         )["id"]
         body = {**fields, "manufacturer": _org(fields.get("manufacturer"))}
-        rows[f"material-spec | save_record | {case}"] = _save_record_id("material_spec", body, root / "save-record")
+        rows[f"material-spec | save_record | {case}"] = _save_record_id(
+            "material_spec", body, root / "save-record", base
+        )
     ws.save()
 
     for case, holder in MATERIAL_HOLDERS.items():
-        rows[f"material-spec | bridge | {case}"] = material_spec_from_component(holder)["material_spec"]["id"]
+        rows[f"material-spec | bridge | {case}"] = material_spec_from_component(holder, **_base(base))["material_spec"][
+            "id"
+        ]
 
     extended = json.loads(EXTENDED_EXAMPLE.read_text(encoding="utf-8"))
-    for spec in extract_material_specs(extended):
+    for spec in extract_material_specs(extended, **_base(base)):
         body = spec["material_spec"]
         rows[f"material-spec | extract | extended example, {body['name']}"] = body["id"]
     two_suppliers = {
@@ -803,7 +845,7 @@ def _material_specs(root: Path) -> dict[str, str]:
     }
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        lifted = extract_material_specs(two_suppliers)
+        lifted = extract_material_specs(two_suppliers, **_base(base))
     rows["material-spec | extract | Graphite from two suppliers"] = ", ".join(
         sorted(spec["material_spec"]["id"] for spec in lifted)
     )
@@ -812,54 +854,57 @@ def _material_specs(root: Path) -> dict[str, str]:
         "negative_electrode": {"coating": {"component": {"active_material": [{"name": "graphite"}]}}},
     }
     rows["material-spec | extract | Graphite and graphite"] = ", ".join(
-        sorted(spec["material_spec"]["id"] for spec in extract_material_specs(one_supplier))
+        sorted(spec["material_spec"]["id"] for spec in extract_material_specs(one_supplier, **_base(base)))
     )
     return rows
 
 
-def _materials(root: Path) -> dict[str, str]:
+def _materials(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
-    spec = api.create_material_spec(validate=False, **MATERIAL_SPEC_CASES["kind key"])
+    spec = api.create_material_spec(validate=False, **MATERIAL_SPEC_CASES["kind key"], **_base(base))
     spec_iri = spec["material_spec"]["id"]
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     for case, fields in MATERIAL_CASES.items():
         lot = fields.get("lot_id")
         extra = {k: v for k, v in fields.items() if k != "lot_id"}
         rows[f"material | ws | {case}"] = ws.add("material", spec=spec, lot=lot, **extra)[0]["material"]["id"]
-        rows[f"material | create | {case}"] = api.create_material(validate=False, material_spec_id=spec_iri, **fields)[
-            "material"
-        ]["id"]
+        rows[f"material | create | {case}"] = api.create_material(
+            validate=False, material_spec_id=spec_iri, **fields, **_base(base)
+        )["material"]["id"]
         rows[f"material | save | {case}"] = api.save_material(
             {"material_spec_id": spec_iri, **fields},
             source_root=root / "save",
             validate=False,
             resolve_references=False,
+            **_base(base),
         )["id"]
         rows[f"material | save_record | {case}"] = _save_record_id(
-            "material", {"material_spec_id": spec_iri, **fields}, root / "save-record"
+            "material", {"material_spec_id": spec_iri, **fields}, root / "save-record", base
         )
     return rows
 
 
-def _electrode_specs(root: Path) -> dict[str, str]:
+def _electrode_specs(root: Path, base: str | None) -> dict[str, str]:
     from battinfo.components import extract_component_specs  # noqa: PLC0415
 
     rows: dict[str, str] = {}
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     for case, fields in ELECTRODE_SPEC_CASES.items():
         rows[f"electrode-spec | ws | {case}"] = ws.add("electrode_spec", **fields)[0]["electrode_spec"]["id"]
-        rows[f"electrode-spec | create | {case}"] = api.create_electrode_spec(validate=False, **fields)[
+        rows[f"electrode-spec | create | {case}"] = api.create_electrode_spec(validate=False, **fields, **_base(base))[
             "electrode_spec"
         ]["id"]
         rows[f"electrode-spec | save | {case}"] = api.save_electrode_spec(
-            dict(fields), source_root=root / "save", validate=False
+            dict(fields), source_root=root / "save", validate=False, **_base(base)
         )["id"]
         body = {**fields, "manufacturer": _org(fields.get("manufacturer"))}
-        rows[f"electrode-spec | save_record | {case}"] = _save_record_id("electrode_spec", body, root / "save-record")
+        rows[f"electrode-spec | save_record | {case}"] = _save_record_id(
+            "electrode_spec", body, root / "save-record", base
+        )
 
     extended = json.loads(EXTENDED_EXAMPLE.read_text(encoding="utf-8"))
     extended["housing"] = {"name": "R26650 steel can", "material": "nickel-plated steel"}
-    for record in extract_component_specs(extended):
+    for record in extract_component_specs(extended, **_base(base)):
         key = next(k for k in record if k.endswith("_spec"))
         body = record[key]
         kind = key.replace("_", "-")
@@ -867,58 +912,61 @@ def _electrode_specs(root: Path) -> dict[str, str]:
     return rows
 
 
-def _electrodes(root: Path) -> dict[str, str]:
+def _electrodes(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
-    spec = api.create_electrode_spec(validate=False, **ELECTRODE_SPEC_CASES["kind key"])
+    spec = api.create_electrode_spec(validate=False, **ELECTRODE_SPEC_CASES["kind key"], **_base(base))
     spec_iri = spec["electrode_spec"]["id"]
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     roll = ws.add("electrode", spec=spec, batch="E-1")[0]
     rows["electrode | ws | batch"] = roll["electrode"]["id"]
     parent = roll["electrode"]["id"]
     rows["electrode | ws | piece of a roll"] = ws.add(
         "electrode", spec=spec, batch="E-1", parent_id=parent, piece_id="disc-07"
     )[0]["electrode"]["id"]
-    rows["electrode | create | batch"] = api.create_electrode(validate=False, electrode_spec_id=spec_iri, batch="E-1")[
-        "electrode"
-    ]["id"]
+    rows["electrode | create | batch"] = api.create_electrode(
+        validate=False, electrode_spec_id=spec_iri, batch="E-1", **_base(base)
+    )["electrode"]["id"]
     rows["electrode | create | piece of a roll"] = api.create_electrode(
-        validate=False, electrode_spec_id=spec_iri, batch="E-1", parent_id=parent, piece_id="disc-07"
+        validate=False, electrode_spec_id=spec_iri, batch="E-1", parent_id=parent, piece_id="disc-07", **_base(base)
     )["electrode"]["id"]
     rows["electrode | save_record | batch"] = _save_record_id(
-        "electrode", {"electrode_spec_id": spec_iri, "batch_id": "E-1"}, root / "save-record"
+        "electrode", {"electrode_spec_id": spec_iri, "batch_id": "E-1"}, root / "save-record", base
     )
     rows["electrode | save_record | piece of a roll"] = _save_record_id(
         "electrode",
         {"electrode_spec_id": spec_iri, "batch_id": "E-1", "parent_id": parent, "piece_id": "disc-07"},
         root / "save-record",
+        base,
     )
     return rows
 
 
-def _component_families(root: Path) -> dict[str, str]:
+def _component_families(root: Path, base: str | None) -> dict[str, str]:
     """Separators, current collectors, electrolytes and housings: random without a uid."""
     rows: dict[str, str] = {}
     for family in ("separator", "current_collector", "electrolyte", "housing"):
         create_spec = getattr(api, f"create_{family}_spec")
         create_instance = getattr(api, f"create_{family}")
         kind = family.replace("_", "-")
-        first = create_spec(validate=False, name=f"Example {kind}")[f"{family}_spec"]["id"]
-        second = create_spec(validate=False, name=f"Example {kind}")[f"{family}_spec"]["id"]
+        first = create_spec(validate=False, name=f"Example {kind}", **_base(base))[f"{family}_spec"]["id"]
+        second = create_spec(validate=False, name=f"Example {kind}", **_base(base))[f"{family}_spec"]["id"]
         rows[f"{kind}-spec | create | name"] = _random_or(first, second)
         rows[f"{kind}-spec | save_record | name"] = _save_record_id(
-            f"{family}_spec", {"name": f"Example {kind}"}, root / "save-record"
+            f"{family}_spec", {"name": f"Example {kind}"}, root / "save-record", base
         )
-        made = [create_instance(validate=False, spec_id=first, name="unit 1")[family]["id"] for _ in range(2)]
+        made = [
+            create_instance(validate=False, spec_id=first, name="unit 1", **_base(base))[family]["id"] for _ in range(2)
+        ]
         rows[f"{kind} | create | name"] = _random_or(*made)
         rows[f"{kind} | save_record | name"] = _save_record_id(
-            family, {f"{family}_spec_id": first, "name": "unit 1"}, root / "save-record"
+            family, {f"{family}_spec_id": first, "name": "unit 1"}, root / "save-record", base
         )
     return rows
 
 
-def _equipment(root: Path) -> dict[str, str]:
+def _equipment(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     draft = root / "ws" / "cycler.equipment-spec.json"
     draft.write_text(
         json.dumps({"name": "Cycler 4200", "manufacturer": "Maccor", "model": "4200", "channel_count": 2}),
@@ -933,60 +981,70 @@ def _equipment(root: Path) -> dict[str, str]:
 
     spec_iri = spec_record["equipment_spec"]["id"]
     equipment_iri = added[0]["equipment"]["id"]
-    made = [api.create_equipment_spec(validate=False, name="Cycler 4200")["equipment_spec"]["id"] for _ in range(2)]
+    made = [
+        api.create_equipment_spec(validate=False, name="Cycler 4200", **_base(base))["equipment_spec"]["id"]
+        for _ in range(2)
+    ]
     rows["equipment-spec | create | name"] = _random_or(*made)
     rows["equipment-spec | save_record | name"] = _save_record_id(
-        "equipment_spec", {"name": "Cycler 4200"}, root / "save-record"
+        "equipment_spec", {"name": "Cycler 4200"}, root / "save-record", base
     )
     made = [
-        api.create_equipment(validate=False, equipment_spec_id=spec_iri, serial_number="MC-0001")["equipment"]["id"]
+        api.create_equipment(validate=False, equipment_spec_id=spec_iri, serial_number="MC-0001", **_base(base))[
+            "equipment"
+        ]["id"]
         for _ in range(2)
     ]
     rows["equipment | create | serial"] = _random_or(*made)
     rows["equipment | save_record | serial"] = _save_record_id(
-        "equipment", {"equipment_spec_id": spec_iri, "serial_number": "MC-0001"}, root / "save-record"
+        "equipment", {"equipment_spec_id": spec_iri, "serial_number": "MC-0001"}, root / "save-record", base
     )
-    rows["channel | create | index 1"] = api.create_channel(validate=False, equipment_id=equipment_iri, index=1)[
-        "channel"
-    ]["id"]
+    rows["channel | create | index 1"] = api.create_channel(
+        validate=False, equipment_id=equipment_iri, index=1, **_base(base)
+    )["channel"]["id"]
     rows["channel | save_record | index 1"] = _save_record_id(
-        "channel", {"equipment_id": equipment_iri, "index": 1}, root / "save-record"
+        "channel", {"equipment_id": equipment_iri, "index": 1}, root / "save-record", base
     )
     return rows
 
 
-def _parameter_sets(root: Path) -> dict[str, str]:
+def _parameter_sets(root: Path, base: str | None) -> dict[str, str]:
     rows: dict[str, str] = {}
     fields = {"name": "Chen 2020 - graphite", "material_kind": "graphite", "claims": CLAIMS}
-    rows["parameter-set | create | claim batch"] = api.create_parameter_set(validate=False, **fields)["parameter_set"][
-        "id"
-    ]
-    ws = _workspace(root / "ws")
+    rows["parameter-set | create | claim batch"] = api.create_parameter_set(validate=False, **fields, **_base(base))[
+        "parameter_set"
+    ]["id"]
+    ws = _workspace(root / "ws", base)
     rows["parameter-set | ws | claim batch"] = ws.add(
         "parameter_set", name="Chen 2020 - graphite", material="graphite", claims=CLAIMS
     )[0]["parameter_set"]["id"]
-    rows["parameter-set | save_record | claim batch"] = _save_record_id("parameter_set", fields, root / "save-record")
+    rows["parameter-set | save_record | claim batch"] = _save_record_id(
+        "parameter_set", fields, root / "save-record", base
+    )
     rows["parameter-set | save_record | parameter file"] = _save_record_id(
-        "parameter_set", {"name": "Example BPX file", "parameters_sha256": "ab" * 32, "parts": []}, root / "save-record"
+        "parameter_set",
+        {"name": "Example BPX file", "parameters_sha256": "ab" * 32, "parts": []},
+        root / "save-record",
+        base,
     )
     return rows
 
 
-def _organizations(root: Path) -> dict[str, str]:
+def _organizations(root: Path, base: str | None) -> dict[str, str]:
     return {
-        "organization | create | name": api.create_organization(validate=False, name="Example Lab")["organization"][
-            "id"
-        ],
+        "organization | create | name": api.create_organization(validate=False, name="Example Lab", **_base(base))[
+            "organization"
+        ]["id"],
         "organization | save_record | name": _save_record_id(
-            "organization", {"name": "Example Lab"}, root / "save-record"
+            "organization", {"name": "Example Lab"}, root / "save-record", base
         ),
     }
 
 
-def _colliding_pairs(root: Path) -> dict[str, str]:
+def _colliding_pairs(root: Path, base: str | None) -> dict[str, str]:
     """Records whose identity fields collide get IRIs seeded from their content."""
     rows: dict[str, str] = {}
-    engine = Workspace(root / "engine")
+    engine = _engine(root / "engine", base)
     specs = {
         capacity: engine.cell_spec(
             manufacturer="Acme",
@@ -1001,7 +1059,7 @@ def _colliding_pairs(root: Path) -> dict[str, str]:
     for capacity, spec in specs.items():
         rows[f"cell-spec | engine | colliding pair, {capacity} Ah"] = str(spec.id)
 
-    ws = _workspace(root / "ws")
+    ws = _workspace(root / "ws", base)
     for name in ("a.csv", "b.csv"):
         path = root / "ws" / "data" / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -1034,15 +1092,20 @@ SCENARIOS: tuple[Callable[[Path], dict[str, str]], ...] = (
 )
 
 
-def mint_all(root: Path) -> dict[str, str]:
-    """Mint every case under *root* (an empty folder) and return case id -> IRI."""
+def mint_all(root: Path, base: str | None = OLD_FORM_BASE) -> dict[str, str]:
+    """Mint every case under *root* (an empty folder) and return case id -> IRI.
+
+    *base* is given to every path, and a workspace is one created before the
+    switch (:func:`_workspace`), which pins the old form of the table. With
+    ``None`` every path takes its default and every workspace is new.
+    """
     rows: dict[str, str] = {}
     with contextlib.redirect_stdout(io.StringIO()), warnings.catch_warnings():
         warnings.simplefilter("ignore")
         for scenario in SCENARIOS:
             folder = root / scenario.__name__.strip("_")
             folder.mkdir(parents=True)
-            found = scenario(folder)
+            found = scenario(folder, base)
             clash = set(found) & set(rows)
             assert not clash, f"case ids used twice: {sorted(clash)}"
             rows.update(found)
@@ -1060,7 +1123,29 @@ def _golden() -> dict[str, str]:
 
 @pytest.fixture(scope="module")
 def minted(tmp_path_factory: pytest.TempPathFactory) -> dict[str, str]:
-    return mint_all(tmp_path_factory.mktemp("golden-iris"))
+    """Every case minted with the old base, and in workspaces that record none."""
+    return mint_all(tmp_path_factory.mktemp("golden-iris"), base=OLD_FORM_BASE)
+
+
+@pytest.fixture(scope="module")
+def minted_by_default(tmp_path_factory: pytest.TempPathFactory) -> dict[str, str]:
+    """Every case minted with no base given, in fresh folders: the base each path takes from 0.8.0."""
+    return mint_all(tmp_path_factory.mktemp("golden-iris-1001"), base=None)
+
+
+def _under_battery_genome(expected: str) -> str:
+    """*expected*, a golden value, with each IRI moved to ``/id/1001/``: the same segment and uid.
+
+    ``random`` and ``refused`` stay as they are.
+    """
+    if expected in (RANDOM, REFUSED):
+        return expected
+    moved = []
+    for iri in expected.split(", "):
+        parsed = parse_record_iri(iri)
+        assert parsed is not None and parsed.prefix is None, f"a golden IRI of the old form, not {iri}"
+        moved.append(record_iri(parsed.segment, parsed.uid, BATTERY_GENOME_PREFIX))
+    return ", ".join(sorted(moved))
 
 
 def test_every_case_is_in_the_golden_table(minted: dict[str, str]) -> None:
@@ -1083,6 +1168,20 @@ def test_iri_holds_or_moves_as_listed(case: str, minted: dict[str, str]) -> None
     assert minted.get(case) == expected, (
         f"{case} mints {minted.get(case)}, expected {expected}. A seed change that moves this IRI "
         "lists it in MOVED with its reason and in the changelog."
+    )
+
+
+def test_fresh_containers_mint_every_case(minted_by_default: dict[str, str]) -> None:
+    assert sorted(minted_by_default) == sorted(_golden())
+
+
+@pytest.mark.parametrize("case", sorted(_golden()))
+def test_fresh_containers_mint_the_golden_uids_under_1001(case: str, minted_by_default: dict[str, str]) -> None:
+    """With no base given, every path mints ``/id/1001/`` with the uid of the golden table (BIG-MAP/BattINFO#482)."""
+    expected = _under_battery_genome(MOVED[case][0] if case in MOVED else _golden()[case])
+    assert minted_by_default.get(case) == expected, (
+        f"{case} mints {minted_by_default.get(case)} in a fresh folder with no base given, expected "
+        f"{expected}: the golden uid under https://w3id.org/battinfo/id/1001/. A uid never depends on the base."
     )
 
 

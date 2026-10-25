@@ -1847,8 +1847,8 @@ class BpxParameterImportResult:
         record with a new IRI that points back at the old one.
 
         ``record_kwargs`` (description, citation, citation_doi, source_url,
-        notes, license, retrieved_at, ...) pass to
-        :func:`battinfo.api.create_parameter_set`. The header's
+        notes, license, retrieved_at, ``base`` for the base the IRI mints
+        under, ...) pass to :func:`battinfo.api.create_parameter_set`. The header's
         ``Description`` and ``References`` fill description and citation
         (or a note) unless given. The record validates against the
         parameter-set schema.

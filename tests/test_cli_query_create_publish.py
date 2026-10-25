@@ -926,11 +926,12 @@ def test_save_batch_cli_json(tmp_path: Path) -> None:
     tests_dir.mkdir(parents=True)
     datasets_dir.mkdir(parents=True)
 
+    # A template given --uid mints its IRI under /id/1001/, so the records name each other in that form.
     type_uid = "3m6k9t2p7x4h9nq8"
-    type_iri = "https://w3id.org/battinfo/spec/3m6k-9t2p-7x4h-9nq8"
+    type_iri = "https://w3id.org/battinfo/id/1001/spec/3m6k-9t2p-7x4h-9nq8"
     cell_uid = "1f8r6v2k9p4m3t7x"
-    cell_iri = "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x"
-    test_iri = "https://w3id.org/battinfo/test/5p7v-2n8k-4m3t-6q9r"
+    cell_iri = "https://w3id.org/battinfo/id/1001/cell/1f8r-6v2k-9p4m-3t7x"
+    test_iri = "https://w3id.org/battinfo/id/1001/test/5p7v-2n8k-4m3t-6q9r"
     dataset_uid = "8c1h8pk68034vav6"
 
     t_type = runner.invoke(

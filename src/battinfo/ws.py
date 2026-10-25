@@ -92,8 +92,24 @@ from battinfo._util import jsonld_literal as _jsonld_literal
 from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
-from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
-from battinfo.namespace import BATTINFO_ROOT, parse_record_iri, parse_thing_iri, record_iri, same_record
+from battinfo.entities import (
+    entity_id_from_doc,
+    held_record_iri,
+    is_dashed_uid,
+    kind_for_type,
+    record_set_dirs,
+    save_entity_path,
+)
+from battinfo.namespace import (
+    BATTINFO_ROOT,
+    DEFAULT_RECORD_BASE,
+    OLD_FORM_BASE,
+    base_prefix,
+    parse_record_iri,
+    parse_thing_iri,
+    record_iri,
+    same_record,
+)
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -2311,10 +2327,16 @@ class AuthoringWorkspace:
         root: str | Path = ".",
         records_repo: str | Path | None = None,
         registry_url: str | None = None,
+        *,
+        base: str | None = None,
     ):
         self._root = Path(root).resolve()
         self._records_root = self._root / ".battinfo" / "records"
         self._legacy_layout_announced = False
+        # The base this workspace's records mint under: the one it recorded when
+        # it was created. Read before the engine is made, because making it
+        # creates .battinfo/, which marks the workspace as existing.
+        self._record_base = self._open_record_base(base)
         self._ws = self._make_engine()
         self._records_repo = Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
         # This workspace's .battinfo/credentials, parsed into the instance and
@@ -2423,8 +2445,78 @@ class AuthoringWorkspace:
             if not self._legacy_layout_announced:
                 print("  note: using legacy records/examples/ layout (pre-0.8 workspace)")
                 self._legacy_layout_announced = True
-            return Workspace(root=self._records_root)
-        return Workspace(root=self._root / ".battinfo", source_dir_name="records")
+            return Workspace(root=self._records_root, base=self._record_base)
+        return Workspace(root=self._root / ".battinfo", source_dir_name="records", base=self._record_base)
+
+    def _open_record_base(self, base: str | None) -> str:
+        """The base this workspace mints under, recorded in ``.battinfo/workspace.json`` when it is created.
+
+        A folder without ``.battinfo/`` is a new workspace: it records *base*,
+        by default :data:`battinfo.namespace.DEFAULT_RECORD_BASE`
+        (``https://w3id.org/battinfo/id/1001/``). A workspace that exists keeps
+        the base it recorded, and one that recorded none was created before
+        the switch and keeps the old form, ``https://w3id.org/battinfo/``, for
+        good (IRI ruling of 22 October 2026, decision 5). Opening an existing
+        workspace never records a base in it. The old form is recorded by
+        recording nothing. A *base* that is not the one an existing workspace
+        mints under raises ``ValueError``.
+        """
+        if base is not None:
+            base_prefix(base)
+        state_dir = self._root / ".battinfo"
+        if not state_dir.exists():
+            chosen = DEFAULT_RECORD_BASE if base is None else base
+            if chosen != OLD_FORM_BASE:
+                state = self._load_workspace_state()
+                state.setdefault("schema_version", "0.1.0")
+                state["record_base"] = chosen
+                self._save_workspace_state(state)
+            return chosen
+        recorded = self._recorded_record_base()
+        if base is not None and base != recorded:
+            raise ValueError(
+                f"The workspace at {self._root} mints its records under {recorded}, the base it was "
+                f"created with, and a workspace keeps its base; base={base!r} cannot change it. "
+                "Open it without base=, or create a new workspace in another folder."
+            )
+        return recorded
+
+    def _recorded_record_base(self) -> str:
+        """The base ``.battinfo/workspace.json`` records, else the old form (a workspace from before the switch)."""
+        recorded = self._load_workspace_state().get("record_base")
+        if recorded is None:
+            return OLD_FORM_BASE
+        try:
+            base_prefix(recorded)
+        except ValueError as exc:
+            raise ValueError(f"{self._workspace_state_path()} records record_base {recorded!r}, which {exc}") from exc
+        return str(recorded)
+
+    @property
+    def record_base(self) -> str:
+        """The base this workspace's new records mint under.
+
+        ``https://w3id.org/battinfo/id/1001/`` for a workspace created from
+        0.8.0 on, ``https://w3id.org/battinfo/`` (the old form) for one created
+        before. It is recorded in ``.battinfo/workspace.json`` when the
+        workspace is created and never changes; a record already saved keeps
+        the IRI it has.
+        """
+        return self._record_base
+
+    def _held_iri(self, entity_type: str, iri: str) -> str:
+        """*iri*, minted in this workspace, or the IRI its records folder already holds the record under.
+
+        A folder that already holds a record keeps that record's IRI, in
+        either form (``entities.held_record_iri``).
+        """
+        return held_record_iri(entity_type, iri, [self._ws.source_root])
+
+    def _with_saved_iri(self, record: dict) -> dict:
+        """*record*, whose IRI was just minted, with the IRI this workspace already saved it under (:meth:`_held_iri`)."""
+        from battinfo.api._shared import _with_held_iri  # noqa: PLC0415
+
+        return _with_held_iri(record, self._ws.source_root)
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -4179,7 +4271,10 @@ class AuthoringWorkspace:
         if rt_key in ("parameter-set", "parameters"):
             from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
 
-            accepted = [*_signature_keywords(self._add_parameter_set), *_signature_keywords(_record_from_parameter_set)]
+            accepted = [
+                *_signature_keywords(self._add_parameter_set),
+                *(key for key in _signature_keywords(_record_from_parameter_set) if key != "base"),
+            ]
             _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
@@ -4409,6 +4504,7 @@ class AuthoringWorkspace:
                     resolve_references=False,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self._record_base,
                 )
                 for rec in records
             ]
@@ -10334,7 +10430,13 @@ class AuthoringWorkspace:
         fields["source"] = _draft_source(fields, default_type="datasheet", path=path)
         # An explicit identity in the draft pins a published cell spec, so a
         # corrected manufacturer, model, format or chemistry does not mint a new IRI.
-        pinned = _draft_spec_iri(fields.pop("id", None), fields.pop("uid", None), path.name)
+        pinned = _draft_spec_iri(
+            fields.pop("id", None),
+            fields.pop("uid", None),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("cell-spec", iri),
+        )
         if pinned is not None:
             fields["id"] = pinned
         missing = [key for key in ("manufacturer", "model", "format", "chemistry") if key not in fields]
@@ -10904,7 +11006,13 @@ class AuthoringWorkspace:
         source = ProvenanceInfo(**_draft_source(dict(raw), default_type="manual", path=path))
         # An explicit identity in the draft pins a published test spec, so a
         # corrected name does not mint a new IRI (the seed includes the name).
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        pinned = _draft_spec_iri(
+            raw.get("id"),
+            raw.get("uid"),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("test-protocol", iri),
+        )
 
         # Forward the authored method so it survives into the saved record (and
         # thence the published JSON-LD as an EMMO process graph). Humans author the
@@ -10960,7 +11068,13 @@ class AuthoringWorkspace:
             raise ValueError(
                 f"{path.name} needs at least a name (or manufacturer/model) - fill in the template before loading it."
             )
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        pinned = _draft_spec_iri(
+            raw.get("id"),
+            raw.get("uid"),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("equipment-spec", iri),
+        )
         uid = (
             None
             if pinned
@@ -11000,7 +11114,10 @@ class AuthoringWorkspace:
             citation=raw.get("citation"),
             retrieved_at=raw.get("retrieved_at"),
             notes=_draft_text_list(raw.get("notes")) or None,
+            base=self._record_base,
         )
+        if not pinned:
+            record = self._with_saved_iri(record)
         body = record["equipment_spec"]
         print(f"  equipment-spec: {body['name']}  {body['id']}")
         return record
@@ -11122,7 +11239,7 @@ class AuthoringWorkspace:
                 self._added_paths.add(Path(path))
             return result
 
-        spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))
+        spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert", base=self._record_base))
         # Text read out of the spec is reported once. When spec= named the
         # saved copy itself (by IRI or path), the upsert finds that file
         # unchanged, rewrites it and warns with the same notes.
@@ -11141,28 +11258,34 @@ class AuthoringWorkspace:
         # unit instead of minting a duplicate. Chosen over random minting because
         # a physical unit's natural key IS its model + serial number.
         equipment_uid = stable_uid(f"equipment:{spec_uid}:{seed_text(serial_number)}")
-        equipment_record = create_equipment(
-            uid=equipment_uid,
-            equipment_spec_id=spec_id,
-            serial_number=serial_number,
-            name=name,
-            handle=handle,
-            location=location,
-            status=status,
-            commissioned_at=commissioned_at,
+        equipment_record = self._with_saved_iri(
+            create_equipment(
+                uid=equipment_uid,
+                equipment_spec_id=spec_id,
+                serial_number=serial_number,
+                name=name,
+                handle=handle,
+                location=location,
+                status=status,
+                commissioned_at=commissioned_at,
+                base=self._record_base,
+            )
         )
-        _track(save_record(equipment_record, source_root=source_root, mode="upsert"))
+        _track(save_record(equipment_record, source_root=source_root, mode="upsert", base=self._record_base))
         equipment_id = equipment_record["equipment"]["id"]
 
         unit_label = name or serial_number
         channel_records = []
         for index in range(1, n_channels + 1):
-            channel_record = create_channel(
-                equipment_id=equipment_id,
-                index=index,
-                label=f"{unit_label}/CH{index}",
+            channel_record = self._with_saved_iri(
+                create_channel(
+                    equipment_id=equipment_id,
+                    index=index,
+                    label=f"{unit_label}/CH{index}",
+                    base=self._record_base,
+                )
             )
-            _track(save_record(channel_record, source_root=source_root, mode="upsert"))
+            _track(save_record(channel_record, source_root=source_root, mode="upsert", base=self._record_base))
             self._register_channel_keys(channel_record["channel"], equipment_record["equipment"])
             channel_records.append(channel_record)
 
@@ -11193,7 +11316,9 @@ class AuthoringWorkspace:
                 "ws.add('material_spec', ...) needs name=... (and kind=...). "
                 "Example: ws.add('material_spec', name='LFP', kind='lfp')."
             )
-        record = create_material_spec(validate=False, name=name, **kwargs)
+        record = create_material_spec(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._material_specs = _dedupe_records_by_id(self._material_specs, record, "material_spec")
         body = record["material_spec"]
         self._register_material_spec_keys(body)
@@ -11245,7 +11370,9 @@ class AuthoringWorkspace:
         from battinfo.api import create_material  # noqa: PLC0415
 
         spec_id = self._resolve_material_spec_arg(spec)
-        record = create_material(validate=False, material_spec_id=spec_id, lot=lot, **kwargs)
+        record = create_material(validate=False, material_spec_id=spec_id, lot=lot, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._materials = _dedupe_records_by_id(self._materials, record, "material")
         body = record["material"]
         label = body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
@@ -11318,7 +11445,9 @@ class AuthoringWorkspace:
                 kwargs["material_kind"] = kind
             else:
                 kwargs["material_spec_id"] = self._resolve_material_spec_arg(material)
-        built = create_parameter_set(validate=False, name=name, **kwargs)
+        built = create_parameter_set(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            built = self._with_saved_iri(built)
         return self._queue_parameter_set(built, name)
 
     def _queue_parameter_set(self, record: dict, name: str | None) -> builtins.list:
@@ -11361,7 +11490,9 @@ class AuthoringWorkspace:
                 "ws.add('electrode_spec', ...) needs name=... (and kind=...). Example: "
                 "ws.add('electrode_spec', name='Graphite anode', kind='graphite')."
             )
-        record = create_electrode_spec(validate=False, name=name, **kwargs)
+        record = create_electrode_spec(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._electrode_specs = _dedupe_records_by_id(self._electrode_specs, record, "electrode_spec")
         body = record["electrode_spec"]
         self._register_electrode_spec_keys(body)
@@ -11415,7 +11546,11 @@ class AuthoringWorkspace:
         from battinfo.api import create_electrode  # noqa: PLC0415
 
         spec_id = self._resolve_electrode_spec_arg(spec)
-        record = create_electrode(validate=False, electrode_spec_id=spec_id, batch=batch, **kwargs)
+        record = create_electrode(
+            validate=False, electrode_spec_id=spec_id, batch=batch, base=self._record_base, **kwargs
+        )
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._electrodes = _dedupe_records_by_id(self._electrodes, record, "electrode")
         body = record["electrode"]
         label = body.get("batch_id") or body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
@@ -11908,10 +12043,10 @@ class AuthoringWorkspace:
                 )
             pinned = iri.strip()
         if uid is not None:
-            from_uid = record_iri("test", _normalized_dashed_uid(str(uid)))
+            from_uid = record_iri("test", _normalized_dashed_uid(str(uid)), base_prefix(self._record_base))
             if pinned is not None and not same_record(pinned, from_uid):
                 raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
-            pinned = pinned or from_uid
+            pinned = pinned or self._held_iri("test", from_uid)
         return pinned
 
     def _pinned_dataset_iris(
@@ -13061,8 +13196,19 @@ def _test_kind_hint() -> str:
     return "Valid kinds: " + ", ".join(_test_kind_values()) + "."
 
 
-def _draft_spec_iri(draft_id: Any, draft_uid: Any, source: str) -> str | None:
-    """The spec IRI a draft file pins with ``"id"`` and/or ``"uid"``, or ``None``."""
+def _draft_spec_iri(
+    draft_id: Any,
+    draft_uid: Any,
+    source: str,
+    *,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] | None = None,
+) -> str | None:
+    """The spec IRI a draft file pins with ``"id"`` and/or ``"uid"``, or ``None``.
+
+    A ``"uid"`` alone pins the IRI of that uid under *base*, the workspace's,
+    which *held* maps to the IRI the workspace already saved the record under.
+    """
     from battinfo.api._shared import SPEC_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
 
     pinned: str | None = None
@@ -13075,10 +13221,10 @@ def _draft_spec_iri(draft_id: Any, draft_uid: Any, source: str) -> str | None:
             )
         pinned = text
     if draft_uid:
-        from_uid = record_iri("spec", _normalized_dashed_uid(str(draft_uid)))
+        from_uid = record_iri("spec", _normalized_dashed_uid(str(draft_uid)), base_prefix(base))
         if pinned is not None and not same_record(pinned, from_uid):
             raise ValueError(f"{source}: 'id' and 'uid' name different specs; keep one.")
-        pinned = pinned or from_uid
+        pinned = pinned or (held(from_uid) if held is not None else from_uid)
     return pinned
 
 
@@ -13151,6 +13297,8 @@ def workspace(
     root: str | Path = ".",
     records_repo: str | Path | None = None,
     registry_url: str | None = _UNSET,
+    *,
+    base: str | None = None,
 ) -> AuthoringWorkspace:
     """Open (or create) a BattINFO workspace for authoring records.
 
@@ -13182,5 +13330,13 @@ def workspace(
         Auto-detected from sibling directories or ``BATTINFO_RECORDS`` env var
         if not given.  Only used when the registry is unreachable or ``registry_url``
         is ``None``.
+    base:
+        The base the records of a new workspace mint under, recorded in
+        ``.battinfo/workspace.json`` when the workspace is created. Left out,
+        it is ``https://w3id.org/battinfo/id/1001/``; pass
+        ``"https://w3id.org/battinfo/"`` to mint in the old form. A workspace
+        that exists keeps the base it was created with, and one created
+        before 0.8.0 keeps the old form; a ``base`` that differs from it
+        raises ``ValueError``. ``ws.record_base`` shows it.
     """
-    return AuthoringWorkspace(root=root, records_repo=records_repo, registry_url=registry_url)
+    return AuthoringWorkspace(root=root, records_repo=records_repo, registry_url=registry_url, base=base)

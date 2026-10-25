@@ -144,6 +144,10 @@ Seed rules are a public contract from 0.8.0, the first release on PyPI: a seed c
 - A 0.8.x patch release MUST keep every IRI already on disk or published. A fix may change what a new record mints, never the IRI of a record that exists.
 - Every move is listed in the changelog, and in `MOVED` in `tests/test_golden_iris.py` with its reason.
 
+### 5.6 The base a record mints under (amendment, IRI ruling of 22 October 2026)
+
+From 0.8.0 a new record mints under its publisher's prefix (6.4), `https://w3id.org/battinfo/id/1001/{segment}/{uid}` for Battery Genome, with the uid 5.1 and 5.2 give it; section 3.1 describes the old form, `https://w3id.org/battinfo/{segment}/{uid}`, which every record minted before has and keeps. A workspace, batch folder or contribution folder records its base when it is created, and one that records none keeps the old form for good. The paths without such a folder take an explicit base, by default `/id/1001/`, and a record already saved where they write keeps its IRI in either form. A seed takes another record's IRI in the old form, so a uid never depends on a base. `tests/test_golden_iris.py` checks every path under both bases. Version 1.1 of this policy (issue #484) replaces this amendment.
+
 ## 6. Entity-Type Registry Governance
 
 The set of `{entity-type}` tokens is registry-managed.

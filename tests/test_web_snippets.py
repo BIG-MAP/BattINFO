@@ -149,4 +149,4 @@ def test_docs_page_quickstart_python_executes(tmp_path: Path) -> None:
             exec(compile(snippet, "<web quickstartPython>", "exec"), {})  # noqa: S102
     finally:
         os.chdir(cwd)
-    assert "w3id.org/battinfo/spec/" in buffer.getvalue()
+    assert "w3id.org/battinfo/id/1001/spec/" in buffer.getvalue()

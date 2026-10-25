@@ -49,7 +49,7 @@ record = create_housing_spec(
 {
   "schema_version": "0.2.0",
   "housing_spec": {
-    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "CR2032 coin housing",
     "cell_format": "coin",
@@ -154,9 +154,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ],
     "skos:prefLabel": "CR2032 coin housing",
-    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "CR2032 coin housing"
 }
 ```
@@ -186,7 +186,7 @@ record = create_housing(
 {
   "schema_version": "0.2.0",
   "housing": {
-    "id": "https://w3id.org/battinfo/housing/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/housing/7d9k-2m4p-8t3x-6nq5",
     "housing_spec_id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7",
     "short_id": "7d9k2m",
     "lot_id": "CR2032-KIT-2026-07"
@@ -217,7 +217,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "ElectrochemicalComponent",
     "schema:Product"
   ],
-  "@id": "https://w3id.org/battinfo/housing/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/housing/7d9k-2m4p-8t3x-6nq5",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7"
   }

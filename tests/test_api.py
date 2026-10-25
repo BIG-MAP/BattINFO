@@ -151,7 +151,7 @@ def test_template_cell_spec_and_create_cell_instance(tmp_path: Path) -> None:
         uid="pge5wer62q82v9k0",
         source_file="A123__ANR26650M1-B.pdf",
     )
-    assert cell_spec["cell_spec"]["id"] == "https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0"
+    assert cell_spec["cell_spec"]["id"] == "https://w3id.org/battinfo/id/1001/spec/pge5-wer6-2q82-v9k0"
     assert cell_spec["cell_spec"]["model"] == "ANR26650M1-B"
     assert cell_spec["cell_spec"]["iec_code"] == "IFpR26650"
     assert cell_spec["cell_spec"]["country_of_origin"] == "United States"
@@ -165,7 +165,7 @@ def test_template_cell_spec_and_create_cell_instance(tmp_path: Path) -> None:
         dataset_id="https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x",
         out_path=out_path,
     )
-    assert inst["cell_instance"]["id"] == "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+    assert inst["cell_instance"]["id"] == "https://w3id.org/battinfo/id/1001/cell/3m6k-9t2p-7x4h-9nq8"
     assert "dataset_id" not in inst["provenance"]
     assert inst["datasets"] == [{"id": "https://w3id.org/battinfo/dataset/1f8r-6v2k-9p4m-3t7x", "role": "raw"}]
     assert out_path.exists()
@@ -814,7 +814,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
         source_root=source_root,
     )
     assert cell_spec_payload["status"] == "created"
-    assert cell_spec_payload["id"].startswith("https://w3id.org/battinfo/spec/")
+    assert cell_spec_payload["id"].startswith("https://w3id.org/battinfo/id/1001/spec/")
 
     exists_payload = save_cell_spec(
         CellSpec(
@@ -869,7 +869,7 @@ def test_save_resource_drafts_and_duplicate_policy(tmp_path: Path) -> None:
         resolve_references=True,
     )
     assert dataset_payload["status"] == "created"
-    assert dataset_payload["id"].startswith("https://w3id.org/battinfo/dataset/")
+    assert dataset_payload["id"].startswith("https://w3id.org/battinfo/id/1001/dataset/")
 
 
 def test_save_record_accepts_canonical_records_and_paths(tmp_path: Path) -> None:

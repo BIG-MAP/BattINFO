@@ -24,6 +24,7 @@ from battinfo.entities import (
     ENTITY_KINDS,
     PLACEHOLDER_UID,
     entity_id_from_doc,
+    held_record_iri,
     iter_entity_files,
     kind_for_doc,
 )
@@ -425,6 +426,27 @@ def _without_minted_identity(record: dict[str, Any], record_key: str | None = No
     if uid and isinstance(identifier, str) and identifier.endswith(uid):
         body.pop("identifier")
     return record
+
+
+def _with_held_iri(record: dict[str, Any], source_root: PathLike | None) -> dict[str, Any]:
+    """*record*, whose IRI a builder has just minted, with the IRI *source_root* already holds it under.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5): when the record file a save of *record*
+    would write holds the same record under the other form of its IRI, such
+    as the old form where the builder minted ``/id/1001/``, *record* takes
+    that IRI (``entities.held_record_iri``). Otherwise, and without
+    *source_root*, *record* is returned as it is. Only for an IRI the builder
+    minted: an IRI the caller gave is never changed.
+    """
+    kind = kind_for_doc(record)
+    body = record.get(kind.record_key) if kind is not None else None
+    if kind is None or source_root is None or not isinstance(body, dict) or not isinstance(body.get("id"), str):
+        return record
+    held = held_record_iri(kind.entity_type, body["id"], [_as_path(source_root)])
+    if held == body["id"]:
+        return record
+    return {**record, kind.record_key: {**body, "id": held}}
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:

@@ -61,6 +61,7 @@ from battinfo.api._shared import (
     _to_unix_time,
     _validate_canonical_record,
     _validate_schema,
+    _with_held_iri,
 )
 from battinfo.bundle import (
     SCHEMA_VERSION,
@@ -76,12 +77,14 @@ from battinfo.entities import (
     dataset_locator_seed,
     entity_files_for_uid,
     entity_types_for_namespace,
+    held_record_iri,
     is_placeholder_iri,
     iter_entity_files,
     kind_for_doc,
     save_entity_path,
+    seed_iri,
 )
-from battinfo.namespace import record_iri, same_record
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, parse_record_iri, record_base, record_iri, same_record
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.pydantic import validate_json
@@ -177,12 +180,16 @@ def _library_cell_spec_filename(manufacturer: str, model: str) -> str:
     return f"{_library_token(manufacturer)}__{_library_token(model)}.json"
 
 
-def _library_cell_spec_uid(specification: Mapping[str, Any], library_root: Path) -> str | None:
-    """The uid a library cell specification without an id mints from its natural key.
+def _library_cell_spec_iri(
+    specification: Mapping[str, Any], library_root: Path, *, base: str = DEFAULT_RECORD_BASE
+) -> str | None:
+    """The IRI a library cell specification without an id mints from its natural key, under *base*.
 
     The library keeps one file per manufacturer and model. When that file holds
     the same spec under the IRI the seeds of before 0.8.0 gave it, the spec keeps
-    that IRI (``entities.cell_spec_uid``). ``None`` without a manufacturer or model.
+    that IRI (``entities.cell_spec_uid``), and when it holds the spec under the
+    other form of its IRI (the old form, or ``/id/1001/``), the spec keeps that
+    form. ``None`` without a manufacturer or model.
     """
     from battinfo.entities import cell_spec_seed_fields, cell_spec_uid, seed_text  # noqa: PLC0415
 
@@ -204,7 +211,11 @@ def _library_cell_spec_uid(specification: Mapping[str, Any], library_root: Path)
             return held
         return None
 
-    return cell_spec_uid(fields, saved=saved)
+    uid = cell_spec_uid(fields, saved=saved)
+    minted = record_iri("spec", uid, base_prefix(base))
+    held = saved(uid)
+    held_id = held.get("id") if held is not None else None
+    return held_id if isinstance(held_id, str) and same_record(held_id, minted) else minted
 
 
 # Specification fields carried through from a flat library-input dict. Unlike the retired
@@ -223,7 +234,7 @@ _LIBRARY_SPEC_OPTIONAL_FIELDS = (
 )
 
 
-def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
+def _library_record_from_input(draft: Mapping[str, Any], *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     """Build a library cell-spec record from a flat dict of specification fields.
 
     Accepts the full specification surface (manufacturer/model/identity + construction,
@@ -240,7 +251,7 @@ def _library_record_from_input(draft: Mapping[str, Any]) -> dict[str, Any]:
             _assert_id_matches_uid(draft_id, _normalized_dashed_uid(uid))
         entity_id = draft_id
     else:
-        entity_id = record_iri("spec", _normalized_dashed_uid(uid))
+        entity_id = record_iri("spec", _normalized_dashed_uid(uid), base_prefix(base))
 
     specification: dict[str, Any] = {
         "id": entity_id,
@@ -950,6 +961,7 @@ def create_cell_instance(
     include_packaged_examples: bool = False,
     out_path: PathLike | None = None,
     validate: bool = True,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Create a physical cell-instance document.
 
@@ -958,6 +970,9 @@ def create_cell_instance(
     `manufacturer`, ...) to resolve the type. Metadata filters resolve against
     YOUR records under ``source_root`` (default ``./examples``); pass
     ``include_packaged_examples=True`` to also match the bundled demo fleet.
+
+    The cell's IRI is minted under ``base``: ``https://w3id.org/battinfo/id/1001/``
+    unless another is given, such as ``"https://w3id.org/battinfo/"`` for the old form.
     """
     if spec_id is not None:
         if cell_spec_id not in (None, spec_id):
@@ -1007,7 +1022,7 @@ def create_cell_instance(
         dashed_uid = stable_uid(identity_seed) if identity_seed is not None else _normalized_dashed_uid(None)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-    instance_id = record_iri("cell", dashed_uid)
+    instance_id = record_iri("cell", dashed_uid, base_prefix(base))
 
     out: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -1109,8 +1124,10 @@ _COMPONENT_SPEC_REF_NAMESPACES = {
 }
 
 
-def _record_from_cell_spec(spec: CellSpec, *, source_root: PathLike | None = None) -> dict[str, Any]:
-    """The canonical record of *spec*, its IRI minted from its natural key when it has none.
+def _record_from_cell_spec(
+    spec: CellSpec, *, source_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
+    """The canonical record of *spec*, its IRI minted under *base* from its natural key when it has none.
 
     With *source_root* (the records folder a save writes to), a spec saved
     there under the IRI the seeds of before 0.8.0 gave it keeps that IRI.
@@ -1123,7 +1140,7 @@ def _record_from_cell_spec(spec: CellSpec, *, source_root: PathLike | None = Non
         if value is not None and not _spec_iri_re(namespace).fullmatch(value):
             raise ValueError(f"{field_name} must match https://w3id.org/battinfo/spec/{{uid}}.")
     # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
-    return _mint_cell_spec_record(spec, source_root=source_root)
+    return _mint_cell_spec_record(spec, source_root=source_root, base=base)
 
 
 def _seed_part(value: str | None, fallback: str = "") -> str:
@@ -1241,8 +1258,8 @@ def _identity_seed(entity_kind: str, entity: Any, *, workspace_root: PathLike | 
         name = _seed_text_part(entity.name) or _seed_part(entity.dataset_path or entity.access_url, "dataset")
         seed = "::".join(
             [
-                _seed_part(entity.cell_instance_id, "unknown-cell"),
-                entity.test_id or "",
+                seed_iri(_seed_part(entity.cell_instance_id, "unknown-cell")),
+                seed_iri(entity.test_id or ""),
                 locator,
                 name,
             ]
@@ -1339,7 +1356,9 @@ def _cell_spec_minted_uid(spec: Any, *, source_root: PathLike | None = None) -> 
     return cell_spec_uid(fields, roots=[_as_path(source_root)] if source_root is not None else [])
 
 
-def _mint_cell_spec_record(spec: CellSpec, *, source_root: PathLike | None = None) -> dict[str, Any]:
+def _mint_cell_spec_record(
+    spec: CellSpec, *, source_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
     if spec.id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(spec.id):
             raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -1352,7 +1371,7 @@ def _mint_cell_spec_record(spec: CellSpec, *, source_root: PathLike | None = Non
             if spec.uid is not None
             else _cell_spec_minted_uid(spec, source_root=source_root)
         )
-        entity_id = record_iri("spec", dashed)
+        entity_id = record_iri("spec", dashed, base_prefix(base))
     # Finalize a copy (mint the id, apply save-time provenance defaults) without mutating the
     # caller. source_type is schema-required, so an unprovided one takes the documented
     # category default; source_file is optional and is recorded only when the author provided
@@ -1365,7 +1384,7 @@ def _mint_cell_spec_record(spec: CellSpec, *, source_root: PathLike | None = Non
     return finalized.to_record()
 
 
-def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
+def _record_from_cell_instance(instance: Cell, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if instance.cell_spec_id is None or not CELL_SPEC_REF_IRI_RE.fullmatch(instance.cell_spec_id):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     for dataset_id in instance.dataset_ids:
@@ -1381,7 +1400,7 @@ def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
         dashed = (
             _normalized_dashed_uid(instance.uid) if instance.uid is not None else _identity_minted_uid("cell", instance)
         )
-        entity_id = record_iri("cell", dashed)
+        entity_id = record_iri("cell", dashed, base_prefix(base))
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = instance.model_copy(deep=True)
     finalized.id = entity_id
@@ -1602,15 +1621,19 @@ def _unmintable_record_message(entity_type: str, record_key: str) -> str:
     )
 
 
-def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None) -> dict[str, Any]:
-    """Give a canonical record saved without an ``id`` its minted IRI.
+def _with_minted_id(
+    doc: dict[str, Any], *, source_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
+    """Give a canonical record saved without an ``id`` its minted IRI, under *base*.
 
     Templates leave the id out (an all-zero placeholder used to be written and
     everyone who saved an unedited template claimed it), so saving the filled-in
     record mints the IRI here from its natural key: ``id``, ``short_id`` and, for
     kinds that carry one, the derived ``identifier``. A record with no natural
     key (see ``_canonical_identity_uid``) is refused rather than given a random
-    IRI. A record that has an id is returned unchanged.
+    IRI. A record that has an id is returned unchanged. A record that
+    *source_root* already holds under the other form of the minted IRI keeps
+    the IRI it is saved under (``entities.held_record_iri``).
     """
     kind = kind_for_doc(doc)
     body = doc.get(kind.record_key) if kind is not None else None
@@ -1621,7 +1644,7 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
     uid = _canonical_identity_uid(kind.entity_type, body, workspace_root=workspace_root, record_roots=record_roots)
     if uid is None:
         raise ValueError(_unmintable_record_message(kind.entity_type, kind.record_key))
-    entity_id = record_iri(kind.iri_namespace, uid)
+    entity_id = held_record_iri(kind.entity_type, record_iri(kind.iri_namespace, uid, base_prefix(base)), record_roots)
     minted: dict[str, Any] = {"id": entity_id, "short_id": _short_id_from_iri(entity_id)}
     prefix = _DERIVED_IDENTIFIER_PREFIX.get(kind.entity_type)
     if prefix is not None and not body.get("identifier"):
@@ -1630,8 +1653,10 @@ def _with_minted_id(doc: dict[str, Any], *, source_root: PathLike | None = None)
     return {**doc, kind.record_key: minted}
 
 
-def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = None) -> dict[str, Any]:
-    """Finalize a Dataset into its canonical record, minting the id when absent.
+def _record_from_dataset(
+    dataset: Dataset, *, workspace_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
+    """Finalize a Dataset into its canonical record, minting the id under *base* when absent.
 
     *workspace_root* is the folder a local data file's path is taken relative
     to in the identity seed (see ``entities.dataset_locator_seed``)."""
@@ -1645,7 +1670,7 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
             if dataset.uid is not None
             else _identity_minted_uid("dataset", dataset, workspace_root=workspace_root)
         )
-        entity_id = record_iri("dataset", dashed)
+        entity_id = record_iri("dataset", dashed, base_prefix(base))
 
     related_cells = [*dataset.related_cell_ids, *([dataset.cell_instance_id] if dataset.cell_instance_id else [])]
     for cell_id in related_cells:
@@ -1682,8 +1707,10 @@ def _record_from_dataset(dataset: Dataset, *, workspace_root: PathLike | None = 
     return finalized.to_record()
 
 
-def _record_from_test(test: Test, *, source_root: PathLike | None = None) -> dict[str, Any]:
-    """The canonical record of *test*, its IRI minted from its identity when it has none.
+def _record_from_test(
+    test: Test, *, source_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
+    """The canonical record of *test*, its IRI minted under *base* from its identity when it has none.
 
     With *source_root* (the records folder a save writes to), a test saved
     there under the IRI the seed of before 0.8.0 gave the same run keeps that
@@ -1708,7 +1735,7 @@ def _record_from_test(test: Test, *, source_root: PathLike | None = None) -> dic
             if test.uid is not None
             else _test_minted_uid(test, record_roots=[source_root] if source_root is not None else [])
         )
-        entity_id = record_iri("test", dashed)
+        entity_id = record_iri("test", dashed, base_prefix(base))
     # Finalize a copy (mint the id, convert timestamps, apply save-time provenance defaults).
     finalized = test.model_copy(deep=True)
     finalized.id = entity_id
@@ -1722,7 +1749,7 @@ def _record_from_test(test: Test, *, source_root: PathLike | None = None) -> dic
     return finalized.to_record()
 
 
-def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
+def _record_from_test_protocol(spec: TestSpec, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if spec.id is not None:
         if not TEST_PROTOCOL_IRI_RE.fullmatch(spec.id):
             raise ValueError("test protocol id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -1731,7 +1758,7 @@ def _record_from_test_protocol(spec: TestSpec) -> dict[str, Any]:
         dashed = (
             _normalized_dashed_uid(spec.uid) if spec.uid is not None else _identity_minted_uid("test-protocol", spec)
         )
-        entity_id = record_iri("spec", dashed)
+        entity_id = record_iri("spec", dashed, base_prefix(base))
 
     # The model already parses the PyBaMM-style experiment/steps authoring input into the
     # canonical `method` and computes `facets` in to_record(); the builder only mints the id
@@ -1813,6 +1840,7 @@ def save_record(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save one canonical BattINFO resource into local source storage and optional resolver artifacts.
 
@@ -1825,13 +1853,18 @@ def save_record(
     back to a random uid and never silently dedup. A canonical record saved
     without an ``id`` (a filled-in template) is minted the same way
     (``_with_minted_id``).
+
+    A minted IRI takes ``base``: ``https://w3id.org/battinfo/id/1001/`` unless
+    another is given, such as ``"https://w3id.org/battinfo/"`` for the old
+    form. A record that ``source_root`` already holds keeps the IRI it is
+    saved under, in either form.
     """
     mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
     source_root_path = _as_path(source_root)
 
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else record
-    doc = _with_minted_id(doc, source_root=source_root_path)
+    doc = _with_minted_id(doc, source_root=source_root_path, base=base)
     if validate:
         _validate_canonical_record(doc, policy=validation_policy)
 
@@ -1861,6 +1894,15 @@ def save_record(
             held_id = _entity_id(_load_json(target_path))
         except Exception:  # noqa: BLE001 - an unreadable file is still not ours to overwrite
             held_id = None
+        held_form = parse_record_iri(held_id) if held_id != entity_id and same_record(held_id, entity_id) else None
+        if held_form is not None:
+            # The other form of the same record, such as /id/1001/ beside a file of the
+            # old form: the record keeps the IRI it is saved under.
+            raise ValueError(
+                f"Cannot save {entity_id}: {target_path} already holds this record as {held_id}, "
+                f"the IRI it keeps. Save it with id {held_id!r}, or mint it with "
+                f"base={record_base(held_form.prefix)!r}."
+            )
         if held_id != entity_id:
             held = f"the record {held_id}" if held_id else "a record that could not be read"
             raise ValueError(
@@ -1971,6 +2013,7 @@ def save_cell_spec(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a cell-spec from either draft payload or canonical record.
 
@@ -1997,6 +2040,7 @@ def save_cell_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_spec"), Mapping):
         return save_record(
@@ -2013,9 +2057,12 @@ def save_cell_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     spec = draft if isinstance(draft, CellSpecificationBundle) else CellSpecificationBundle(**dict(draft))
-    record = _record_from_cell_spec(spec, source_root=source_root)
+    record = _record_from_cell_spec(spec, source_root=source_root, base=base)
+    if spec.id is None:
+        record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -2030,6 +2077,7 @@ def save_cell_spec(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -2048,6 +2096,7 @@ def save_cell_instance(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a cell-instance from either draft payload or canonical record.
 
@@ -2076,6 +2125,7 @@ def save_cell_instance(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("cell_instance"), Mapping):
         return save_record(
@@ -2092,9 +2142,12 @@ def save_cell_instance(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     instance = draft if isinstance(draft, CellInstanceBundle) else CellInstanceBundle(**dict(draft))
-    record = _record_from_cell_instance(instance)
+    record = _record_from_cell_instance(instance, base=base)
+    if instance.id is None:
+        record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -2109,6 +2162,7 @@ def save_cell_instance(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -2127,6 +2181,7 @@ def save_dataset(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a dataset record into a records folder and return what was written.
 
@@ -2211,6 +2266,7 @@ def save_dataset(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("dataset"), Mapping):
         return save_record(
@@ -2227,11 +2283,14 @@ def save_dataset(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     dataset = draft if isinstance(draft, DatasetBundle) else DatasetBundle(**dict(draft))
     # Saved into a workspace's records folder, a local data file seeds the IRI by its
     # path relative to that workspace, as ws.add("test", data=...) does.
-    record = _record_from_dataset(dataset, workspace_root=workspace_layout_root(source_root))
+    record = _record_from_dataset(dataset, workspace_root=workspace_layout_root(source_root), base=base)
+    if dataset.id is None:
+        record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -2246,6 +2305,7 @@ def save_dataset(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -2264,6 +2324,7 @@ def save_test(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a test from either draft payload or canonical record."""
     from battinfo.bundle import Test as TestBundle
@@ -2284,6 +2345,7 @@ def save_test(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("test"), Mapping):
         return save_record(
@@ -2300,9 +2362,12 @@ def save_test(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     test = draft if isinstance(draft, TestBundle) else TestBundle(**dict(draft))
-    record = _record_from_test(test, source_root=source_root)
+    record = _record_from_test(test, source_root=source_root, base=base)
+    if test.id is None:
+        record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -2317,6 +2382,7 @@ def save_test(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -2335,6 +2401,7 @@ def save_test_spec(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a test protocol from either draft payload or canonical record."""
     from battinfo.bundle import TestSpec
@@ -2355,6 +2422,7 @@ def save_test_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("test_spec"), Mapping):
         return save_record(
@@ -2371,9 +2439,12 @@ def save_test_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     spec = draft if isinstance(draft, TestSpec) else TestSpec(**dict(draft))
-    record = _record_from_test_protocol(spec)
+    record = _record_from_test_protocol(spec, base=base)
+    if spec.id is None:
+        record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -2388,6 +2459,7 @@ def save_test_spec(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -2538,8 +2610,14 @@ def save_library_cell_spec(
     glob: str = "*.json",
     clean_output: bool = False,
     dry_run: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
-    """Save a reusable cell specification into the curated library."""
+    """Save a reusable cell specification into the curated library.
+
+    A specification without an id gets one minted under ``base``,
+    ``https://w3id.org/battinfo/id/1001/`` unless another is given; one the
+    library already holds keeps the IRI it is saved under.
+    """
     from battinfo.bundle import CellSpec as CellSpecificationBundle
 
     if isinstance(draft, (str, Path)):
@@ -2559,6 +2637,7 @@ def save_library_cell_spec(
             glob=glob,
             clean_output=clean_output,
             dry_run=dry_run,
+            base=base,
         )
 
     if isinstance(draft, CellSpecificationBundle):
@@ -2572,7 +2651,7 @@ def save_library_cell_spec(
         doc = dict(draft)
     else:
         # Flat dict of specification fields (CLI inline options / hand-authored JSON).
-        doc = _library_record_from_input(dict(draft))
+        doc = _library_record_from_input(dict(draft), base=base)
 
     if validate and not isinstance(doc.get("specification"), Mapping):
         _validate_cell_specification(doc)
@@ -2588,10 +2667,10 @@ def save_library_cell_spec(
     if not specification.get("id"):
         # A filled-in library template carries no id: mint it from the same natural
         # key as a cell spec (manufacturer, model, format, chemistry, size code).
-        minted_uid = _library_cell_spec_uid(specification, library_root_path)
-        if minted_uid is None:
+        minted_iri = _library_cell_spec_iri(specification, library_root_path, base=base)
+        if minted_iri is None:
             raise ValueError(_unmintable_record_message("cell-spec", "specification"))
-        specification = {"id": record_iri("spec", minted_uid), **specification}
+        specification = {"id": minted_iri, **specification}
         doc = {**doc, "specification": specification}
     elif is_placeholder_iri(specification.get("id")):
         raise ValueError(
@@ -2702,8 +2781,12 @@ def save_batch(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
-    """Save a deterministic batch of canonical resources."""
+    """Save a deterministic batch of canonical resources.
+
+    A record without an id gets one minted under ``base`` (see :func:`save_record`).
+    """
     mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
 
@@ -2742,6 +2825,7 @@ def save_batch(
                         validate=validate,
                         validation_policy=validation_policy,
                         dry_run=dry_run,
+                        base=base,
                     )
                     status = payload.get("status")
                     if status == "created":

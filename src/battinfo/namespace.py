@@ -16,12 +16,14 @@ under any other prefix the same uid names another record.
 
 This module is the one place that builds and recognises these shapes::
 
-    from battinfo.namespace import parse_record_iri, record_iri, same_record
+    from battinfo.namespace import base_prefix, parse_record_iri, record_iri, same_record
 
     record_iri("cell", "b6yn-0sxe-t2qk-9mjv")
     # 'https://w3id.org/battinfo/cell/b6yn-0sxe-t2qk-9mjv'
     record_iri("cell", "b6yn-0sxe-t2qk-9mjv", prefix="1001")
     # 'https://w3id.org/battinfo/id/1001/cell/b6yn-0sxe-t2qk-9mjv'
+    base_prefix("https://w3id.org/battinfo/id/1001/")
+    # '1001'
     parse_record_iri("https://w3id.org/battinfo/id/1001/cell/b6yn-0sxe-t2qk-9mjv")
     # RecordIri(prefix='1001', segment='cell', uid='b6yn-0sxe-t2qk-9mjv')
     same_record(
@@ -30,13 +32,21 @@ This module is the one place that builds and recognises these shapes::
     )
     # True
 
-Nothing mints the prefixed form yet. Every builder calls :func:`record_iri`
-without a prefix, so minted IRIs keep the old form until minting takes its
-base from the workspace. Every recogniser accepts both shapes
-(``both_shapes=True``), as the v1 JSON Schemas do, and a field that
-references a maker, a product model or a material also accepts a shared
-thing (``things=True``). The IRI patterns of the schemas are built here too:
-``scripts/sync_schema_iri_patterns.py`` writes them.
+A record mints under the base of its container (ruling decision 5). A
+workspace or a batch folder records its base when it is created, and new
+ones record :data:`DEFAULT_RECORD_BASE`, ``https://w3id.org/battinfo/id/1001/``;
+one with no base recorded was created before the switch and keeps the old
+form, :data:`OLD_FORM_BASE`, for good. A path without a container, such as a
+``save_*`` or ``create_*`` function, takes a ``base=`` argument that defaults
+to :data:`DEFAULT_RECORD_BASE`. :func:`base_prefix` reads a base back as the
+prefix :func:`record_iri` takes. A uid never depends on the base: a seed takes
+a parent's IRI in the old form (``entities.seed_iri``).
+
+Every recogniser accepts both shapes (``both_shapes=True``), as the v1 JSON
+Schemas do, and a field that references a maker, a product model or a
+material also accepts a shared thing (``things=True``). The IRI patterns of
+the schemas are built here too: ``scripts/sync_schema_iri_patterns.py``
+writes them.
 
 The publisher prefixes come from the register in
 ``data/namespace/prefixes.json`` (:data:`PUBLISHER_PREFIXES`), and the
@@ -60,7 +70,9 @@ __all__ = [
     "BATTINFO_PREFIX",
     "BATTINFO_ROOT",
     "CONTEXT_BASE",
+    "DEFAULT_RECORD_BASE",
     "ID_BASE",
+    "OLD_FORM_BASE",
     "PREFIX_PATTERN",
     "PUBLISHER_PREFIXES",
     "PublisherPrefix",
@@ -69,6 +81,7 @@ __all__ = [
     "SEGMENT_PATTERN",
     "UID_PATTERN",
     "VOCABULARY_NAMESPACE",
+    "base_prefix",
     "parse_record_iri",
     "parse_thing_iri",
     "publisher_prefix",
@@ -233,6 +246,36 @@ def record_base(prefix: str | None = None) -> str:
     holds definitions only (1000, BattINFO's own).
     """
     return BATTINFO_ROOT if prefix is None else f"{ID_BASE}{_checked_prefix(prefix)}/"
+
+
+#: The base of the old form, the root. Every record minted before the switch
+#: has it, and so does every record that a workspace or batch folder with no
+#: base recorded mints, for good.
+OLD_FORM_BASE = BATTINFO_ROOT
+#: The base new records mint under: Battery Genome's, ``https://w3id.org/battinfo/id/1001/``.
+#: New workspaces and batch folders record it when they are created, and the
+#: paths without a container take it unless they are given another.
+DEFAULT_RECORD_BASE = record_base(BATTERY_GENOME_PREFIX)
+
+
+def base_prefix(base: str) -> str | None:
+    """The prefix :func:`record_iri` takes for *base*: ``None`` for :data:`OLD_FORM_BASE`, else ``{prefix}``.
+
+    *base* is a record base as a container records it and as ``base=``
+    arguments take it: ``https://w3id.org/battinfo/`` for the old form or
+    ``https://w3id.org/battinfo/id/{prefix}/``. Raises ``ValueError`` for
+    anything else, a prefix that holds definitions only (1000) included.
+    """
+    if base == OLD_FORM_BASE:
+        return None
+    if isinstance(base, str) and base.startswith(ID_BASE) and base.endswith("/"):
+        prefix = base[len(ID_BASE) : -1]
+        if _PREFIX_RE.fullmatch(prefix):
+            return _checked_prefix(prefix)
+    raise ValueError(
+        f"{base!r} is not a record base: a base is {OLD_FORM_BASE} for the old form or "
+        f"{ID_BASE}{{prefix}}/ with a publisher prefix of four or more digits, such as {DEFAULT_RECORD_BASE}."
+    )
 
 
 def record_iri(segment: str, uid: str, prefix: str | None = None) -> str:

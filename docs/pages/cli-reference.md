@@ -160,6 +160,9 @@ computational stays with the source file, which is linked back as the
 record&#x27;s source_protocol artifact (with its sha256). Warnings list what
 did not carry over.
 
+The IRI mints under --base. When --out already holds the record under
+the other form of its IRI, the record keeps the IRI it has there.
+
 **Usage**:
 
 ```console
@@ -177,6 +180,7 @@ $ battinfo import-protocol [OPTIONS] {input_path}
 * `--kind <str>`: Test kind (e.g. cycling, gitt; default: inferred).
 * `--uid <str>`: Canonical uid (xxxx-xxxx-xxxx-xxxx); default: derived deterministically from the file&#x27;s sha256.
 * `--out <path>`: Write the canonical test-protocol record here (default: stdout).
+* `--base <str>`: The base the record&#x27;s IRI mints under; https://w3id.org/battinfo/ for the old form.  [default: https://w3id.org/battinfo/id/1001/]
 * `--help`: Show this message and exit.
 
 ## `battinfo query`
@@ -2021,6 +2025,7 @@ $ battinfo batch init [OPTIONS] {output_dir}
 * `--iris <str>`: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).
 * `--serials <str>`: Comma-separated serial numbers (one per cell, used as folder names).
 * `--force`: Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.
+* `--base <str>`: The base a new batch&#x27;s records mint under (default https://w3id.org/battinfo/id/1001/; https://w3id.org/battinfo/ for the old form). An existing batch keeps its own.
 * `--help`: Show this message and exit.
 
 ### `battinfo batch add`

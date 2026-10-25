@@ -41,6 +41,7 @@ from battinfo.bundle import (
     ProvenanceInfo,
     Test,
 )
+from battinfo.namespace import DEFAULT_RECORD_BASE, OLD_FORM_BASE, base_prefix
 from battinfo.publication import load_publication
 from battinfo.validate.record import validate_record
 
@@ -167,11 +168,22 @@ class WorkspaceManifest(BaseModel):
     registry: RegistryTarget
     release: ReleaseInfo = Field(default_factory=ReleaseInfo)
     comment: list[str] = Field(default_factory=list)
+    # The base the workspace's records mint under, recorded when it was
+    # created. A manifest without one belongs to a workspace created before
+    # the switch, which keeps the old form (IRI ruling, decision 5).
+    record_base: str | None = None
 
     @field_validator("artifacts_dir", "dist_dir")
     @classmethod
     def _inside_the_workspace(cls, value: str, info: ValidationInfo) -> str:
         return check_relative_path(value, field=str(info.field_name))
+
+    @field_validator("record_base")
+    @classmethod
+    def _a_record_base(cls, value: str | None) -> str | None:
+        if value is not None:
+            base_prefix(value)
+        return value
 
 
 class SubmissionRelatedResource(BaseModel):
@@ -415,6 +427,17 @@ class LocalWorkspace:
         self.root = _as_path(root)
         self.manifest_path = self.root / WORKSPACE_FILENAME
 
+    def _record_base_to_keep(self) -> str | None:
+        """The ``record_base`` a manifest written over this workspace's keeps.
+
+        A workspace keeps the base it was created with: the one its manifest
+        records, or none (the old form) when it records none. A folder with no
+        manifest yet is a new workspace and records the base new ones take.
+        """
+        if not self.manifest_path.exists():
+            return DEFAULT_RECORD_BASE
+        return WorkspaceManifest.model_validate(_read_json(self.manifest_path)).record_base
+
     def _make_root(self) -> None:
         """Create the root folder, marking it when this call creates it.
 
@@ -456,6 +479,7 @@ class LocalWorkspace:
             comment=[
                 "Edit the resource JSON files directly, then run `battinfo workspace validate` and `battinfo workspace bundle` to build the submission package.",
             ],
+            record_base=DEFAULT_RECORD_BASE,
         )
         cell_doc = WorkspaceCellDocument(
             cell_spec=CellSpecificationAuthoring(
@@ -712,6 +736,7 @@ class LocalWorkspace:
         resolved_release = _coerce_release_info(release)
         resolved_zenodo = _coerce_zenodo_metadata(zenodo)
         resolved_comment = list(comment or [])
+        record_base = self._record_base_to_keep()
         self._make_root()
         artifact_relpath, access_url, download_url = self._resolve_distribution(
             dataset,
@@ -726,6 +751,7 @@ class LocalWorkspace:
             registry=resolved_registry,
             release=resolved_release,
             comment=resolved_comment,
+            record_base=record_base,
         )
         cell_doc = WorkspaceCellDocument(
             cell_spec=CellSpecificationAuthoring(
@@ -1379,7 +1405,9 @@ class LocalWorkspace:
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            scratch = Workspace(root=Path(tmpdir))
+            # Records without an IRI mint under the base the workspace recorded
+            # when it was created; one that recorded none keeps the old form.
+            scratch = Workspace(root=Path(tmpdir), base=manifest.record_base or OLD_FORM_BASE)
             scratch.cell_specs.append(cell_spec)
             scratch.cells.append(cell)
             scratch.tests.append(test)

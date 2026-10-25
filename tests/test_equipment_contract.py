@@ -27,9 +27,13 @@ from battinfo.validate.record import validate_record_report
 
 ROOT = Path(__file__).resolve().parents[1]
 
-SPEC_IRI = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-EQUIPMENT_IRI = re.compile(r"^https://w3id\.org/battinfo/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-CHANNEL_IRI = re.compile(r"^https://w3id\.org/battinfo/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+SPEC_IRI = re.compile(r"^https://w3id\.org/battinfo/id/1001/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+EQUIPMENT_IRI = re.compile(
+    r"^https://w3id\.org/battinfo/id/1001/equipment/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
+CHANNEL_IRI = re.compile(
+    r"^https://w3id\.org/battinfo/id/1001/channel/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
 
 
 def test_equipment_spec_mints_under_shared_spec_namespace() -> None:

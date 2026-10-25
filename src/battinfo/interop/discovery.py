@@ -54,6 +54,7 @@ from battinfo.api import (
 from battinfo.bundle import BatteryTestType, Cell, CellSpec, Dataset, Test
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 PathLike = str | Path
 
@@ -201,10 +202,11 @@ def _parse_electrolyte(name: str) -> dict[str, Any]:
 class _Builder:
     """Accumulates deduplicated specs and per-cell chains for one import."""
 
-    def __init__(self, source: str, source_file: str, validate: bool) -> None:
+    def __init__(self, source: str, source_file: str, validate: bool, base: str = DEFAULT_RECORD_BASE) -> None:
         self.source = source
         self.source_file = source_file
         self.validate = validate
+        self.base = base  # the base every IRI of the import is minted under
         self._materials: dict[str, dict[str, Any]] = {}  # name → record
         self._electrodes: dict[str, dict[str, Any]] = {}  # key → record
         self._electrolytes: dict[str, dict[str, Any]] = {}  # name → record
@@ -233,6 +235,7 @@ class _Builder:
             prop = {"specific_capacity": specific_capacity} if specific_capacity is not None else None
             rec = create_material_spec(
                 validate=self.validate,
+                base=self.base,
                 uid=_uid("discovery", "material", name),
                 name=name,
                 material_class="active_material",
@@ -280,6 +283,7 @@ class _Builder:
             rec = create_component_spec(
                 "electrode",
                 validate=self.validate,
+                base=self.base,
                 uid=_uid("discovery", "electrode", key),
                 name=name,
                 body=body,
@@ -310,6 +314,7 @@ class _Builder:
             rec = create_component_spec(
                 "electrolyte",
                 validate=self.validate,
+                base=self.base,
                 uid=_uid("discovery", "electrolyte", name),
                 name=name,
                 body=body,
@@ -358,7 +363,8 @@ class _Builder:
                 source_file=self.source_file,
                 citation=citation,
                 notes=notes,
-            )
+            ),
+            base=self.base,
         )
         if cell_properties:
             cell_record["properties"] = {**cell_record.get("properties", {}), **cell_properties}
@@ -373,7 +379,8 @@ class _Builder:
                     serial_number=cell_id,
                     source_type="lab",
                     citation=citation,
-                )
+                ),
+                base=self.base,
             )
         )
         cell_uid = cell_instance["cell_instance"]["id"]
@@ -392,7 +399,8 @@ class _Builder:
                         status="completed",
                         source_type="lab",
                         citation=citation,
-                    )
+                    ),
+                    base=self.base,
                 )
             )
             test_id = test["test"]["id"]
@@ -416,7 +424,8 @@ class _Builder:
                                 }
                             ],
                             citation=citation,
-                        )
+                        ),
+                        base=self.base,
                     )
                 )
 
@@ -509,8 +518,9 @@ def import_discovery_eln(
     *,
     limit: int | None = None,
     validate: bool = True,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> DiscoveryImportPackage:
-    """Import a Discovery-Benchmark RO-Crate (`.eln`) into a linked spec graph.
+    """Import a Discovery-Benchmark RO-Crate (`.eln`) into a linked spec graph, its IRIs minted under *base*.
 
     Parameters
     ----------
@@ -542,7 +552,7 @@ def import_discovery_eln(
         graph = loaded.get("@graph", []) if isinstance(loaded, Mapping) else []
         source_name = crate.name
     index: dict[str, Mapping[str, Any]] = {n["@id"]: n for n in graph if isinstance(n, Mapping) and "@id" in n}
-    builder = _Builder("eln", source_name, validate)
+    builder = _Builder("eln", source_name, validate, base)
 
     cells = [n for n in graph if isinstance(n, Mapping) and "CoinCell" in _node_types(n)]
     cells.sort(key=lambda n: n.get("@id", ""))
@@ -657,8 +667,9 @@ def import_discovery_xlsx(
     sheet: str = "Automated cells",
     limit: int | None = None,
     validate: bool = True,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> DiscoveryImportPackage:
-    """Import the flat Discovery-Benchmark workbook (one cell per row).
+    """Import the flat Discovery-Benchmark workbook (one cell per row), its IRIs minted under *base*.
 
     Produces material-spec + electrolyte-spec + cell-spec -> instance -> test per
     row. Unlike the RO-Crate path this emits no electrode-specs (the flat sheet
@@ -708,7 +719,7 @@ def import_discovery_xlsx(
         "anode_active": col("Active material", 1),
         "anode_capacity": col("Capacity"),
     }
-    builder = _Builder("xlsx", path.name, validate)
+    builder = _Builder("xlsx", path.name, validate, base)
 
     def cell_val(row: Sequence[Any], key: str) -> Any:
         i = ix.get(key)

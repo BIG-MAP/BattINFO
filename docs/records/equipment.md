@@ -238,7 +238,7 @@ record = create_channel(
 {
   "schema_version": "0.2.0",
   "channel": {
-    "id": "https://w3id.org/battinfo/channel/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/channel/7d9k-2m4p-8t3x-6nq5",
     "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
     "index": 1,
     "short_id": "7d9k2m",
@@ -263,7 +263,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:Thing",
     "prov:Entity"
   ],
-  "@id": "https://w3id.org/battinfo/channel/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/channel/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "MC3000-A/CH1",
   "schema:position": 1,
   "schema:isPartOf": {

@@ -199,7 +199,7 @@ class TestPackageBatch:
         pkg = package_batch(batch_dir, creators=CREATORS)
         assert pkg["entry_count"] == 3
         bundle_text = (Path(pkg["staging_dir"]) / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
-        test_ids = set(re.findall(r"https://w3id\.org/battinfo/test/[a-z0-9-]+", bundle_text))
+        test_ids = set(re.findall(r"https://w3id\.org/battinfo/id/1001/test/[a-z0-9-]+", bundle_text))
         assert len(test_ids) == 3, "undated same-kind tests in one cell collided onto one IRI"
 
     def test_bundle_json_parseable(self, tmp_path: Path) -> None:
@@ -314,7 +314,7 @@ class TestPackageBatch:
 
         def iris(staging: Path) -> list[str]:
             text = (staging / ZENODO_CELL_RECORD_FILENAME).read_text(encoding="utf-8")
-            return sorted(set(re.findall(r"https://w3id\.org/battinfo/(?:cell|test|dataset)/[a-z0-9-]+", text)))
+            return sorted(set(re.findall(r"https://w3id\.org/battinfo/id/1001/(?:cell|test|dataset)/[a-z0-9-]+", text)))
 
         cleaned = iris(Path(package_batch(batch, tmp_path / "cleaned", creators=CREATORS)["staging_dir"]))
         monkeypatch.setattr(contribution, "_without_local_urls", lambda record: record)
