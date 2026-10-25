@@ -74,10 +74,13 @@ def test_the_hosted_files_are_the_context_every_schema_at_its_id_and_the_vocabul
         assert by_path[relative].url == schema_id
         assert schema_id.startswith("https://w3id.org/battinfo/schema/")
 
-    vocabulary = by_path["assets/vocab/battinfo-records.ttl"]
-    assert vocabulary.url == "https://w3id.org/battinfo/batchId"
-    assert vocabulary.accept == "text/turtle"
-    assert len(files) == len(schemas) + 2
+    vocabulary = [f for f in files if f.path.as_posix() == "assets/vocab/battinfo-records.ttl"]
+    assert [f.url for f in vocabulary] == [
+        "https://w3id.org/battinfo/batchId",
+        "https://w3id.org/battinfo/vocab/records",
+    ]
+    assert {f.accept for f in vocabulary} == {"text/turtle"}
+    assert len(files) == len(schemas) + 3
 
 
 def test_the_vocabulary_is_asked_for_through_a_term_it_declares() -> None:

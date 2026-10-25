@@ -574,7 +574,7 @@ def _patch_intake_urls(intake: dict, file_map: dict[Path, str], dist: Path) -> d
 # ── Shipment init ──────────────────────────────────────────────────────────────
 
 BATCH_MANIFEST = "batch.yaml"
-_CELL_TYPE_IRI_PATTERN = record_iri_regex("cell", "spec")
+_CELL_TYPE_IRI_PATTERN = record_iri_regex("cell", "spec", both_shapes=True)
 
 
 def _resolve_cell_spec_for_batch(cell_spec: str) -> tuple[str, str, str, str]:

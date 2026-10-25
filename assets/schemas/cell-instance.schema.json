@@ -30,7 +30,7 @@
           "description": "Canonical IRI of this cell instance."
         },
         "cell_spec_id": {
-          "$ref": "#/$defs/SpecIri",
+          "$ref": "#/$defs/CellSpecRefIri",
           "description": "IRI of the cell spec this physical cell realizes."
         },
         "working_electrode_id": {
@@ -346,12 +346,12 @@
     },
     "CellIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
     },
     "DatasetIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
     },
     "DatasetLink": {
@@ -379,13 +379,14 @@
       },
       "description": "Link to a dataset record, with the role the dataset plays for this record."
     },
-    "SpecIri": {
+    "CellSpecRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a cell spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a product model as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "ElectrodeIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "Funding": {
       "type": "object",

@@ -11,7 +11,8 @@ the registry's own vendoring check compares them:
   ``application/ld+json``;
 * every JSON Schema under ``src/battinfo/data/schemas/``, at its ``$id``;
 * the record vocabulary, ``assets/vocab/battinfo-records.ttl``, which w3id
-  serves for each term it declares, such as https://w3id.org/battinfo/batchId.
+  serves for each term it declares, such as https://w3id.org/battinfo/batchId,
+  and at its own ontology IRI, https://w3id.org/battinfo/vocab/records.
 
 ``.github/workflows/release.yml`` runs it before an upload, and a mismatch
 blocks only a final release tag. With ``--release-terms`` it checks instead
@@ -91,6 +92,9 @@ VOCABULARY_PATH = Path("assets/vocab/battinfo-records.ttl")
 # batchId is a term the vocabulary declares and the v1 context maps (batch_id),
 # so the IRI keeps resolving if the registry ever routes declared terms only.
 VOCABULARY_URL = "https://w3id.org/battinfo/batchId"
+# The vocabulary's own ontology IRI (BIG-MAP/BattINFO#481), which the registry
+# also answers with a 303 to /vocab/battinfo-records.ttl.
+VOCABULARY_ONTOLOGY_URL = "https://w3id.org/battinfo/vocab/records"
 
 ONTOLOGY_PATH = Path("battinfo.ttl")
 ONTOLOGY_IRI = "https://w3id.org/battinfo"
@@ -198,6 +202,7 @@ def hosted_files(root: Path = ROOT) -> list[HostedFile]:
         url = schema_id if isinstance(schema_id, str) else ""
         files.append(HostedFile(url, "application/schema+json, application/json", path.relative_to(root)))
     files.append(HostedFile(VOCABULARY_URL, "text/turtle", VOCABULARY_PATH))
+    files.append(HostedFile(VOCABULARY_ONTOLOGY_URL, "text/turtle", VOCABULARY_PATH))
     return files
 
 

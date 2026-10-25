@@ -35,12 +35,13 @@ const JSONLD_KEYWORDS = new Set([
   "@nest", "@none", "@prefix", "@included", "@json", "@protected", "@import",
 ]);
 
-// The canonical identifier shape our schemas enforce:
+// The canonical identifier shapes our schemas enforce:
 //   https://w3id.org/battinfo/<segment>/<uid>   uid = 4×4 Crockford-ish groups.
+//   https://w3id.org/battinfo/id/<prefix>/<segment>/<uid>   prefix = 4+ digits.
 // A spec's described individual is skolemized as <spec-IRI>#described — the
 // one legal fragment on a canonical IRI.
 const UID = "[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}";
-const BATTINFO_IRI = new RegExp(`^https://w3id\\.org/battinfo/[a-z-]+/${UID}(?:#described)?$`);
+const BATTINFO_IRI = new RegExp(`^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?[a-z-]+/${UID}(?:#described)?$`);
 const BATTINFO_PREFIX = "https://w3id.org/battinfo/";
 
 /** URLs we can resolve offline from the vendored context. */

@@ -641,7 +641,7 @@
           "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri",
+          "$ref": "#/$defs/OrganizationRefIri",
           "description": "Canonical BattINFO organization IRI linking this manufacturer to its organization record."
         },
         "name": {
@@ -674,7 +674,7 @@
           "description": "JSON-LD type discriminator."
         },
         "id": {
-          "$ref": "#/$defs/OrganizationIri",
+          "$ref": "#/$defs/OrganizationRefIri",
           "description": "Canonical BattINFO organization IRI linking this brand to its organization record."
         },
         "name": {
@@ -703,28 +703,28 @@
     },
     "SpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
-    "OrganizationIri": {
+    "OrganizationRefIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "ElectrodeSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "ElectrolyteSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "SeparatorSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "HousingSpecIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
     },
     "Funding": {
       "type": "object",

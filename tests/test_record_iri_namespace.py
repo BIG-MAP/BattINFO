@@ -2,9 +2,10 @@
 
 The old form ``https://w3id.org/battinfo/{segment}/{uid}`` and the prefixed
 form ``https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}`` are built and
-recognised in one module. Nothing mints the prefixed form yet and every
-recogniser still accepts the old form only, so the tests below also pin that
-the recognisers moved onto the module accept and refuse what they did before.
+recognised in one module. Nothing mints the prefixed form yet, but every
+recogniser accepts both shapes (BIG-MAP/BattINFO#478), and the ones that read a
+reference to a product model or a material also accept a shared thing,
+``https://w3id.org/battinfo/id/{uid}``.
 """
 
 from __future__ import annotations
@@ -226,37 +227,96 @@ def test_a_pattern_takes_several_segments_and_needs_one() -> None:
 
 def test_a_regex_has_no_groups_so_a_json_schema_pattern_can_take_it() -> None:
     assert re.compile(record_iri_regex("spec", "cell", both_shapes=True)).groups == 0
+    assert re.compile(record_iri_regex("spec", "cell", both_shapes=True, things=True)).groups == 0
+
+
+def test_a_pattern_with_things_also_takes_a_shared_thing() -> None:
+    pattern = record_iri_pattern("organization", both_shapes=True, things=True)
+    organization = f"https://w3id.org/battinfo/organization/{UID}"
+    for iri in (organization, f"https://w3id.org/battinfo/id/1001/organization/{UID}", THING):
+        assert pattern.fullmatch(iri), iri
+    for iri in (
+        f"https://w3id.org/battinfo/id/1001/{UID}",
+        f"https://w3id.org/battinfo/id/id/{UID}",
+        f"https://w3id.org/battinfo/{UID}",
+        f"{THING}/",
+        f"https://w3id.org/battinfo/id/{UID.upper()}",
+        OLD,
+    ):
+        assert not pattern.fullmatch(iri), iri
+    old_form_and_thing = record_iri_pattern("organization", things=True)
+    assert old_form_and_thing.fullmatch(organization) and old_form_and_thing.fullmatch(THING)
+    assert not old_form_and_thing.fullmatch(f"https://w3id.org/battinfo/id/1001/organization/{UID}")
 
 
 _UID_TAIL = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
 
 
-@pytest.mark.parametrize(
-    ("module", "name", "pattern"),
-    [
-        ("battinfo.api._shared", "SPEC_IRI_RE", rf"^https://w3id\.org/battinfo/spec/{_UID_TAIL}$"),
-        ("battinfo.api._shared", "CELL_IRI_RE", rf"^https://w3id\.org/battinfo/cell/{_UID_TAIL}$"),
-        ("battinfo.api._shared", "DATASET_IRI_RE", rf"^https://w3id\.org/battinfo/dataset/{_UID_TAIL}$"),
-        ("battinfo.api._shared", "TEST_IRI_RE", rf"^https://w3id\.org/battinfo/test/{_UID_TAIL}$"),
-        (
-            "battinfo.api._shared",
-            "MATERIAL_SPEC_IRI_RE",
-            rf"^https://w3id\.org/battinfo/(?:spec|material-spec)/{_UID_TAIL}$",
-        ),
-        ("battinfo.api._shared", "MATERIAL_IRI_RE", rf"^https://w3id\.org/battinfo/material/{_UID_TAIL}$"),
-        ("battinfo.validate.references", "SPEC_IRI_RE", rf"^https://w3id\.org/battinfo/spec/{_UID_TAIL}$"),
-        ("battinfo.validate.references", "CELL_IRI_RE", rf"^https://w3id\.org/battinfo/cell/{_UID_TAIL}$"),
-        ("battinfo.validate.references", "DATASET_IRI_RE", rf"^https://w3id\.org/battinfo/dataset/{_UID_TAIL}$"),
-        ("battinfo.validate.references", "TEST_IRI_RE", rf"^https://w3id\.org/battinfo/test/{_UID_TAIL}$"),
-    ],
-)
-def test_the_recognisers_built_in_the_module_are_the_expressions_they_were(
-    module: str, name: str, pattern: str
+_RECOGNISERS = [
+    ("battinfo.api._shared", "SPEC_IRI_RE", ("spec",)),
+    ("battinfo.api._shared", "CELL_IRI_RE", ("cell",)),
+    ("battinfo.api._shared", "DATASET_IRI_RE", ("dataset",)),
+    ("battinfo.api._shared", "TEST_IRI_RE", ("test",)),
+    ("battinfo.api._shared", "MATERIAL_SPEC_IRI_RE", ("spec", "material-spec")),
+    ("battinfo.api._shared", "MATERIAL_IRI_RE", ("material",)),
+    ("battinfo.validate.references", "SPEC_IRI_RE", ("spec",)),
+    ("battinfo.validate.references", "CELL_IRI_RE", ("cell",)),
+    ("battinfo.validate.references", "DATASET_IRI_RE", ("dataset",)),
+    ("battinfo.validate.references", "TEST_IRI_RE", ("test",)),
+]
+# Recognisers of a reference to a product model or a material, which also take a shared thing.
+_REFERENCE_RECOGNISERS = [
+    ("battinfo.api._shared", "CELL_SPEC_REF_IRI_RE", ("spec",)),
+    ("battinfo.api._shared", "MATERIAL_SPEC_REF_IRI_RE", ("spec", "material-spec")),
+]
+
+
+def _accepted_and_refused(segment: str) -> tuple[list[str], list[str]]:
+    """IRIs under *segment* that a recogniser of both shapes accepts, and IRIs it refuses."""
+    other = "dataset" if segment != "dataset" else "cell"
+    accepted = [
+        f"https://w3id.org/battinfo/{segment}/{UID}",
+        f"https://w3id.org/battinfo/id/1001/{segment}/{UID}",
+        f"https://w3id.org/battinfo/id/1002/{segment}/{UID}",
+        f"https://w3id.org/battinfo/id/12345/{segment}/{UID}",
+    ]
+    refused = [
+        f"https://w3id.org/battinfo/id/1/{segment}/{UID}",
+        f"https://w3id.org/battinfo/id/abc/{segment}/{UID}",
+        f"https://w3id.org/battinfo/{other}/{UID}",
+        f"https://w3id.org/battinfo/id/1001/{other}/{UID}",
+        f"https://w3id.org/battinfo/{segment}/{UID[:-1]}I",
+        f"https://w3id.org/battinfo/{segment}/{UID}/",
+        f"https://w3id.org/battinfo/id/1001/{segment}/{UID}#described",
+    ]
+    return accepted, refused
+
+
+@pytest.mark.parametrize(("module", "name", "segments"), _RECOGNISERS)
+def test_every_recogniser_accepts_both_shapes_and_nothing_else(
+    module: str, name: str, segments: tuple[str, ...]
 ) -> None:
-    """Widening what validates comes with the schema erratum; until then each pattern is the one it replaced."""
     import importlib
 
-    assert getattr(importlib.import_module(module), name).pattern == pattern
+    recogniser = getattr(importlib.import_module(module), name)
+    assert recogniser.pattern == record_iri_regex(*segments, both_shapes=True)
+    for segment in segments:
+        accepted, refused = _accepted_and_refused(segment)
+        assert all(recogniser.fullmatch(iri) for iri in accepted), accepted
+        assert not any(recogniser.fullmatch(iri) for iri in refused), refused
+    assert not recogniser.fullmatch(THING), "a record's own id is never a shared thing"
+
+
+@pytest.mark.parametrize(("module", "name", "segments"), _REFERENCE_RECOGNISERS)
+def test_a_reference_recogniser_also_takes_a_shared_thing(module: str, name: str, segments: tuple[str, ...]) -> None:
+    import importlib
+
+    recogniser = getattr(importlib.import_module(module), name)
+    assert recogniser.pattern == record_iri_regex(*segments, both_shapes=True, things=True)
+    for segment in segments:
+        accepted, refused = _accepted_and_refused(segment)
+        assert all(recogniser.fullmatch(iri) for iri in [*accepted, THING]), accepted
+        assert not any(recogniser.fullmatch(iri) for iri in refused), refused
 
 
 def test_the_api_uid_tail_is_the_module_uid_grammar_unchanged() -> None:
@@ -266,20 +326,22 @@ def test_the_api_uid_tail_is_the_module_uid_grammar_unchanged() -> None:
 
 
 @pytest.mark.parametrize("family", ["electrode", "separator", "current-collector", "equipment", "organization"])
-def test_the_component_recognisers_accept_and_refuse_what_they_did(family: str) -> None:
+def test_the_component_recognisers_accept_both_shapes(family: str) -> None:
     from battinfo.api._shared import _component_iri_re, _spec_iri_re
 
-    old_component = re.compile(rf"^https://w3id\.org/battinfo/{re.escape(family)}/{_UID_TAIL}$")
-    old_spec = re.compile(rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family)}-spec)/{_UID_TAIL}$")
-    candidates = [
-        record_iri(segment, uid, prefix)
-        for segment in (family, f"{family}-spec", "spec", "cell")
-        for uid in (UID, "0000-0000-0000-0000")
-        for prefix in (None, "1001")
-    ] + [f"https://w3id.org/battinfo/{family}/{UID}/", f"https://w3id.org/battinfo/{family}/{UID.upper()}"]
-    for iri in candidates:
-        assert bool(_component_iri_re(family).fullmatch(iri)) is bool(old_component.fullmatch(iri)), iri
-        assert bool(_spec_iri_re(f"{family}-spec").fullmatch(iri)) is bool(old_spec.fullmatch(iri)), iri
+    for prefix in (None, "1001", "1002"):
+        assert _component_iri_re(family).fullmatch(record_iri(family, UID, prefix))
+        assert _spec_iri_re(f"{family}-spec").fullmatch(record_iri("spec", UID, prefix))
+        assert _spec_iri_re(f"{family}-spec").fullmatch(record_iri(f"{family}-spec", UID, prefix))
+        assert not _component_iri_re(family).fullmatch(record_iri("cell", UID, prefix))
+        assert not _spec_iri_re(f"{family}-spec").fullmatch(record_iri(family, UID, prefix))
+    for iri in (
+        f"https://w3id.org/battinfo/{family}/{UID}/",
+        f"https://w3id.org/battinfo/{family}/{UID.upper()}",
+        THING,
+    ):
+        assert not _component_iri_re(family).fullmatch(iri)
+        assert not _spec_iri_re(f"{family}-spec").fullmatch(iri)
 
 
 # ── No other module builds or matches a record IRI ──────────────────────────
@@ -479,8 +541,7 @@ def test_a_new_record_beside_a_saved_one_takes_the_prefix(tmp_path: Path, monkey
 def _rerun_beside_a_prefixed_spec(tmp_path: Path) -> tuple[Any, dict[str, list[Any]]]:
     """A cell and its spec saved, the spec's file rewritten under /id/1001/, and a new session minting them again.
 
-    The save itself waits for the v1 schemas to accept the prefixed form, so
-    the second session is only finalized: its records carry the IRIs a save
+    The second session is only finalized: its records carry the IRIs a save
     would write them under (``_finalized_records``).
     """
     import battinfo

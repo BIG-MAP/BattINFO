@@ -44,6 +44,35 @@ def test_battinfo_vocab_covers_every_emitted_term() -> None:
     )
 
 
+def test_the_vocabulary_is_its_own_ontology_and_keeps_its_retired_terms() -> None:
+    """One owl:Ontology, https://w3id.org/battinfo/vocab/records, defining every term (BIG-MAP/BattINFO#481).
+
+    The root, https://w3id.org/battinfo/, is the BattINFO ontology's address,
+    so the vocabulary does not claim it. Its terms stay at the root; the
+    retired ones are owl:deprecated, with dcterms:isReplacedBy where known.
+    """
+    import rdflib
+    from rdflib.namespace import DCTERMS, OWL, RDF, RDFS
+
+    gen = _load("gen_battinfo_vocab")
+    graph = rdflib.Graph().parse(ROOT / "assets" / "vocab" / "battinfo-records.ttl", format="turtle")
+    ontology = rdflib.URIRef("https://w3id.org/battinfo/vocab/records")
+    assert set(graph.subjects(RDF.type, OWL.Ontology)) == {ontology}
+
+    terms = {s for s in graph.subjects(RDFS.isDefinedBy, None)}
+    assert {str(o) for o in graph.objects(None, RDFS.isDefinedBy)} == {str(ontology)}
+    assert all(str(term).startswith("https://w3id.org/battinfo/") and "/" not in str(term)[26:] for term in terms)
+    deprecated = {s for s in graph.subjects(OWL.deprecated, rdflib.Literal(True))}
+    current = terms - deprecated
+    assert {str(t)[26:] for t in current} == set(gen.placeholder_terms()) | set(gen.RESIDUE)
+    assert len(current) == 57
+    assert {str(t)[26:] for t in deprecated} == set(gen.RETIRED)
+    assert len(deprecated) == 39
+    replaced = {str(s)[26:]: str(o) for s, o in graph.subject_objects(DCTERMS.isReplacedBy)}
+    assert replaced == {term: iri for term, iri in gen.RETIRED.items() if iri}
+    assert len(replaced) == 9
+
+
 def test_emmo_labels_cover_every_mapped_term() -> None:
     gen = _load("gen_emmo_labels")
 

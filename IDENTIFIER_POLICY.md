@@ -308,7 +308,7 @@ The shared documents served under `https://w3id.org/battinfo/`, the records JSON
 
 Both are frozen from the `v0.8.0` tag of BattINFO, its first release on PyPI. Consumers may cache them indefinitely and rely on their meaning staying the same for the lifetime of the URL. The first version of this section, of 30 July 2026, already declared them frozen, yet both changed in place until the release; the [erratum](#erratum-changes-made-in-place-before-080) below lists every such change.
 
-The `v1` records context is append-only from the tag. It defines 705 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
+The `v1` records context is append-only from the tag. It defines 707 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
 
 - A term that `v1` defines in a release MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed, and `v1` MUST NOT gain a JSON-LD keyword such as `@vocab`, which would change how every document expands. For the terms of 0.8.0, `scripts/gen_context.py` refuses to write such a change and `tests/test_context_v1_freeze.py` fails on one. For the terms of later releases, the same test compares `v1` with the copy at each release tag the commit contains; CI fetches the tags for it. `PRE_RELEASE_CORRECTIONS`, the table in that script that corrected terms before the tag, is closed and no longer applied.
 - A release MAY add terms. A release whose records use a new term ships only after the registry serves the context that defines it.
@@ -326,7 +326,7 @@ So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descri
 
 #### Erratum: changes made in place before 0.8.0
 
-When this section was first written, on 30 July 2026, it named "the 373 terms defined by the `v1` records context" as frozen. The registry had then served the complete `v1` context at its URL since 22 July (a smaller context before that) and the schemas since early July. It went on re-syncing both from BattINFO until 12 October 2026, and the release itself corrects more. This erratum lists every change made after 30 July 2026, up to the `v0.8.0` tag, to the definition of an existing term or to what an existing schema accepts. It leaves out new terms (`v1` grows from 373 to 705), new schema files, and edits to descriptions, titles, comments and annotations, such as the withdrawn Battery Pass profile and the IEC wording of `size_code`. It was compiled by comparing the context at each commit that changed it, and the schemas at each registry re-sync, with the copies 0.8.0 ships.
+When this section was first written, on 30 July 2026, it named "the 373 terms defined by the `v1` records context" as frozen. The registry had then served the complete `v1` context at its URL since 22 July (a smaller context before that) and the schemas since early July. It went on re-syncing both from BattINFO until 12 October 2026, and the release itself corrects more. This erratum lists every change made after 30 July 2026, up to the `v0.8.0` tag, to the definition of an existing term or to what an existing schema accepts. It leaves out new terms (`v1` grows from 373 to 707), new schema files, and edits to descriptions, titles, comments and annotations, such as the withdrawn Battery Pass profile and the IEC wording of `size_code`. It was compiled by comparing the context at each commit that changed it, and the schemas at each registry re-sync, with the copies 0.8.0 ships.
 
 A record published before a change keeps the expansion it was rendered with until the registry renders it again with the 0.8.0 copies.
 
@@ -386,9 +386,21 @@ These changes only accept more, so a record that validated before still does:
 - A cell spec's `reference_electrode` takes an inline electrode as well as a string, and a parameter set no longer needs `claims` (4 October).
 - A parameter set's `id` and `supersedes` take a `dataset/` IRI as well as a `spec/` one (12 October, PR #436). New parameter sets mint under `dataset/`, and a `spec/` IRI remains valid for a record minted before (section 6.3).
 - Enumerations gained values: the housing part type `vent` (31 July), the material classes `thickener` and `dispersant` (8 September), the test and test-protocol kinds `pitt` and `cyclic_voltammetry`, and the termination quantity `soc` (4 October).
+- Record IRIs take both shapes that the IRI ruling of 22 October allows (issues #476 and #478). Every pattern that reads a record IRI, in 32 schema files, accepts `https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}`, with a prefix of four or more digits, as well as `https://w3id.org/battinfo/{segment}/{uid}`, because records of other publishers appear as parents. The patterns are now built by `battinfo.namespace` (`scripts/sync_schema_iri_patterns.py`).
+- A field that references a maker, a product model or a material also accepts a shared thing, `https://w3id.org/battinfo/id/{uid}` (issue #478): the `id` of an organization given as a manufacturer, supplier, brand or parent organization, a cell's or a parameter set's `cell_spec_id`, and `material_spec_id`, `active_material_spec_id` and `base_material_id`. A record's own `id` does not. These fields refer to `OrganizationRefIri`, `CellSpecRefIri` and `MaterialSpecRefIri`, split from the definition of a record's own `id` where one served both.
+- An electrolyte's `salt` and a person's `affiliation` each take one object or a list of them (25 October, PR #471).
+- The `manufacturer` and `supplier` of an inline component (electrode, coating, tab, current collector, electrolyte, salt, material, mixture, separator) take an organization object (`modules/common/organization-ref.schema.json`) as well as a name, and an `Organization` takes `same_as`, an external IRI such as a ROR ID (PR #471).
+- An inline electrode (`modules/components/electrode.schema.json`) may consist of its `material` alone, such as a lithium-metal counter electrode (PR #471).
 - Optional properties were added to most schemas, `license` and `handle` among them. A record written before uses none of them. The 0.8.0 changelog describes each.
 
 The first version of this section allowed additive, backward-compatible changes within a version, so the changes in this last list did not break it; they are listed so that the record is complete.
+
+##### The records vocabulary
+
+The records vocabulary, `assets/vocab/battinfo-records.ttl`, which the registry serves for each of its terms, changed in two ways before the tag (issue #481):
+
+- It declares its own ontology IRI, `https://w3id.org/battinfo/vocab/records`. It declared `https://w3id.org/battinfo/`, the address of the BattINFO ontology, so two documents claimed one address. Its 57 term IRIs are unchanged; each term's `rdfs:isDefinedBy` names the new IRI.
+- The 39 terms that earlier served copies declared and later dropped are declared again, as `owl:deprecated`, so that records and deposits that use them still find a definition. Nine name the EMMO term that replaced them with `dcterms:isReplacedBy`, `ambientTemperature` (AmbientCelsiusTemperature) among them.
 
 ## 12. Governance Scope
 

@@ -385,3 +385,19 @@ def test_staging_dir_created_if_absent(tmp_path: Path) -> None:
     assert not staging.exists()
     build_zenodo_package(record, staging, _make_file_sets(tmp_path / "src", 1))
     assert staging.exists()
+
+
+@pytest.mark.parametrize(
+    "entity_id",
+    [
+        "https://w3id.org/battinfo/spec/NM6T-CEPH-FRAX-1MK1",
+        "https://w3id.org/battinfo/spec/nm6t-ceph-frax-1mk1#described",
+        "https://w3id.org/battinfo/id/1001/spec/nm6t-ceph-frax-1mk1",
+    ],
+)
+def test_a_battinfo_iri_is_kept_as_given_not_reseeded(entity_id: str) -> None:
+    """A string under the BattINFO root is an IRI: kept as given for the schema to judge, never hashed into a new one."""
+    from battinfo import publication
+
+    assert publication._cell_spec_iri(entity_id) == entity_id
+    assert publication._cell_specification_iri(entity_id) == entity_id

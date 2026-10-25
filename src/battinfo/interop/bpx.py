@@ -51,7 +51,7 @@ from battinfo._bpx_layout import (
 )
 from battinfo._jcs import _from_numpy, canonical_json_bytes
 from battinfo._jcs import loads as _loads_json
-from battinfo.namespace import BATTINFO_ROOT
+from battinfo.namespace import parse_record_iri, parse_thing_iri
 
 PathLike = str | Path
 
@@ -2147,7 +2147,7 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
     kind = resolve_material_kind(value) if isinstance(value, str) else None
     if kind is not None:
         return {"material_kind": kind}
-    if isinstance(value, str) and value.startswith(BATTINFO_ROOT):
+    if isinstance(value, str) and (parse_record_iri(value) is not None or parse_thing_iri(value) is not None):
         return {"material_spec_id": value}
     raise ValueError(
         f"materials[{side!r}] is {value!r}, which is neither a curated material kind nor a "

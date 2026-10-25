@@ -41,10 +41,11 @@ from battinfo._util import _as_path, _citation_url_value
 from battinfo.api._records import _assert_id_matches_uid, save_record
 from battinfo.api._shared import (
     CELL_IRI_RE,
+    CELL_SPEC_REF_IRI_RE,
     DATASET_IRI_RE,
     DEFAULT_REGISTRATION_SOURCE_ROOT,
     DUPLICATE_POLICY_ERROR,
-    MATERIAL_SPEC_IRI_RE,
+    MATERIAL_SPEC_REF_IRI_RE,
     REGISTER_MODE_CREATE_ONLY,
     SPEC_IRI_RE,
     PathLike,
@@ -150,12 +151,12 @@ def _resolved_target(
             raise ValueError(f"unknown material kind {value!r}. Valid kinds: {', '.join(material_kind_keys())}.")
         return field, resolved
     if field == "material_spec_id":
-        if not MATERIAL_SPEC_IRI_RE.fullmatch(str(value)):
+        if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(str(value)):
             raise ValueError(
                 "material_spec_id must be a canonical material-spec IRI (https://w3id.org/battinfo/spec/{uid})."
             )
         return field, str(value)
-    if not SPEC_IRI_RE.fullmatch(str(value)):
+    if not CELL_SPEC_REF_IRI_RE.fullmatch(str(value)):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     return field, str(value)
 
@@ -342,7 +343,7 @@ def _checked_parts(parts: Any, default_provenance_class: str | None) -> list[dic
                     )
                 out["material_kind"] = resolved
             else:
-                if not MATERIAL_SPEC_IRI_RE.fullmatch(str(spec)):
+                if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(str(spec)):
                     raise ValueError(
                         f"parts[{index}] ({name}): material_spec_id must be a canonical "
                         "material-spec IRI (https://w3id.org/battinfo/spec/{uid})."
@@ -808,7 +809,7 @@ def _parameter_file_body(
             "describes."
         )
     link_field = links[0]
-    if link_field == "cell_spec_id" and not SPEC_IRI_RE.fullmatch(str(cell_spec_id)):
+    if link_field == "cell_spec_id" and not CELL_SPEC_REF_IRI_RE.fullmatch(str(cell_spec_id)):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if link_field == "cell_instance_id" and not CELL_IRI_RE.fullmatch(str(cell_instance_id)):
         raise ValueError("cell_instance_id must match https://w3id.org/battinfo/cell/{uid}.")

@@ -304,7 +304,7 @@ SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
 }
 
 _PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en", "handle": "probe-group/probe-sample"}
-_NAMESPACE_RE = re.compile(r"battinfo/\(\?:([a-z-]+)|battinfo/([a-z-]+)/")
+_SEGMENT_RE = re.compile(r"[a-z][a-z0-9-]*")
 
 
 def _load_schema(relative: str) -> dict:
@@ -380,9 +380,13 @@ def sample_value(schema: dict, root: dict, name: str = "", base: str = "", depth
     if schema.get("pattern"):
         if name in _PATTERN_SAMPLES:
             return _PATTERN_SAMPLES[name]
-        match = _NAMESPACE_RE.search(schema["pattern"])
-        if match:
-            return f"https://w3id.org/battinfo/{match.group(1) or match.group(2)}/{UID}"
+        # A record IRI pattern: a record of the first segment it names (id/ is the
+        # branch of prefixed records and shared things, never a segment).
+        pattern = re.compile(schema["pattern"])
+        for segment in _SEGMENT_RE.findall(schema["pattern"].partition("battinfo/")[2]):
+            candidate = f"https://w3id.org/battinfo/{segment}/{UID}"
+            if segment != "id" and pattern.fullmatch(candidate):
+                return candidate
         return None  # unsamplable pattern; treated as a sweep gap, not a parity gap
     return "probe"
 

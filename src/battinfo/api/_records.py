@@ -24,6 +24,7 @@ from battinfo.api._resolver import publish_record
 from battinfo.api._shared import (
     CELL_IRI_RE,
     CELL_SPEC_IRI_RE,
+    CELL_SPEC_REF_IRI_RE,
     DATASET_IRI_RE,
     DEFAULT_LIBRARY_AGGREGATE_JSONLD,
     DEFAULT_LIBRARY_CELL_TYPES_DIR,
@@ -903,7 +904,7 @@ def resolve_cell_spec_id(
     demo fleet.
     """
     if cell_spec_id is not None:
-        if not CELL_SPEC_IRI_RE.fullmatch(cell_spec_id):
+        if not CELL_SPEC_REF_IRI_RE.fullmatch(cell_spec_id):
             raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
         return cell_spec_id
 
@@ -1365,7 +1366,7 @@ def _mint_cell_spec_record(spec: CellSpec, *, source_root: PathLike | None = Non
 
 
 def _record_from_cell_instance(instance: Cell) -> dict[str, Any]:
-    if instance.cell_spec_id is None or not CELL_SPEC_IRI_RE.fullmatch(instance.cell_spec_id):
+    if instance.cell_spec_id is None or not CELL_SPEC_REF_IRI_RE.fullmatch(instance.cell_spec_id):
         raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     for dataset_id in instance.dataset_ids:
         if not DATASET_IRI_RE.fullmatch(dataset_id):

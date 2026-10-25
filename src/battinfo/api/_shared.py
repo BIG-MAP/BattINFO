@@ -41,16 +41,23 @@ TestKind = BatteryTestType
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
-SPEC_IRI_RE = record_iri_pattern("spec")
+# Every recogniser takes both record shapes, the old form and /id/{prefix}/
+# (IRI ruling of 22 October 2026, BIG-MAP/BattINFO#476).
+SPEC_IRI_RE = record_iri_pattern("spec", both_shapes=True)
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = record_iri_pattern("cell")
-DATASET_IRI_RE = record_iri_pattern("dataset")
-TEST_IRI_RE = record_iri_pattern("test")
+CELL_IRI_RE = record_iri_pattern("cell", both_shapes=True)
+DATASET_IRI_RE = record_iri_pattern("dataset", both_shapes=True)
+TEST_IRI_RE = record_iri_pattern("test", both_shapes=True)
 # spec/ is canonical; the superseded material-spec/ form stays accepted as
 # input so pre-consolidation records keep loading (IDENTIFIER_POLICY 6.1).
-MATERIAL_SPEC_IRI_RE = record_iri_pattern("spec", "material-spec")
-MATERIAL_IRI_RE = record_iri_pattern("material")
+MATERIAL_SPEC_IRI_RE = record_iri_pattern("spec", "material-spec", both_shapes=True)
+MATERIAL_IRI_RE = record_iri_pattern("material", both_shapes=True)
+# A field that references a product model (a cell's spec) or a material (a
+# material spec) also takes a shared thing, https://w3id.org/battinfo/id/{uid},
+# which only the registry mints. A record's own id never does.
+CELL_SPEC_REF_IRI_RE = record_iri_pattern("spec", both_shapes=True, things=True)
+MATERIAL_SPEC_REF_IRI_RE = record_iri_pattern("spec", "material-spec", both_shapes=True, things=True)
 
 # The battinfo package root (this file lives in the api/ subpackage, one level down).
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -443,11 +450,11 @@ _UID_TAIL = UID_PATTERN
 
 
 def _component_iri_re(namespace: str) -> re.Pattern[str]:
-    return record_iri_pattern(namespace)
+    return record_iri_pattern(namespace, both_shapes=True)
 
 
 def _spec_iri_re(family_namespace: str) -> re.Pattern[str]:
     """Spec IRIs mint under the shared spec/ namespace (IDENTIFIER_POLICY 6.1);
     the superseded per-family '{family}-spec/' form stays accepted as input so
     records minted before the consolidation keep loading (never break an IRI)."""
-    return record_iri_pattern("spec", family_namespace)
+    return record_iri_pattern("spec", family_namespace, both_shapes=True)

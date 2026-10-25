@@ -14,7 +14,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "Canonical BattINFO IRI of the cell spec (spec/ namespace)."
     },
     "name": {
@@ -123,7 +123,7 @@
         },
         "material_spec_id": {
           "type": "string",
-          "pattern": "^https://w3id\\.org/battinfo/(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec|electrode-spec|separator-spec|electrolyte-spec|current-collector-spec|housing-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
           "description": "IRI of the material-spec this separator base material realizes."
         },
         "structure": {

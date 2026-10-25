@@ -17,6 +17,16 @@ explicit, closed inventory:
       domain-battery/electrochemistry releases).
   (b) RESIDUE terms — hand-curated, genuinely-local record-plumbing terms the
       code still emits, each with a hand-written rdfs:comment. Currently empty.
+  (c) RETIRED terms — terms an earlier served copy declared and a later one
+      dropped. Published records and deposits still use them, so each stays
+      declared, as owl:deprecated, with dcterms:isReplacedBy where the term
+      that replaced it is known.
+
+The vocabulary is an ontology of its own, https://w3id.org/battinfo/vocab/records
+(BIG-MAP/BattINFO#481), under the reserved vocab segment, and every term says
+rdfs:isDefinedBy it. The terms themselves stay at the root,
+https://w3id.org/battinfo/<term>, whose bare address belongs to the BattINFO
+ontology (battinfo.ttl).
 
 There is deliberately NO hash-namespace (ns#) section: served artifacts no
 longer expand anything against https://w3id.org/battinfo/ns#. Every predicate
@@ -91,11 +101,73 @@ READER_FALLBACK_TERMS = {
 # (semantic.property_unmapped) and documented as non-canonical.
 DYNAMIC_MINT_FILES: set[str] = set()
 
+# The vocabulary's own ontology IRI. The root, https://w3id.org/battinfo/, is the
+# address of the BattINFO ontology, so the vocabulary does not claim it.
+ONTOLOGY_IRI = "https://w3id.org/battinfo/vocab/records"
+
 # ── Static section: genuinely-local residue terms ─────────────────────────────
 # term -> hand-written rdfs:comment. Add a term here ONLY if it is truly local
 # record plumbing that no standard vocabulary covers; the honesty check forces
 # every emitted term through either this dict or the context placeholders.
 RESIDUE: dict[str, str] = {}
+
+# ── Retired terms ─────────────────────────────────────────────────────────────
+# term -> the IRI of the term that replaced it, or None when none is recorded.
+# Each was declared by a served copy of this vocabulary and dropped by a later
+# one; the registry's case table (battinfo_registry.api.w3id_cases) keeps the
+# same list. They stay declared, as owl:deprecated, because published records
+# and deposits use them, the Flores deposits on Zenodo among them
+# (ambientTemperature). profile is left out: it is a reserved segment, and no
+# record used it. A term is never both retired and current.
+_ELECTROCHEMISTRY = "https://w3id.org/emmo/domain/electrochemistry#electrochemistry_"
+RETIRED: dict[str, str | None] = {
+    # Replaced by EMMO terms (the erratum to IDENTIFIER_POLICY 11.1 lists the v1 terms).
+    "operatingTemperatureMin": _ELECTROCHEMISTRY + "08a73f4b_3242_4356_af24_68ba0bf66d51",  # PR #331
+    "operatingTemperatureMax": _ELECTROCHEMISTRY + "e999bd7d_93ad_47fb_8d8d_dd667e4ef553",  # PR #331
+    "powerCapability": _ELECTROCHEMISTRY + "4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",  # MaximumPower, PR #415
+    "maximumPower": _ELECTROCHEMISTRY + "4e6c4e9d_64cb_4c24_a0f3_5b4146ebbeb0",  # MaximumPower, PR #415
+    "powerEnergyRatio": _ELECTROCHEMISTRY + "917660a7_2d98_4564_9ce7_6b5d1087de2c",  # PR #415
+    "roundTripEnergyEfficiency": _ELECTROCHEMISTRY + "c413d29a_b814_4d88_8db0_0fd0171cff11",  # PR #415
+    "capacityThresholdExhaustion": _ELECTROCHEMISTRY + "02dc55b3_18a1_438e_bee0_ab77670cb2d5",  # PR #415
+    "chargingTime": _ELECTROCHEMISTRY + "a3d54f83_4dc2_4833_acc2_c8652702d9b7",  # PR #415
+    "ambientTemperature": _ELECTROCHEMISTRY + "abd08921_6f3b_4a48_811e_7685c58aec0b",  # PR #465
+    # Served from 2026-07-08 until the registry's re-vendor of 2026-07-18. No
+    # replacement recorded.
+    **dict.fromkeys(
+        (
+            "Battery",
+            "BatteryCell",
+            "BatteryMetadataRecord",
+            "BatteryModule",
+            "BatteryPack",
+            "BatterySystem",
+            "Cell",
+            "affectedProperty",
+            "citationDOI",
+            "columns",
+            "deviationCategory",
+            "doi",
+            "hasBattery",
+            "hasMeasurement",
+            "instrumentName",
+            "mass",
+            "nominalCapacity",
+            "nominalVoltage",
+            "protocolName",
+            "provenance",
+            "retrievedAt",
+            "sourceFile",
+            "sourceType",
+            "sourceURL",
+            "status",
+            "testProtocol",
+            "testedCell",
+            "typicalValue",
+            "valueText",
+            "workflowVersion",
+        )
+    ),
+}
 
 
 def _collect_context_aliases(context: dict, out: dict[str, list[str]]) -> None:
@@ -186,6 +258,12 @@ def check_honesty(placeholders: dict[str, list[str]]) -> None:
             "section 14) or, if genuinely local, add them to RESIDUE with a "
             "hand-written comment."
         )
+    revived = sorted((set(placeholders) | set(RESIDUE)) & set(RETIRED))
+    if revived:
+        raise SystemExit(
+            f"gen_battinfo_vocab: term(s) {revived} are both current and RETIRED. "
+            "A term the code uses again is current: take it out of RETIRED."
+        )
     rogue_dynamic = dynamic_files - DYNAMIC_MINT_FILES
     if rogue_dynamic:
         raise SystemExit(
@@ -200,13 +278,18 @@ def label_of(term: str) -> str:
     return words[0].upper() + words[1:]
 
 
+def _kind(term: str) -> str:
+    return "owl:Class" if term[0].isupper() else "rdf:Property"
+
+
 def build() -> str:
     placeholders = placeholder_terms()
     check_honesty(placeholders)
     lines = [
         "# GENERATED by scripts/gen_battinfo_vocab.py - do not edit.",
         "# battinfo: (slash) - closed inventory of placeholder terms awaiting",
-        f"# upstream EMMO terms, plus a hand-curated residue (currently {len(RESIDUE)}).",
+        f"# upstream EMMO terms, plus a hand-curated residue (currently {len(RESIDUE)}),",
+        f"# and {len(RETIRED)} retired terms, kept as owl:deprecated.",
         "# battinfo: never carries domain semantics (IDENTIFIER_POLICY.md s.14);",
         "# the placeholder block may only SHRINK as upstream EMMO releases drain",
         "# it. Unmapped-property fallback terms (warned at emit time as",
@@ -219,7 +302,7 @@ def build() -> str:
         "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .",
         "@prefix dcterms: <http://purl.org/dc/terms/> .",
         "",
-        "<https://w3id.org/battinfo/> a owl:Ontology ;",
+        f"<{ONTOLOGY_IRI}> a owl:Ontology ;",
         '    rdfs:label "BattINFO record-layer vocabulary"@en ;',
         '    rdfs:comment "Placeholder terms used by canonical BattINFO record '
         "exports (JSON-LD) while the corresponding EMMO domain terms are pending "
@@ -229,7 +312,7 @@ def build() -> str:
         "",
     ]
     for term in sorted(placeholders):
-        kind = "owl:Class" if term[0].isupper() else "rdf:Property"
+        kind = _kind(term)
         keys = ", ".join(sorted(placeholders[term]))
         comment = (
             f"Placeholder for record key(s) '{keys}' pending an upstream EMMO "
@@ -240,16 +323,31 @@ def build() -> str:
             f"battinfo:{term} a {kind} ;",
             f'    rdfs:label "{label_of(term)}"@en ;',
             f'    rdfs:comment "{comment}"@en ;',
-            "    rdfs:isDefinedBy <https://w3id.org/battinfo/> .",
+            f"    rdfs:isDefinedBy <{ONTOLOGY_IRI}> .",
             "",
         ]
     for term in sorted(RESIDUE):
-        kind = "owl:Class" if term[0].isupper() else "rdf:Property"
         lines += [
-            f"battinfo:{term} a {kind} ;",
+            f"battinfo:{term} a {_kind(term)} ;",
             f'    rdfs:label "{label_of(term)}"@en ;',
             f'    rdfs:comment "{RESIDUE[term]}"@en ;',
-            "    rdfs:isDefinedBy <https://w3id.org/battinfo/> .",
+            f"    rdfs:isDefinedBy <{ONTOLOGY_IRI}> .",
+            "",
+        ]
+    for term in sorted(RETIRED):
+        replacement = RETIRED[term]
+        comment = (
+            "Retired record-layer term, replaced by the term dcterms:isReplacedBy names"
+            if replacement
+            else "Retired record-layer term with no recorded replacement"
+        ) + "; it stays declared because published records use it."
+        lines += [
+            f"battinfo:{term} a {_kind(term)} ;",
+            f'    rdfs:label "{label_of(term)}"@en ;',
+            f'    rdfs:comment "{comment}"@en ;',
+            "    owl:deprecated true ;",
+            *([f"    dcterms:isReplacedBy <{replacement}> ;"] if replacement else []),
+            f"    rdfs:isDefinedBy <{ONTOLOGY_IRI}> .",
             "",
         ]
     return "\n".join(lines)
@@ -259,7 +357,7 @@ def main() -> int:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(build(), encoding="utf-8", newline="\n")
     n = len(placeholder_terms()) + len(RESIDUE)
-    print(f"Wrote {OUT} ({n} battinfo: terms)")
+    print(f"Wrote {OUT} ({n} battinfo: terms and {len(RETIRED)} retired ones)")
     return 0
 
 

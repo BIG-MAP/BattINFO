@@ -149,7 +149,7 @@
         "parentOrganization": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OrganizationIri"
+              "$ref": "#/$defs/OrganizationRefIri"
             },
             {
               "type": "object",
@@ -159,7 +159,7 @@
               ],
               "properties": {
                 "id": {
-                  "$ref": "#/$defs/OrganizationIri",
+                  "$ref": "#/$defs/OrganizationRefIri",
                   "description": "Canonical IRI of the parent organization record."
                 },
                 "name": {
@@ -206,7 +206,7 @@
         "parent_organization": {
           "anyOf": [
             {
-              "$ref": "#/$defs/OrganizationIri"
+              "$ref": "#/$defs/OrganizationRefIri"
             },
             {
               "type": "object",
@@ -216,7 +216,7 @@
               ],
               "properties": {
                 "id": {
-                  "$ref": "#/$defs/OrganizationIri",
+                  "$ref": "#/$defs/OrganizationRefIri",
                   "description": "Canonical IRI of the parent organization record."
                 },
                 "name": {
@@ -291,8 +291,13 @@
   "$defs": {
     "OrganizationIri": {
       "type": "string",
-      "pattern": "^https://w3id\\.org/battinfo/organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
       "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "OrganizationRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
     },
     "ShortId": {
       "type": "string",
