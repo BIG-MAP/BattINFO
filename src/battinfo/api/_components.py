@@ -44,6 +44,7 @@ from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
 )
+from battinfo.namespace import record_iri
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 # A spec/ IRI the instance templates build with when no spec is given; the field is
@@ -296,7 +297,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         dashed_uid = (
             _normalized_dashed_uid(draft.uid) if draft.uid is not None else _material_spec_identity_uid(draft, kind_key)
         )
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = record_iri("spec", dashed_uid)
 
     spec: dict[str, Any] = {
         "id": entity_id,
@@ -370,7 +371,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
 
             lot = draft.lot_id or draft.batch_id or draft.name or ""
             dashed_uid = stable_uid(_material_identity_seed(draft.material_spec_id, lot))
-        entity_id = f"https://w3id.org/battinfo/material/{dashed_uid}"
+        entity_id = record_iri("material", dashed_uid)
 
     material: dict[str, Any] = {
         "id": entity_id,
@@ -598,7 +599,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
             if draft.uid is not None
             else _electrode_spec_identity_uid(draft, kind_key)
         )
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = record_iri("spec", dashed_uid)
 
     if draft.active_material_spec_id is not None and not MATERIAL_SPEC_IRI_RE.fullmatch(draft.active_material_spec_id):
         raise ValueError("active_material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -705,7 +706,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
                     piece_id=draft.piece_id,
                 )
             )
-        entity_id = f"https://w3id.org/battinfo/electrode/{dashed_uid}"
+        entity_id = record_iri("electrode", dashed_uid)
 
     electrode: dict[str, Any] = {
         "id": entity_id,
@@ -1337,7 +1338,7 @@ def _record_from_component_spec(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/spec/{dashed_uid}"
+        entity_id = record_iri("spec", dashed_uid)
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     if handle is not None:
@@ -1409,7 +1410,7 @@ def _record_from_component_instance(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/{base_namespace}/{dashed_uid}"
+        entity_id = record_iri(base_namespace, dashed_uid)
 
     instance: dict[str, Any] = {
         "id": entity_id,

@@ -4520,13 +4520,17 @@ def import_protocol(
     """
     import hashlib
 
-    from battinfo.entities import stable_uid
+    from battinfo.entities import is_dashed_uid, stable_uid
     from battinfo.interop import (
         import_aurora_unicycler,
         import_bmgen_jsonld,
         import_pybamm_experiment,
         import_ucp,
     )
+    from battinfo.namespace import record_iri
+
+    if uid is not None and not is_dashed_uid(uid):
+        raise typer.BadParameter("uid must be a dashed uid, xxxx-xxxx-xxxx-xxxx.", param_hint="--uid")
 
     raw = input_path.read_bytes()
     sha256 = hashlib.sha256(raw).hexdigest()
@@ -4576,7 +4580,7 @@ def import_protocol(
 
     # Deterministic identity: the same file imports to the same IRI.
     dashed = uid or stable_uid(f"test-protocol-import::{sha256}")
-    spec.id = f"https://w3id.org/battinfo/spec/{dashed}"
+    spec.id = record_iri("spec", dashed)
     record = spec.to_record()
 
     for note in spec.comment or []:

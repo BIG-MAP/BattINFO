@@ -93,6 +93,7 @@ from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
+from battinfo.namespace import BATTINFO_ROOT, record_base, record_iri
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -1458,12 +1459,7 @@ def _replaced_legacy_parameter_sets(record_sets: dict[str, list[dict]]) -> dict[
         if not isinstance(body, dict):
             continue
         old, new = body.get("supersedes"), body.get("id")
-        if (
-            isinstance(old, str)
-            and old.startswith("https://w3id.org/battinfo/spec/")
-            and isinstance(new, str)
-            and new != old
-        ):
+        if isinstance(old, str) and old.startswith(record_base() + "spec/") and isinstance(new, str) and new != old:
             replaced[old] = new
     return replaced
 
@@ -1616,7 +1612,7 @@ def _unresolved_record_references(doc: dict) -> list[str]:
             refs.extend(about if isinstance(about, list) else [about])
         for ref in refs:
             iri = ref.get("@id") if isinstance(ref, dict) else None
-            if isinstance(iri, str) and iri.startswith("https://w3id.org/battinfo/") and iri not in present:
+            if isinstance(iri, str) and iri.startswith(BATTINFO_ROOT) and iri not in present:
                 missing.add(iri)
     return sorted(missing)
 
@@ -11212,7 +11208,7 @@ class AuthoringWorkspace:
             return body["id"]
         if isinstance(spec, str) and spec.strip():
             text = spec.strip()
-            if text.startswith("https://w3id.org/battinfo/"):
+            if text.startswith(BATTINFO_ROOT):
                 return text
             found = self._material_specs_by_ref.get(text.lower())
             if found is not None:
@@ -11381,7 +11377,7 @@ class AuthoringWorkspace:
             return str(body["id"])
         if isinstance(spec, str) and spec.strip():
             text = spec.strip()
-            if text.startswith("https://w3id.org/battinfo/"):
+            if text.startswith(BATTINFO_ROOT):
                 return text
             found = self._electrode_specs_by_ref.get(text.lower())
             if found is not None:
@@ -11900,7 +11896,7 @@ class AuthoringWorkspace:
                 )
             pinned = iri.strip()
         if uid is not None:
-            from_uid = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(str(uid))}"
+            from_uid = record_iri("test", _normalized_dashed_uid(str(uid)))
             if pinned is not None and pinned != from_uid:
                 raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
             pinned = from_uid
@@ -13067,7 +13063,7 @@ def _draft_spec_iri(draft_id: Any, draft_uid: Any, source: str) -> str | None:
             )
         pinned = text
     if draft_uid:
-        from_uid = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(str(draft_uid))}"
+        from_uid = record_iri("spec", _normalized_dashed_uid(str(draft_uid)))
         if pinned is not None and pinned != from_uid:
             raise ValueError(f"{source}: 'id' and 'uid' name different specs; keep one.")
         pinned = from_uid

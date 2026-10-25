@@ -72,6 +72,7 @@ It needs Python 3.11 to 3.14 and is tested on Linux and Windows. `pip install ba
 - **A Zenodo deposit is checked before it exists.** `ws.zenodo()` checks a draft as it checks a publish, and refuses a deposit without creators, with metadata Zenodo rejects, or with files hosted on R2 unless `archive_hosted_files=True`. A sandbox deposit never writes its DOI or file URLs into records, and `ws.submit()` records a DOI only from a deposit published on zenodo.org that holds the record.
 - **The CLI batch path uploads to the Zenodo sandbox only.** `battinfo batch upload` and `battinfo push` need `--sandbox` and a sandbox token. Publish to zenodo.org with `ws.zenodo()`.
 - **Battery Pass output is withdrawn.** The `batterypass` mapping target and validation profile are removed, and `battinfo map` exits 2 and writes nothing for a record it cannot map, where it used to write an empty document. The profile schema stays at its URL, marked withdrawn.
+- **`battinfo import-protocol --uid` takes a dashed uid only.** A malformed uid is refused with a usage error, where it used to end up in the record's IRI.
 - **Dependencies.** The core needs pydantic 2.11 or later and rdflib 7.6 or later, and pyshacl 0.40.1 holds rdflib below 8. `battinfo[processing]` installs the batterydf converter from PyPI.
 
 ### Deprecations removed in 0.9.0

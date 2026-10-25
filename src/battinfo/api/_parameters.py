@@ -60,6 +60,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import legacy_stable_uid, seed_text, stable_uid
+from battinfo.namespace import record_iri
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 _PARAMETER_KEY_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -69,7 +70,7 @@ _TARGET_FIELDS = ("material_kind", "material_spec_id", "cell_spec_id")
 # Every parameter set, of either flavour, is a dataset (IDENTIFIER_POLICY 6.3).
 # Records minted before 2026-10-11 live under spec/; a replacement names one in
 # supersedes, so that field takes either namespace.
-_PARAMETER_SET_IRI_BASE = "https://w3id.org/battinfo/dataset/"
+_PARAMETER_SET_SEGMENT = "dataset"
 
 
 def _checked_claim(
@@ -272,7 +273,7 @@ def _seeded_parameter_set_uid(body: Mapping[str, Any], *, legacy: bool) -> str |
 
 
 def _legacy_uid_reused_message(entity_id: str, legacy_uid: str) -> str:
-    legacy_iri = f"https://w3id.org/battinfo/spec/{legacy_uid}"
+    legacy_iri = record_iri("spec", legacy_uid)
     return (
         f"{entity_id} reuses the uid of {legacy_iri}, the IRI this parameter set had under spec/ "
         "before parameter sets moved to dataset/ on 2026-10-11. A uid is never reused, not even "
@@ -389,13 +390,13 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
             # Minted under spec/ before 2026-10-11, from the seed of the time: it
             # stays bound to its fingerprint (the legacy-namespace warning is
             # the validator's, not this rule's).
-            expected = f"https://w3id.org/battinfo/spec/{_legacy_parameter_file_uid(fingerprint)}"
+            expected = record_iri("spec", _legacy_parameter_file_uid(fingerprint))
             recipe = (
                 "stable_uid('parameter-set-file:' + parameters_sha256) for a parameter file "
                 "minted under spec/ before 2026-10-11"
             )
         else:
-            expected = f"{_PARAMETER_SET_IRI_BASE}{parameter_file_uid(fingerprint)}"
+            expected = record_iri(_PARAMETER_SET_SEGMENT, parameter_file_uid(fingerprint))
             recipe = "stable_uid('parameter-file:' + parameters_sha256)"
         if body.get("id") != expected:
             issues.append(
@@ -741,12 +742,12 @@ def _claim_batch_body(
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
+        entity_id = record_iri(_PARAMETER_SET_SEGMENT, dashed_uid)
     else:
         # Deterministic identity: the same (target, scope side, name) always
         # mints the same IRI, so re-importing a source is idempotent.
         dashed_uid = claim_batch_uid(target_value, scope, name, electrode_polarity)
-        entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
+        entity_id = record_iri(_PARAMETER_SET_SEGMENT, dashed_uid)
     if id is not None or uid is not None:
         # A pinned uid may not be the one this batch had under spec/.
         legacy_uid = _seeded_claim_batch_uid(_LEGACY_CLAIM_BATCH_SEED, target_value, scope, name, electrode_polarity)
@@ -819,11 +820,11 @@ def _parameter_file_body(
             "file's RFC 8785 canonical form (battinfo.interop.bpx_content_digest)."
         )
     dashed_uid = parameter_file_uid(parameters_sha256)
-    entity_id = f"{_PARAMETER_SET_IRI_BASE}{dashed_uid}"
+    entity_id = record_iri(_PARAMETER_SET_SEGMENT, dashed_uid)
     given = (
         id
         if id is not None
-        else (f"{_PARAMETER_SET_IRI_BASE}{_normalized_dashed_uid(uid)}" if uid is not None else None)
+        else (record_iri(_PARAMETER_SET_SEGMENT, _normalized_dashed_uid(uid)) if uid is not None else None)
     )
     legacy_uid = _legacy_parameter_file_uid(parameters_sha256)
     if given is not None and str(given).rsplit("/", 1)[-1] == legacy_uid:
@@ -916,7 +917,7 @@ def supersede_parameter_set(record: Mapping[str, Any], *, validate: bool = True)
             f"cannot mint a dataset/ IRI for {old_id}: a claim batch needs its name and one of "
             "material_kind, material_spec_id or cell_spec_id, a parameter file its parameters_sha256."
         )
-    new_body: dict[str, Any] = {"id": f"{_PARAMETER_SET_IRI_BASE}{uid}", "short_id": uid.replace("-", "")[:6]}
+    new_body: dict[str, Any] = {"id": record_iri(_PARAMETER_SET_SEGMENT, uid), "short_id": uid.replace("-", "")[:6]}
     for key, value in body.items():
         if key in ("id", "short_id", "supersedes"):
             continue

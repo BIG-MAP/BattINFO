@@ -83,6 +83,7 @@ from battinfo.entities import (
     stable_uid,
     test_identity_seed,
 )
+from battinfo.namespace import record_iri, same_record
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
@@ -173,9 +174,10 @@ _IRI_NAMESPACE: dict[str, str] = {
 }
 
 
-def _entity_iri(entity_type: str, seed: str) -> str:
+def _entity_iri(entity_type: str, seed: str, *, prefix: str | None = None) -> str:
+    """The IRI *seed* mints, in the old form unless a publisher *prefix* is given (``namespace.record_iri``)."""
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
+    return record_iri(namespace, _stable_uid(seed), prefix)
 
 
 def _legacy_entity_iri(entity_type: str, seed: str) -> str:
@@ -184,7 +186,7 @@ def _legacy_entity_iri(entity_type: str, seed: str) -> str:
     Only for finding a record saved under it; nothing new is minted with it.
     """
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"https://w3id.org/battinfo/{namespace}/{legacy_stable_uid(seed)}"
+    return record_iri(namespace, legacy_stable_uid(seed))
 
 
 def _iri_uid(iri: str) -> str:
@@ -212,8 +214,8 @@ def _cell_spec_fields(manufacturer: Any, model: Any, format: Any, chemistry: Any
     }
 
 
-def _cell_spec_iri(uid: str) -> str:
-    return f"https://w3id.org/battinfo/{_IRI_NAMESPACE['cell-spec']}/{uid}"
+def _cell_spec_iri(uid: str, *, prefix: str | None = None) -> str:
+    return record_iri(_IRI_NAMESPACE["cell-spec"], uid, prefix)
 
 
 # Fields that vary across runs and must NOT influence a content-derived
@@ -2641,7 +2643,9 @@ class Workspace:
         keeps it, and only the others are re-minted from their content; so a
         record keeps its IRI whether or not a save ran before the record that
         collides with it was added. A record alone on an IRI that is saved
-        already has its own record and keeps it.
+        already has its own record and keeps it. A record is saved under its
+        IRI in either form, the old form or ``/id/1001/`` (``namespace.same_record``),
+        and keeps the form it is saved in whichever form this pass minted.
 
         A record saved under a seed of before 0.8.0 keeps that IRI too.
         *legacy_ids* holds, for each record, the IRIs the rule of before 0.8.0
@@ -2658,6 +2662,7 @@ class Workspace:
         roots = [Path(root) for root in record_roots]
         if not roots:
             return held
+        record_key = ENTITY_BY_TYPE[entity_type].record_key
         groups: dict[str, list[int]] = {}
         for index, item in enumerate(finalized):
             if item.id is not None:
@@ -2669,10 +2674,17 @@ class Workspace:
             uid = _iri_uid(iri)
             if not any(save_entity_path(entity_type, uid, root).is_file() for root in roots):
                 continue
+            doc = saved_record_document(entity_type, uid, roots)
+            saved_iri = doc[record_key].get("id") if doc is not None else None
+            if not same_record(saved_iri, iri):
+                doc = None
+            elif saved_iri != iri:
+                # Saved under the other form of this IRI: the record keeps the IRI it is saved under.
+                for index in members:
+                    finalized[index].id = saved_iri
             if len(members) == 1:
                 own_record.add(members[0])
                 continue
-            doc = saved_record_document(entity_type, uid, roots)
             match = next(
                 (index for index in members if doc is not None and self._is_saved_record(finalized[index], doc)),
                 None,
@@ -2681,7 +2693,6 @@ class Workspace:
                 held[match] = True
         if legacy_ids is None or is_legacy_record is None:
             return held
-        record_key = ENTITY_BY_TYPE[entity_type].record_key
         taken = {item.id for item in finalized if item.id is not None}
         pending = [
             index
@@ -2709,9 +2720,10 @@ class Workspace:
                     ][:1]
                 if len(matches) != 1:
                     continue
-                finalized[matches[0]].id = legacy
+                saved_iri = doc[record_key]["id"]  # the legacy IRI, in the form it is saved under
+                finalized[matches[0]].id = saved_iri
                 held[matches[0]] = True
-                taken.add(legacy)
+                taken.add(saved_iri)
         return held
 
     def _is_saved_record(self, item: Any, saved: Mapping[str, Any]) -> bool:

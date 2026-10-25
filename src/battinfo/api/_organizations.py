@@ -42,6 +42,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import seed_text, stable_uid
+from battinfo.namespace import record_iri
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 ORGANIZATION_IRI_RE = _component_iri_re("organization")
@@ -139,12 +140,12 @@ def _record_from_organization(
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = f"https://w3id.org/battinfo/organization/{dashed_uid}"
+        entity_id = record_iri("organization", dashed_uid)
     else:
         # Deterministic identity from the normalized name: the same
         # organization re-created anywhere mints the same IRI.
         dashed_uid = stable_uid(organization_identity_seed(name))
-        entity_id = f"https://w3id.org/battinfo/organization/{dashed_uid}"
+        entity_id = record_iri("organization", dashed_uid)
 
     body: dict[str, Any] = {
         "id": entity_id,

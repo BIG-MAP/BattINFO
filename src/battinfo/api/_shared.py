@@ -22,11 +22,13 @@ from battinfo.bundle import (
 )
 from battinfo.entities import (
     ENTITY_KINDS,
+    PLACEHOLDER_UID,
     entity_id_from_doc,
     iter_entity_files,
     kind_for_doc,
 )
 from battinfo.entities import UID_DASHED_RE as UID_DASHED_RE  # battinfo.api re-exports it
+from battinfo.namespace import UID_PATTERN, record_iri, record_iri_pattern
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.publication import validate_publication_report
@@ -39,20 +41,16 @@ TestKind = BatteryTestType
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
-SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+SPEC_IRI_RE = record_iri_pattern("spec")
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-TEST_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+CELL_IRI_RE = record_iri_pattern("cell")
+DATASET_IRI_RE = record_iri_pattern("dataset")
+TEST_IRI_RE = record_iri_pattern("test")
 # spec/ is canonical; the superseded material-spec/ form stays accepted as
 # input so pre-consolidation records keep loading (IDENTIFIER_POLICY 6.1).
-MATERIAL_SPEC_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-MATERIAL_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+MATERIAL_SPEC_IRI_RE = record_iri_pattern("spec", "material-spec")
+MATERIAL_IRI_RE = record_iri_pattern("material")
 
 # The battinfo package root (this file lives in the api/ subpackage, one level down).
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -81,8 +79,8 @@ DEFAULT_PUBLISH_SOURCES = tuple(EXAMPLES_ROOT / kind.subdir for kind in ENTITY_K
 DEFAULT_INDEX_SOURCE_ROOT = EXAMPLES_ROOT
 DEFAULT_REGISTRATION_SOURCE_ROOT = Path("examples")
 TEMPLATE_UID = "0000000000000000"
-TEMPLATE_CELL_SPEC_ID = "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
-TEMPLATE_CELL_ID = "https://w3id.org/battinfo/cell/0000-0000-0000-0000"
+TEMPLATE_CELL_SPEC_ID = record_iri("spec", PLACEHOLDER_UID)
+TEMPLATE_CELL_ID = record_iri("cell", PLACEHOLDER_UID)
 
 REGISTER_MODE_CREATE_ONLY = "create_only"
 REGISTER_MODE_UPSERT = "upsert"
@@ -441,15 +439,15 @@ def _relative_or_absolute(path: Path, root: Path) -> str:
 # follow one spec+instance shape that reuses an existing embedded holder. These generic
 # functions are parameterized by family; thin per-family wrappers are generated below.
 
-_UID_TAIL = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
+_UID_TAIL = UID_PATTERN
 
 
 def _component_iri_re(namespace: str) -> re.Pattern[str]:
-    return re.compile(rf"^https://w3id\.org/battinfo/{re.escape(namespace)}/{_UID_TAIL}$")
+    return record_iri_pattern(namespace)
 
 
 def _spec_iri_re(family_namespace: str) -> re.Pattern[str]:
     """Spec IRIs mint under the shared spec/ namespace (IDENTIFIER_POLICY 6.1);
     the superseded per-family '{family}-spec/' form stays accepted as input so
     records minted before the consolidation keep loading (never break an IRI)."""
-    return re.compile(rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family_namespace)})/{_UID_TAIL}$")
+    return record_iri_pattern("spec", family_namespace)

@@ -56,6 +56,17 @@ def test_import_protocol_sniffs_pybamm_text(tmp_path: Path) -> None:
     assert record["artifacts"][0]["format"] == "pybamm-experiment"
 
 
+def test_import_protocol_refuses_a_malformed_uid(tmp_path: Path) -> None:
+    source = tmp_path / "protocol.yaml"
+    source.write_text(UCP_YAML, encoding="utf-8")
+    out = tmp_path / "record.json"
+    result = CliRunner().invoke(app, ["import-protocol", str(source), "--uid", "not-a-uid", "--out", str(out)])
+    assert result.exit_code == 2
+    assert result.exception is None or isinstance(result.exception, SystemExit)
+    assert "uid must be a dashed uid, xxxx-xxxx-xxxx-xxxx." in " ".join(result.output.split())
+    assert not out.exists()
+
+
 def test_import_protocol_rejects_unknown_format(tmp_path: Path) -> None:
     source = tmp_path / "protocol.yaml"
     source.write_text(UCP_YAML, encoding="utf-8")
