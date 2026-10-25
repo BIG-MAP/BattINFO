@@ -1273,7 +1273,7 @@ Schema: [`material.schema.json`](https://w3id.org/battinfo/schema/material.schem
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | → MaterialIri | yes |  |
-| `material_spec_id` | → MaterialSpecIri | yes | IRI of the material-spec this physical lot realizes. |
+| `material_spec_id` | → MaterialSpecRefIri | yes | IRI of the material-spec this physical lot realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical lot (e.g. a lab/inventory id). |
 | `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |

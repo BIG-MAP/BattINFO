@@ -2455,7 +2455,7 @@ The `cell_instance` block:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | → CellIri | yes | Canonical IRI of this cell instance. |
-| `cell_spec_id` | → SpecIri | yes | IRI of the cell spec this physical cell realizes. |
+| `cell_spec_id` | → CellSpecRefIri | yes | IRI of the cell spec this physical cell realizes. |
 | `working_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell. |
 | `counter_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes. |
 | `name` | string |  | Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number. |
