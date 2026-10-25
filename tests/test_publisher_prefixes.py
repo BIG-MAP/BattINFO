@@ -40,8 +40,11 @@ def _packaged(name: str) -> Any:
 
 def test_the_register_ships_with_the_package_and_loads() -> None:
     assert PUBLISHER_PREFIXES == {
-        "1000": PublisherPrefix("1000", "BattINFO", False, None, date(2026, 10, 22)),
-        "1001": PublisherPrefix("1001", "Battery Genome registry", True, None, date(2026, 10, 22)),
+        "1000": PublisherPrefix("1000", "BattINFO", False, None, None, date(2026, 10, 22)),
+        "1001": PublisherPrefix("1001", "Battery Genome registry", True, None, None, date(2026, 10, 22)),
+        "1002": PublisherPrefix(
+            "1002", "Battery Data Commons", True, None, "https://batterydatacommons.org/", date(2026, 10, 25)
+        ),
     }
 
 
@@ -71,8 +74,29 @@ def test_the_prefix_constants_are_in_the_register() -> None:
 
 
 def test_an_allocation_date_that_is_not_text_is_refused() -> None:
-    entry = {"prefix": "1000", "holder": "BattINFO", "records": False, "resolver": None, "allocated": 20261022}
+    entry = {
+        "prefix": "1000",
+        "holder": "BattINFO",
+        "records": False,
+        "resolver": None,
+        "landing": None,
+        "allocated": 20261022,
+    }
     with pytest.raises(ValueError, match="allocation date"):
+        namespace._load_prefix_register({"prefixes": [entry]})
+
+
+@pytest.mark.parametrize("landing", ["http://batterydatacommons.org/", "https://batterydatacommons.org", 42])
+def test_a_landing_host_that_is_not_an_https_url_ending_in_a_slash_is_refused(landing: object) -> None:
+    entry = {
+        "prefix": "1000",
+        "holder": "BattINFO",
+        "records": False,
+        "resolver": None,
+        "landing": landing,
+        "allocated": "2026-10-22",
+    }
+    with pytest.raises(ValueError, match="landing host"):
         namespace._load_prefix_register({"prefixes": [entry]})
 
 
@@ -99,7 +123,7 @@ def test_no_record_is_minted_under_a_prefix_with_records_false() -> None:
 # ── A number nobody holds ───────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize("prefix", ["1002", "9999", "12345"])
+@pytest.mark.parametrize("prefix", ["1003", "9999", "12345"])
 def test_an_unknown_prefix_has_no_entry_but_still_builds_and_parses(prefix: str) -> None:
     """Whether a publisher holds a prefix is the registry's question; the SDK builds and reads any number."""
     assert publisher_prefix(prefix) is None

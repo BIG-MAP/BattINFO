@@ -16,7 +16,7 @@
   "$defs": {
     "entry": {
       "type": "object",
-      "required": ["prefix", "holder", "records", "resolver", "allocated"],
+      "required": ["prefix", "holder", "records", "resolver", "landing", "allocated"],
       "additionalProperties": false,
       "properties": {
         "prefix": {
@@ -37,6 +37,11 @@
           "description": "The https URL the publisher's addresses are served from, or null when it has no resolver of its own.",
           "type": ["string", "null"],
           "pattern": "^https://[^\\s/]+/\\S*$"
+        },
+        "landing": {
+          "description": "The https host of the publisher's own record pages, ending in /, or null. A browser that opens one of the publisher's record IRIs is sent to the record's page only when that page is on this host.",
+          "type": ["string", "null"],
+          "pattern": "^https://[^\\s/]+/(\\S*/)?$"
         },
         "allocated": {
           "description": "The date the number was given out (YYYY-MM-DD).",

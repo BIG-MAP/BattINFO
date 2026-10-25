@@ -216,10 +216,11 @@ A legacy `spec/` parameter-set IRI is accepted read-only (ruling 2026-10-12). Th
 
 A publisher prefix is a four-digit number held by one minting authority, such as a registry. The publisher mints records under `https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}` and defines its own terms under `https://w3id.org/battinfo/def/{prefix}/`. A prefix is a number, never a name, so renaming a publisher never moves its addresses.
 
-- The register is `src/battinfo/data/namespace/prefixes.json`. Each entry gives the number, its holder, whether records are minted under it, the resolver that serves it (or none) and the date it was allocated.
+- The register is `src/battinfo/data/namespace/prefixes.json`. Each entry gives the number, its holder, whether records are minted under it, the resolver that serves it (or none), the host of its own record pages (or none) and the date it was allocated.
 - The maintainers of the battinfo entry on w3id.org allocate prefixes. A publisher asks for one by pull request to this repository.
 - Numbers are given out in sequence from 1000. A number is never reused or passed to another holder.
-- 1000 is BattINFO's own and holds definitions only: no record is minted under `id/1000/`. 1001 is the Battery Genome registry.
+- 1000 is BattINFO's own and holds definitions only: no record is minted under `id/1000/`. 1001 is the Battery Genome registry, and 1002 is Battery Data Commons.
+- A publisher may register the host of its own record pages. A browser that opens one of its record IRIs is then sent to that record's page, but only when the page is on the registered host; for any other publisher, and any other address, the resolver shows its own page with a link out.
 - A prefix records who minted an IRI and never changes afterwards. If a publisher closes, its prefix is pointed at an archived copy of what it published, so its IRIs keep resolving.
 - A publisher that runs its own resolver also gets its own line in the w3id rules, so its addresses do not depend on another publisher's resolver.
 

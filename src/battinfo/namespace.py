@@ -104,13 +104,17 @@ class PublisherPrefix(NamedTuple):
 
     *records* is false for a prefix that holds definitions only, and
     *resolver* is ``None`` when the BattINFO registry dispatches the
-    publisher's addresses rather than a resolver of its own.
+    publisher's addresses rather than a resolver of its own. *landing* is
+    the host of the publisher's own record pages, or ``None``: a browser that
+    opens one of its record IRIs is sent to the record's page only when that
+    page is on this host.
     """
 
     prefix: str
     holder: str
     records: bool
     resolver: str | None
+    landing: str | None
     allocated: date
 
 
@@ -122,16 +126,23 @@ def _register_entry(entry: Any) -> PublisherPrefix:
     if not isinstance(entry, Mapping) or set(entry) != set(PublisherPrefix._fields):
         raise ValueError(f"a prefix register entry has the fields {', '.join(PublisherPrefix._fields)}: {entry!r}")
     prefix, holder, records, resolver = entry["prefix"], entry["holder"], entry["records"], entry["resolver"]
+    landing = entry["landing"]
     if not isinstance(prefix, str) or not _REGISTER_PREFIX_RE.fullmatch(prefix):
         raise ValueError(f"register prefix {prefix!r} is not a four-digit number")
     if not isinstance(holder, str) or not holder.strip() or not isinstance(records, bool):
         raise ValueError(f"register prefix {prefix} needs a holder and a true or false records")
     if resolver is not None and not (isinstance(resolver, str) and resolver.startswith("https://")):
         raise ValueError(f"register prefix {prefix} has a resolver that is not an https URL: {resolver!r}")
+    if landing is not None and not (
+        isinstance(landing, str) and landing.startswith("https://") and landing.endswith("/")
+    ):
+        raise ValueError(
+            f"register prefix {prefix} has a landing host that is not an https URL ending in /: {landing!r}"
+        )
     allocated = entry["allocated"]
     if not isinstance(allocated, str):
         raise ValueError(f"register prefix {prefix} needs its allocation date as YYYY-MM-DD: {allocated!r}")
-    return PublisherPrefix(prefix, holder, records, resolver, date.fromisoformat(allocated))
+    return PublisherPrefix(prefix, holder, records, resolver, landing, date.fromisoformat(allocated))
 
 
 def _load_prefix_register(document: Any) -> Mapping[str, PublisherPrefix]:
