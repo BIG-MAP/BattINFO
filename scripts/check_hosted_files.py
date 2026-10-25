@@ -26,22 +26,32 @@ https://w3id.org/battinfo to the newest release's copy at the root of the site,
 https://w3id.org/battinfo/X.Y.Z to battinfo/versions/X.Y.Z/battinfo.ttl, and
 https://w3id.org/battinfo/latest to battinfo.ttl on main. The versionIRI,
 https://w3id.org/battinfo/X.Y.Z/battinfo, reaches the registry, which answers
-with a 303 to https://w3id.org/battinfo/X.Y.Z. Each request asks for
-``text/turtle`` and follows the redirects one at a time, so the report says
-where each IRI landed:
+with a 303 to https://w3id.org/battinfo/X.Y.Z. The inferred ontology,
+battinfo-inferred.ttl beside each battinfo.ttl, is served at
+https://w3id.org/battinfo/inferred and /X.Y.Z/inferred, and declares the
+versionIRI https://w3id.org/battinfo/X.Y.Z/inferred. The 2024 ontology, whose
+versionIRI is https://w3id.org/battinfo/0.8.0-beta/battinfo, is kept in
+battinfo/versions/0.8.0-beta/. Each request asks for ``text/turtle`` and
+follows the redirects one at a time, so the report says where each IRI landed:
 
-* ``--ontology-routes`` checks that the root, /latest, /X.Y.Z and the
-  versionIRI of this checkout's battinfo.ttl land where w3id should send them.
-  Before the tag the release's files are not there yet, so a 404 in the right
-  place passes. With ``--served`` each must also answer with this checkout's
-  battinfo.ttl, which is the check after the tag. /latest still leads to the
-  master branch until a perma-id pull request moves it to main; while it does,
-  it is reported as ``pending`` and does not fail the check.
+* ``--ontology-routes`` checks that the root, /latest, /X.Y.Z, the versionIRI
+  of this checkout's battinfo.ttl, both inferred IRIs and both 0.8.0-beta IRIs
+  land where w3id should send them. Before the tag the release's files are not
+  there yet, so a 404 in the right place passes. With ``--served`` each must
+  also answer with this checkout's battinfo.ttl, or a file that declares the
+  expected versionIRI, which is the check after the tag. /latest still leads
+  to the master branch until a perma-id pull request moves it to main; while
+  it does, it is reported as ``pending`` and does not fail the check. The
+  inferred file is optional: a 404 where it belongs is reported as ``routed``
+  and does not fail the check, but a file that declares another versionIRI
+  does.
 * ``--ontology`` checks that the root declares the last release's versionIRI
-  and imports, and that /X.Y.Z and the versionIRI serve that release's
-  battinfo.ttl. ``.github/workflows/hosted-files.yml`` runs it every day. It is
-  not part of release.yml, because the versionIRI resolves only after the
-  tag's own docs deploy, and it leaves /latest out, since that follows main.
+  and imports, that /X.Y.Z and the versionIRI serve that release's
+  battinfo.ttl, and that the inferred and 0.8.0-beta IRIs serve files that
+  declare their versionIRIs; a release without an inferred file passes.
+  ``.github/workflows/hosted-files.yml`` runs it every day. It is not part of
+  release.yml, because the versionIRI resolves only after the tag's own docs
+  deploy, and it leaves /latest out, since that follows main.
 
 A request is tried again when the server is busy or does not answer, since the
 registry's host can take a minute to wake up. So that a run always ends with a
@@ -107,6 +117,11 @@ LATEST_FILE_ON_MASTER = "https://raw.githubusercontent.com/BIG-MAP/BattINFO/mast
 # docs-deploy.sh publishes the ontology from this release on; older releases
 # were published by hand, under other paths.
 FIRST_ONTOLOGY_RELEASE = (0, 8, 0)
+# Versions published before that whose versionIRI still resolves to Pages: the
+# file https://w3id.org/battinfo served from 2024 until 0.8.0 declares
+# https://w3id.org/battinfo/0.8.0-beta/battinfo, and docs-deploy.sh keeps it in
+# battinfo/versions/0.8.0-beta/.
+KEPT_VERSIONS = ("0.8.0-beta",)
 
 FINAL_RELEASE_TAG = re.compile(r"v(\d+)\.(\d+)\.(\d+)")
 USER_AGENT = "battinfo-hosted-check (+https://github.com/BIG-MAP/BattINFO)"
@@ -183,11 +198,16 @@ class Route:
 
     *interim* is where the IRI leads until a routing change outside this
     repository is merged; landing there is reported as pending, not as a fault.
+    With *declares*, the file there is not the checkout's battinfo.ttl but one
+    that must declare this ``owl:versionIRI``. An *optional* file may be
+    missing: a 404 at *lands* is reported as routed, never as missing.
     """
 
     iri: str
     lands: str
     interim: str | None = None
+    declares: str | None = None
+    optional: bool = False
 
 
 def hosted_files(root: Path = ROOT) -> list[HostedFile]:
@@ -509,6 +529,18 @@ def ontology_routes(facts: OntologyFacts, version: str, *, latest: bool) -> list
     routes.append(Route(f"{ONTOLOGY_IRI}/{version}", versioned))
     if facts.version_iri:
         routes.append(Route(facts.version_iri, versioned))
+    # docs-deploy.sh publishes no inferred file when the reasoner fails, and
+    # removes the root's of an older version, so both may answer 404.
+    inferred = f"{ONTOLOGY_IRI}/{version}/inferred"
+    routes.append(Route(f"{ONTOLOGY_IRI}/inferred", f"{PAGES}/battinfo-inferred.ttl", declares=inferred, optional=True))
+    routes.append(
+        Route(inferred, f"{PAGES}/battinfo/versions/{version}/battinfo-inferred.ttl", declares=inferred, optional=True)
+    )
+    for kept in KEPT_VERSIONS:
+        kept_file = f"{PAGES}/battinfo/versions/{kept}/battinfo.ttl"
+        kept_iri = f"{ONTOLOGY_IRI}/{kept}/battinfo"
+        routes.append(Route(f"{ONTOLOGY_IRI}/{kept}", kept_file, declares=kept_iri))
+        routes.append(Route(kept_iri, kept_file, declares=kept_iri))
     return routes
 
 
@@ -525,8 +557,17 @@ def _ontology_outcome(route: Route, landing: Landing, expected: bytes, *, by_imp
             detail = f"{where}, where it leads until the perma-id change to {route.lands} is merged"
             return Outcome(hosted_file, "pending", detail)
         return Outcome(hosted_file, "misrouted", f"{where}, expected {route.lands}")
+    if landing.status == 404 and route.optional:
+        return Outcome(hosted_file, "routed", f"{where}: no inferred file published")
     if landing.status != 200:
         return Outcome(hosted_file, "missing" if served else "routed", where)
+    if route.declares is not None:
+        hosted_iri = ontology_facts(landing.body).version_iri
+        if hosted_iri == route.declares:
+            return Outcome(hosted_file, "same", where)
+        if not served:
+            return Outcome(hosted_file, "routed", f"{where}, serving the versionIRI {hosted_iri}")
+        return Outcome(hosted_file, "differs", f"{where}: versionIRI {hosted_iri}, expected {route.declares}")
     if by_imports:
         hosted, wanted = ontology_facts(landing.body), ontology_facts(expected)
         same = (hosted.version_iri, hosted.imports) == (wanted.version_iri, wanted.imports)
@@ -583,7 +624,8 @@ def check_ontology_routes(
     # /latest still on master is reported but never fails the check: the
     # perma-id pull request that moves it has its own review, outside this
     # repository, and does not block a release.
-    passing = {"same", "pending"} if served else {"same", "routed", "pending"}
+    # With served, only an optional file that is not published is "routed".
+    passing = {"same", "routed", "pending"}
     if served:
         head = f"The w3id ontology IRIs, which must serve this checkout's battinfo.ttl ({facts.version}):"
     else:
@@ -622,7 +664,8 @@ def check_ontology(trace_url: Trace, tag: str | None, root: Path = ROOT) -> tupl
     problems = []
     if facts.version != version or not facts.version_iri:
         problems.append(f"{tag}'s own battinfo.ttl declares version {facts.version} and versionIRI {facts.version_iri}")
-    status = 0 if not problems and all(o.status == "same" for o in outcomes) else 1
+    # "routed" here is an optional inferred file the release did not publish.
+    status = 0 if not problems and all(o.status in {"same", "routed"} for o in outcomes) else 1
     if status == 0:
         head = f"The w3id ontology IRIs serve the battinfo.ttl of {tag}."
     else:

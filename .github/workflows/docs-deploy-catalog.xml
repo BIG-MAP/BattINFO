@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  The import catalog ROBOT reads when docs-deploy.sh writes battinfo-inferred.ttl.
+
+  w3id answers https://w3id.org/emmo/1.0.2 with a squashed EMMO from
+  emmo-repo.github.io, in which HermiT finds 3670 unsatisfiable classes once
+  the domain modules are merged in. The release's own emmo.ttl, which imports
+  the EMMO modules one by one, is what domain-battery's catalog reads, and
+  with it the closure is coherent. Every other import resolves through w3id.
+
+  Keep the version equal to "EMMO core" in the header of battinfo.ttl
+  (tests/test_docs_deploy.py checks it).
+-->
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <uri name="https://w3id.org/emmo/1.0.2" uri="https://raw.githubusercontent.com/emmo-repo/EMMO/1.0.2/emmo.ttl"/>
+</catalog>
