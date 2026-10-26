@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.request import Request as UrlRequest
 
@@ -17,6 +17,9 @@ from battinfo._util import local_file_references, local_files_message
 from battinfo.api._shared import PathLike
 from battinfo.api._staging import build_curated_cell_spec_submission
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
+
+if TYPE_CHECKING:
+    from battinfo._adoption import RetiredRecord
 
 
 def _urlopen(request: UrlRequest, *, timeout: float):  # noqa: ANN202
@@ -107,7 +110,7 @@ def submit_publication_package(
     backoff_sec: float = 0.5,
     allow_local_files: bool = False,
     allow_unchecked_iris: bool = False,
-    checked_iris: Mapping[str, str] | None = None,
+    checked_iris: Mapping[str, str | RetiredRecord] | None = None,
 ) -> dict[str, Any]:
     """POST a publication package to the registry, defending against a hostile/cold registry.
 
@@ -137,10 +140,12 @@ def submit_publication_package(
     ``https://w3id.org/battinfo/{segment}/{uid}``, is sent in that form, and
     the result's ``adopted`` maps it to that form. A registry that cannot be
     asked raises ``UncheckedIrisError`` before anything is sent, naming the
-    IRIs, unless ``allow_unchecked_iris=True``. *checked_iris* maps the IRIs a
-    caller has already looked up in this registry to the IRI to use for each,
-    as ``ws.submit()`` does for a whole workspace; they are not asked about
-    again.
+    IRIs, unless ``allow_unchecked_iris=True``. A record the registry holds as
+    superseded or withdrawn raises ``RetiredIrisError`` before anything is
+    sent, whatever ``allow_unchecked_iris`` says. *checked_iris* maps the
+    IRIs a caller has already looked up in this registry to the IRI to use
+    for each, or to the ``RetiredRecord`` that stops it, as ``ws.submit()``
+    does for a whole workspace; they are not asked about again.
     """
     from battinfo._adoption import adopt_registry_iris, adopted_iris, minted_iris, rewrite_iris  # noqa: PLC0415
 

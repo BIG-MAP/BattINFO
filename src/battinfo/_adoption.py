@@ -13,6 +13,13 @@ An IRI the registry holds in the old form is adopted: every string that names
 it is rewritten to the old form. Only those strings change, never a uid, so
 a record that names an adopted one keeps its own IRI.
 
+A record the registry holds, in either form, as ``superseded`` or
+``withdrawn`` is not adopted: the record described here has the identity of
+a retired one. The submission or deposit stops with :class:`RetiredIrisError`
+before anything is rewritten or sent, and ``allow_unchecked_iris=True`` does
+not lift it. An answer without a status, from an older registry, counts as
+``published``.
+
 A registry that cannot be asked stops the submission or deposit with
 :class:`UncheckedIrisError`, which names the IRIs not checked, unless the
 caller passes ``allow_unchecked_iris=True``. Only the registry's own answer
@@ -32,7 +39,7 @@ import warnings
 from collections.abc import Iterable, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel
 
@@ -47,6 +54,8 @@ from battinfo.namespace import (
 )
 
 __all__ = [
+    "RetiredIrisError",
+    "RetiredRecord",
     "UncheckedIrisError",
     "adopt_model_iris",
     "adopt_registry_iris",
@@ -72,6 +81,9 @@ _LOOKUP_RETRIES = 1
 # The body of the registry's 404 for a record it does not hold
 # (battinfo-registry, GET /resources/{resource_type}/{resource_id}).
 _NOT_HELD = {"detail": "Resource not found."}
+# The statuses of a record the registry no longer publishes (its ``status``
+# field; the other is ``published``).
+_RETIRED_STATUSES = frozenset({"superseded", "withdrawn"})
 
 
 class UncheckedIrisError(RuntimeError):
@@ -83,6 +95,31 @@ class UncheckedIrisError(RuntimeError):
     def __init__(self, message: str, *, iris: Iterable[str]) -> None:
         super().__init__(message)
         self.iris = list(iris)
+
+
+class RetiredRecord(NamedTuple):
+    """The registry's answer for an IRI whose record it holds as superseded or withdrawn."""
+
+    iri: str
+    """The IRI the registry holds the record under, in either form."""
+    status: str
+    """``"superseded"`` or ``"withdrawn"``."""
+    replaced_by: tuple[str, ...] = ()
+    """The IRIs of the records that replace a superseded one, as the registry gives them."""
+
+
+class RetiredIrisError(RuntimeError):
+    """A submission or deposit stopped because the registry holds some of its records as superseded or withdrawn.
+
+    *retired* maps each IRI minted here to the :class:`RetiredRecord` the
+    registry answered, and *iris* lists those IRIs. Nothing was rewritten,
+    submitted or deposited.
+    """
+
+    def __init__(self, message: str, *, retired: Mapping[str, RetiredRecord]) -> None:
+        super().__init__(message)
+        self.retired = dict(retired)
+        self.iris = list(self.retired)
 
 
 def _is_minted(iri: object) -> bool:
@@ -229,8 +266,21 @@ def _says_not_held(exc: urllib.error.HTTPError) -> bool:
     return body == _NOT_HELD
 
 
-def _registry_answer(registry: Any, iri: str, *, retries: int = _LOOKUP_RETRIES) -> str | None:
-    """The IRI to use for *iri*: the old form *registry* holds the record under, else *iri*; None when it could not be asked."""
+def _replacements(entry: Mapping[str, Any]) -> tuple[str, ...]:
+    """The IRIs that replace a superseded record, from its entry's ``replaced_by_iris``, else ``replaced_by_iri``."""
+    listed = entry.get("replaced_by_iris")
+    if isinstance(listed, list) and listed:
+        return tuple(item for item in listed if isinstance(item, str))
+    single = entry.get("replaced_by_iri")
+    return (single,) if isinstance(single, str) and single else ()
+
+
+def _registry_answer(registry: Any, iri: str, *, retries: int = _LOOKUP_RETRIES) -> str | RetiredRecord | None:
+    """The IRI to use for *iri*: the old form *registry* holds the record under, else *iri*.
+
+    A :class:`RetiredRecord` when the registry holds the record as superseded
+    or withdrawn; None when it could not be asked.
+    """
     try:
         entry = registry.get(iri, retries=retries)
     except urllib.error.HTTPError as exc:
@@ -240,10 +290,36 @@ def _registry_answer(registry: Any, iri: str, *, retries: int = _LOOKUP_RETRIES)
     held = entry.get("canonical_iri") if isinstance(entry, Mapping) else None
     if not isinstance(held, str):
         return None
-    # The registry matches on segment and uid. It holds the record in the old
-    # form when its IRI is the other form of this one; anything else leaves
-    # the IRI as it was minted.
-    return held if held != iri and same_record(held, iri) else iri
+    # The registry matches on segment and uid. It holds this record when its
+    # IRI is this one or the other form of it; anything else leaves the IRI
+    # as it was minted.
+    if not same_record(held, iri):
+        return iri
+    # A record it no longer publishes is never adopted. An entry without a
+    # status comes from a registry older than the field: it is published.
+    status = entry.get("status")
+    if status in _RETIRED_STATUSES:
+        return RetiredRecord(held, status, _replacements(entry) if status == "superseded" else ())
+    return held
+
+
+def _retired_message(action: str, registry_url: str | None, retired: Mapping[str, RetiredRecord]) -> str:
+    lines = []
+    for minted, record in sorted(retired.items()):
+        if record.replaced_by:
+            what = f"superseded by {', '.join(record.replaced_by)}"
+        else:
+            what = record.status
+        lines.append(f"  {minted}: the registry holds it as {record.iri}, which was {what}.")
+    where = f"the registry at {registry_url}" if registry_url else "the registry"
+    return (
+        f"{action} stopped before anything was sent or written: {where} holds {len(retired)} "
+        "record(s) named here as retired, so they cannot be published again.\n"
+        + "\n".join(lines)
+        + "\nEach of these records has the identity of the retired record. If it means the record that "
+        "replaced it, refer to that record instead. If it is a new record, the fields that identify it "
+        "must differ, so that it gets a uid of its own."
+    )
 
 
 def adopt_registry_iris(
@@ -252,17 +328,21 @@ def adopt_registry_iris(
     registry_url: str | None,
     action: str,
     allow_unchecked_iris: bool = False,
-    answers: dict[str, str] | None = None,
+    answers: dict[str, str | RetiredRecord] | None = None,
 ) -> dict[str, str]:
     """Each IRI of the ``/id/1001/`` form among *iris*, mapped to the IRI to use for it.
 
     That is the old form when the registry at *registry_url* holds the record
     under it, and the IRI itself when the registry does not hold the record,
     or holds it under that IRI. Other IRIs are left out. *answers* holds what
-    this registry already answered, in the same shape, and is updated in
-    place, so a caller asks about each IRI once.
+    this registry already answered, in the same shape or as a
+    :class:`RetiredRecord`, and is updated in place, so a caller asks about
+    each IRI once.
 
-    An IRI the registry cannot be asked about, and every IRI when there is no
+    An IRI whose record the registry holds as superseded or withdrawn raises
+    :class:`RetiredIrisError`, naming each such record and what replaced it,
+    before anything is sent; *allow_unchecked_iris* does not lift it. An IRI
+    the registry cannot be asked about, and every IRI when there is no
     *registry_url*, raises :class:`UncheckedIrisError`, naming them and
     *action* (the call, such as ``"ws.submit()"``), before anything is sent.
     With *allow_unchecked_iris* they map to themselves instead, with a
@@ -284,7 +364,7 @@ def adopt_registry_iris(
         if first is None:
             unchecked = pending
         else:
-            found = {pending[0]: first}
+            found: dict[str, str | RetiredRecord] = {pending[0]: first}
             rest = pending[1:]
             if rest:
                 with ThreadPoolExecutor(max_workers=_LOOKUP_WORKERS) as pool:
@@ -295,6 +375,12 @@ def adopt_registry_iris(
                             found[iri] = answer
             known.update(found)
             checked.update(found)
+    # A retired record is a conflict, not a missing answer: it stops the call
+    # whatever else could not be checked, and allow_unchecked_iris does not
+    # lift it. *answers* keeps it, so asking again stops again.
+    retired = {iri: answer for iri, answer in checked.items() if isinstance(answer, RetiredRecord)}
+    if retired:
+        raise RetiredIrisError(_retired_message(action, registry_url, retired), retired=retired)
     if unchecked:
         where = (
             f"the registry at {registry_url}"
@@ -317,7 +403,8 @@ def adopt_registry_iris(
             stacklevel=3,
         )
         checked.update({iri: iri for iri in unchecked})
-    return {iri: checked[iri] for iri in wanted}
+    # Every answer left names an IRI: a retired one raised above.
+    return {iri: answer for iri, answer in sorted(checked.items()) if isinstance(answer, str)}
 
 
 def registry_url_or_default(registry_url: str | None) -> str:
@@ -333,7 +420,7 @@ def adopt_model_iris(
     registry_url: str | None,
     action: str,
     allow_unchecked_iris: bool = False,
-    answers: dict[str, str] | None = None,
+    answers: dict[str, str | RetiredRecord] | None = None,
 ) -> dict[str, str]:
     """Adopt, in the record models *models*, the old form of each ``/id/1001/`` IRI the registry holds in it.
 
@@ -342,7 +429,8 @@ def adopt_model_iris(
     else ``BATTINFO_REGISTRY_URL``. Without one it asks nothing and adopts
     nothing. *answers* is passed on to :func:`adopt_registry_iris`. Returns
     the IRIs adopted, each mapped to its old form; the models are rewritten
-    in place.
+    in place, unless a record is held as superseded or withdrawn, which
+    raises :class:`RetiredIrisError` and leaves them as they were.
     """
     registry = registry_url or os.environ.get("BATTINFO_REGISTRY_URL")
     if not registry:

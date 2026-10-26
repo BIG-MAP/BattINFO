@@ -8,8 +8,10 @@ deposited the workspace asks the registry about each ``/id/1001/`` IRI and
 adopts the old form: every record that names it is rewritten, no uid
 changes, and nothing sent names the ``/id/1001/`` form. A registry that
 cannot be asked stops the submission or deposit unless
-``allow_unchecked_iris=True``. A workspace refers to a record it holds by the
-IRI its saved copy has, whichever form the reference was given in.
+``allow_unchecked_iris=True``. A record the registry holds as superseded or
+withdrawn is never adopted: it stops the submission or deposit before anything
+is rewritten or sent. A workspace refers to a record it holds by the IRI its
+saved copy has, whichever form the reference was given in.
 
 The registry and Zenodo are answered in memory; nothing goes on the network.
 """
@@ -33,9 +35,10 @@ import battinfo.api
 from battinfo import api
 from battinfo import registry as registry_module
 from battinfo import zenodo as zenodo_module
+from battinfo._adoption import RetiredRecord
 from battinfo.entities import cell_spec_uid
 from battinfo.namespace import OLD_FORM_BASE, parse_record_iri, record_iri
-from battinfo.ws import AuthoringWorkspace, SubmitError, UncheckedIrisError
+from battinfo.ws import AuthoringWorkspace, RetiredIrisError, SubmitError, UncheckedIrisError
 
 REGISTRY = "https://registry.example"
 ZENODO_API = "https://zenodo.org/api"
@@ -68,13 +71,15 @@ class FakeServices:
 
     The registry holds the records in ``held`` (``"segment/uid"`` -> IRI) and
     answers ``GET /resources/{segment}/{uid}`` with the entry's
-    ``canonical_iri``, else 404; with ``offline`` every GET fails as an
-    unreachable host would. Packages POSTed to it are kept in ``posted``.
+    ``canonical_iri`` and the fields ``status`` adds for it (none unless a
+    test sets them, as an older registry answers), else 404; with
+    ``offline`` every GET fails as an unreachable host would. Packages POSTed to it are kept in ``posted``.
     Zenodo serves one deposit (id 7) and keeps the files put in its bucket.
     """
 
     def __init__(self) -> None:
         self.held: dict[str, str] = {f"spec/{SPEC_UID}": SPEC_OLD}
+        self.status: dict[str, dict[str, Any]] = {}
         self.offline = False
         self.lookups: list[str] = []
         self.posted: list[dict] = []
@@ -100,7 +105,8 @@ class FakeServices:
             raise urllib.error.URLError("registry unreachable")
         key = path.removeprefix("/resources/")
         if key in self.held:
-            return _Reply({"canonical_iri": self.held[key], "canonical_id": key.rsplit("/", 1)[1]})
+            entry = {"canonical_iri": self.held[key], "canonical_id": key.rsplit("/", 1)[1]}
+            return _Reply({**entry, **self.status.get(key, {})})
         raise urllib.error.HTTPError(url, 404, "Not Found", None, io.BytesIO(b'{"detail": "Resource not found."}'))  # type: ignore[arg-type]
 
     def _zenodo(self, method: str, url: str, request: Any) -> _Reply:
@@ -538,3 +544,139 @@ def test_a_contribution_adopts_the_old_form_in_its_files_before_the_deposit(
     assert (root / CONTRIBUTION_MANIFEST).read_text(encoding="utf-8") == f"cell_spec_iri: {SPEC_OLD}\n"
     assert json.loads(intake.read_text(encoding="utf-8")) == {"resources": [{"canonical_iri": SPEC_OLD}]}
     assert (dist / "data.csv").read_text(encoding="utf-8") == f"{SPEC_NEW}\n"
+
+
+# ── A record the registry no longer publishes ────────────────────────────────
+
+REPLACEMENT = record_iri("spec", "d4mr-8vxe-k2pq-7tnb")
+OTHER_REPLACEMENT = record_iri("spec", "f5ws-3hzk-9qrt-2vcy")
+# Each retired case: the fields the registry's entry adds, and what the error says happened to the record.
+RETIRED = {
+    "superseded": (
+        {"status": "superseded", "replaced_by_iri": REPLACEMENT, "replaced_by_iris": None},
+        f"superseded by {REPLACEMENT}",
+    ),
+    "superseded by several": (
+        {
+            "status": "superseded",
+            "replaced_by_iri": REPLACEMENT,
+            "replaced_by_iris": [REPLACEMENT, OTHER_REPLACEMENT],
+        },
+        f"superseded by {REPLACEMENT}, {OTHER_REPLACEMENT}",
+    ),
+    "withdrawn": ({"status": "withdrawn", "replaced_by_iri": None, "replaced_by_iris": None}, "withdrawn"),
+}
+
+
+@pytest.fixture(params=sorted(RETIRED))
+def retired(request: pytest.FixtureRequest, services: FakeServices) -> str:
+    """The registry holds the spec in the old form as retired; returns what the error says of it."""
+    entry, said = RETIRED[request.param]
+    services.status[f"spec/{SPEC_UID}"] = entry
+    return said
+
+
+def _files(ws: AuthoringWorkspace) -> dict[Path, bytes]:
+    paths = [*ws._ws.source_root.rglob("*.json"), ws._ws.index_path]
+    return {path: path.read_bytes() for path in paths if path.is_file()}
+
+
+def _assert_stopped(error: BaseException | None, said: str) -> None:
+    assert isinstance(error, RetiredIrisError)
+    assert error.iris == [SPEC_NEW]
+    assert error.retired[SPEC_NEW].iri == SPEC_OLD
+    message = str(error)
+    assert f"{SPEC_NEW}: the registry holds it as {SPEC_OLD}, which was {said}." in message
+    assert "If it means the record that replaced it" in message and "must differ" in message
+
+
+def test_submit_stops_on_a_record_the_registry_retired(tmp_path: Path, services: FakeServices, retired: str) -> None:
+    ws = _new_workspace(tmp_path)
+    ((cell,),) = [_saved(ws, "cell-instance")]
+    # Held as published, so it would be adopted, were it not for the spec.
+    services.held[f"cell/{_uid(cell['id'])}"] = record_iri("cell", _uid(cell["id"]))
+    before = _files(ws)
+
+    with pytest.raises(SubmitError) as refused:
+        ws.submit(**CREDS)
+    _assert_stopped(refused.value.__cause__, retired)
+    assert services.posted == [] and services.zenodo == []
+    assert _files(ws) == before
+    asked = list(services.lookups)
+
+    # The session keeps the answer: a second call stops without asking again,
+    # and allow_unchecked_iris does not lift the stop.
+    with pytest.raises(SubmitError) as again:
+        ws.submit(allow_unchecked_iris=True, **CREDS)
+    _assert_stopped(again.value.__cause__, retired)
+    assert services.lookups == asked
+    assert services.posted == []
+    assert _files(ws) == before
+
+
+def test_a_zenodo_draft_stops_on_a_record_the_registry_retired(
+    tmp_path: Path, services: FakeServices, retired: str
+) -> None:
+    ws = _new_workspace(tmp_path, data=True)
+    before = _files(ws)
+
+    with pytest.raises(RetiredIrisError) as refused:
+        ws.zenodo(token="placeholder", creators=CREATORS, allow_unchecked_iris=True)
+    _assert_stopped(refused.value, retired)
+    assert services.zenodo == [] and services.files == {} and services.posted == []
+    assert _files(ws) == before
+
+
+def test_submit_publication_package_stops_on_a_record_the_registry_retired(
+    services: FakeServices, retired: str
+) -> None:
+    payload = {"resource": {"canonical_iri": SPEC_NEW, "related": [f"{SPEC_NEW}#described"]}}
+    original = copy.deepcopy(payload)
+
+    with pytest.raises(RetiredIrisError) as refused:
+        api.submit_publication_package(payload, registry_base_url=REGISTRY, api_key="k", allow_unchecked_iris=True)
+    _assert_stopped(refused.value, retired)
+    assert services.posted == []
+    assert payload == original
+
+    # An answer passed on in checked_iris stops the call without asking again.
+    services.lookups.clear()
+    with pytest.raises(RetiredIrisError):
+        api.submit_publication_package(
+            payload, registry_base_url=REGISTRY, api_key="k", checked_iris=dict(refused.value.retired)
+        )
+    assert services.lookups == [] and services.posted == []
+
+
+def test_a_record_retired_under_its_new_form_stops_too(services: FakeServices) -> None:
+    services.held[f"spec/{SPEC_UID}"] = SPEC_NEW
+    services.status[f"spec/{SPEC_UID}"] = {"status": "withdrawn"}
+
+    with pytest.raises(RetiredIrisError) as refused:
+        api.submit_publication_package(
+            {"resource": {"canonical_iri": SPEC_NEW}}, registry_base_url=REGISTRY, api_key="k"
+        )
+    assert refused.value.retired == {SPEC_NEW: RetiredRecord(SPEC_NEW, "withdrawn")}
+    assert services.posted == []
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [{"status": "published", "replaced_by_iri": None, "replaced_by_iris": None}, {}],
+    ids=["published", "no status"],
+)
+def test_a_published_record_or_one_without_a_status_is_adopted(
+    tmp_path: Path, services: FakeServices, entry: dict[str, Any]
+) -> None:
+    services.status[f"spec/{SPEC_UID}"] = entry
+
+    result = api.submit_publication_package(
+        {"resource": {"canonical_iri": SPEC_NEW}}, registry_base_url=REGISTRY, api_key="k"
+    )
+    assert result["adopted"] == {SPEC_NEW: SPEC_OLD}
+    assert services.posted == [{"resource": {"canonical_iri": SPEC_OLD}}]
+
+    ws = _new_workspace(tmp_path)
+    assert all(outcome["ok"] for outcome in ws.submit(**CREDS))
+    assert _saved(ws, "cell-spec")[0]["id"] == SPEC_OLD
+    assert SPEC_NEW not in services.sent_text()

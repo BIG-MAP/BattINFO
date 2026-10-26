@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from battinfo._adoption import adopt_model_iris
+from battinfo._adoption import RetiredRecord, adopt_model_iris
 from battinfo._deposit_files import UnsafeLocation, location_path
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
@@ -1854,7 +1854,7 @@ def publish(
     base: str = DEFAULT_RECORD_BASE,
     registry_url: str | None = None,
     allow_unchecked_iris: bool = False,
-    checked_iris: Mapping[str, str] | None = None,
+    checked_iris: Mapping[str, str | RetiredRecord] | None = None,
 ) -> dict[str, Any]:
     """Build the publication package of one cell spec, cell, test and dataset folder.
 
@@ -1868,8 +1868,11 @@ def publish(
     given one: ``registry_url``, else ``BATTINFO_REGISTRY_URL``. Then a record
     that registry already holds in the old form keeps that IRI (``adopted`` in
     the result lists it), and a registry that cannot be asked raises
-    ``UncheckedIrisError`` unless ``allow_unchecked_iris=True``. *checked_iris*
-    maps IRIs already looked up in that registry to the IRI to use for each.
+    ``UncheckedIrisError`` unless ``allow_unchecked_iris=True``. A record it
+    holds as superseded or withdrawn raises ``RetiredIrisError``, whatever
+    ``allow_unchecked_iris`` says. *checked_iris* maps IRIs already looked up
+    in that registry to the IRI to use for each, or to the ``RetiredRecord``
+    that stops it.
     """
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
     if datasheet is not None and not datasheet.exists():
@@ -2123,7 +2126,7 @@ def publish_dataset_metadata(
         )
     # Given a registry, the shared spec takes the old form it holds before it is
     # written, and each package reuses the answer.
-    spec_answers: dict[str, str] = {}
+    spec_answers: dict[str, str | RetiredRecord] = {}
     adopt_model_iris(
         [normalized_cell_spec, *([normalized_cell_specification] if normalized_cell_specification is not None else [])],
         registry_url=registry_url,
