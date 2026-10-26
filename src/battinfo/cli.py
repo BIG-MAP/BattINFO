@@ -3535,6 +3535,11 @@ def dataset_publish(
     ),
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+    allow_unchecked_iris: bool = typer.Option(
+        False,
+        "--allow-unchecked-iris",
+        help="Deposit IRIs minted under /id/1001/ that the registry could not be asked about as they are.",
+    ),
 ) -> None:
     """Experimental: publish the processed contribution folder.
 
@@ -3583,6 +3588,7 @@ def dataset_publish(
             token=resolved_token,
             sandbox=sandbox,
             community=resolved_community,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
     except FileNotFoundError as exc:
         console.print(f"[red]Error:[/red] {exc}")
@@ -3592,6 +3598,8 @@ def dataset_publish(
         raise typer.Exit(code=1) from exc
 
     console.print("[green]Deposit created (draft).[/green]")
+    for minted, held in sorted((result.get("adopted") or {}).items()):
+        console.print(f"  Adopted: {minted} -> {held}")
     console.print(f"  DOI:     {result.get('doi') or '(assigned on publication)'}")
     console.print(f"  Files:   {result['files_uploaded']} uploaded")
     console.print("  Review and publish at:")

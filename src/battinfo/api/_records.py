@@ -62,6 +62,7 @@ from battinfo.api._shared import (
     _validate_canonical_record,
     _validate_schema,
     _with_held_iri,
+    _with_held_iris,
 )
 from battinfo.bundle import (
     SCHEMA_VERSION,
@@ -1857,7 +1858,10 @@ def save_record(
     A minted IRI takes ``base``: ``https://w3id.org/battinfo/id/1001/`` unless
     another is given, such as ``"https://w3id.org/battinfo/"`` for the old
     form. A record that ``source_root`` already holds keeps the IRI it is
-    saved under, in either form.
+    saved under, in either form. An ``/id/1001/`` IRI that the folder holds in
+    the old form, the record's own or one the record names, is saved in the
+    old form, such as when an importer runs again into a folder written
+    before the switch.
     """
     mode_normalized = _validate_save_mode(mode)
     duplicate_policy_normalized = _validate_duplicate_policy(duplicate_policy)
@@ -1865,6 +1869,7 @@ def save_record(
 
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else record
     doc = _with_minted_id(doc, source_root=source_root_path, base=base)
+    doc = _with_held_iris(doc, source_root_path)
     if validate:
         _validate_canonical_record(doc, policy=validation_policy)
 
@@ -1896,8 +1901,9 @@ def save_record(
             held_id = None
         held_form = parse_record_iri(held_id) if held_id != entity_id and same_record(held_id, entity_id) else None
         if held_form is not None:
-            # The other form of the same record, such as /id/1001/ beside a file of the
-            # old form: the record keeps the IRI it is saved under.
+            # The other form of the same record, the old form beside a file of the
+            # /id/1001/ form (the other way round is adopted above): the record
+            # keeps the IRI it is saved under.
             raise ValueError(
                 f"Cannot save {entity_id}: {target_path} already holds this record as {held_id}, "
                 f"the IRI it keeps. Save it with id {held_id!r}, or mint it with "

@@ -671,6 +671,7 @@ def test_electrode_spec_reference_only_holder_is_valid() -> None:
 # ── Submission ────────────────────────────────────────────────────────────────
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_submit_covers_every_saved_record_type() -> None:
     """_SUBDIRS must list every directory ws.save() can write.
 

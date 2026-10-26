@@ -40,6 +40,8 @@ from battinfo.zenodo import (
     upload_zenodo_package,
 )
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 
 class TestChecksumMatch:
     def test_matches_bare_md5(self, tmp_path: Path) -> None:

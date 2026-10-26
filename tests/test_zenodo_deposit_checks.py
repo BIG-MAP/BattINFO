@@ -32,6 +32,8 @@ from battinfo._deposit_files import Omission, deposit_file_problems, distributio
 from battinfo.validate.semantic import validate_semantic_report
 from battinfo.ws import AuthoringWorkspace, _read_deposit_record_sets, _unix_to_iso
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 API = "https://zenodo.org/api"
 BUCKET = f"{API}/files/bucket-7"
 RECORD_URL = "https://zenodo.org/records/7"

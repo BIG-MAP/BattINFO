@@ -428,6 +428,7 @@ def _test_records(payload: dict) -> list[dict]:
     ]
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_publish_with_an_artifact_base_url_sends_no_local_path(tmp_path: Path, monkeypatch) -> None:
     """The builder writes no local path into a URL field, so no allow_local_files is needed."""
     from battinfo._util import local_file_references
@@ -449,6 +450,7 @@ def test_publish_with_an_artifact_base_url_sends_no_local_path(tmp_path: Path, m
         assert provenance["source_url"].endswith("/" + provenance["source_file"])
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_publish_with_an_uploader_sends_no_local_path(tmp_path: Path, monkeypatch) -> None:
     from battinfo._util import local_file_references
 
@@ -480,6 +482,7 @@ def test_publish_without_artifact_urls_is_refused(tmp_path: Path, monkeypatch) -
     assert sent == []
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_ingest_publish_cli_with_an_artifact_base_url_passes(tmp_path: Path, monkeypatch) -> None:
     ingest_root = _make_ingest_root(tmp_path)
     sent = _accepting_registry(monkeypatch)

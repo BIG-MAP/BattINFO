@@ -16,6 +16,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from battinfo._jsonio import read_record_json
 from battinfo._util import _as_path, _now_unix
 from battinfo.bundle import (
     BatteryTestType,
@@ -447,6 +448,45 @@ def _with_held_iri(record: dict[str, Any], source_root: PathLike | None) -> dict
     if held == body["id"]:
         return record
     return {**record, kind.record_key: {**body, "id": held}}
+
+
+def _with_held_iris(doc: dict[str, Any], source_root: PathLike | None) -> dict[str, Any]:
+    """*doc* with each ``/id/1001/`` IRI it names that *source_root* holds in the old form rewritten to that form.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5). A record saved into a folder of the old
+    form, such as an importer run again into a folder written by 0.8.0rc2,
+    adopts the old form there for its own IRI and for the IRIs of the records
+    it names, so the folder never names one record in two forms. A uid never
+    depends on the base, so a record keeps the file it was saved in. Only the
+    file a save of each IRI would write is read (``entities.save_entity_path``).
+    """
+    from battinfo._adoption import minted_iris, rewrite_iris  # noqa: PLC0415
+    from battinfo.entities import ENTITY_BY_TYPE, entity_types_for_namespace, save_entity_path  # noqa: PLC0415
+    from battinfo.namespace import parse_record_iri, same_record  # noqa: PLC0415
+
+    if source_root is None:
+        return doc
+    root = _as_path(source_root)
+    adopted: dict[str, str] = {}
+    for iri in sorted(minted_iris(doc)):
+        parsed = parse_record_iri(iri)
+        if parsed is None:
+            continue
+        for entity_type in entity_types_for_namespace(parsed.segment):
+            path = save_entity_path(entity_type, parsed.uid, root) if entity_type in ENTITY_BY_TYPE else None
+            if path is None or not path.is_file():
+                continue
+            try:
+                held = entity_id_from_doc(read_record_json(path))
+            except (OSError, ValueError):
+                continue
+            if held == iri:
+                break
+            if isinstance(held, str) and same_record(held, iri):
+                adopted[iri] = held
+                break
+    return rewrite_iris(doc, adopted) if adopted else doc
 
 
 def _iri_tail(iri: str) -> tuple[str, str]:

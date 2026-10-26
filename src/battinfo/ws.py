@@ -38,6 +38,7 @@ if TYPE_CHECKING:
 
     from battinfo._workspace import Workspace
 
+from battinfo._adoption import UncheckedIrisError as UncheckedIrisError  # ws.submit/zenodo raise it
 from battinfo._deposit_files import (
     DepositContext,
     DepositFile,
@@ -2373,6 +2374,10 @@ class AuthoringWorkspace:
         # "unreachable", ...), so a record is asked for once per registry, and a
         # failed lookup is not retried on every ws.add() that references it.
         self._reference_lookups: dict[tuple[str, str, str], str] = {}
+        # registry -> {IRI minted under /id/1001/: the IRI to use for it}, as that
+        # registry answered when a submit or deposit asked (_adopt_registry_iris),
+        # so each IRI is asked about once per registry in a session.
+        self._registry_answers: dict[str, dict[str, str]] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -2517,6 +2522,86 @@ class AuthoringWorkspace:
         from battinfo.api._shared import _with_held_iri  # noqa: PLC0415
 
         return _with_held_iri(record, self._ws.source_root)
+
+    def _adopt_registry_iris(
+        self, registry_url: str | None, *, allow_unchecked_iris: bool, action: str
+    ) -> dict[str, str]:
+        """Adopt the old form of each record this workspace names under ``/id/1001/`` that the registry holds in it.
+
+        Run first by :meth:`submit`, :meth:`zenodo` and :meth:`publish`. Every
+        IRI of the ``/id/1001/`` form in the saved records is looked up in the
+        registry at *registry_url* (``battinfo._adoption.adopt_registry_iris``).
+        One the registry holds under its old form is adopted: the record
+        files, the index and the records in this session are rewritten to
+        name the old form, and the call prints what it adopted. A uid never
+        depends on the base, so every record keeps its file and its uid.
+
+        Returns each IRI looked up, mapped to the IRI to use for it (the old
+        form when adopted, else itself). An IRI the registry cannot be asked
+        about raises ``UncheckedIrisError`` before anything is changed, unless
+        *allow_unchecked_iris*.
+        """
+        from battinfo._adoption import (  # noqa: PLC0415
+            adopt_registry_iris,
+            adopted_iris,
+            adoption_lines,
+            minted_iris,
+            rewrite_files,
+        )
+
+        records_dir = self._ws.source_root
+        files = sorted(records_dir.rglob("*.json")) if records_dir.exists() else []
+        found: set[str] = set()
+        for path in files:
+            try:
+                found |= minted_iris(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError):
+                continue  # the submit or deposit reports an unreadable record itself
+        checked = adopt_registry_iris(
+            found,
+            registry_url=registry_url,
+            action=action,
+            allow_unchecked_iris=allow_unchecked_iris,
+            answers=self._registry_answers.setdefault(registry_url, {}) if registry_url else None,
+        )
+        adopted = adopted_iris(checked)
+        if adopted:
+            rewrite_files([*files, self._ws.index_path], adopted)
+            self._rewrite_session_iris(adopted)
+            for line in adoption_lines(adopted):
+                print(line)
+        return checked
+
+    def _rewrite_session_iris(self, adopted: Mapping[str, str]) -> None:
+        """Give the records this session holds the IRIs *adopted* maps to, so the next save keeps them."""
+        from battinfo._adoption import rewrite_iris, rewrite_iris_in_place  # noqa: PLC0415
+
+        held: builtins.list[Any] = [
+            *self._ws.descriptions,
+            *self._ws.cell_specs,
+            *self._ws.cells,
+            *self._ws.test_specs,
+            *self._ws.tests,
+            *self._ws.datasets,
+            *(cell for cell, _ in self._indexed_cells),
+            *self._material_specs,
+            *self._materials,
+            *self._electrode_specs,
+            *self._electrodes,
+            *self._parameter_sets,
+        ]
+        for record in held:
+            rewrite_iris_in_place(record, adopted)
+        # The lookups keyed by IRI answer to the adopted IRI too.
+        for specs in (self._material_specs_by_ref, self._electrode_specs_by_ref):
+            for key, body in list(specs.items()):
+                rewrite_iris_in_place(body, adopted)
+                if key in adopted:
+                    specs[adopted[key]] = body
+        for key, pair in list(self._channels_by_ref.items()):
+            self._channels_by_ref[key] = rewrite_iris(pair, adopted)
+            if key in adopted:
+                self._channels_by_ref[adopted[key]] = self._channels_by_ref[key]
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -4539,6 +4624,7 @@ class AuthoringWorkspace:
         allow_partial: bool = False,
         allow_local_files: bool = False,
         archive_hosted_files: bool = False,
+        allow_unchecked_iris: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -4568,6 +4654,11 @@ class AuthoringWorkspace:
 
         For finer control — e.g. reviewing a Zenodo draft before it goes live —
         call those four steps individually instead.
+
+        Right after the save, each IRI minted under
+        ``https://w3id.org/battinfo/id/1001/`` is looked up in the registry, and
+        a record the registry already holds in the old form keeps that IRI
+        (see :meth:`submit`), before anything is uploaded, deposited or sent.
 
         Parameters
         ----------
@@ -4610,6 +4701,10 @@ class AuthoringWorkspace:
             :meth:`upload` before the deposit, so it needs this too. Without
             it such a call is refused after the save, before anything is
             uploaded or sent, and the refusal names the files.
+        allow_unchecked_iris:
+            Go on with IRIs minted under ``/id/1001/`` that could not be
+            checked with the registry, with a warning, instead of stopping
+            (see :meth:`submit` and :meth:`zenodo`).
         """
         if zenodo:
             # A deposit without a token or a creator, or one whose recorded
@@ -4631,6 +4726,13 @@ class AuthoringWorkspace:
             self.save()
         finally:
             self._publishing = False
+        # A record minted under /id/1001/ that the registry already holds in the
+        # old form takes that IRI before anything is uploaded, deposited or sent;
+        # ws.zenodo() and ws.submit() below reuse the registry's answers. Without
+        # a registry and a deposit, ws.submit() refuses below.
+        registry_url = self._registry_base()[0]
+        if zenodo or registry_url is not None:
+            self._adopt_registry_iris(registry_url, allow_unchecked_iris=allow_unchecked_iris, action="ws.publish()")
         if zenodo:
             # Both checks below come before the R2 upload and the deposit.
             plan = self._deposit_file_plan(
@@ -4657,7 +4759,13 @@ class AuthoringWorkspace:
                 )
             # ws.submit() takes the DOI from the deposit's record in
             # .battinfo/zenodo.json, and puts it on the records the deposit holds.
-            self.zenodo(publish=True, sandbox=sandbox, creators=creators, archive_hosted_files=archive_hosted_files)
+            self.zenodo(
+                publish=True,
+                sandbox=sandbox,
+                creators=creators,
+                archive_hosted_files=archive_hosted_files,
+                allow_unchecked_iris=allow_unchecked_iris,
+            )
         return self.submit(
             note=note,
             doi=doi,
@@ -4665,6 +4773,7 @@ class AuthoringWorkspace:
             publication_mode=publication_mode,
             allow_partial=allow_partial,
             allow_local_files=allow_local_files,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def status(
@@ -5781,6 +5890,7 @@ class AuthoringWorkspace:
         submit_all: bool = False,
         resume: bool = True,
         allow_local_files: bool = False,
+        allow_unchecked_iris: bool = False,
     ) -> builtins.list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
 
@@ -5812,6 +5922,15 @@ class AuthoringWorkspace:
         ``names=`` only your lab uses) or pin an IRI of your own.  Lab labels
         such as ``"S1"`` are not scoped to a lab until 0.9, so two labs that both
         name a cell of one spec ``"S1"`` mint one IRI.
+
+        Once the records are read and checked, and before anything is sent,
+        each IRI minted under ``https://w3id.org/battinfo/id/1001/`` is looked
+        up in the registry. A record it already holds in the old form,
+        ``https://w3id.org/battinfo/{segment}/{uid}``, keeps that IRI: the
+        records that name it are rewritten and saved, and the call prints what
+        it adopted. A registry that cannot be asked stops the submission with
+        :class:`SubmitError`, naming the IRIs not checked, unless
+        ``allow_unchecked_iris=True``.
 
         Credentials can be passed as arguments, established with ``ws.login()``
         (scoped to this workspace instance), set as environment variables, or
@@ -5865,6 +5984,10 @@ class AuthoringWorkspace:
             nobody else can open. Deposit the files first (``ws.zenodo()``
             points the records at the deposited copies), then submit.
             ``True`` lifts the check, for a local test registry only.
+        allow_unchecked_iris:
+            Submit IRIs minted under ``/id/1001/`` that could not be checked
+            with the registry as they are, with a warning, instead of
+            stopping.
 
         Example::
 
@@ -6132,6 +6255,22 @@ class AuthoringWorkspace:
                 outcomes=prefailed,
             )
 
+        # One record, one IRI: a record minted here under /id/1001/ that the
+        # registry already holds in the old form takes that IRI, in the saved
+        # records and in those read above, before anything is sent (IRI
+        # ruling, decision 5). The checks above need no network.
+        from battinfo._adoption import adopted_iris, rewrite_iris
+
+        try:
+            checked_iris = self._adopt_registry_iris(
+                url, allow_unchecked_iris=allow_unchecked_iris, action="ws.submit()"
+            )
+        except UncheckedIrisError as exc:
+            raise SubmitError(str(exc)) from exc
+        adopted = adopted_iris(checked_iris)
+        if adopted:
+            parsed = {path: rewrite_iris(rec, adopted) for path, rec in parsed.items()}
+
         # The Zenodo DOI is recorded as provenance.citation_doi, a field the
         # registry record schemas allow, so each submitted record links to its
         # archived dataset: the DOI passed for every record, or else the
@@ -6332,6 +6471,8 @@ class AuthoringWorkspace:
                         publication_mode=publication_mode,
                         validation=validations[src],
                         allow_local_files=allow_local_files,
+                        checked_iris=checked_iris,
+                        allow_unchecked_iris=allow_unchecked_iris,
                     )
                 )
 
@@ -6370,6 +6511,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6429,6 +6572,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6472,6 +6617,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6515,6 +6662,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6579,6 +6728,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -7229,6 +7380,7 @@ class AuthoringWorkspace:
         license: str | None = None,
         keywords: builtins.list[str] | None = None,
         archive_hosted_files: bool = False,
+        allow_unchecked_iris: bool = False,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -7297,6 +7449,15 @@ class AuthoringWorkspace:
         unless ``archive_hosted_files=True``: the deposit then archives each from
         the local file :meth:`upload` recorded, and the records keep their R2
         URLs.
+
+        Once the records pass the publication check, and before Zenodo is
+        contacted, each IRI minted under ``https://w3id.org/battinfo/id/1001/``
+        is looked up in the workspace's registry. A record it already holds in
+        the old form, ``https://w3id.org/battinfo/{segment}/{uid}``, keeps that
+        IRI: the records that name it are rewritten and saved, and the result's
+        ``adopted`` lists it. A registry that cannot be asked, or a workspace
+        without one, stops the deposit before anything is sent, naming the
+        IRIs not checked, unless ``allow_unchecked_iris=True``.
 
         A record that points at a copy of its data the deposit should carry, but
         whose local file this workspace has no record of, refuses the deposit
@@ -7389,6 +7550,10 @@ class AuthoringWorkspace:
             deposit otherwise refuses. Each comes from its local file, and a
             warning names each one from the private bucket
             (``upload(public=False)``), since the deposit makes it public.
+        allow_unchecked_iris:
+            Deposit IRIs minted under ``/id/1001/`` that could not be checked
+            with the registry as they are, with a warning, instead of
+            stopping.
 
         Returns
         -------
@@ -7409,6 +7574,7 @@ class AuthoringWorkspace:
         """
         import tempfile
 
+        from battinfo._adoption import adopted_iris
         from battinfo.zenodo import KeptFilesError, ZenodoClient, ZenodoError
 
         # Each numbered step runs only once the steps before it have passed, so
@@ -7437,65 +7603,82 @@ class AuthoringWorkspace:
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
-
-        # The deposit's parameter sets must pass the record check ws.submit() runs.
-        deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
-        _print_replaced_legacy_parameter_sets(replaced_legacy)
-        parameter_set_errors = _parameter_set_publication_errors(deposit_records)
-        if parameter_set_errors:
-            raise RuntimeError(
-                f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
-                "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
-            )
-
         # One title for the deposit graph, the RO-Crate and the Zenodo metadata:
         # the one given, or the automatic one the metadata would derive, so a
         # deposit made without a title still names its catalog node.
         title = self._deposit_title(title)
         domain = ZENODO_HOSTS[environment]
-
-        # ── 3. File plan ───────────────────────────────────────────────────────
-        # One entry per file, with its deposit name and digests. Everything
-        # below takes file names and URLs from the plan. A record that points
-        # at a copy an earlier deposit made is found through the index: its
-        # local file goes up again when it changed, and when it is gone the
-        # copy the record already holds is kept.
         context = self._deposit_context(sandbox=sandbox, record_id=record_id, state=state, index=index)
-        plan = self._deposit_file_plan(records_dir, context=context)
-        kept_files = plan.kept_files()
-        # A file ws.upload() put in R2 storage goes into the deposit only when
-        # the call asks for it, and one from the private bucket with a warning.
-        if archive_hosted_files:
-            self._warn_private_hosted_files(plan)
-        else:
-            self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
-
-        # ── 4. Placeholder graph, checked for a draft as for a publish ─────────
-        # A refusal here leaves no draft behind. The graph is built as
-        # ws.preview_jsonld() builds it, with placeholders for the record id and
-        # DOI the deposit does not have yet. No check reads those values beyond
-        # their form, which the placeholders share, and the dataset records take
-        # the deposited file URLs only at the end, so the verdict is the one the
-        # deposit's own graph gets. That graph is checked again before a DOI is
-        # minted. A record the plan or the graph had to leave out refuses the
-        # deposit first, naming each record and why.
-        omissions = list(plan.omissions)
         version_of = record_id or (state.get("record_id") if state.get("published") else None)
-        placeholder_graph = self._build_zenodo_jsonld(
-            zenodo_record_id=0,
-            prereserved_doi="10.5281/zenodo.RECORD_ID",
-            record_url=f"https://{domain}/records/RECORD_ID",
-            file_plan=plan,
-            title=title,
-            description=description or "",
-            creators=creators,
-            contributors=contributors,
-            license=license or "",
-            keywords=keywords or [],
-            is_version_of=f"https://{domain}/records/{version_of}" if version_of else "",
-            omissions=omissions,
+
+        def prepare(first: bool) -> tuple[dict, DepositFilePlan, list, list, dict]:
+            """Steps 2 to 4 on the records as saved: they run again after an adoption rewrites them."""
+            # The deposit's parameter sets must pass the record check ws.submit() runs.
+            deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+            if first:
+                _print_replaced_legacy_parameter_sets(replaced_legacy)
+            parameter_set_errors = _parameter_set_publication_errors(deposit_records)
+            if parameter_set_errors:
+                raise RuntimeError(
+                    f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
+                    "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
+                )
+
+            # ── 3. File plan ───────────────────────────────────────────────────
+            # One entry per file, with its deposit name and digests. Everything
+            # below takes file names and URLs from the plan. A record that points
+            # at a copy an earlier deposit made is found through the index: its
+            # local file goes up again when it changed, and when it is gone the
+            # copy the record already holds is kept.
+            plan = self._deposit_file_plan(records_dir, report=first, context=context)
+            kept_files = plan.kept_files()
+            # A file ws.upload() put in R2 storage goes into the deposit only when
+            # the call asks for it, and one from the private bucket with a warning.
+            if first and archive_hosted_files:
+                self._warn_private_hosted_files(plan)
+            elif first:
+                self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
+
+            # ── 4. Placeholder graph, checked for a draft as for a publish ─────
+            # A refusal here leaves no draft behind. The graph is built as
+            # ws.preview_jsonld() builds it, with placeholders for the record id
+            # and DOI the deposit does not have yet. No check reads those values
+            # beyond their form, which the placeholders share, and the dataset
+            # records take the deposited file URLs only at the end, so the
+            # verdict is the one the deposit's own graph gets. That graph is
+            # checked again before a DOI is minted. A record the plan or the
+            # graph had to leave out refuses the deposit first, naming each
+            # record and why.
+            omissions = list(plan.omissions)
+            placeholder_graph = self._build_zenodo_jsonld(
+                zenodo_record_id=0,
+                prereserved_doi="10.5281/zenodo.RECORD_ID",
+                record_url=f"https://{domain}/records/RECORD_ID",
+                file_plan=plan,
+                title=title,
+                description=description or "",
+                creators=creators,
+                contributors=contributors,
+                license=license or "",
+                keywords=keywords or [],
+                is_version_of=f"https://{domain}/records/{version_of}" if version_of else "",
+                omissions=omissions,
+            )
+            self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
+            return deposit_records, plan, kept_files, omissions, placeholder_graph
+
+        deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=True)
+        # One record, one IRI: once the records pass the checks above, a record
+        # minted here under /id/1001/ that the registry already holds in the old
+        # form takes that IRI (IRI ruling, decision 5), and the deposit is
+        # planned and checked again on the rewritten records.
+        adopted = adopted_iris(
+            self._adopt_registry_iris(
+                self._registry_base()[0], allow_unchecked_iris=allow_unchecked_iris, action="ws.zenodo()"
+            )
         )
-        self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
+        if adopted:
+            deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=False)
         # The records the deposit holds: ws.submit() records its DOI on these only.
         held_records = _deposit_record_iris(deposit_records, placeholder_graph)
 
@@ -7805,6 +7988,7 @@ class AuthoringWorkspace:
             draft_url=draft_url,
             published=published,
             is_new_version=record_id is not None,
+            adopted=adopted,
         )
 
     def validate_rocrate(self, path: str | Path | None = None) -> bool:
@@ -10051,8 +10235,12 @@ class AuthoringWorkspace:
                 f"recorded on them. {hint}"
             )
             return lambda iri: None
+        # A record adopted the old form of its IRI after the deposit recorded the
+        # other form (#483) is still one the deposit holds.
         held = frozenset(state["records"])
-        return lambda iri: stored if stored and isinstance(iri, str) and iri in held else None
+        return lambda iri: (
+            stored if stored and isinstance(iri, str) and any(iri == h or same_record(iri, h) for h in held) else None
+        )
 
     def _check_zenodo_draft(self, state: dict) -> bool:
         """For :meth:`submit`: ask Zenodo about the draft *state* records, if a token is set.
@@ -10481,7 +10669,7 @@ class AuthoringWorkspace:
         # Loading the same result again (a notebook cell re-run) reuses the cell
         # already referenced; a second object would make its serial ambiguous.
         iri = result.get("id")
-        known = next((cell for cell, _ in self._indexed_cells if iri and cell.id == iri), None)
+        known = self._indexed_cell_by_iri(iri)
         if known is not None:
             return known
         cell = Cell(
@@ -10491,10 +10679,20 @@ class AuthoringWorkspace:
             serial_number=result.get("serial_number"),
             batch_id=result.get("batch_id"),
         )
-        self._index_cell(cell, result.get("serial_number"), result.get("name"))
         if cell.id:
-            self._resolve_published_reference(cell.id, "cell")
+            # Referred to by the IRI the cell has here or in the registry, in either form.
+            cell.id = self._reference_iri(cell.id, "cell")
+        self._index_cell(cell, result.get("serial_number"), result.get("name"))
         return cell
+
+    def _indexed_cell_by_iri(self, iri: object) -> Any:
+        """The cell this session indexes under *iri*, in either form of it, or ``None``."""
+        if not isinstance(iri, str) or not iri:
+            return None
+        return next(
+            (cell for cell, _ in self._indexed_cells if cell.id == iri or same_record(cell.id, iri)),
+            None,
+        )
 
     # ── Published records referenced from this workspace ──────────────────────
 
@@ -10507,32 +10705,53 @@ class AuthoringWorkspace:
         """
         return self._root / ".battinfo" / "references"
 
-    def _knows_record(self, iri: str, entity_type: str) -> bool:
-        """True when *iri* is in this session, saved in this workspace, or kept as a copy."""
+    def _known_record_iri(self, iri: str, entity_type: str) -> str | None:
+        """The IRI this session, this workspace's records or a kept copy holds the record *iri* names under.
+
+        Records are compared by segment and uid (``namespace.same_record``), so
+        the old form and the ``/id/1001/`` form of one record find each other,
+        and the IRI returned is the one the record has here, which a
+        reference to it takes. ``None`` when none of them holds it.
+        """
         sessions: dict[str, builtins.list[Any]] = {
             "cell": self._ws.cells,
             "cell-spec": self._ws.cell_specs,
             "test-protocol": self._ws.test_specs,
         }
-        if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
-            return True
+        for obj in sessions.get(entity_type, []):
+            held = getattr(obj, "id", None)
+            if held == iri or (isinstance(held, str) and same_record(held, iri)):
+                return held
         uid = iri.rstrip("/").rsplit("/", 1)[-1]
         if not is_dashed_uid(uid):
-            return False  # no file is named after it
+            return None  # no file is named after it
         for root in (self._ws.source_root, self._references_root):
             path = save_entity_path(entity_type, uid, root)
             try:
-                if path.exists() and entity_id_from_doc(_read_json(path)) == iri:
-                    return True
+                held = entity_id_from_doc(_read_json(path)) if path.exists() else None
             except (OSError, ValueError):
                 continue
-        return False
+            if held is not None and (held == iri or same_record(held, iri)):
+                return held
+        return None
+
+    def _reference_iri(self, iri: str, entity_type: str) -> str:
+        """The IRI this workspace refers to the published record *iri* by, looked up as :meth:`_resolve_published_reference` does.
+
+        The IRI the session, the records folder or a kept copy holds the record
+        under, in either form; *iri* itself when the record is in none of them
+        (offline, or not found).
+        """
+        self._resolve_published_reference(iri, entity_type)
+        return self._known_record_iri(iri, entity_type) or iri
 
     def _fetch_registry_record(self, iri: str, entity_type: str) -> tuple[dict | None, str]:
         """GET the published record behind *iri*: ``(canonical record or None, outcome)``.
 
         The outcome is ``found``, ``not_found`` (the registry does not hold it),
         ``unreachable``, or ``unreadable`` (its entry carries no canonical record).
+        The registry matches on segment and uid, so the record may carry the
+        other form of *iri*; it is kept with the IRI it carries.
         """
         import urllib.error  # noqa: PLC0415
         import urllib.request  # noqa: PLC0415
@@ -10550,7 +10769,8 @@ class AuthoringWorkspace:
         except Exception:  # noqa: BLE001 - registry down or network blocked: degrade, never fail ws.add
             return None, "unreachable"
         record = _canonical_record_of(envelope, entity_type)
-        if record is None or entity_id_from_doc(record) != iri:
+        held = entity_id_from_doc(record) if record is not None else None
+        if record is None or held is None or not (held == iri or same_record(held, iri)):
             return None, "unreadable"
         return record, "found"
 
@@ -10586,7 +10806,7 @@ class AuthoringWorkspace:
         one per test. A record found under an IRI that does not end in a uid
         raises ``ValueError`` (see ``_keep_reference_copy``).
         """
-        if self._knows_record(iri, entity_type):
+        if self._known_record_iri(iri, entity_type) is not None:
             return "local"
         registry = self._registry_url
         if not registry:
@@ -10644,15 +10864,19 @@ class AuthoringWorkspace:
             properties=specs,
             source=ProvenanceInfo(type="registry"),
         )
-        ct.id = result.get("id") or product.get("id")
-        if ct.id:
-            # Keep the fetched published record as a reference copy, so cells
-            # authored against this spec resolve it when ws.save() validates them.
-            if result.get("source") == "api" and entity_id_from_doc(record) == ct.id:
-                if not self._knows_record(ct.id, "cell-spec"):
-                    self._keep_reference_copy(record, "cell-spec")
-            else:
-                self._resolve_published_reference(ct.id, "cell-spec")
+        iri = result.get("id") or product.get("id")
+        ct.id = iri
+        if iri:
+            # The spec is referred to by the IRI it has: the one this workspace
+            # holds it under, or the published record's, in either form. Keep the
+            # fetched published record as a reference copy, so cells authored
+            # against this spec resolve it when ws.save() validates them.
+            fetched = entity_id_from_doc(record) if result.get("source") == "api" else None
+            held = self._known_record_iri(iri, "cell-spec")
+            if held is None and fetched is not None and (fetched == iri or same_record(fetched, iri)):
+                self._keep_reference_copy(record, "cell-spec")
+                held = fetched
+            ct.id = held or self._reference_iri(iri, "cell-spec")
         return ct
 
     def _fetch_cell_spec_record(self, result: dict) -> dict:
@@ -11685,8 +11909,9 @@ class AuthoringWorkspace:
     def _resolve_test_protocol_ref(self, iri: str) -> tuple[str | None, str | None]:
         """Look up a saved test-protocol record by IRI → ``(name, test_kind)``.
 
-        Both are ``None`` when no record with that IRI exists in this workspace;
-        the IRI is still accepted as a reference to a protocol published elsewhere.
+        Both are ``None`` when no record with that IRI, in either form, exists
+        in this workspace; the IRI is still accepted as a reference to a
+        protocol published elsewhere.
         """
         proto_dir = self._ws.source_root / "test-protocol"
         for path in sorted(proto_dir.glob("*.json")) if proto_dir.exists() else []:
@@ -11694,7 +11919,7 @@ class AuthoringWorkspace:
                 body = _read_json(path).get("test_spec") or {}
             except (OSError, ValueError):
                 continue
-            if body.get("id") == iri:
+            if body.get("id") == iri or same_record(body.get("id"), iri):
                 return body.get("name"), (body.get("kind") or body.get("test_kind") or body.get("test_type"))
         return None, None
 
@@ -11810,13 +12035,15 @@ class AuthoringWorkspace:
                 # drop the protocol entirely and mint a test with protocol_id
                 # null, so require an IRI (resolved here) and reject anything else.
                 if test_spec.startswith(("http://", "https://")):
-                    protocol_id_ref = test_spec
                     protocol_name, resolved_kind = self._resolve_test_protocol_ref(test_spec)
                     if protocol_name is None and resolved_kind is None:
                         # Not saved here: a protocol published elsewhere, so make the
                         # reference resolvable at save time (its name and kind stay
                         # unread, so the test's identity does not change).
                         self._resolve_published_reference(test_spec, "test-protocol")
+                    # Referred to by the IRI the protocol has here or in the registry,
+                    # in either form. The test's uid is the same under both.
+                    protocol_id_ref = self._known_record_iri(test_spec, "test-protocol") or test_spec
                     if resolved_kind and not test_type:
                         test_type = resolved_kind
                 else:
@@ -12202,9 +12429,10 @@ class AuthoringWorkspace:
         if isinstance(ref, str):
             s = ref.strip()
             if s.startswith("http"):  # an IRI
-                # A cell already found (by serial, a search hit or an earlier IRI) is
-                # reused, not referenced and looked up in the registry again.
-                known = next((cell for cell, _ in self._indexed_cells if getattr(cell, "id", None) == s), None)
+                # A cell already found (by serial, a search hit or an earlier IRI,
+                # in either form) is reused, not referenced and looked up in the
+                # registry again.
+                known = self._indexed_cell_by_iri(s)
                 if known is not None:
                     return known
                 return self._reference_cell({"id": s, "type": "cell"})
@@ -12832,6 +13060,8 @@ def _journaled_submit(
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
     allow_local_files: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict:
     """Run one submission through the resume journal (no journal → plain submit)."""
     if journal is None:
@@ -12844,6 +13074,8 @@ def _journaled_submit(
             publication_mode=publication_mode,
             validation=validation,
             allow_local_files=allow_local_files,
+            checked_iris=checked_iris,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
     payload_hash = _journal_payload_hash(payload)
     previous = journal.previous_success(source_local_id, payload_hash, registry_url=url) if source_local_id else None
@@ -12868,6 +13100,8 @@ def _journaled_submit(
         publication_mode=publication_mode,
         validation=validation,
         allow_local_files=allow_local_files,
+        checked_iris=checked_iris,
+        allow_unchecked_iris=allow_unchecked_iris,
     )
     journal.record(outcome, payload_hash, registry_url=url)
     return outcome
@@ -12924,6 +13158,8 @@ def _do_submit(
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
     allow_local_files: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
@@ -12935,7 +13171,8 @@ def _do_submit(
     with ``ok`` (True for published/validated, False for failed/rejected/errored),
     ``status``, ``error`` (the message when not ok), ``iri`` and the raw
     ``result``. A failed record is reported in the outcome, never swallowed, so
-    the batch surfaces it.
+    the batch surfaces it. *checked_iris* are the IRIs :meth:`AuthoringWorkspace.submit`
+    already looked up in this registry (``submit_publication_package``).
     """
     import copy
 
@@ -12949,7 +13186,12 @@ def _do_submit(
     for attempt in range(2):
         try:
             result = submit_publication_package(
-                payload, registry_base_url=url, api_key=key, allow_local_files=allow_local_files
+                payload,
+                registry_base_url=url,
+                api_key=key,
+                allow_local_files=allow_local_files,
+                checked_iris=checked_iris,
+                allow_unchecked_iris=allow_unchecked_iris,
             )
             raw_response = result.get("response")
             response = raw_response if isinstance(raw_response, dict) else {}
@@ -13280,7 +13522,11 @@ def _import_test_kind_from_technique(technique: str) -> str:
 
 @dataclass
 class ZenodoResult:
-    """Result of ``ws.zenodo()``."""
+    """Result of ``ws.zenodo()``.
+
+    *adopted* maps each IRI minted under ``/id/1001/`` that the deposit took
+    in the old form the registry holds to that form.
+    """
 
     record_id: str
     doi: str
@@ -13288,6 +13534,7 @@ class ZenodoResult:
     draft_url: str
     published: bool
     is_new_version: bool
+    adopted: dict[str, str] = field(default_factory=dict)
 
 
 _DEFAULT_REGISTRY_URL = "https://battinfo-registry.onrender.com"
