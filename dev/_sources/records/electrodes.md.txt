@@ -44,7 +44,7 @@ record = create_electrode_spec(
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    "id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch",
     "short_id": "kxwy5f",
     "name": "NMC811 cathode design A",
     "active_material_kind": "nmc811",
@@ -188,9 +188,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "ActiveMaterial"
     },
     "skos:prefLabel": "NMC811 cathode design A",
-    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch",
   "schema:name": "NMC811 cathode design A"
 }
 ```
@@ -229,7 +229,7 @@ record = create_electrode(
 {
   "schema_version": "0.2.0",
   "electrode": {
-    "id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
+    "id": "https://w3id.org/battinfo/id/1001/electrode/3w87-0ddf-ryjg-evxe",
     "electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "3w870d",
     "name": "Cathode disc 07, cell LAB-2026-0001",
@@ -259,7 +259,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": "Electrode",
-  "@id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
+  "@id": "https://w3id.org/battinfo/id/1001/electrode/3w87-0ddf-ryjg-evxe",
   "schema:name": "Cathode disc 07, cell LAB-2026-0001",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"

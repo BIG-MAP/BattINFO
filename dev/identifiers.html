@@ -548,13 +548,15 @@
   <section id="identifiers-purls">
 <h1>Identifiers &amp; PURLs<a class="headerlink" href="#identifiers-purls" title="Link to this heading">#</a></h1>
 <p>Every BattINFO record has one canonical identifier — an IRI of the form:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>https://w3id.org/battinfo/&lt;namespace&gt;/&lt;uid&gt;
-└──────┬──────┘ └──┬───┘ └───┬────┘ └─┬─┘
-   PURL host     project   record     16-char UID
-                           namespace  (Crockford Base32)
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>https://w3id.org/battinfo/id/1001/&lt;namespace&gt;/&lt;uid&gt;
+└──────┬───────┘ └──┬───┘ └──┬──┘ └────┬────┘ └─┬─┘
+   PURL host     project publisher  record    16-char UID
+                          prefix   namespace  (Crockford Base32)
 </pre></div>
 </div>
-<p>Example: <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0</span></code></p>
+<p>1001 is the prefix of Battery Genome, under which BattINFO mints new records. Records minted before 0.8.0 have the older form without the prefix, <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/&lt;namespace&gt;/&lt;uid&gt;</span></code>, and keep it, as does every record of a workspace created before 0.8.0. The two forms of one namespace and uid name one record.</p>
+<p>A new workspace can describe a record that already exists in the older form, such as a published cell spec: the uid is the same, only the form differs. Before <code class="docutils literal notranslate"><span class="pre">ws.submit()</span></code>, <code class="docutils literal notranslate"><span class="pre">ws.zenodo()</span></code> or <code class="docutils literal notranslate"><span class="pre">ws.publish()</span></code> sends anything, each IRI minted under <code class="docutils literal notranslate"><span class="pre">/id/1001/</span></code> is looked up in the registry, and one the registry holds in the older form is adopted: every record that names it is rewritten to that form and saved, and the call lists what it adopted. If the registry cannot be reached, the call stops and names the IRIs it could not check; pass <code class="docutils literal notranslate"><span class="pre">allow_unchecked_iris=True</span></code> to go on without the check.</p>
+<p>Example of an existing record, in the older form: <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0</span></code></p>
 <section id="the-three-promises">
 <h2>The three promises<a class="headerlink" href="#the-three-promises" title="Link to this heading">#</a></h2>
 <ul class="simple">

@@ -42,7 +42,7 @@ record = create_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
+    "id": "https://w3id.org/battinfo/id/1001/dataset/qqf7-w7e0-zrpj-vy7q",
     "short_id": "qqf7w7",
     "name": "Graphite density claims, Smith 2026",
     "material_kind": "graphite",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
+  "@id": "https://w3id.org/battinfo/id/1001/dataset/qqf7-w7e0-zrpj-vy7q",
   "@type": "schema:Dataset",
   "schema:name": "Graphite density claims, Smith 2026",
   "schema:about": {
@@ -161,7 +161,7 @@ record = result.to_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
+    "id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc",
     "short_id": "j6a4h1",
     "name": "Example pouch cell",
     "virtual_cell": true,
@@ -264,7 +264,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
+  "@id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc",
   "@type": "schema:Dataset",
   "schema:name": "Example pouch cell",
   "schema:identifier": {
@@ -434,7 +434,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "dcat:byteSize": 418,
     "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11",
     "schema:isPartOf": {
-      "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc"
+      "@id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc"
     }
   }
 }

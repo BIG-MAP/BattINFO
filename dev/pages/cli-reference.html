@@ -716,6 +716,8 @@ battinfo config set zenodo_sandbox_token &lt;token&gt;</p>
 computational stays with the source file, which is linked back as the
 record’s source_protocol artifact (with its sha256). Warnings list what
 did not carry over.</p>
+<p>The IRI mints under –base. When –out already holds the record under
+the other form of its IRI, the record keeps the IRI it has there.</p>
 <p><strong>Usage</strong>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>battinfo<span class="w"> </span>import-protocol<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">{</span>input_path<span class="o">}</span>
 </pre></div>
@@ -731,6 +733,7 @@ did not carry over.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--kind</span> <span class="pre">&lt;str&gt;</span></code>: Test kind (e.g. cycling, gitt; default: inferred).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--uid</span> <span class="pre">&lt;str&gt;</span></code>: Canonical uid (xxxx-xxxx-xxxx-xxxx); default: derived deterministically from the file’s sha256.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--out</span> <span class="pre">&lt;path&gt;</span></code>: Write the canonical test-protocol record here (default: stdout).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--base</span> <span class="pre">&lt;str&gt;</span></code>: The base the record’s IRI mints under; https://w3id.org/battinfo/ for the old form.  [default: https://w3id.org/battinfo/id/1001/]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
 </section>
@@ -2348,6 +2351,7 @@ Required scopes: deposit:write</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--token</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--community</span> <span class="pre">&lt;str&gt;</span></code>: Zenodo community identifier.  [default: battery-genome]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--no-community</span></code>: Skip community submission.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--allow-unchecked-iris</span></code>: Deposit IRIs minted under /id/1001/ that the registry could not be asked about as they are.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
 </section>
@@ -2411,6 +2415,7 @@ cell its IRI again.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">--iris</span> <span class="pre">&lt;str&gt;</span></code>: Comma-separated list of pre-assigned BattINFO cell IRIs (one per cell).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--serials</span> <span class="pre">&lt;str&gt;</span></code>: Comma-separated serial numbers (one per cell, used as folder names).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--force</span></code>: Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--base</span> <span class="pre">&lt;str&gt;</span></code>: The base a new batch’s records mint under (default https://w3id.org/battinfo/id/1001/; https://w3id.org/battinfo/ for the old form). An existing batch keeps its own.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--help</span></code>: Show this message and exit.</p></li>
 </ul>
 </section>

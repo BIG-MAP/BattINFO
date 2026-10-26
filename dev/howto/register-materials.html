@@ -564,7 +564,7 @@
 <span class="n">nmc</span> <span class="o">=</span> <span class="n">create_material_spec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;NMC811&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;nmc811&quot;</span><span class="p">,</span>
                            <span class="n">formula</span><span class="o">=</span><span class="s2">&quot;LiNi0.8Mn0.1Co0.1O2&quot;</span><span class="p">)</span>
 <span class="n">saved</span> <span class="o">=</span> <span class="n">save_material_spec</span><span class="p">(</span><span class="n">nmc</span><span class="p">,</span> <span class="n">source_root</span><span class="o">=</span><span class="s2">&quot;my-library&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;upsert&quot;</span><span class="p">)</span>
-<span class="n">NMC811_IRI</span> <span class="o">=</span> <span class="n">saved</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>   <span class="c1"># e.g. https://w3id.org/battinfo/spec/3ypr-gngx-x28c-rarf</span>
+<span class="n">NMC811_IRI</span> <span class="o">=</span> <span class="n">saved</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span>   <span class="c1"># e.g. https://w3id.org/battinfo/id/1001/spec/8x8j-0d1r-wvgs-99e4</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">source_root</span></code> is the folder that holds your record library (records land in
@@ -623,7 +623,7 @@ yours:</p>
 <section id="what-just-happened">
 <h2>What just happened<a class="headerlink" href="#what-just-happened" title="Link to this heading">#</a></h2>
 <p>Each save wrote one plain-JSON record into your library and minted it a
-permanent <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/spec/</span></code> IRI. That IRI is how everything
+permanent <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/id/1001/spec/</span></code> IRI. That IRI is how everything
 else refers to the material: electrode recipes reference it
 (see <a class="reference internal" href="build-a-cell-from-components.html"><span class="std std-doc">Build a cell from components</span></a>), and the
 saved record validates against the material-spec schema before it lands.

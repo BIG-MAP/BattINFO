@@ -43,7 +43,7 @@ record = create_separator_spec(
 {
   "schema_version": "0.2.0",
   "separator_spec": {
-    "id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
+    "id": "https://w3id.org/battinfo/id/1001/spec/6nec-h262-tthy-4rnt",
     "short_id": "6nech2",
     "name": "Celgard 2500",
     "material": "PP",
@@ -127,9 +127,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       }
     ],
     "skos:prefLabel": "Celgard 2500",
-    "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/6nec-h262-tthy-4rnt#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/6nec-h262-tthy-4rnt",
   "schema:name": "Celgard 2500"
 }
 ```
@@ -159,7 +159,7 @@ record = create_separator(
 {
   "schema_version": "0.2.0",
   "separator": {
-    "id": "https://w3id.org/battinfo/separator/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/separator/7d9k-2m4p-8t3x-6nq5",
     "separator_spec_id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt",
     "short_id": "7d9k2m",
     "lot_id": "CG25-2026-114"
@@ -187,7 +187,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": "Separator",
-  "@id": "https://w3id.org/battinfo/separator/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/separator/7d9k-2m4p-8t3x-6nq5",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/6nec-h262-tthy-4rnt"
   }

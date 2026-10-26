@@ -65,7 +65,7 @@ record = create_electrolyte_spec(
 {
   "schema_version": "0.2.0",
   "electrolyte_spec": {
-    "id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
+    "id": "https://w3id.org/battinfo/id/1001/spec/0rp6-kncv-cyem-qwcd",
     "short_id": "0rp6kn",
     "name": "1M LiPF6 in EC:EMC 3:7 + 2% VC",
     "family": "organic",
@@ -252,9 +252,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MilliSiemensPerCentiMetre"
     },
     "skos:prefLabel": "1M LiPF6 in EC:EMC 3:7 + 2% VC",
-    "@id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/0rp6-kncv-cyem-qwcd#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/0rp6-kncv-cyem-qwcd",
   "schema:name": "1M LiPF6 in EC:EMC 3:7 + 2% VC"
 }
 ```
@@ -288,7 +288,7 @@ record = create_electrolyte(
 {
   "schema_version": "0.2.0",
   "electrolyte": {
-    "id": "https://w3id.org/battinfo/electrolyte/me0t-k16f-eh5y-rq0k",
+    "id": "https://w3id.org/battinfo/id/1001/electrolyte/me0t-k16f-eh5y-rq0k",
     "electrolyte_spec_id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd",
     "short_id": "me0tk1"
   },
@@ -315,7 +315,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": "ElectrolyteSolution",
-  "@id": "https://w3id.org/battinfo/electrolyte/me0t-k16f-eh5y-rq0k",
+  "@id": "https://w3id.org/battinfo/id/1001/electrolyte/me0t-k16f-eh5y-rq0k",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/0rp6-kncv-cyem-qwcd"
   }
