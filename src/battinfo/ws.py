@@ -38,6 +38,8 @@ if TYPE_CHECKING:
 
     from battinfo._workspace import Workspace
 
+from battinfo._adoption import RetiredIrisError as RetiredIrisError  # ws.submit/zenodo raise it
+from battinfo._adoption import RetiredRecord
 from battinfo._adoption import UncheckedIrisError as UncheckedIrisError  # ws.submit/zenodo raise it
 from battinfo._deposit_files import (
     DepositContext,
@@ -2374,10 +2376,11 @@ class AuthoringWorkspace:
         # "unreachable", ...), so a record is asked for once per registry, and a
         # failed lookup is not retried on every ws.add() that references it.
         self._reference_lookups: dict[tuple[str, str, str], str] = {}
-        # registry -> {IRI minted under /id/1001/: the IRI to use for it}, as that
-        # registry answered when a submit or deposit asked (_adopt_registry_iris),
-        # so each IRI is asked about once per registry in a session.
-        self._registry_answers: dict[str, dict[str, str]] = {}
+        # registry -> {IRI minted under /id/1001/: the IRI to use for it, or the
+        # RetiredRecord that stops it}, as that registry answered when a submit
+        # or deposit asked (_adopt_registry_iris), so each IRI is asked about
+        # once per registry in a session.
+        self._registry_answers: dict[str, dict[str, str | RetiredRecord]] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -2537,9 +2540,10 @@ class AuthoringWorkspace:
         depends on the base, so every record keeps its file and its uid.
 
         Returns each IRI looked up, mapped to the IRI to use for it (the old
-        form when adopted, else itself). An IRI the registry cannot be asked
-        about raises ``UncheckedIrisError`` before anything is changed, unless
-        *allow_unchecked_iris*.
+        form when adopted, else itself). A record the registry holds as
+        superseded or withdrawn raises ``RetiredIrisError``, and an IRI it
+        cannot be asked about raises ``UncheckedIrisError`` unless
+        *allow_unchecked_iris*, both before anything is changed.
         """
         from battinfo._adoption import (  # noqa: PLC0415
             adopt_registry_iris,
@@ -5930,7 +5934,9 @@ class AuthoringWorkspace:
         records that name it are rewritten and saved, and the call prints what
         it adopted. A registry that cannot be asked stops the submission with
         :class:`SubmitError`, naming the IRIs not checked, unless
-        ``allow_unchecked_iris=True``.
+        ``allow_unchecked_iris=True``. A record it holds as superseded or
+        withdrawn stops it too, whatever ``allow_unchecked_iris`` says, and
+        the error names what replaced it.
 
         Credentials can be passed as arguments, established with ``ws.login()``
         (scoped to this workspace instance), set as environment variables, or
@@ -6265,7 +6271,7 @@ class AuthoringWorkspace:
             checked_iris = self._adopt_registry_iris(
                 url, allow_unchecked_iris=allow_unchecked_iris, action="ws.submit()"
             )
-        except UncheckedIrisError as exc:
+        except (UncheckedIrisError, RetiredIrisError) as exc:
             raise SubmitError(str(exc)) from exc
         adopted = adopted_iris(checked_iris)
         if adopted:
@@ -7457,7 +7463,9 @@ class AuthoringWorkspace:
         IRI: the records that name it are rewritten and saved, and the result's
         ``adopted`` lists it. A registry that cannot be asked, or a workspace
         without one, stops the deposit before anything is sent, naming the
-        IRIs not checked, unless ``allow_unchecked_iris=True``.
+        IRIs not checked, unless ``allow_unchecked_iris=True``. A record it
+        holds as superseded or withdrawn stops the deposit with
+        :class:`RetiredIrisError`, whatever ``allow_unchecked_iris`` says.
 
         A record that points at a copy of its data the deposit should carry, but
         whose local file this workspace has no record of, refuses the deposit

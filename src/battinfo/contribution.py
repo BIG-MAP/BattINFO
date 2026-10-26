@@ -563,6 +563,8 @@ def publish_to_zenodo(
     that IRI: the contribution's files are rewritten to name it, and the
     result's ``adopted`` lists it. A registry that cannot be asked raises
     ``UncheckedIrisError``, naming the IRIs, unless ``allow_unchecked_iris=True``.
+    A record it holds as superseded or withdrawn raises ``RetiredIrisError``
+    before anything is rewritten or sent, whatever ``allow_unchecked_iris`` says.
     """
     from battinfo.zenodo import ZenodoClient
 
