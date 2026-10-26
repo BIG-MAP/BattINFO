@@ -85,6 +85,14 @@ jobs:
         run: uv run --no-sync pytest -q tests --cov=battinfo --cov-report=term-missing --cov-report=xml
       - name: Identifier-policy compliance
         run: uv run --no-sync python .tools/quality/lint_identifier_policy.py
+      # A merged release of a publisher's vocabulary never changes: a pull
+      # request may add releases under def/, but not change, delete or rename
+      # a file of one its base holds. The full history above has the base.
+      - name: Vocabulary releases are unchanged
+        if: github.event_name == 'pull_request' && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: uv run --no-sync python scripts/check_def_vocabularies.py --unchanged-since "$BASE_SHA"
       - name: Packaged examples are in sync with source
         run: uv run --no-sync python scripts/sync_examples.py --check
       # Hard gate. The LinkML slot_uri declarations are the single source of

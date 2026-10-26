@@ -8,6 +8,8 @@
 #   battinfo.ttl + battinfo.html at the root: the newest final release's ontology
 #   battinfo/versions/X.Y.Z/battinfo.ttl + battinfo.html: each final release's
 #   battinfo-inferred.ttl beside each battinfo.ttl, when the reasoner made one
+#   def/{prefix}/{X.Y.Z}/ for each release of a publisher's vocabulary, and
+#   def/{prefix}/ and def/index.html (scripts/build_def_site.py)
 #
 # Only a final release tag (vX.Y.Z) updates stable/, and only when it is the
 # newest final release, so a backport such as v0.8.2 after v0.9.0 leaves
@@ -44,6 +46,18 @@
 # - The root versions/ folder is removed. It held copies of that 2024 file
 #   under the numbers of older releases, which no w3id rule reads.
 #
+# Every deploy, of main or of any tag, also publishes the publishers'
+# vocabularies under def/, whose releases are not tied to BattINFO's. The docs
+# workflow's build job lays them out in docs/_build/def-site/def/ with
+# scripts/build_def_site.py, and its --merge, run here, adds each release
+# folder def/{prefix}/{X.Y.Z}/ that gh-pages lacks. A published release folder
+# is never replaced or removed: one whose vocab.ttl differs from the
+# checkout's is kept, with a warning, and one whose vocab.ttl is the same gets
+# the checkout's index.html, so page fixes reach it. def/{prefix}/vocab.ttl
+# and index.html, the newest final release's, and def/index.html are then
+# written from every release on gh-pages, so a tag built from an older
+# checkout keeps the newer releases.
+#
 # tests/test_docs_deploy.py runs this script against a scratch gh-pages tree.
 #
 # Usage: docs-deploy.sh <version>   (e.g. "dev", "v0.8.0rc1" or "v0.8.0")
@@ -51,12 +65,15 @@
 set -euo pipefail
 VERSION="$1"
 BUILD_DIR="docs/_build/html"
+DEF_SITE="docs/_build/def-site"
+BUILD_DEF_SITE="$(dirname "${BASH_SOURCE[0]}")/../../scripts/build_def_site.py"
 ONTOLOGY="battinfo.ttl"
 CATALOG=".github/workflows/docs-deploy-catalog.xml"
 SITE_DIR="$(mktemp -d)"
 PYTHON="${PYTHON:-python3}"
 FINAL_RELEASE='^v[0-9]+\.[0-9]+\.[0-9]+$'
 ontology_failed=""
+def_failed=""
 
 git fetch origin gh-pages:gh-pages 2>/dev/null || true
 if git rev-parse --verify gh-pages >/dev/null 2>&1; then
@@ -296,6 +313,13 @@ PY
   fi
 fi
 
+# The publishers' vocabularies, which the build job laid out.
+if [[ -d "$DEF_SITE/def" ]]; then
+  if ! "$PYTHON" "$BUILD_DEF_SITE" --merge "$DEF_SITE" "$SITE_DIR"; then
+    def_failed=1
+  fi
+fi
+
 cd "$SITE_DIR"
 git add -A
 if git diff --cached --quiet; then
@@ -308,5 +332,10 @@ fi
 
 if [[ -n "$ontology_failed" ]]; then
   echo "::error::The docs of $VERSION are deployed, but its ontology is not; the message above says why." >&2
+fi
+if [[ -n "$def_failed" ]]; then
+  echo "::error::The docs of $VERSION are deployed, but the def/ vocabularies may not all be; the message above says why." >&2
+fi
+if [[ -n "$ontology_failed$def_failed" ]]; then
   exit 1
 fi

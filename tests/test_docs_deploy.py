@@ -17,12 +17,18 @@ Main's deploy and a final tag's also keep the 2024 root ontology at its
 versionIRI, 0.8.0-beta, and drop the root versions/ folder of mislabelled
 copies of it.
 
+Every deploy adds the releases of the publishers' vocabularies under def/
+that gh-pages lacks, as scripts/build_def_site.py laid them out in the build
+job, and never replaces a published one. The fixture vocabulary of
+tests/fixtures/def-vocabularies/ stands in for a publisher's.
+
 The script runs with bash and git, against a local bare repository standing
 in for origin; nothing leaves the machine.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import re
@@ -36,6 +42,19 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / ".github" / "workflows" / "docs-deploy.sh"
+FIXTURE_DEF = ROOT / "tests" / "fixtures" / "def-vocabularies" / "def"
+
+
+def _load(name: str):
+    spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def_site = _load("build_def_site")
 
 # The ontology files published in 2024: the root battinfo.ttl declares the
 # versionIRI of 0.8.0-beta, and battinfo-inferred.ttl is its inferred form.
@@ -197,13 +216,16 @@ def _deploy(
     ok: bool = True,
     reasoner: str | None = None,
     reasoner_timeout: str = "120",
+    vocabularies: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Run the script as docs.yml does: in a fresh clone of the tag, holding the built docs.
 
     The clone's battinfo.ttl declares *ontology*, by default the tag's own
     version (0.8.0 for a branch build or a pre-release). With *reasoner*, ROBOT
     is the stand-in, doing what FAKE_ROBOT says for that word; without it,
-    ROBOT is not set.
+    ROBOT is not set. *vocabularies* is the clone's def/ folder, which the
+    build job lays out in docs/_build/def-site; without it, def/ holds no
+    vocabulary.
     """
     tmp_path, origin, env = site
     checkout = tmp_path / f"checkout-{len(list(tmp_path.glob('checkout-*')))}"
@@ -211,6 +233,8 @@ def _deploy(
     build = checkout / "docs" / "_build" / "html"
     build.mkdir(parents=True)
     (build / "index.html").write_bytes(f"{version} build\n".encode())
+    def_dir = vocabularies if vocabularies is not None else checkout / "def"
+    assert def_site.build(checkout / "docs" / "_build" / "def-site", def_dir) == []
     final = re.fullmatch(r"v(\d+\.\d+\.\d+)", version)
     (checkout / "battinfo.ttl").write_bytes(_ontology(ontology or (final.group(1) if final else "0.8.0")))
     env = {**env, "ROBOT": "", "REASONER_TIMEOUT": reasoner_timeout}
@@ -501,3 +525,153 @@ def test_robot_is_pinned_checked_and_cannot_stop_a_deploy() -> None:
     limit = re.search(r'get\("REASONER_TIMEOUT"\) or (\d+)', SCRIPT.read_text(encoding="utf-8"))
     assert limit is not None
     assert deploy["timeout-minutes"] * 60 >= int(limit.group(1)) + 5 * 60
+
+
+# The publishers' vocabularies under def/.
+
+PRIOR_OF_THE_BETA = "    owl:priorVersion <https://w3id.org/battinfo/def/1000/1.0.0> ;\n"
+
+
+def _vocabularies(site: tuple[Path, Path, dict[str, str]], *versions: str, first_beta: bool = False) -> Path:
+    """A checkout's def/ folder holding the fixture releases *versions* of prefix 1000.
+
+    With *first_beta*, 1.1.0-beta.1 is the vocabulary's first release, so it
+    names no prior version.
+    """
+    tmp_path = site[0]
+    def_dir = tmp_path / f"def-{len(list(tmp_path.glob('def-*')))}" / "def"
+    for version in versions:
+        shutil.copytree(FIXTURE_DEF / "1000" / version, def_dir / "1000" / version)
+    if first_beta:
+        beta = def_dir / "1000" / "1.1.0-beta.1" / "vocab.ttl"
+        beta.write_text(beta.read_text(encoding="utf-8").replace(PRIOR_OF_THE_BETA, ""), encoding="utf-8")
+    return def_dir
+
+
+def _release(def_dir: Path, version: str) -> bytes:
+    return (def_dir / "1000" / version / "vocab.ttl").read_bytes().replace(b"\r\n", b"\n")
+
+
+def test_without_vocabularies_nothing_is_published_under_def(site: tuple[Path, Path, dict[str, str]]) -> None:
+    _deploy(site, "dev")
+    assert not _is_published(site, "def")
+
+
+def test_vocabulary_releases_are_published_and_the_vocabulary_serves_its_newest_final_release(
+    site: tuple[Path, Path, dict[str, str]],
+) -> None:
+    # A pre-release alone is served at the vocabulary's address.
+    beta_only = _vocabularies(site, "1.1.0-beta.1", first_beta=True)
+    _deploy(site, "dev", vocabularies=beta_only)
+    assert _published(site, "def/1000/1.1.0-beta.1/vocab.ttl") == _release(beta_only, "1.1.0-beta.1")
+    beta_page = _published(site, "def/1000/1.1.0-beta.1/index.html")
+    assert b"Version IRI: <code>https://w3id.org/battinfo/def/1000/1.1.0-beta.1</code>" in beta_page
+    assert _published(site, "def/1000/vocab.ttl") == _release(beta_only, "1.1.0-beta.1")
+    assert _published(site, "def/1000/index.html") == beta_page
+    assert b'<a href="1000/1.1.0-beta.1/">1.1.0-beta.1</a>, served at the ontology IRI' in _published(
+        site, "def/index.html"
+    )
+
+    # A final release is added beside it and takes the vocabulary's address.
+    with_final = _vocabularies(site, "1.1.0-beta.1", "1.1.0", first_beta=True)
+    _deploy(site, "dev", vocabularies=with_final)
+    assert sorted(_listed(site, "def/1000/")) == [
+        "def/1000/1.1.0",
+        "def/1000/1.1.0-beta.1",
+        "def/1000/index.html",
+        "def/1000/vocab.ttl",
+    ]
+    assert _published(site, "def/1000/1.1.0-beta.1/index.html") == beta_page
+    assert _published(site, "def/1000/vocab.ttl") == _release(with_final, "1.1.0")
+    assert _published(site, "def/1000/index.html") == _published(site, "def/1000/1.1.0/index.html")
+    index = _published(site, "def/index.html").decode("utf-8")
+    assert re.findall(r'<li><a href="1000/([^/]+)/">', index) == ["1.1.0", "1.1.0-beta.1"]
+    assert '<a href="1000/1.1.0/">1.1.0</a>, served at the ontology IRI' in index
+
+    # Running again changes nothing.
+    proc = _deploy(site, "dev", vocabularies=with_final)
+    assert "No docs changes to deploy." in proc.stdout, proc.stdout + proc.stderr
+
+
+def test_a_tag_built_from_an_older_checkout_keeps_the_newer_releases(site: tuple[Path, Path, dict[str, str]]) -> None:
+    every = _vocabularies(site, "1.0.0", "1.1.0-beta.1", "1.1.0")
+    _deploy(site, "dev", vocabularies=every)
+
+    # A pre-release tag deploys the vocabularies too, and a tag cut before the
+    # newer releases leaves them, and the vocabulary's address, as they are.
+    for tag in ("v0.8.1rc1", "v0.8.1"):
+        _deploy(site, tag, vocabularies=_vocabularies(site, "1.0.0"))
+        for version in ("1.0.0", "1.1.0-beta.1", "1.1.0"):
+            assert _published(site, f"def/1000/{version}/vocab.ttl") == _release(every, version)
+        assert _published(site, "def/1000/vocab.ttl") == _release(every, "1.1.0")
+        index = _published(site, "def/index.html").decode("utf-8")
+        assert re.findall(r'<li><a href="1000/([^/]+)/">', index) == ["1.1.0", "1.1.0-beta.1", "1.0.0"]
+
+    # A checkout that no longer has a release does not remove it either.
+    _deploy(site, "dev")
+    assert _published(site, "def/1000/1.0.0/vocab.ttl") == _release(every, "1.0.0")
+
+
+def test_a_published_release_is_never_replaced_and_a_different_copy_is_warned_about(
+    site: tuple[Path, Path, dict[str, str]],
+) -> None:
+    first = _vocabularies(site, "1.0.0")
+    _deploy(site, "dev", vocabularies=first)
+    page = _published(site, "def/1000/1.0.0/index.html")
+
+    changed = _vocabularies(site, "1.0.0")
+    vocab = changed / "1000" / "1.0.0" / "vocab.ttl"
+    vocab.write_text(vocab.read_text(encoding="utf-8").replace('"sample"@en', '"specimen"@en'), encoding="utf-8")
+    proc = _deploy(site, "dev", vocabularies=changed)
+
+    assert _published(site, "def/1000/1.0.0/vocab.ttl") == _release(first, "1.0.0")
+    assert _published(site, "def/1000/1.0.0/index.html") == page
+    assert _published(site, "def/1000/vocab.ttl") == _release(first, "1.0.0")
+    assert "::warning::def/1000/1.0.0/vocab.ttl on gh-pages differs from this checkout's." in proc.stderr, proc.stderr
+    assert "No docs changes to deploy." in proc.stdout, proc.stdout + proc.stderr
+
+
+def test_a_fix_to_the_page_reaches_a_published_release_whose_vocabulary_is_unchanged(
+    site: tuple[Path, Path, dict[str, str]],
+) -> None:
+    def_dir = _vocabularies(site, "1.0.0")
+    _deploy(site, "dev", vocabularies=def_dir)
+    page = _published(site, "def/1000/1.0.0/index.html")
+    vocab = _published(site, "def/1000/1.0.0/vocab.ttl")
+    # The page an older build of the site wrote.
+    _add_to_site(site, {"def/1000/1.0.0/index.html": "older page\n", "def/1000/index.html": "older page\n"})
+
+    proc = _deploy(site, "dev", vocabularies=def_dir)
+    assert _published(site, "def/1000/1.0.0/index.html") == page
+    assert _published(site, "def/1000/index.html") == page
+    assert _published(site, "def/1000/1.0.0/vocab.ttl") == vocab
+    assert "::warning::" not in proc.stderr, proc.stderr
+
+
+def test_a_partly_written_release_folder_is_replaced_whole(site: tuple[Path, Path, dict[str, str]]) -> None:
+    # A folder without vocab.ttl is not a published release.
+    _add_to_site(site, {"def/1000/1.0.0/index.html": "half written\n"})
+    def_dir = _vocabularies(site, "1.0.0")
+    _deploy(site, "dev", vocabularies=def_dir)
+
+    assert _published(site, "def/1000/1.0.0/vocab.ttl") == _release(def_dir, "1.0.0")
+    assert b"<h1>Example vocabulary</h1>" in _published(site, "def/1000/1.0.0/index.html")
+    assert _listed(site, "def/1000/1.0.0/") == ["def/1000/1.0.0/index.html", "def/1000/1.0.0/vocab.ttl"]
+    assert _listed(site, "def/1000/") == ["def/1000/1.0.0", "def/1000/index.html", "def/1000/vocab.ttl"]
+
+
+def test_the_build_job_lays_out_the_vocabularies_where_the_deploy_reads_them() -> None:
+    docs = yaml.safe_load((ROOT / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8"))
+    build, deploy = docs["jobs"]["build"], docs["jobs"]["deploy"]
+    (step,) = [s for s in build["steps"] if "scripts/build_def_site.py" in s.get("run", "")]
+    assert step["run"].endswith("scripts/build_def_site.py docs/_build/def-site")
+    (upload,) = [s for s in build["steps"] if s.get("with", {}).get("name") == "def-site"]
+    assert upload["uses"].startswith("actions/upload-artifact@")
+    assert upload["with"]["path"] == "docs/_build/def-site"
+    (download,) = [s for s in deploy["steps"] if s.get("with", {}).get("name") == "def-site"]
+    assert download["uses"].startswith("actions/download-artifact@")
+    assert download["with"]["path"] == "docs/_build/def-site"
+    assert 'DEF_SITE="docs/_build/def-site"' in SCRIPT.read_text(encoding="utf-8")
+    # A merge that changes only def/ deploys: main's pushes have no path filter.
+    triggers = docs.get("on", docs.get(True))
+    assert triggers["push"] == {"branches": ["main"], "tags": ["v*"]}
