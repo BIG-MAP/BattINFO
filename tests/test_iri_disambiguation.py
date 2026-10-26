@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo import Workspace, quantity  # noqa: E402
+from battinfo.namespace import OLD_FORM_BASE  # noqa: E402
 
 
 def _ws(root: Path) -> Workspace:
@@ -407,7 +408,8 @@ def test_colliding_cell_specs_saved_before_0_8_0_keep_their_iris(tmp_path: Path)
     root = tmp_path / "lab"
 
     def session(pinned: bool) -> dict[str, list[str]]:
-        ws = battinfo.workspace(root, registry_url=None)
+        # A workspace of before 0.8.0 mints the old form.
+        ws = battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)
         plain = battinfo.CellSpec(manufacturer="Example Lab", model="R2032", format="coin", chemistry="Li-ion")
         rated = battinfo.CellSpec(
             manufacturer="Example Lab",
@@ -461,7 +463,7 @@ def _save_spec_alone_before_0_8_0(root: Path) -> dict:
     """Save the spec and C01 as 057b66a0 did, by pinning the IRI it minted; return the saved spec record."""
     import battinfo
 
-    first = battinfo.workspace(root, registry_url=None)
+    first = battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)  # a workspace of before 0.8.0
     first.add("cell", spec=_li_ion_spec(2.0), serial_numbers=["C01"])
     first._ws.cell_specs[0].id = SPEC_SAVED_ALONE_BEFORE_0_8_0
     first.save()

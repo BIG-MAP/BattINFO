@@ -1283,7 +1283,9 @@ def test_records_on_a_draft_no_run_recorded_are_refused_in_a_new_session(
     assert set(_locations(fresh)) == {new_url}
     assert _download_urls(zenodo.graph(int(state["record_id"]))) == [new_url]
     if entry == "publish":
-        assert new_url in json.dumps(registry.payloads) and str(orphan.id) not in json.dumps(registry.payloads)
+        # The orphan's record and DOI, not its bare number: a timestamp can contain it.
+        sent = json.dumps(registry.payloads)
+        assert new_url in sent and f"/records/{orphan.id}/" not in sent and f"zenodo.{orphan.id}" not in sent
 
 
 def test_a_file_in_an_unpublished_draft_of_this_account_is_refused_not_linked(tmp_path: Path, zenodo: _Zenodo) -> None:

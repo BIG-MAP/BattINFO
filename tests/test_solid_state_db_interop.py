@@ -95,7 +95,7 @@ def test_batch_imports_every_row() -> None:
     assert len(results) == 6
     for r in results:
         # every row yields a full chain
-        assert r.cell_spec["cell_spec"]["id"].startswith("https://w3id.org/battinfo/spec/")
+        assert r.cell_spec["cell_spec"]["id"].startswith("https://w3id.org/battinfo/id/1001/spec/")
         assert r.cell_instance["cell_instance"]["cell_spec_id"] == r.cell_spec["cell_spec"]["id"]
         assert r.material_specs, f"row {r.row_id} produced no materials"
         assert r.test is not None and r.test["test"]["kind"] == "cycling"

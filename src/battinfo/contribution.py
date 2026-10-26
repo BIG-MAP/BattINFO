@@ -11,7 +11,7 @@ import json
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import yaml
 
@@ -23,7 +23,7 @@ from battinfo.ingest import (
     _resolve_kind_map,
     build_ingest_workspace,
 )
-from battinfo.namespace import record_iri, record_iri_regex
+from battinfo.namespace import DEFAULT_RECORD_BASE, OLD_FORM_BASE, base_prefix, record_iri, record_iri_regex
 
 # Extended token → BatteryTestType mapping for package_batch file scanning.
 # Keys are lowercase substrings matched against the filename.
@@ -55,6 +55,37 @@ CONTRIBUTION_TIMESERIES_GLOB = "data/**/*.csv"
 CONTRIBUTION_PHOTO_GLOBS = ["photos/*.jpg", "photos/*.jpeg", "photos/*.png"]
 
 
+# ── The base a folder's records mint under ────────────────────────────────────
+
+#: The key under which a contribution folder (``battinfo.yaml``) and a batch
+#: folder (``batch.yaml``) record the base their records mint under.
+RECORD_BASE_KEY = "record_base"
+
+
+def recorded_record_base(manifest: Mapping[str, Any], *, where: str) -> str:
+    """The base a folder's manifest records, else the old form.
+
+    A contribution or batch folder records the base its records mint under
+    when it is created (IRI ruling of 22 October 2026, decision 5). One that
+    records none was created before the switch and keeps the old form,
+    ``https://w3id.org/battinfo/``, for good. *where* names the manifest in
+    the error for a value that is not a record base.
+    """
+    recorded = manifest.get(RECORD_BASE_KEY)
+    if recorded is None:
+        return OLD_FORM_BASE
+    try:
+        base_prefix(recorded)
+    except ValueError as exc:
+        raise ValueError(f"{where} records {RECORD_BASE_KEY} {recorded!r}, which {exc}") from exc
+    return str(recorded)
+
+
+def _base_to_record(base: str) -> str | None:
+    """The ``record_base`` a new folder writes for *base*: none for the old form, which is the absence of one."""
+    return None if base == OLD_FORM_BASE else base
+
+
 # ── Init ──────────────────────────────────────────────────────────────────────
 
 
@@ -66,13 +97,34 @@ def init_contribution(
     lab: str | None = None,
     license: str = "CC-BY-4.0",
     overwrite: bool = False,
+    base: str | None = None,
 ) -> Path:
-    """Copy the contribution template to *output_path* and patch battinfo.yaml."""
+    """Copy the contribution template to *output_path* and patch battinfo.yaml.
+
+    A new contribution folder records the base its records mint under in
+    ``battinfo.yaml``: *base*, by default ``https://w3id.org/battinfo/id/1001/``
+    (``"https://w3id.org/battinfo/"`` for the old form). A folder that already
+    holds a contribution keeps the base it records, or the old form when it
+    records none; a *base* that differs from it raises ``ValueError``.
+    """
     import re
 
     output_path = Path(output_path)
     if output_path.exists() and not overwrite:
         raise FileExistsError(f"{output_path} already exists. Pass overwrite=True or choose a different name.")
+    if base is not None:
+        base_prefix(base)
+    existing = output_path / CONTRIBUTION_MANIFEST
+    if existing.is_file():
+        kept = recorded_record_base(load_contribution_manifest(output_path), where=str(existing))
+        if base is not None and base != kept:
+            raise ValueError(
+                f"{existing} mints its records under {kept}, the base the contribution was created with; "
+                f"base={base!r} cannot change it."
+            )
+        record_base = _base_to_record(kept)
+    else:
+        record_base = _base_to_record(DEFAULT_RECORD_BASE if base is None else base)
 
     shutil.copytree(TEMPLATE_DIR, output_path, dirs_exist_ok=overwrite)
 
@@ -96,6 +148,12 @@ def init_contribution(
         text = _patch(text, "lab", lab)
     if license != "CC-BY-4.0":
         text = _patch(text, "license", license)
+    if record_base is not None:
+        text = (
+            text.rstrip("\n")
+            + "\n\n# ── Managed by battinfo: the base this contribution's records mint under ──────\n"
+            + f'{RECORD_BASE_KEY}: "{record_base}"\n'
+        )
 
     manifest_path.write_text(text, encoding="utf-8")
     return output_path
@@ -432,6 +490,9 @@ def process_contribution(
         clean=clean,
         validation_policy=validation_policy,
         bundle=bundle,
+        # The base the contribution recorded when it was created; one that
+        # records none was created before the switch and keeps the old form.
+        base=recorded_record_base(manifest, where=str(root / CONTRIBUTION_MANIFEST)),
     )
     result["build"] = build
     return result
@@ -663,6 +724,8 @@ def _generate_cell_iri(
     cell_spec_iri: str,
     batch_id: str | None,
     serial_number: str | None = None,
+    *,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> str:
     """Mint a cell IRI the way every other path mints it.
 
@@ -673,6 +736,7 @@ def _generate_cell_iri(
     gets a random IRI: its place in the batch is not an identity, and two
     unlabelled cells must never share one. The caller records it in the
     cell's ``battinfo.yaml``, which is where ``package_batch`` reads it.
+    The IRI takes *base*, the batch's.
     """
     from battinfo.api._shared import _normalized_dashed_uid
     from battinfo.entities import cell_instance_identity_seed, seed_text, stable_uid
@@ -683,7 +747,7 @@ def _generate_cell_iri(
         else None
     )
     uid = stable_uid(seed) if seed is not None else _normalized_dashed_uid()
-    return record_iri("cell", uid)
+    return record_iri("cell", uid, base_prefix(base))
 
 
 def _recorded_cell_iris(
@@ -736,6 +800,7 @@ cell_spec_iri: {cell_spec_iri!r}
 cell_iri: {cell_iri}
 publisher_id: null
 source_version: null
+record_base: {record_base}
 """
 
 
@@ -752,6 +817,7 @@ def init_batch(
     cell_iris: list[str] | None = None,
     serial_numbers: list[str] | None = None,
     overwrite: bool = False,
+    base: str | None = None,
 ) -> dict[str, Any]:
     """Scaffold a multi-cell batch directory.
 
@@ -784,6 +850,14 @@ def init_batch(
                    ``battinfo.yaml`` records for the same cell spec: a
                    serial's folder by its name, and the folders of cells
                    without a serial in folder order.
+        base: The base the batch's records mint under, recorded in
+              ``batch.yaml`` (and each cell's ``battinfo.yaml``) when the
+              batch is created. Left out, it is
+              ``https://w3id.org/battinfo/id/1001/``; pass
+              ``"https://w3id.org/battinfo/"`` for the old form. A batch
+              folder that already has a ``batch.yaml`` keeps the base it
+              records, or the old form when it records none; a ``base``
+              that differs from it raises ValueError.
 
     A cell with a serial number gets the IRI it gets on every path that
     takes its spec, serial and batch (``save_cell_instance``,
@@ -807,6 +881,19 @@ def init_batch(
 
     if output_dir.exists() and not overwrite:
         raise FileExistsError(f"{output_dir} already exists. Pass overwrite=True or choose a different path.")
+    if base is not None:
+        base_prefix(base)
+    existing_manifest = output_dir / BATCH_MANIFEST
+    if existing_manifest.is_file():
+        # A batch folder keeps the base it was created with.
+        batch_base = recorded_record_base(load_batch_manifest(output_dir), where=str(existing_manifest))
+        if base is not None and base != batch_base:
+            raise ValueError(
+                f"{existing_manifest} mints its records under {batch_base}, the base the batch was "
+                f"created with; base={base!r} cannot change it."
+            )
+    else:
+        batch_base = DEFAULT_RECORD_BASE if base is None else base
     recorded, unserialled = _recorded_cell_iris(output_dir, cell_spec_iri, manufacturer, model)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -823,6 +910,8 @@ def init_batch(
         "project": project,
         "license": license,
     }
+    if _base_to_record(batch_base) is not None:
+        shipment_meta[RECORD_BASE_KEY] = batch_base
     _write_yaml(output_dir / BATCH_MANIFEST, shipment_meta)
 
     # ── per-cell folders ───────────────────────────────────────────────────────
@@ -833,9 +922,11 @@ def init_batch(
         if cell_iris:
             cell_iri = cell_iris[i]
         elif sn:
-            cell_iri = recorded.get(_slugify(sn)) or _generate_cell_iri(cell_spec_iri, batch_id, sn)
+            cell_iri = recorded.get(_slugify(sn)) or _generate_cell_iri(cell_spec_iri, batch_id, sn, base=batch_base)
         else:
-            cell_iri = unserialled.pop(0) if unserialled else _generate_cell_iri(cell_spec_iri, batch_id)
+            cell_iri = (
+                unserialled.pop(0) if unserialled else _generate_cell_iri(cell_spec_iri, batch_id, base=batch_base)
+            )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         # Fail closed on a within-batch folder collision: two cells that slug to the same
         # folder (e.g. duplicate serials) would otherwise reuse the dir (mkdir exist_ok)
@@ -864,6 +955,7 @@ def init_batch(
             operator=repr(operator) if operator else "null",
             project=repr(project) if project else "null",
             license=license,
+            record_base=repr(_base_to_record(batch_base)) if _base_to_record(batch_base) else "null",
         )
         (cell_dir / CONTRIBUTION_MANIFEST).write_text(manifest_text, encoding="utf-8")
 
@@ -941,6 +1033,8 @@ def add_to_batch(
         raise ValueError(f"serial_numbers length ({len(serial_numbers)}) must equal count ({count}).")
 
     manifest = load_batch_manifest(batch_dir)
+    # The base the batch recorded when it was created, else the old form.
+    batch_base = recorded_record_base(manifest, where=str(batch_dir / BATCH_MANIFEST))
 
     cell_spec_iri: str = manifest["cell_spec_iri"]
     cell_spec_name: str = manifest.get("cell_spec_name", "")
@@ -957,7 +1051,11 @@ def add_to_batch(
     new_cells: list[dict[str, Any]] = []
     for i in range(count):
         sn = serial_numbers[i].strip() if serial_numbers else None
-        cell_iri = cell_iris[i] if cell_iris else _generate_cell_iri(cell_spec_iri, effective_batch_id, sn or None)
+        cell_iri = (
+            cell_iris[i]
+            if cell_iris
+            else _generate_cell_iri(cell_spec_iri, effective_batch_id, sn or None, base=batch_base)
+        )
         folder_name = _cell_folder_name(cell_iri, manufacturer, model, sn)
         cell_name = sn or folder_name
 
@@ -977,6 +1075,7 @@ def add_to_batch(
             operator=repr(effective_operator) if effective_operator else "null",
             project=repr(effective_project) if effective_project else "null",
             license=effective_license,
+            record_base=repr(_base_to_record(batch_base)) if _base_to_record(batch_base) else "null",
         )
         (cell_dir / CONTRIBUTION_MANIFEST).write_text(manifest_text, encoding="utf-8")
         new_cells.append({"folder": folder_name, "cell_name": cell_name, "cell_iri": cell_iri})
@@ -1214,9 +1313,12 @@ def package_batch(
     batch_dir = Path(batch_dir).resolve()
     manifest = load_batch_manifest(batch_dir)
     cell_spec_iri: str = manifest["cell_spec_iri"]
+    # The tests and datasets mint under the base the batch recorded when it was
+    # created; a batch that records none keeps the old form.
+    batch_base = recorded_record_base(manifest, where=str(batch_dir / BATCH_MANIFEST))
 
     raw_cell_spec, cell_spec = _load_cell_spec_for_batch(cell_spec_iri)
-    cell_spec = _finalize_cell_spec(raw_cell_spec, cell_specification=cell_spec)
+    cell_spec = _finalize_cell_spec(raw_cell_spec, cell_specification=cell_spec, base=batch_base)
 
     # Discover cell sub-folders: any directory with a battinfo.yaml
     cell_dirs = sorted(d for d in batch_dir.iterdir() if d.is_dir() and (d / CONTRIBUTION_MANIFEST).exists())
@@ -1246,7 +1348,9 @@ def package_batch(
             batch_id=cell_manifest.get("batch_id") or manifest.get("batch_id"),
             source=ProvenanceInfo(type="measurement"),
         )
-        ci = _without_local_urls(_finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir))
+        ci = _without_local_urls(
+            _finalize_cell_instance(raw_ci, cell_spec=cell_spec, dataset_dir=cell_dir, base=batch_base)
+        )
         if ci.id is not None:
             prior = seen_cell_iris.get(ci.id)
             if prior is not None:
@@ -1283,6 +1387,7 @@ def package_batch(
                     cell_instance=ci,
                     dataset_dir=cell_dir,
                     data_locator=dataset_locator_seed(dataset_path=raw_path, workspace_root=cell_dir),
+                    base=batch_base,
                 )
             )
 
@@ -1295,7 +1400,9 @@ def package_batch(
             )
             # The dataset IRI is seeded from the folder's name (dataset_locator_seed),
             # so the local access URL goes only after it is minted.
-            ds = _without_local_urls(_finalize_dataset(raw_ds, cell_instance=ci, test=test, dataset_dir=cell_dir))
+            ds = _without_local_urls(
+                _finalize_dataset(raw_ds, cell_instance=ci, test=test, dataset_dir=cell_dir, base=batch_base)
+            )
 
             entries.append(
                 ZenodoDatasetEntry(

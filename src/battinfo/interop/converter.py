@@ -10,9 +10,10 @@ from typing import TYPE_CHECKING, Any, Mapping
 
 from battinfo._util import is_real_number
 from battinfo.bundle import SCHEMA_VERSION, Cell, CellSpec, ProvenanceInfo, Test, TestSpec
+from battinfo.entities import seed_iri
 from battinfo.interop._common import load_json_source
 from battinfo.interop.protocols import _num
-from battinfo.namespace import record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
 
 if TYPE_CHECKING:
     from battinfo._workspace import Workspace
@@ -242,6 +243,7 @@ def import_converter_jsonld(
     model: str | None = None,
     chemistry: str | None = None,
     schema_version: str = SCHEMA_VERSION,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> ConverterImportResult:
     return import_converter_jsonld_record(
         source,
@@ -250,6 +252,7 @@ def import_converter_jsonld(
         model=model,
         chemistry=chemistry,
         schema_version=schema_version,
+        base=base,
     )
 
 
@@ -262,7 +265,9 @@ def import_converter_jsonld_record(
     chemistry: str | None = None,
     schema_version: str = SCHEMA_VERSION,
     validate: bool = True,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> ConverterImportResult:
+    """Import a BattINFO Converter coin-cell export; the IRIs it mints take *base*."""
     raw_payload, source_file = _load_source(source)
     warnings: list[str] = []
 
@@ -332,6 +337,7 @@ def import_converter_jsonld_record(
                 size_code or "",
             ]
         ),
+        base=base,
     )
 
     instance_serial = _extract_product_id(payload.get("schema:productID"))
@@ -340,7 +346,7 @@ def import_converter_jsonld_record(
     if instance_name is not None:
         instance_seed = "::".join([instance_name, assembly_date or "", imported_manufacturer])
         instance_entry: dict[str, Any] = {
-            "id": _entity_iri("cell", instance_seed),
+            "id": _entity_iri("cell", instance_seed, base=base),
             "name": instance_name,
             "comment": "Imported from BattINFO Converter JSON-LD.",
         }
@@ -421,6 +427,7 @@ def import_converter_jsonld_record(
         workflow_version=_workflow_version(converter_version, converter_schema_version),
         schema_version=schema_version,
         warnings=warnings,
+        base=base,
     )
 
     result_specification = CellSpec.from_library_record(record, schema_version=schema_version)
@@ -452,6 +459,7 @@ def import_converter_package(
     schema_version: str = SCHEMA_VERSION,
     validate: bool = True,
     components: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> ConverterImportPackage:
     imported = import_converter_jsonld_record(
         source,
@@ -461,6 +469,7 @@ def import_converter_package(
         chemistry=chemistry,
         schema_version=schema_version,
         validate=validate,
+        base=base,
     )
     specification = imported.specification
     cell_spec = CellSpec.from_cell_specification(specification)
@@ -521,7 +530,7 @@ def import_converter_package(
         payload, _name = _load_source(source)
         coin_cell, _test = _normalize_to_coin_cell(payload)
         seed = specification.id or model or "converter"
-        extraction = extract_component_specs(coin_cell, seed=str(seed), validate=validate)
+        extraction = extract_component_specs(coin_cell, seed=str(seed), validate=validate, base=base)
         package.material_specs = extraction.material_specs
         package.electrode_specs = extraction.electrode_specs
         package.electrolyte_specs = extraction.electrolyte_specs
@@ -1318,9 +1327,12 @@ def _extract_procedure_records(
     workflow_version: str | None,
     schema_version: str,
     warnings: list[str],
+    base: str = DEFAULT_RECORD_BASE,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if not isinstance(instance_id, str) or not instance_id:
         return [], []
+    # The cell's IRI enters the seeds in the old form (entities.seed_iri).
+    instance_seed = seed_iri(instance_id)
 
     protocol_records: list[dict[str, Any]] = []
     test_records: list[dict[str, Any]] = []
@@ -1359,7 +1371,9 @@ def _extract_procedure_records(
                     f"Converter rated-capacity procedure for {role} was imported without parsed task steps."
                 )
 
-            protocol_id = _entity_iri("test-protocol", f"{instance_id}::{role}::capacity-check::{procedure_index}")
+            protocol_id = _entity_iri(
+                "test-protocol", f"{instance_seed}::{role}::capacity-check::{procedure_index}", base=base
+            )
             # The EMMO task chain is parsed into the structured, queryable method.
             # Free-form test-object context (reference electrode, subject role) and the
             # measurement-output list are not part of the method, so they are preserved
@@ -1386,7 +1400,7 @@ def _extract_procedure_records(
                 comment=import_notes,
             )
 
-            test_id = _entity_iri("test", f"{instance_id}::{role}::capacity-check::{procedure_index}")
+            test_id = _entity_iri("test", f"{instance_seed}::{role}::capacity-check::{procedure_index}", base=base)
             test = Test(
                 schema_version=schema_version,
                 id=test_id,
@@ -1435,9 +1449,9 @@ _IRI_NAMESPACE: dict[str, str] = {
 }
 
 
-def _entity_iri(entity_type: str, seed: str) -> str:
+def _entity_iri(entity_type: str, seed: str, *, base: str = DEFAULT_RECORD_BASE) -> str:
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return record_iri(namespace, _stable_uid(seed))
+    return record_iri(namespace, _stable_uid(seed), base_prefix(base))
 
 
 # ---------------------------------------------------------------------------
@@ -1502,10 +1516,12 @@ def import_dataset_record(
     source: Mapping[str, Any] | str | Path,
     *,
     schema_version: str = SCHEMA_VERSION,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any] | None:
     """Build a battinfo dataset record from the hasOutput block of a converter export.
 
     Returns None if the document contains no dataset distribution information.
+    The dataset's IRI is minted under *base*.
     """
     raw_payload, source_file = _load_source(source)
     _, battery_test_node = _normalize_to_coin_cell(raw_payload)
@@ -1535,7 +1551,7 @@ def import_dataset_record(
         or f"Dataset from {source_file}"
     )
 
-    dataset_id = _entity_iri("dataset", dataset_url + "::" + title)
+    dataset_id = _entity_iri("dataset", dataset_url + "::" + title, base=base)
     identifier = _string_value(has_output.get("schema:identifier")) or dataset_url
 
     dataset: dict[str, Any] = {
@@ -1660,6 +1676,7 @@ def batch_import_converter_directory(
     schema_version: str = SCHEMA_VERSION,
     manufacturer: str | None = None,
     chemistry: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> list[BatchImportResult]:
     """Import all BattINFO Converter metadata files found under *directory*.
 
@@ -1689,6 +1706,7 @@ def batch_import_converter_directory(
                 manufacturer=manufacturer,
                 chemistry=chemistry,
                 schema_version=schema_version,
+                base=base,
             )
             descriptor = import_result.record
             warnings = list(import_result.warnings)
@@ -1699,7 +1717,7 @@ def batch_import_converter_directory(
                 cell_id = instances[0].get("id")
 
             try:
-                dataset = import_dataset_record(path, schema_version=schema_version)
+                dataset = import_dataset_record(path, schema_version=schema_version, base=base)
             except Exception as ds_err:
                 warnings.append(f"Dataset record could not be built: {ds_err}")
 

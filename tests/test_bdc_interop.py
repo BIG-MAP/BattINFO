@@ -92,7 +92,7 @@ def test_batch_import_skips_software_and_builds_chains() -> None:
     assert "bdc_sw_001" not in ids  # software-tool record has no cell
     assert len(pkg.imports) == 7
     for imp in pkg.imports:
-        assert imp.cell_spec["cell_spec"]["id"].startswith("https://w3id.org/battinfo/spec/")
+        assert imp.cell_spec["cell_spec"]["id"].startswith("https://w3id.org/battinfo/id/1001/spec/")
         assert imp.cell_instance["cell_instance"]["cell_spec_id"] == imp.cell_spec["cell_spec"]["id"]
         assert imp.dataset["dataset"]["name"]
         # the dataset relates to the imported cell instance (schema.org `about`)

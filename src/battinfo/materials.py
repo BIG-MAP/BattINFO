@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from battinfo.entities import stable_uid
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 # ── Level 1: MaterialKind vocabulary ────────────────────────────────────────────
 #
@@ -177,8 +178,9 @@ def material_spec_from_component(
     *,
     material_class: str | None = None,
     uid_seed: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
-    """Lift an embedded material holder to a standalone material-spec record.
+    """Lift an embedded material holder to a standalone material-spec record, its IRI minted under *base*.
 
     The IRI is minted through the material-spec seed (manufacturer, product,
     grade, kind), the same IRI ``create_material_spec`` and
@@ -209,7 +211,7 @@ def material_spec_from_component(
             fields[key] = holder[key]
     if material_class:
         fields["material_class"] = material_class
-    return create_material_spec(validate=False, **fields)
+    return create_material_spec(validate=False, base=base, **fields)
 
 
 def link_component_to_spec(component: Any, material_spec_id: str) -> dict[str, Any]:
@@ -271,8 +273,10 @@ def _iter_embedded_materials(cell_spec_record: Mapping[str, Any]):
         yield {"name": separator["material"]}, "separator_material"
 
 
-def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str, Any]]:
-    """Extract de-duplicated standalone material-spec records from a cell-spec record.
+def extract_material_specs(
+    cell_spec_record: Mapping[str, Any], *, base: str = DEFAULT_RECORD_BASE
+) -> list[dict[str, Any]]:
+    """Extract de-duplicated standalone material-spec records from a cell-spec record, minted under *base*.
 
     Walks electrode coatings, the electrolyte, and the separator, lifting each
     embedded material to a material-spec (:func:`material_spec_from_component`).
@@ -283,7 +287,7 @@ def extract_material_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str
     seen: dict[str, dict[str, Any]] = {}
     seen_identity: dict[str, tuple[Any, dict[str, Any]]] = {}
     for holder, mclass in _iter_embedded_materials(cell_spec_record):
-        spec = material_spec_from_component(holder, material_class=mclass)
+        spec = material_spec_from_component(holder, material_class=mclass, base=base)
         key = spec["material_spec"]["id"]
         identity = (holder.get("molecular_formula"), _intrinsic_property(holder.get("property")))
         if key in seen:

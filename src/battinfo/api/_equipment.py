@@ -36,7 +36,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import stable_uid
-from battinfo.namespace import record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
 from battinfo.validate.core import DEFAULT_POLICY
 
 EQUIPMENT_IRI_RE = _component_iri_re("equipment")
@@ -92,6 +92,7 @@ def _record_from_equipment_spec(
     citation: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     # This kind never existed before the spec/ consolidation: spec/-only, no
     # legacy per-family alternation.
@@ -104,7 +105,7 @@ def _record_from_equipment_spec(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri("spec", dashed_uid)
+        entity_id = record_iri("spec", dashed_uid, base_prefix(base))
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     if handle is not None:
@@ -162,6 +163,7 @@ def _record_from_equipment(
     citation: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     if not SPEC_IRI_RE.fullmatch(equipment_spec_id):
         raise ValueError("equipment_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
@@ -174,7 +176,7 @@ def _record_from_equipment(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri("equipment", dashed_uid)
+        entity_id = record_iri("equipment", dashed_uid, base_prefix(base))
 
     equipment: dict[str, Any] = {
         "id": entity_id,
@@ -228,6 +230,7 @@ def _record_from_channel(
     citation: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     if not EQUIPMENT_IRI_RE.fullmatch(equipment_id):
         raise ValueError("equipment_id must match https://w3id.org/battinfo/equipment/{uid}.")
@@ -242,13 +245,13 @@ def _record_from_channel(
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri("channel", dashed_uid)
+        entity_id = record_iri("channel", dashed_uid, base_prefix(base))
     else:
         # Deterministic identity: the same (equipment, index) always mints the
         # same channel IRI, so re-registration is idempotent.
         _, equipment_uid = _iri_tail(equipment_id)
         dashed_uid = stable_uid(f"channel:{equipment_uid}:{index}")
-        entity_id = record_iri("channel", dashed_uid)
+        entity_id = record_iri("channel", dashed_uid, base_prefix(base))
 
     channel: dict[str, Any] = {
         "id": entity_id,
@@ -284,7 +287,8 @@ def create_equipment_spec(*, validate: bool = True, **fields: Any) -> dict[str, 
     Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
     call, which nothing can derive again: it is outside the identity contract
     (IDENTIFIER_POLICY 5.4). ``ws.add("equipment", spec=...)`` mints the spec from
-    its manufacturer, model and name instead.
+    its manufacturer, model and name instead. The IRI is minted under ``base=``
+    (``https://w3id.org/battinfo/id/1001/`` unless another is given).
     """
     record = _record_from_equipment_spec(**fields)
     if validate:
@@ -301,7 +305,8 @@ def create_equipment(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
     Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
     call, which nothing can derive again: it is outside the identity contract
     (IDENTIFIER_POLICY 5.4). ``ws.add("equipment", ...)`` mints the unit from its
-    spec and serial number instead.
+    spec and serial number instead. The IRI is minted under ``base=``
+    (``https://w3id.org/battinfo/id/1001/`` unless another is given).
     """
     shorthand = fields.pop("spec_id", None)
     if shorthand is not None:
@@ -319,7 +324,8 @@ def create_channel(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
 
     The uid is derived deterministically from ``(equipment uid, index)`` unless
     ``uid``/``id`` is given explicitly, so the same channel always mints the
-    same IRI.
+    same IRI, under ``base=`` (``https://w3id.org/battinfo/id/1001/`` unless
+    another is given). The seed takes the equipment's uid, never its base.
     """
     record = _record_from_channel(**fields)
     if validate:

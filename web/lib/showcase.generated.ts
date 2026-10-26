@@ -21,7 +21,7 @@ export const showcase: {
     "record": {
       "schema_version": "0.2.0",
       "material_spec": {
-        "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+        "id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
         "short_id": "7d9k2m",
         "name": "NMC811",
         "kind": "nmc811",
@@ -502,28 +502,28 @@ export const showcase: {
       },
       "channels": [
         {
-          "id": "https://w3id.org/battinfo/channel/3w87-0ddf-ryjg-evxe",
+          "id": "https://w3id.org/battinfo/id/1001/channel/3w87-0ddf-ryjg-evxe",
           "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
           "index": 1,
           "short_id": "3w870d",
           "label": "MC3000-A/CH1"
         },
         {
-          "id": "https://w3id.org/battinfo/channel/kxwy-5f5f-f682-hhch",
+          "id": "https://w3id.org/battinfo/id/1001/channel/kxwy-5f5f-f682-hhch",
           "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
           "index": 2,
           "short_id": "kxwy5f",
           "label": "MC3000-A/CH2"
         },
         {
-          "id": "https://w3id.org/battinfo/channel/6nec-h262-tthy-4rnt",
+          "id": "https://w3id.org/battinfo/id/1001/channel/6nec-h262-tthy-4rnt",
           "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
           "index": 3,
           "short_id": "6nech2",
           "label": "MC3000-A/CH3"
         },
         {
-          "id": "https://w3id.org/battinfo/channel/0rp6-kncv-cyem-qwcd",
+          "id": "https://w3id.org/battinfo/id/1001/channel/0rp6-kncv-cyem-qwcd",
           "equipment_id": "https://w3id.org/battinfo/equipment/y9xy-kr0v-y5tn-dfj7",
           "index": 4,
           "short_id": "0rp6kn",

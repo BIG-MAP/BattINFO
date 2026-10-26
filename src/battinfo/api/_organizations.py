@@ -38,11 +38,12 @@ from battinfo.api._shared import (
     _resolved_retrieved_at,
     _str_eq,
     _validate_canonical_record,
+    _with_held_iri,
 )
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import seed_text, stable_uid
-from battinfo.namespace import record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 ORGANIZATION_IRI_RE = _component_iri_re("organization")
@@ -89,6 +90,7 @@ def _record_from_organization(
     source_url: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
     **aliases: Any,
 ) -> dict[str, Any]:
     # Deprecated camelCase kwargs (legalName=, foundingDate=, ...) normalize
@@ -118,6 +120,7 @@ def _record_from_organization(
             "source_url": source_url,
             "retrieved_at": retrieved_at,
             "notes": notes,
+            "base": base,
         }
         for camel, value in aliases.items():
             snake = _ORGANIZATION_TO_SNAKE[camel]
@@ -140,12 +143,12 @@ def _record_from_organization(
         _, dashed_uid = _iri_tail(entity_id)
     elif uid is not None:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri("organization", dashed_uid)
+        entity_id = record_iri("organization", dashed_uid, base_prefix(base))
     else:
         # Deterministic identity from the normalized name: the same
         # organization re-created anywhere mints the same IRI.
         dashed_uid = stable_uid(organization_identity_seed(name))
-        entity_id = record_iri("organization", dashed_uid)
+        entity_id = record_iri("organization", dashed_uid, base_prefix(base))
 
     body: dict[str, Any] = {
         "id": entity_id,
@@ -197,7 +200,8 @@ def create_organization(*, validate: bool = True, **fields: Any) -> dict[str, An
     New uids derive deterministically from the normalized ``name`` — creating
     the same organization twice mints the same IRI. Deprecated camelCase
     kwargs (``legalName=`` etc.) are accepted and normalize to the canonical
-    snake_case keys.
+    snake_case keys. The IRI is minted under ``base=``
+    (``https://w3id.org/battinfo/id/1001/`` unless another is given).
     """
     record = _record_from_organization(**fields)
     if validate:
@@ -216,6 +220,7 @@ def save_organization(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save an organization from either a kwargs draft or a canonical record."""
     if isinstance(draft, (str, Path)):
@@ -229,11 +234,15 @@ def save_organization(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, Mapping) and isinstance(draft.get("organization"), Mapping):
         record = dict(draft)
     elif isinstance(draft, Mapping):
-        record = _record_from_organization(**dict(draft))
+        fields = dict(draft)
+        record = _record_from_organization(**{"base": base, **fields})
+        if fields.get("id") is None:
+            record = _with_held_iri(record, source_root)
     else:
         raise TypeError(
             "save_organization expects a canonical record dict, a kwargs draft "
@@ -251,6 +260,7 @@ def save_organization(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 

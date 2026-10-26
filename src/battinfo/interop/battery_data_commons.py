@@ -45,6 +45,7 @@ from battinfo.api import (
 )
 from battinfo.bundle import BatteryTestType, Cell, CellSpec, Dataset, Test
 from battinfo.interop._common import load_json_source
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 PathLike = str | Path
 
@@ -173,9 +174,13 @@ def _encoding_format(url: str) -> str:
 
 
 def import_bdc_record(
-    record: Mapping[str, Any], *, validate: bool = True, _materials: dict[str, dict[str, Any]] | None = None
+    record: Mapping[str, Any],
+    *,
+    validate: bool = True,
+    _materials: dict[str, dict[str, Any]] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> BdcRecordImport | None:
-    """Map one BDC canonical record into a BattINFO record chain.
+    """Map one BDC canonical record into a BattINFO record chain, its IRIs minted under *base*.
 
     Returns ``None`` for software-tool records (no cell). ``_materials`` is a
     shared accumulator used by :func:`batch_import_bdc` to deduplicate electrode
@@ -215,6 +220,7 @@ def import_bdc_record(
         if clean not in materials:
             materials[clean] = create_material_spec(
                 validate=validate,
+                base=base,
                 uid=_uid("bdc", "material", clean),
                 name=clean,
                 material_class="active_material",
@@ -265,7 +271,8 @@ def import_bdc_record(
                 source_file=f"{bdc_id}.json",
                 citation=citation,
                 notes=notes,
-            )
+            ),
+            base=base,
         )
     )
     cell_spec_id = cell_spec["cell_spec"]["id"]
@@ -278,7 +285,8 @@ def import_bdc_record(
                 serial_number=bdc_id,
                 source_type="lab",
                 citation=citation,
-            )
+            ),
+            base=base,
         )
     )
     cell_uid = cell_instance["cell_instance"]["id"]
@@ -300,7 +308,8 @@ def import_bdc_record(
                             status="completed",
                             source_type="lab",
                             citation=citation,
-                        )
+                        ),
+                        base=base,
                     )
                 )
             )
@@ -341,15 +350,18 @@ def import_bdc_record(
                 related_test_ids=[t["test"]["id"] for t in tests],
                 source_type="catalog",
                 citation=citation,
-            )
+            ),
+            base=base,
         )
     )
 
     return BdcRecordImport(bdc_id, dataset, cell_spec, cell_instance, tests, warnings=warnings)
 
 
-def batch_import_bdc(source: PathLike, *, limit: int | None = None, validate: bool = True) -> BdcImportPackage:
-    """Import every canonical BDC dataset record under *source*.
+def batch_import_bdc(
+    source: PathLike, *, limit: int | None = None, validate: bool = True, base: str = DEFAULT_RECORD_BASE
+) -> BdcImportPackage:
+    """Import every canonical BDC dataset record under *source*, the IRIs minted under *base*.
 
     *source* may be the BDC repository root, its ``canonical/datasets``
     directory, or a single ``bdc_*.json`` file.
@@ -370,7 +382,7 @@ def batch_import_bdc(source: PathLike, *, limit: int | None = None, validate: bo
         record = load_json_source(file)
         if str(record.get("record_status", "active")) != "active":
             continue
-        imp = import_bdc_record(record, validate=validate, _materials=materials)
+        imp = import_bdc_record(record, validate=validate, _materials=materials, base=base)
         if imp is not None:
             imports.append(imp)
 

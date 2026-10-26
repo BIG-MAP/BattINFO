@@ -61,13 +61,13 @@ cell_spec = CellSpec(
 
 result = publish(cell_spec, destination="local", root=".battinfo/quickstart")
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/jv2y-hq4t-cjrv-1w16
+# https://w3id.org/battinfo/id/1001/spec/jv2y-hq4t-cjrv-1w16
 ```
 
 BattINFO mints a stable, opaque IRI for the record and writes it to disk. The IRI comes from the manufacturer, model, format, chemistry and size code, so you get the same one as above.
 
 That IRI is **permanent, but not yet resolvable on the web** — opening
-`https://w3id.org/battinfo/spec/...` in a browser returns 404 for a record
+`https://w3id.org/battinfo/id/1001/spec/...` in a browser returns 404 for a record
 published locally. A local publish mints the identity; it becomes
 dereferenceable once you publish the record to the registry (Tutorial 6 below).
 

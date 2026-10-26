@@ -2,16 +2,16 @@
 
 The old form ``https://w3id.org/battinfo/{segment}/{uid}`` and the prefixed
 form ``https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}`` are built and
-recognised in one module. Nothing mints the prefixed form yet, but every
-recogniser accepts both shapes (BIG-MAP/BattINFO#478), and the ones that read a
-reference to a product model or a material also accept a shared thing,
-``https://w3id.org/battinfo/id/{uid}``.
+recognised in one module. Every recogniser accepts both shapes
+(BIG-MAP/BattINFO#478), and the ones that read a reference to a product model
+or a material also accept a shared thing, ``https://w3id.org/battinfo/id/{uid}``.
+New records mint under ``/id/1001/`` (BIG-MAP/BattINFO#482); a record saved in
+either form keeps the IRI it has.
 """
 
 from __future__ import annotations
 
 import ast
-import functools
 import json
 import re
 import sys
@@ -27,6 +27,8 @@ from battinfo import namespace  # noqa: E402
 from battinfo.entities import ENTITY_KINDS, UID_ALPHABET, saved_record_body, saved_record_document  # noqa: E402
 from battinfo.namespace import (  # noqa: E402
     BATTINFO_ROOT,
+    DEFAULT_RECORD_BASE,
+    OLD_FORM_BASE,
     RecordIri,
     parse_record_iri,
     parse_thing_iri,
@@ -482,12 +484,26 @@ def _record_files(root: Path) -> dict[Path, tuple[bytes, int]]:
     return {path: (path.read_bytes(), path.stat().st_mtime_ns) for path in sorted(folder.rglob("*.json"))}
 
 
-def _minting_with_prefix(monkeypatch: pytest.MonkeyPatch, prefix: str | None) -> None:
-    """The engine's builders called with *prefix*, as a workspace created after the switch will call them."""
-    from battinfo import _workspace
+def _old_workspace(root: Path) -> Any:
+    """A workspace that mints the old form, as one created before the switch does."""
+    import battinfo
 
-    monkeypatch.setattr(_workspace, "_entity_iri", functools.partial(_workspace._entity_iri, prefix=prefix))
-    monkeypatch.setattr(_workspace, "_cell_spec_iri", functools.partial(_workspace._cell_spec_iri, prefix=prefix))
+    return battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)
+
+
+def _minting_under(root: Path, base: str) -> Any:
+    """The workspace at *root* opened again, its records minted under *base*.
+
+    A workspace keeps the base it was created with, so this stands for a
+    session of the other base over the same records folder, such as a new
+    workspace that the records of an old one were copied into.
+    """
+    import battinfo
+
+    ws = battinfo.workspace(root, registry_url=None)
+    ws._record_base = base
+    ws._ws = ws._make_engine()
+    return ws
 
 
 def _as_prefixed(iri: str, prefix: str = "1001") -> str:
@@ -496,21 +512,16 @@ def _as_prefixed(iri: str, prefix: str = "1001") -> str:
     return record_iri(parsed.segment, parsed.uid, prefix)
 
 
-def test_a_record_saved_in_the_old_form_keeps_its_iri_when_minted_with_a_prefix(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    import battinfo
-
+def test_a_record_saved_in_the_old_form_keeps_its_iri_when_minted_with_a_prefix(tmp_path: Path) -> None:
     root = tmp_path / "lab"
-    first = battinfo.workspace(root, registry_url=None)
+    first = _old_workspace(root)
     first.add("cell", spec=_lab_spec(), serial_numbers=["C01", "C02"])
     first.save()
     saved_ids = sorted(item.id for item in [*first._ws.cell_specs, *first._ws.cells])
     assert all(parse_record_iri(iri).prefix is None for iri in saved_ids)
     before = _record_files(root)
 
-    _minting_with_prefix(monkeypatch, "1001")
-    rerun = battinfo.workspace(root, registry_url=None)
+    rerun = _minting_under(root, DEFAULT_RECORD_BASE)
     rerun.add("cell", spec=_lab_spec(), serial_numbers=["C01", "C02"])
     rerun.save()
 
@@ -519,17 +530,14 @@ def test_a_record_saved_in_the_old_form_keeps_its_iri_when_minted_with_a_prefix(
     assert _record_files(root) == before
 
 
-def test_a_new_record_beside_a_saved_one_takes_the_prefix(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_a_new_record_beside_a_saved_one_takes_the_prefix(tmp_path: Path) -> None:
     """Only the record that is already saved keeps the old form."""
-    import battinfo
-
     root = tmp_path / "lab"
-    first = battinfo.workspace(root, registry_url=None)
+    first = _old_workspace(root)
     first.add("cell", spec=_lab_spec(), serial_numbers=["C01"])
     first.save()
 
-    _minting_with_prefix(monkeypatch, "1001")
-    rerun = battinfo.workspace(root, registry_url=None)
+    rerun = _minting_under(root, DEFAULT_RECORD_BASE)
     rerun.add("cell", spec=_lab_spec(), serial_numbers=["C01", "C02"])
     finalized = rerun._ws._finalized_records()
 
@@ -542,12 +550,12 @@ def _rerun_beside_a_prefixed_spec(tmp_path: Path) -> tuple[Any, dict[str, list[A
     """A cell and its spec saved, the spec's file rewritten under /id/1001/, and a new session minting them again.
 
     The second session is only finalized: its records carry the IRIs a save
-    would write them under (``_finalized_records``).
+    would write them under (``_finalized_records``). Both sessions mint the old form.
     """
     import battinfo
 
     root = tmp_path / "lab"
-    first = battinfo.workspace(root, registry_url=None)
+    first = _old_workspace(root)
     first.add("cell", spec=_lab_spec(), serial_numbers=["C01"])
     first.save()
     (path,) = (root / ".battinfo" / "records" / "cell-spec").glob("*.json")
@@ -569,24 +577,16 @@ def test_a_record_saved_in_the_prefixed_form_keeps_its_iri_when_minted_in_the_ol
     assert [cell.cell_spec_id for cell in finalized["cells"]] == [prefixed]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "BIG-MAP/BattINFO#482: the adopted /id/1001/ spec IRI enters the cell's seed, so the cell mints "
-        "another uid until seeds take parent IRIs in the old form"
-    ),
-)
 def test_a_cell_under_a_spec_saved_in_the_prefixed_form_keeps_its_iri(tmp_path: Path) -> None:
+    """The /id/1001/ spec IRI enters the cell's seed in the old form, so the cell keeps its uid (BIG-MAP/BattINFO#482)."""
     first, finalized = _rerun_beside_a_prefixed_spec(tmp_path)
 
     assert [cell.id for cell in finalized["cells"]] == [first._ws.cells[0].id]
 
 
 def test_the_saved_record_lookup_finds_either_form_of_one_record_and_no_other(tmp_path: Path) -> None:
-    import battinfo
-
     root = tmp_path / "lab"
-    first = battinfo.workspace(root, registry_url=None)
+    first = _old_workspace(root)
     first.add("cell", spec=_lab_spec(), serial_numbers=["C01"])
     first.save()
     records = first._ws.source_root

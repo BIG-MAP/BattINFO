@@ -3,13 +3,15 @@
 Every BattINFO record has one canonical identifier — an IRI of the form:
 
 ```text
-https://w3id.org/battinfo/<namespace>/<uid>
-└──────┬──────┘ └──┬───┘ └───┬────┘ └─┬─┘
-   PURL host     project   record     16-char UID
-                           namespace  (Crockford Base32)
+https://w3id.org/battinfo/id/1001/<namespace>/<uid>
+└──────┬───────┘ └──┬───┘ └──┬──┘ └────┬────┘ └─┬─┘
+   PURL host     project publisher  record    16-char UID
+                          prefix   namespace  (Crockford Base32)
 ```
 
-Example: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
+1001 is the prefix of Battery Genome, under which BattINFO mints new records. Records minted before 0.8.0 have the older form without the prefix, `https://w3id.org/battinfo/<namespace>/<uid>`, and keep it, as does every record of a workspace created before 0.8.0. The two forms of one namespace and uid name one record.
+
+Example of an existing record, in the older form: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
 
 ## The three promises
 

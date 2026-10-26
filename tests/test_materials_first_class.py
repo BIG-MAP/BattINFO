@@ -23,7 +23,7 @@ def test_h1_material_spec_is_deterministic_and_dedupes() -> None:
         api.create_material_spec(name="Graphite", formula="C", validate=False)["material_spec"]["id"] for _ in range(3)
     ]
     assert len(set(ids)) == 1  # identical create calls -> one id (H1 dead)
-    assert ids[0].startswith("https://w3id.org/battinfo/spec/")
+    assert ids[0].startswith("https://w3id.org/battinfo/id/1001/spec/")
 
 
 def test_h1_identity_basis_is_manufacturer_product_grade() -> None:

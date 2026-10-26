@@ -41,7 +41,7 @@ record = create_organization(
 {
   "schema_version": "0.2.0",
   "organization": {
-    "id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/organization/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "Example Instruments",
     "type": "Manufacturer",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": "schema:Organization",
-  "@id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/organization/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "Example Instruments",
   "schema:legalName": "Example Instruments GmbH",
   "schema:additionalType": "Manufacturer",

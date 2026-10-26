@@ -45,6 +45,7 @@ from battinfo.api import (  # noqa: E402
 )
 from battinfo.bundle import Cell, CellSpec, Dataset, ProvenanceInfo, Test, TestSpec  # noqa: E402
 from battinfo.entities import COMPONENT_FAMILIES, ENTITY_KINDS  # noqa: E402
+from battinfo.namespace import OLD_FORM_BASE  # noqa: E402
 from battinfo.ws import (  # noqa: E402
     DEPOSIT_COVERAGE_EXEMPT,
     DEPOSIT_STANDALONE_KINDS,
@@ -64,7 +65,7 @@ ELECTRODE_SPEC_IRI = "https://w3id.org/battinfo/spec/dddd-eeee-ffff-gggg"
 
 
 def _record_sets() -> dict[str, list[dict]]:
-    """One wired record of every registered type, keyed by on-disk subdir.
+    """One wired record of every registered type, keyed by on-disk subdir, all in the old form.
 
     Wired the way a real corpus is (cell spec -> cell -> test -> dataset, test on
     a channel of a unit, electrode batch on its design, powder under it), because
@@ -72,12 +73,14 @@ def _record_sets() -> dict[str, list[dict]]:
     """
     material_spec = create_material_spec(
         validate=False,
+        base=OLD_FORM_BASE,
         uid=MATERIAL_SPEC_IRI.rsplit("/", 1)[-1],
         name="Graphite powder",
         kind="graphite",
     )
     material = create_material(
         validate=False,
+        base=OLD_FORM_BASE,
         uid="1111-2222-3333-4444",
         name="Graphite lot",
         material_spec_id=material_spec["material_spec"]["id"],
@@ -85,6 +88,7 @@ def _record_sets() -> dict[str, list[dict]]:
     )
     electrode_spec = create_electrode_spec(
         validate=False,
+        base=OLD_FORM_BASE,
         uid=ELECTRODE_SPEC_IRI.rsplit("/", 1)[-1],
         name="Graphite anode",
         kind="graphite",
@@ -93,6 +97,7 @@ def _record_sets() -> dict[str, list[dict]]:
     )
     electrode = create_electrode(
         validate=False,
+        base=OLD_FORM_BASE,
         uid="2222-3333-4444-5555",
         name="Coating batch A",
         electrode_spec_id=electrode_spec["electrode_spec"]["id"],
@@ -100,18 +105,21 @@ def _record_sets() -> dict[str, list[dict]]:
     )
     equipment_spec = create_equipment_spec(
         validate=False,
+        base=OLD_FORM_BASE,
         uid="3333-4444-5555-6666",
         name="MC3000",
     )
     equipment = create_equipment(
         validate=False,
+        base=OLD_FORM_BASE,
         uid=UID,
         equipment_spec_id=equipment_spec["equipment_spec"]["id"],
         serial_number="SN-1",
     )
-    channel = create_channel(validate=False, uid=UID, equipment_id=EQUIPMENT_IRI, index=1)
+    channel = create_channel(validate=False, base=OLD_FORM_BASE, uid=UID, equipment_id=EQUIPMENT_IRI, index=1)
     parameter_set = create_parameter_set(
         validate=False,
+        base=OLD_FORM_BASE,
         uid="4444-5555-6666-7777",
         name="Demo source - graphite",
         material_kind="graphite",
@@ -165,7 +173,7 @@ def _record_sets() -> dict[str, list[dict]]:
         access_url="https://example.org/data.parquet",
         source=ProvenanceInfo(type="measurement"),
     ).to_record()
-    organization = create_organization(validate=False, name="Demo Co", type="Manufacturer")
+    organization = create_organization(validate=False, base=OLD_FORM_BASE, name="Demo Co", type="Manufacturer")
 
     sets: dict[str, list[dict]] = {
         "cell-spec": [cell_spec],
@@ -192,6 +200,7 @@ def _record_sets() -> dict[str, list[dict]]:
         spec = create_component_spec(
             family,
             validate=False,
+            base=OLD_FORM_BASE,
             uid=spec_uid,
             name=f"{hyphen} spec",
         )
@@ -200,6 +209,7 @@ def _record_sets() -> dict[str, list[dict]]:
             create_component_instance(
                 family,
                 validate=False,
+                base=OLD_FORM_BASE,
                 uid=inst_uid,
                 spec_id=f"https://w3id.org/battinfo/spec/{spec_uid}",
             )
@@ -334,7 +344,9 @@ def test_parameter_sets_are_not_checked_as_dataset_records() -> None:
 
     record_sets = _record_sets()
     fixture = ROOT / "tests" / "fixtures" / "interop" / "bpx-dfn-full.bpx.json"
-    record_sets["parameter-set"].append(from_bpx_parameters(fixture).to_parameter_set(virtual_cell=True))
+    record_sets["parameter-set"].append(
+        from_bpx_parameters(fixture).to_parameter_set(virtual_cell=True, base=OLD_FORM_BASE)
+    )
     parameter_set_iris = {_record_iri(rec) for rec in record_sets["parameter-set"]}
     assert all(iri.startswith("https://w3id.org/battinfo/dataset/") for iri in parameter_set_iris)
 

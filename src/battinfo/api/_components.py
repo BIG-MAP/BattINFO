@@ -35,6 +35,7 @@ from battinfo.api._shared import (
     _str_eq,
     _to_unix_time,
     _validate_canonical_record,
+    _with_held_iri,
     _without_minted_identity,
 )
 from battinfo.bundle import (
@@ -45,7 +46,7 @@ from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
 )
-from battinfo.namespace import record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 # A spec/ IRI the instance templates build with when no spec is given; the field is
@@ -283,7 +284,7 @@ def _material_identity_seed(material_spec_id: str, lot: Any) -> str:
     return material_identity_seed(material_spec_id=material_spec_id, lot=lot)
 
 
-def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
+def _record_from_material_spec(draft: MaterialSpecInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     kind_key = _resolve_kind_or_raise(draft.kind, draft.name, draft.product_id)
     if draft.id is not None:
         if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.id):
@@ -298,7 +299,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
         dashed_uid = (
             _normalized_dashed_uid(draft.uid) if draft.uid is not None else _material_spec_identity_uid(draft, kind_key)
         )
-        entity_id = record_iri("spec", dashed_uid)
+        entity_id = record_iri("spec", dashed_uid, base_prefix(base))
 
     spec: dict[str, Any] = {
         "id": entity_id,
@@ -352,7 +353,7 @@ def _record_from_material_spec(draft: MaterialSpecInput) -> dict[str, Any]:
     return record_to_snake_aliases(record)
 
 
-def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
+def _record_from_material(draft: MaterialInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(draft.material_spec_id):
         raise ValueError("material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if draft.id is not None:
@@ -372,7 +373,7 @@ def _record_from_material(draft: MaterialInput) -> dict[str, Any]:
 
             lot = draft.lot_id or draft.batch_id or draft.name or ""
             dashed_uid = stable_uid(_material_identity_seed(draft.material_spec_id, lot))
-        entity_id = record_iri("material", dashed_uid)
+        entity_id = record_iri("material", dashed_uid, base_prefix(base))
 
     material: dict[str, Any] = {
         "id": entity_id,
@@ -584,7 +585,7 @@ def _electrode_spec_identity_uid(draft: ElectrodeSpecInput, kind_key: str | None
     )
 
 
-def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
+def _record_from_electrode_spec(draft: ElectrodeSpecInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
 
     kind_key = _resolve_electrode_kind_or_raise(draft.active_material_kind, draft.name, draft.product_id)
     if draft.id is not None:
@@ -600,7 +601,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
             if draft.uid is not None
             else _electrode_spec_identity_uid(draft, kind_key)
         )
-        entity_id = record_iri("spec", dashed_uid)
+        entity_id = record_iri("spec", dashed_uid, base_prefix(base))
 
     if draft.active_material_spec_id is not None and not MATERIAL_SPEC_REF_IRI_RE.fullmatch(
         draft.active_material_spec_id
@@ -682,7 +683,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput) -> dict[str, Any]:
     return record_to_snake_aliases(record)
 
 
-def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
+def _record_from_electrode(draft: ElectrodeInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if not _spec_iri_re("electrode-spec").fullmatch(draft.electrode_spec_id):
         raise ValueError("electrode_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
     if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(draft.parent_id):
@@ -709,7 +710,7 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
                     piece_id=draft.piece_id,
                 )
             )
-        entity_id = record_iri("electrode", dashed_uid)
+        entity_id = record_iri("electrode", dashed_uid, base_prefix(base))
 
     electrode: dict[str, Any] = {
         "id": entity_id,
@@ -761,17 +762,17 @@ def _record_from_electrode(draft: ElectrodeInput) -> dict[str, Any]:
     return record_to_snake_aliases(record)
 
 
-def create_electrode_spec(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical electrode-spec document from typed fields."""
-    record = _record_from_electrode_spec(ElectrodeSpecInput(**fields))
+def create_electrode_spec(*, validate: bool = True, base: str = DEFAULT_RECORD_BASE, **fields: Any) -> dict[str, Any]:
+    """Create a canonical electrode-spec document from typed fields, its IRI minted under ``base``."""
+    record = _record_from_electrode_spec(ElectrodeSpecInput(**fields), base=base)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
 
 
-def create_electrode(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical electrode (instance) document from typed fields."""
-    record = _record_from_electrode(ElectrodeInput(**fields))
+def create_electrode(*, validate: bool = True, base: str = DEFAULT_RECORD_BASE, **fields: Any) -> dict[str, Any]:
+    """Create a canonical electrode (instance) document from typed fields, its IRI minted under ``base``."""
+    record = _record_from_electrode(ElectrodeInput(**fields), base=base)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
@@ -788,6 +789,7 @@ def save_electrode_spec(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save an electrode-spec from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -801,13 +803,21 @@ def save_electrode_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, ElectrodeSpecInput):
-        record = _record_from_electrode_spec(draft)
+        record = (
+            _with_held_iri(_record_from_electrode_spec(draft, base=base), source_root)
+            if draft.id is None
+            else _record_from_electrode_spec(draft)
+        )
     elif isinstance(draft, Mapping) and isinstance(draft.get("electrode_spec"), Mapping):
         record = dict(draft)
     else:
-        record = _record_from_electrode_spec(ElectrodeSpecInput.model_validate(draft))
+        parsed = ElectrodeSpecInput.model_validate(draft)
+        record = _record_from_electrode_spec(parsed, base=base)
+        if parsed.id is None:
+            record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -820,6 +830,7 @@ def save_electrode_spec(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -834,6 +845,7 @@ def save_electrode(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save an electrode (instance) from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -847,13 +859,21 @@ def save_electrode(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, ElectrodeInput):
-        record = _record_from_electrode(draft)
+        record = (
+            _with_held_iri(_record_from_electrode(draft, base=base), source_root)
+            if draft.id is None
+            else _record_from_electrode(draft)
+        )
     elif isinstance(draft, Mapping) and isinstance(draft.get("electrode"), Mapping):
         record = dict(draft)
     else:
-        record = _record_from_electrode(ElectrodeInput.model_validate(draft))
+        parsed = ElectrodeInput.model_validate(draft)
+        record = _record_from_electrode(parsed, base=base)
+        if parsed.id is None:
+            record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -866,6 +886,7 @@ def save_electrode(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -1071,17 +1092,17 @@ def template_material(
     return record if uid is not None else _without_minted_identity(record)
 
 
-def create_material_spec(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical material-spec document from typed fields."""
-    record = _record_from_material_spec(MaterialSpecInput(**fields))
+def create_material_spec(*, validate: bool = True, base: str = DEFAULT_RECORD_BASE, **fields: Any) -> dict[str, Any]:
+    """Create a canonical material-spec document from typed fields, its IRI minted under ``base``."""
+    record = _record_from_material_spec(MaterialSpecInput(**fields), base=base)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
 
 
-def create_material(*, validate: bool = True, **fields: Any) -> dict[str, Any]:
-    """Create a canonical material (instance) document from typed fields."""
-    record = _record_from_material(MaterialInput(**fields))
+def create_material(*, validate: bool = True, base: str = DEFAULT_RECORD_BASE, **fields: Any) -> dict[str, Any]:
+    """Create a canonical material (instance) document from typed fields, its IRI minted under ``base``."""
+    record = _record_from_material(MaterialInput(**fields), base=base)
     if validate:
         _validate_canonical_record(record, policy=DEFAULT_POLICY)
     return record
@@ -1098,6 +1119,7 @@ def save_material_spec(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a material-spec from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -1111,13 +1133,21 @@ def save_material_spec(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, MaterialSpecInput):
-        record = _record_from_material_spec(draft)
+        record = (
+            _with_held_iri(_record_from_material_spec(draft, base=base), source_root)
+            if draft.id is None
+            else _record_from_material_spec(draft)
+        )
     elif isinstance(draft, Mapping) and isinstance(draft.get("material_spec"), Mapping):
         record = dict(draft)
     else:
-        record = _record_from_material_spec(MaterialSpecInput.model_validate(draft))
+        parsed = MaterialSpecInput.model_validate(draft)
+        record = _record_from_material_spec(parsed, base=base)
+        if parsed.id is None:
+            record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -1130,6 +1160,7 @@ def save_material_spec(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -1144,6 +1175,7 @@ def save_material(
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
     stamp: Callable[[dict[str, Any]], None] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Save a material (instance) from either draft payload or canonical record."""
     if isinstance(draft, (str, Path)):
@@ -1157,13 +1189,21 @@ def save_material(
             validation_policy=validation_policy,
             dry_run=dry_run,
             stamp=stamp,
+            base=base,
         )
     if isinstance(draft, MaterialInput):
-        record = _record_from_material(draft)
+        record = (
+            _with_held_iri(_record_from_material(draft, base=base), source_root)
+            if draft.id is None
+            else _record_from_material(draft)
+        )
     elif isinstance(draft, Mapping) and isinstance(draft.get("material"), Mapping):
         record = dict(draft)
     else:
-        record = _record_from_material(MaterialInput.model_validate(draft))
+        parsed = MaterialInput.model_validate(draft)
+        record = _record_from_material(parsed, base=base)
+        if parsed.id is None:
+            record = _with_held_iri(record, source_root)
     return save_record(
         record,
         source_root=source_root,
@@ -1176,6 +1216,7 @@ def save_material(
         validation_policy=validation_policy,
         dry_run=dry_run,
         stamp=stamp,
+        base=base,
     )
 
 
@@ -1327,6 +1368,7 @@ def _record_from_component_spec(
     citation: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
     **extra: Any,
 ) -> dict[str, Any]:
     legacy_namespace = f"{component_family.replace('_', '-')}-spec"
@@ -1341,7 +1383,7 @@ def _record_from_component_spec(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri("spec", dashed_uid)
+        entity_id = record_iri("spec", dashed_uid, base_prefix(base))
 
     spec: dict[str, Any] = {"id": entity_id, "short_id": dashed_uid.replace("-", "")[:6], "name": name}
     if handle is not None:
@@ -1399,6 +1441,7 @@ def _record_from_component_instance(
     citation: str | None = None,
     retrieved_at: int | str | None = None,
     notes: list[str] | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     base_namespace = component_family.replace("_", "-")
     spec_namespace = f"{base_namespace}-spec"
@@ -1413,7 +1456,7 @@ def _record_from_component_instance(
         _, dashed_uid = _iri_tail(entity_id)
     else:
         dashed_uid = _normalized_dashed_uid(uid)
-        entity_id = record_iri(base_namespace, dashed_uid)
+        entity_id = record_iri(base_namespace, dashed_uid, base_prefix(base))
 
     instance: dict[str, Any] = {
         "id": entity_id,
@@ -1459,7 +1502,9 @@ def create_component_spec(component_family: str, *, validate: bool = True, **fie
     Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
     call, which nothing can derive again: it is outside the identity contract
     (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
-    derived from the part's natural key for a record you will save.
+    derived from the part's natural key for a record you will save. The IRI
+    is minted under ``base=`` (``https://w3id.org/battinfo/id/1001/`` unless
+    another is given).
     """
     record = _record_from_component_spec(component_family, **fields)
     if validate:
@@ -1476,7 +1521,9 @@ def create_component_instance(component_family: str, *, validate: bool = True, *
     Without ``uid=`` or ``id=`` the record gets a random IRI, a new one on every
     call, which nothing can derive again: it is outside the identity contract
     (IDENTIFIER_POLICY 5.4), and saving it twice saves two records. Pass a uid
-    derived from the part's natural key for a record you will save.
+    derived from the part's natural key for a record you will save. The IRI
+    is minted under ``base=`` (``https://w3id.org/battinfo/id/1001/`` unless
+    another is given).
     """
     prefixed = fields.pop(f"{component_family}_spec_id", None)
     if prefixed is not None:
@@ -1499,6 +1546,7 @@ def _save_component(
     validate: bool = True,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else dict(record)
     return save_record(
@@ -1512,6 +1560,7 @@ def _save_component(
         validate=validate,
         validation_policy=validation_policy,
         dry_run=dry_run,
+        base=base,
     )
 
 

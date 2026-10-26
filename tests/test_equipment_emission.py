@@ -16,6 +16,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from battinfo.api import create_channel, create_equipment, create_equipment_spec  # noqa: E402
 from battinfo.jsonld import record_to_jsonld  # noqa: E402
+from battinfo.namespace import OLD_FORM_BASE  # noqa: E402
 
 SPEC_UID = "aaaa-bbbb-cccc-dddd"
 SPEC_IRI = f"https://w3id.org/battinfo/spec/{SPEC_UID}"
@@ -24,6 +25,7 @@ SPEC_IRI = f"https://w3id.org/battinfo/spec/{SPEC_UID}"
 def _spec() -> dict:
     return create_equipment_spec(
         uid=SPEC_UID,
+        base=OLD_FORM_BASE,  # the spec the records below name by SPEC_IRI
         name="SkyRC MC3000",
         manufacturer="SkyRC",
         model="MC3000",

@@ -50,6 +50,7 @@ from battinfo.api import (
     _validate_canonical_record,
 )
 from battinfo.bundle import BatteryTestType, Cell, CellSpec, Test
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 PathLike = str | Path
 
@@ -197,8 +198,9 @@ def from_solid_state_db_row(
     *,
     source_file: str = "DB Master Sheet.csv",
     validate: bool = True,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> SolidStateImportResult:
-    """Map a single solid-state-database row into a BattINFO record chain.
+    """Map a single solid-state-database row into a BattINFO record chain, its IRIs minted under *base*.
 
     Parameters
     ----------
@@ -251,7 +253,7 @@ def from_solid_state_db_row(
             source_type="literature",
             citation=citation,
         )
-        material_specs.append(_record_from_material_spec(draft))
+        material_specs.append(_record_from_material_spec(draft, base=base))
 
     # material_class is a coarse enum; "metal_electrode" fits Li-metal anodes,
     # "separator_material" the solid-electrolyte separator layer (electrolyte == separator).
@@ -311,7 +313,8 @@ def from_solid_state_db_row(
             source_file=source_file,
             citation=citation,
             notes=notes,
-        )
+        ),
+        base=base,
     )
     cell_spec_id = cell_spec["cell_spec"]["id"]
 
@@ -322,7 +325,8 @@ def from_solid_state_db_row(
             source_type="lab",
             citation=citation,
             notes=[f"Cell reported as {model_name}." + (f" Lead author: {author}." if author else "")],
-        )
+        ),
+        base=base,
     )
     cell_id = cell_instance["cell_instance"]["id"]
 
@@ -355,7 +359,8 @@ def from_solid_state_db_row(
                 status="completed",
                 source_type="lab",
                 citation=citation,
-            )
+            ),
+            base=base,
         )
 
     result = SolidStateImportResult(
@@ -407,8 +412,9 @@ def batch_import_solid_state_db(
     limit: int | None = None,
     validate: bool = True,
     skip_errors: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> list[SolidStateImportResult]:
-    """Import every row of a solid-state-database CSV into record chains.
+    """Import every row of a solid-state-database CSV into record chains, their IRIs minted under *base*.
 
     Parameters
     ----------
@@ -437,7 +443,7 @@ def batch_import_solid_state_db(
         if _clean(row.get("CAM_Material")) is None and _clean(row.get("AAM_Material")) is None:
             continue
         try:
-            results.append(from_solid_state_db_row(row, source_file=path.name, validate=validate))
+            results.append(from_solid_state_db_row(row, source_file=path.name, validate=validate, base=base))
         except Exception:
             if skip_errors:
                 continue

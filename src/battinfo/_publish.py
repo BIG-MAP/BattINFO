@@ -12,8 +12,11 @@ from pydantic import BaseModel, Field
 
 from battinfo._workspace import Workspace
 from battinfo.api import build_curated_cell_spec_submission, submit_publication_package
+from battinfo.api._records import _record_from_cell_spec
 from battinfo.bundle import Cell, CellSpec, Dataset, Test, TestSpec
 from battinfo.config import resolve_destination_config
+from battinfo.entities import held_record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE
 from battinfo.publication import publish as _legacy_publish
 
 PathLike = str | Path
@@ -54,6 +57,7 @@ _LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset(
         "ro_crate_filename",
         "datacite_filename",
         "dcat_filename",
+        "base",
     }
 )
 
@@ -81,6 +85,7 @@ def publish(
     workspace_id: str | None = None,
     publisher_id: str | None = None,
     source_version: str | None = None,
+    base: str | None = None,
     **legacy: Any,
 ) -> PublishResult | dict[str, Any]:
     """Save one cell spec, and submit it when the destination is a registry.
@@ -121,6 +126,10 @@ def publish(
         Validation policy for the saved record. Defaults to ``"strict"``.
     registry_base_url, api_key, api_key_header, platform_base_url, workspace_id, publisher_id, source_version:
         Override the destination's configured values.
+    base:
+        The base a cell spec without an IRI mints under. Left out, it is
+        ``https://w3id.org/battinfo/id/1001/``; pass ``"https://w3id.org/battinfo/"``
+        for the old form. A spec already saved in ``root`` keeps the IRI it has.
 
     Returns
     -------
@@ -164,6 +173,8 @@ def publish(
         )
         if validation_policy is not None:
             legacy["validation_policy"] = validation_policy
+        if base is not None:
+            legacy["base"] = base
         return _legacy_publish(**legacy)
     _refuse_keywords(legacy, "publish()")
 
@@ -185,6 +196,7 @@ def publish(
             workspace_id=workspace_id,
             publisher_id=publisher_id,
             source_version=source_version,
+            base=DEFAULT_RECORD_BASE if base is None else base,
         )
 
     raise TypeError(_not_a_cell_spec(obj))
@@ -234,6 +246,7 @@ def _publish_cell_spec(
     workspace_id: str | None = None,
     publisher_id: str | None = None,
     source_version: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> PublishResult:
     config = resolve_destination_config(
         destination,
@@ -247,7 +260,15 @@ def _publish_cell_spec(
     )
 
     workspace_root = Path(root) if root is not None else default_publish_root(cell_spec)
-    workspace = Workspace(root=workspace_root, clean=force, generated=True)
+    if cell_spec.id is None:
+        # A spec the folder already holds keeps its IRI, in either form, even
+        # when force=True deletes the folder before the save mints again.
+        records = workspace_root / "examples"
+        minted = _record_from_cell_spec(cell_spec, source_root=records, base=base)["cell_spec"]["id"]
+        held = held_record_iri("cell-spec", minted, [records])
+        if held != minted:
+            cell_spec.id = held
+    workspace = Workspace(root=workspace_root, clean=force, generated=True, base=base)
     workspace.add(cell_spec)
     workspace.save(validation_policy=validation_policy)
 

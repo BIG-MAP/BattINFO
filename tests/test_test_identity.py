@@ -24,6 +24,7 @@ import battinfo  # noqa: E402
 from battinfo import api, entities  # noqa: E402
 from battinfo._workspace import Workspace  # noqa: E402
 from battinfo.bundle import CellSpec, Test, TestSpec  # noqa: E402
+from battinfo.namespace import OLD_FORM_BASE  # noqa: E402
 
 GOLDEN = json.loads((ROOT / "tests" / "fixtures" / "identity" / "golden-iris.json").read_text(encoding="utf-8"))["iris"]
 
@@ -37,6 +38,12 @@ CELL_IRI = "https://w3id.org/battinfo/cell/aaaa-bbbb-cccc-dddd"
 def _workspace(root: Path) -> battinfo.AuthoringWorkspace:
     root.mkdir(parents=True, exist_ok=True)
     return battinfo.workspace(root, registry_url=None)
+
+
+def _old_workspace(root: Path) -> battinfo.AuthoringWorkspace:
+    """A workspace created before 0.8.0, which mints the old form, as the golden table records it."""
+    root.mkdir(parents=True, exist_ok=True)
+    return battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)
 
 
 def _write(path: Path, text: str) -> Path:
@@ -438,7 +445,7 @@ def test_a_workspace_saved_before_the_change_keeps_its_test_and_dataset_iris(tmp
     }
 
     def session(pinned: bool) -> dict[str, str]:
-        ws = _workspace(root)
+        ws = _old_workspace(root)
         ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
         tests = {}
         for case, fields in cases.items():
@@ -468,7 +475,7 @@ def test_two_runs_saved_before_the_change_keep_their_iris(tmp_path: Path) -> Non
         _write(root / "data" / name, f"time_s,voltage_V\n0,{3.0 if name == 'a.csv' else 3.1}\n")
 
     def session(pinned: bool) -> dict[str, str]:
-        ws = _workspace(root)
+        ws = _old_workspace(root)
         ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
         tests = {}
         for name in ("a.csv", "b.csv"):
@@ -491,12 +498,12 @@ def test_a_saved_test_is_kept_only_for_the_same_run(tmp_path: Path) -> None:
     root = tmp_path / "ws"
     _write(root / "data" / "C01.csv", "time_s,voltage_V\n0,3.0\n")
     _write(root / "data" / "C01-other.csv", "time_s,voltage_V\n0,3.0\n")
-    ws = _workspace(root)
+    ws = _old_workspace(root)
     ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
     ws.add("test", type="capacity_check", cell="C01", data="data/C01.csv", iri=GOLDEN["test | ws | with data"])
     ws.save()
 
-    rerun = _workspace(root)
+    rerun = _old_workspace(root)
     rerun.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
     (other,) = rerun.add("test", type="capacity_check", cell="C01", data="data/C01-other.csv")
     rerun.save()
@@ -513,13 +520,13 @@ def test_a_run_saved_alone_before_the_change_keeps_its_iris_when_a_second_run_jo
     root = tmp_path / "ws"
     _write(root / "data" / "C01.csv", "time_s,voltage_V\n0,3.0\n")
     _write(root / "data" / "C01-b.csv", "time_s,voltage_V\n0,3.1\n")
-    first = _workspace(root)
+    first = _old_workspace(root)
     first.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
     first.add("test", type="capacity_check", cell="C01", data="data/C01.csv", iri=GOLDEN["test | ws | with data"])
     first.save()
     assert [str(d.id) for d in first._ws.datasets] == [GOLDEN["dataset | ws | local file"]]
 
-    rerun = _workspace(root)
+    rerun = _old_workspace(root)
     rerun.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
     tests = {}
     for name in ("C01-b.csv", "C01.csv") if second_first else ("C01.csv", "C01-b.csv"):

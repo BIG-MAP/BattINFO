@@ -8,7 +8,7 @@ import shutil
 import warnings
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from battinfo._deposit_files import UnsafeLocation, location_path
 from battinfo._emmo_instruments import _instrument_node
@@ -43,12 +43,20 @@ from battinfo.entities import (
     cell_spec_identity_seed,
     dataset_locator_seed,
     given_test_name,
+    seed_iri,
     seed_text,
     stable_uid,
     test_identity_seed,
 )
 from battinfo.jsonld import dataset_series_edges, electrode_role_links, schema_checksum_terms
-from battinfo.namespace import BATTINFO_ROOT, record_iri
+from battinfo.namespace import (
+    BATTINFO_ROOT,
+    DEFAULT_RECORD_BASE,
+    base_prefix,
+    parse_record_iri,
+    record_iri,
+    same_record,
+)
 from battinfo.validate.core import PUBLISHER_POLICY, ValidationPolicy
 from battinfo.validate.publication import validate_publication_report
 from battinfo.validate.pydantic import validate_json
@@ -247,22 +255,70 @@ _PUB_IRI_NAMESPACE: dict[str, str] = {
 }
 
 
-def _entity_iri(entity_type: str, seed: str) -> str:
-    """The IRI an identity seed mints, through the shared primitive ``entities.stable_uid``."""
+def _entity_iri(entity_type: str, seed: str, *, base: str = DEFAULT_RECORD_BASE) -> str:
+    """The IRI an identity seed mints under *base*, through the shared primitive ``entities.stable_uid``."""
     namespace = _PUB_IRI_NAMESPACE.get(entity_type, entity_type)
-    return record_iri(namespace, stable_uid(seed))
+    return record_iri(namespace, stable_uid(seed), base_prefix(base))
 
 
-def _cell_specification_iri(entity_id: str) -> str:
+def _cell_specification_iri(entity_id: str, *, base: str = DEFAULT_RECORD_BASE) -> str:
     if entity_id.startswith(BATTINFO_ROOT):
         return entity_id
-    return _entity_iri("cell-specification", entity_id)
+    return _entity_iri("cell-specification", entity_id, base=base)
 
 
-def _cell_spec_iri(entity_id: str) -> str:
+def _cell_spec_iri(entity_id: str, *, base: str = DEFAULT_RECORD_BASE) -> str:
     if entity_id.startswith(BATTINFO_ROOT):
         return entity_id
-    return _entity_iri("cell-spec", entity_id)
+    return _entity_iri("cell-spec", entity_id, base=base)
+
+
+def _as_minted(iri: str) -> str:
+    """*iri* unchanged: the IRI a finalizer mints is kept when no folder holds the record."""
+    return iri
+
+
+def _string_values(value: Any) -> list[str]:
+    """Every string anywhere in *value*, a parsed JSON document."""
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, Mapping):
+        return [text for item in value.values() for text in _string_values(item)]
+    if isinstance(value, list):
+        return [text for item in value for text in _string_values(item)]
+    return []
+
+
+def _held_publication_iris(dataset_dir: Path, publish_filename: str) -> Callable[[str], str]:
+    """How the records a package mints keep the IRIs a package already in *dataset_dir* gave them.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5). The returned function maps an IRI just
+    minted to the other form of it, the old form or ``/id/1001/``, when the
+    publication graph already written in *dataset_dir* (``publish_filename``)
+    names the record under that form; otherwise it returns the IRI as minted.
+    """
+    path = dataset_dir / publish_filename
+    if not path.is_file():
+        return _as_minted
+    try:
+        document = _load_json(path)
+    except (OSError, ValueError):
+        return _as_minted
+    saved: dict[tuple[str, str], list[str]] = {}
+    for value in _string_values(document):
+        text = value.partition("#")[0]  # a node of the record, such as its #described part
+        parsed = parse_record_iri(text)
+        if parsed is not None and text not in saved.get((parsed.segment, parsed.uid), []):
+            saved.setdefault((parsed.segment, parsed.uid), []).append(text)
+
+    def held(iri: str) -> str:
+        parsed = parse_record_iri(iri)
+        if parsed is None:
+            return iri
+        return next((text for text in saved.get((parsed.segment, parsed.uid), []) if same_record(text, iri)), iri)
+
+    return held
 
 
 def _with_default(value: str | None, fallback: str) -> str:
@@ -1416,7 +1472,14 @@ def _normalize_cell_specification(
     source: CellSpec | Mapping[str, Any] | PathLike,
     *,
     datasheet_path: Path | None = None,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] = _as_minted,
 ) -> CellSpec:
+    """*source* as a cell specification; an id that is not an IRI seeds one minted under *base*.
+
+    *held* maps a minted IRI to the one a folder already holds the record
+    under (:func:`_held_publication_iris`).
+    """
     if isinstance(source, CellSpec):
         spec = source.model_copy(deep=True)
     else:
@@ -1441,7 +1504,8 @@ def _normalize_cell_specification(
                 "retrieved_at": _now_unix(),
             }
         )
-    spec.id = _cell_specification_iri(spec.id)
+    minted = _cell_specification_iri(spec.id, base=base)
+    spec.id = minted if minted == spec.id else held(minted)
     return spec
 
 
@@ -1454,9 +1518,9 @@ def _normalize_cell_spec(source: CellSpec | Mapping[str, Any] | PathLike) -> Cel
     return CellSpec.from_json(payload)
 
 
-def _build_cell_spec_from_specification(cell_specification: CellSpec) -> CellSpec:
+def _build_cell_spec_from_specification(cell_specification: CellSpec, *, base: str = DEFAULT_RECORD_BASE) -> CellSpec:
     return CellSpec(
-        id=_cell_spec_iri(cell_specification.id),
+        id=_cell_spec_iri(cell_specification.id, base=base),
         name=f"{cell_specification.manufacturer} {cell_specification.model}",
         manufacturer=cell_specification.manufacturer,
         model=cell_specification.model,
@@ -1485,12 +1549,15 @@ def derive_cell_spec(
     source: CellSpec | Mapping[str, Any] | PathLike,
     *,
     datasheet_path: PathLike | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> CellSpec:
+    """The cell spec a cell specification describes, an IRI it lacks minted under *base*."""
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
-    normalized = _normalize_cell_specification(source, datasheet_path=datasheet)
+    normalized = _normalize_cell_specification(source, datasheet_path=datasheet, base=base)
     return _finalize_cell_spec(
-        _build_cell_spec_from_specification(normalized),
+        _build_cell_spec_from_specification(normalized, base=base),
         cell_specification=normalized,
+        base=base,
     )
 
 
@@ -1498,11 +1565,18 @@ def _finalize_cell_spec(
     cell_spec: CellSpec,
     *,
     cell_specification: CellSpec | None = None,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] = _as_minted,
 ) -> CellSpec:
+    """A finalized copy of *cell_spec*, an IRI it lacks minted under *base*.
+
+    *held* maps a minted IRI to the one a folder already holds the record
+    under (:func:`_held_publication_iris`).
+    """
     finalized = cell_spec.model_copy(deep=True)
     if finalized.id is None:
-        finalized.id = (
-            _cell_spec_iri(cell_specification.id)
+        finalized.id = held(
+            _cell_spec_iri(cell_specification.id, base=base)
             if cell_specification is not None
             else _entity_iri(
                 "cell-spec",
@@ -1513,6 +1587,7 @@ def _finalize_cell_spec(
                     chemistry=finalized.chemistry,
                     size_code=finalized.size_code,
                 ),
+                base=base,
             )
         )
     if finalized.name is None:
@@ -1530,7 +1605,10 @@ def _finalize_cell_instance(
     cell_spec: CellSpec,
     dataset_dir: Path,
     dataset_id: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] = _as_minted,
 ) -> Cell:
+    """A finalized copy of *cell_instance*, an IRI it lacks minted under *base* (see :func:`_finalize_cell_spec`)."""
     finalized = cell_instance.model_copy(deep=True, update={"cell_spec": None})
     if finalized.cell_spec_id is None:
         finalized.cell_spec_id = cell_spec.id
@@ -1549,9 +1627,14 @@ def _finalize_cell_instance(
         )
         if seed is None:
             seed = "::".join(
-                [_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", seed_text(dataset_dir.name)]
+                [
+                    seed_iri(_with_default(finalized.cell_spec_id, "unknown-cell-spec")),
+                    "",
+                    "",
+                    seed_text(dataset_dir.name),
+                ]
             )
-        finalized.id = _entity_iri("cell", seed)
+        finalized.id = held(_entity_iri("cell", seed, base=base))
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
     source = finalized.source.model_copy(deep=True)
     if source.type is None:
@@ -1571,8 +1654,10 @@ def _finalize_test(
     dataset_dir: Path,
     data_locator: str,
     dataset_id: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] = _as_minted,
 ) -> Test:
-    """A finalized copy of *test*, its IRI minted from its identity when it has none.
+    """A finalized copy of *test*, its IRI minted under *base* from its identity when it has none.
 
     *data_locator* is the location of the run's data (``entities.dataset_locator_seed``),
     which tells it apart from another run of one kind on one cell
@@ -1593,17 +1678,20 @@ def _finalize_test(
     if finalized.id is None:
         # The test seed every surface shares: cell, kind, protocol (its IRI, else its
         # name) and the run, here the data's location, so the name does not enter.
-        finalized.id = _entity_iri(
-            "test",
-            test_identity_seed(
-                cell_id=finalized.cell_instance_id,
-                kind=finalized.test_kind,
-                protocol_id=finalized.protocol_id,
-                protocol_name=finalized.protocol.name,
-                data_locator=data_locator,
-                started_at=finalized.started_at,
-                name=given_name,
-            ),
+        finalized.id = held(
+            _entity_iri(
+                "test",
+                test_identity_seed(
+                    cell_id=finalized.cell_instance_id,
+                    kind=finalized.test_kind,
+                    protocol_id=finalized.protocol_id,
+                    protocol_name=finalized.protocol.name,
+                    data_locator=data_locator,
+                    started_at=finalized.started_at,
+                    name=given_name,
+                ),
+                base=base,
+            )
         )
     finalized.dataset_ids = _append_unique(finalized.dataset_ids, dataset_id)
     source = finalized.source.model_copy(deep=True)
@@ -1635,7 +1723,10 @@ def _finalize_dataset(
     cell_instance: Cell,
     test: Test,
     dataset_dir: Path,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] = _as_minted,
 ) -> Dataset:
+    """A finalized copy of *dataset*, an IRI it lacks minted under *base* (see :func:`_finalize_cell_spec`)."""
     finalized = dataset.model_copy(deep=True, update={"cell": None, "test": None})
     if finalized.dataset_path is None:
         finalized.dataset_path = str(dataset_dir)
@@ -1653,16 +1744,19 @@ def _finalize_dataset(
         # Seeded like every other dataset IRI (the workspace and save_dataset): cell,
         # test, a locator that does not depend on where the folder sits (an explicit
         # remote URL, otherwise the folder's name; see dataset_locator_seed), and name.
-        finalized.id = _entity_iri(
-            "dataset",
-            "::".join(
-                [
-                    _with_default(finalized.cell_instance_id, "unknown-cell"),
-                    finalized.test_id or "",
-                    _dataset_locator(finalized, dataset_dir),
-                    _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
-                ]
-            ),
+        finalized.id = held(
+            _entity_iri(
+                "dataset",
+                "::".join(
+                    [
+                        seed_iri(_with_default(finalized.cell_instance_id, "unknown-cell")),
+                        seed_iri(finalized.test_id or ""),
+                        _dataset_locator(finalized, dataset_dir),
+                        _seed_text_or(finalized.name, seed_text(dataset_dir.name)),
+                    ]
+                ),
+                base=base,
+            )
         )
     source = finalized.source.model_copy(deep=True)
     if source.type is None:
@@ -1682,25 +1776,42 @@ def _finalize_publication_bundle(
     test: Test,
     dataset: Dataset,
     cell_specification: CellSpec | None = None,
+    base: str = DEFAULT_RECORD_BASE,
+    publish_filename: str = DEFAULT_PUBLISH_FILENAME,
+    held: Callable[[str], str] | None = None,
 ) -> tuple[BattinfoBundle, Path]:
+    """The bundle of one publication package, the IRIs it lacks minted under *base*.
+
+    A record the dataset folder's publication graph (*publish_filename*)
+    already names keeps the IRI it has there, in either form
+    (:func:`_held_publication_iris`); *held* replaces that lookup.
+    """
     dataset_dir = _resolve_dataset_dir(dataset)
-    finalized_cell_spec = _finalize_cell_spec(cell_spec, cell_specification=cell_specification)
+    if held is None:
+        held = _held_publication_iris(dataset_dir, publish_filename)
+    finalized_cell_spec = _finalize_cell_spec(cell_spec, cell_specification=cell_specification, base=base, held=held)
     finalized_cell_instance = _finalize_cell_instance(
         cell_instance,
         cell_spec=finalized_cell_spec,
         dataset_dir=dataset_dir,
+        base=base,
+        held=held,
     )
     finalized_test = _finalize_test(
         test,
         cell_instance=finalized_cell_instance,
         dataset_dir=dataset_dir,
         data_locator=_dataset_locator(dataset, dataset_dir),
+        base=base,
+        held=held,
     )
     finalized_dataset = _finalize_dataset(
         dataset,
         cell_instance=finalized_cell_instance,
         test=finalized_test,
         dataset_dir=dataset_dir,
+        base=base,
+        held=held,
     )
     finalized_cell_instance.dataset_ids = _append_unique(finalized_cell_instance.dataset_ids, finalized_dataset.id)
     finalized_test.dataset_ids = _append_unique(finalized_test.dataset_ids, finalized_dataset.id)
@@ -1739,20 +1850,30 @@ def publish(
     datacite_filename: str = DEFAULT_DATACITE_METADATA_FILENAME,
     dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
+    """Build the publication package of one cell spec, cell, test and dataset folder.
+
+    A record without an IRI gets one minted under ``base``:
+    ``https://w3id.org/battinfo/id/1001/`` unless another is given, such as
+    ``"https://w3id.org/battinfo/"`` for the old form. A record that the
+    dataset folder's publication graph already names keeps the IRI it has
+    there.
+    """
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
     if datasheet is not None and not datasheet.exists():
         raise FileNotFoundError(f"datasheet does not exist: {datasheet}")
 
+    held = _held_publication_iris(_resolve_dataset_dir(dataset), publish_filename)
     normalized_cell_specification = (
-        _normalize_cell_specification(cell_specification, datasheet_path=datasheet)
+        _normalize_cell_specification(cell_specification, datasheet_path=datasheet, base=base, held=held)
         if cell_specification is not None
         else None
     )
     if (
         normalized_cell_specification is not None
         and cell_spec.id is not None
-        and cell_spec.id != _cell_spec_iri(normalized_cell_specification.id)
+        and cell_spec.id != _cell_spec_iri(normalized_cell_specification.id, base=base)
     ):
         raise ValueError(
             "cell_spec.id must match the class IRI derived from cell_specification.id when both are provided."
@@ -1764,6 +1885,8 @@ def publish(
         test=test,
         dataset=dataset,
         cell_specification=normalized_cell_specification,
+        base=base,
+        held=held,
     )
     if not dataset_dir.exists():
         raise FileNotFoundError(f"dataset_dir does not exist: {dataset_dir}")
@@ -1867,8 +1990,9 @@ def build_publication_package(
     datacite_filename: str = DEFAULT_DATACITE_METADATA_FILENAME,
     dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
-    """Preferred name for locally building a publication package on disk."""
+    """Preferred name for locally building a publication package on disk (see :func:`publish`)."""
 
     return publish(
         cell_spec=cell_spec,
@@ -1889,6 +2013,7 @@ def build_publication_package(
         datacite_filename=datacite_filename,
         dcat_filename=dcat_filename,
         validation_policy=validation_policy,
+        base=base,
     )
 
 
@@ -1918,7 +2043,9 @@ def publish_dataset_metadata(
     emit_bundle_dir: bool = False,
     emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
+    """Build a publication package in each of *dataset_dirs*, the IRIs they lack minted under *base* (see :func:`publish`)."""
     staging_root = _as_path(staging_root)
     dataset_dir_paths = [_as_path(path) for path in dataset_dirs]
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
@@ -1934,22 +2061,31 @@ def publish_dataset_metadata(
     if cell_specification is None and cell_spec is None:
         raise ValueError("Provide either cell_specification or cell_spec.")
 
+    # The cell spec is shared by every package: it keeps the IRI any of their
+    # folders already gives it (_held_publication_iris).
+    in_folders = [_held_publication_iris(dataset_dir, publish_filename) for dataset_dir in dataset_dir_paths]
+
+    def held_in_any(iri: str) -> str:
+        return next((kept for kept in (held(iri) for held in in_folders) if kept != iri), iri)
+
     normalized_cell_specification = (
-        _normalize_cell_specification(cell_specification, datasheet_path=datasheet)
+        _normalize_cell_specification(cell_specification, datasheet_path=datasheet, base=base, held=held_in_any)
         if cell_specification is not None
         else None
     )
     normalized_cell_spec = (
         _normalize_cell_spec(cell_spec)
         if cell_spec is not None
-        else _build_cell_spec_from_specification(normalized_cell_specification)
+        else _build_cell_spec_from_specification(normalized_cell_specification, base=base)
     )
     normalized_cell_spec = _finalize_cell_spec(
         normalized_cell_spec,
         cell_specification=normalized_cell_specification,
+        base=base,
+        held=held_in_any,
     )
     if normalized_cell_specification is not None and normalized_cell_spec.id != _cell_spec_iri(
-        normalized_cell_specification.id
+        normalized_cell_specification.id, base=base
     ):
         raise ValueError(
             "cell_spec.id must match the class IRI derived from cell_specification.id when both are provided."
@@ -2029,6 +2165,7 @@ def publish_dataset_metadata(
             emit_bundle_dir=emit_bundle_dir,
             emit_html_page=emit_html_page,
             validation_policy=validation_policy,
+            base=base,
         )
 
         result_entry = {
@@ -2089,6 +2226,7 @@ def publish_cr2032_dataset_metadata(
     emit_bundle_dir: bool = False,
     emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     dataset_dir_paths = [_as_path(path) for path in (dataset_dirs or DEFAULT_CR2032_DATASET_DIRS)]
     if not dataset_dir_paths:
@@ -2118,6 +2256,7 @@ def publish_cr2032_dataset_metadata(
         emit_bundle_dir=emit_bundle_dir,
         emit_html_page=emit_html_page,
         validation_policy=validation_policy,
+        base=base,
     )
 
 

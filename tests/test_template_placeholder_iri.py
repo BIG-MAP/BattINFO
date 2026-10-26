@@ -26,7 +26,8 @@ from battinfo.entities import kind_for_doc
 from battinfo.validate import NAMED_POLICIES, validate_record_report
 
 PLACEHOLDER_CELL = "https://w3id.org/battinfo/cell/0000-0000-0000-0000"
-CELL_IRI = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+# What a save mints for a cell: its IRI under /id/1001/ (IRI ruling, decision 5).
+CELL_IRI = re.compile(r"^https://w3id\.org/battinfo/id/1001/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
 
 
 def _cli(*args: str) -> dict:
@@ -73,7 +74,7 @@ def test_template_still_pins_an_explicit_uid() -> None:
     record = template_cell_instance(
         cell_spec_id="https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0", uid="1f8r6v2k9p4m3t7x"
     )
-    assert record["cell_instance"]["id"] == "https://w3id.org/battinfo/cell/1f8r-6v2k-9p4m-3t7x"
+    assert record["cell_instance"]["id"] == "https://w3id.org/battinfo/id/1001/cell/1f8r-6v2k-9p4m-3t7x"
     assert "id" not in template_cell_instance()["cell_instance"]
 
 

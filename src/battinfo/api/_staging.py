@@ -20,6 +20,7 @@ from battinfo.bundle import (
     CellSpec,
 )
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.namespace import DEFAULT_RECORD_BASE
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.record import validate_record
 
@@ -274,8 +275,9 @@ def validate_staging_cell_spec(
     source: dict[str, Any] | PathLike,
     *,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
-    """Validate a staging cell-spec draft without writing anything to disk.
+    """Validate a staging cell-spec draft without writing anything to disk; an IRI it lacks is minted under *base*.
 
     Returns a dict with keys ``ok`` (bool), ``source_path``, ``record_id``,
     ``record_id_basis``, ``issues`` (list of validation issue dicts), and
@@ -283,7 +285,7 @@ def validate_staging_cell_spec(
     """
     draft, source_path = _staging_cell_spec_input(source)
     identity = _staging_cell_spec_identity(source, draft)
-    record = _record_from_cell_spec(draft)
+    record = _record_from_cell_spec(draft, base=base)
     report = _validate_record_report(record, policy=validation_policy)
     return {
         "ok": report.ok,
@@ -350,8 +352,12 @@ def promote_staging_cell_spec(
     record_id: str | None = None,
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Promote a validated staging cell-spec draft to the curated record store.
+
+    A draft without an IRI gets one minted under *base*; a record the curated
+    store already holds keeps the IRI it has there.
 
     Validates the draft, assigns or resolves the canonical record IRI, writes
     the canonical JSON file to ``curated_root``, and returns a result dict with
@@ -377,7 +383,7 @@ def promote_staging_cell_spec(
     if existing_id is not None:
         draft = draft.model_copy(update={"id": existing_id, "uid": None})
 
-    record = _record_from_cell_spec(draft)
+    record = _record_from_cell_spec(draft, base=base)
     report = _validate_record_report(record, policy=validation_policy)
     if not report.ok:
         raise ValueError(f"staging cell-spec validation failed: {'; '.join(report.render_errors())}")
@@ -402,6 +408,7 @@ def promote_staging_cell_specs(
     glob: str = "*.json",
     validation_policy: ValidationPolicy | str = DEFAULT_POLICY,
     dry_run: bool = False,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     input_root = _as_path(input_dir)
     if not input_root.exists() or not input_root.is_dir():
@@ -416,6 +423,7 @@ def promote_staging_cell_specs(
                 curated_root=curated_root,
                 validation_policy=validation_policy,
                 dry_run=dry_run,
+                base=base,
             )
         )
     return {

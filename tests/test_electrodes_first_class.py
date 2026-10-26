@@ -39,7 +39,7 @@ def test_electrode_spec_id_is_deterministic() -> None:
         for _ in range(3)
     ]
     assert len(set(ids)) == 1
-    assert ids[0].startswith("https://w3id.org/battinfo/spec/")
+    assert ids[0].startswith("https://w3id.org/battinfo/id/1001/spec/")
 
 
 def test_identity_basis_is_producer_product_grade() -> None:
@@ -80,7 +80,7 @@ def test_electrode_batch_id_from_spec_and_batch() -> None:
     b = api.create_electrode(electrode_spec_id=spec_id, batch="B-1", validate=False)["electrode"]["id"]
     c = api.create_electrode(electrode_spec_id=spec_id, batch="B-2", validate=False)["electrode"]["id"]
     assert a == b and a != c
-    assert a.startswith("https://w3id.org/battinfo/electrode/")
+    assert a.startswith("https://w3id.org/battinfo/id/1001/electrode/")
 
 
 def test_resave_of_identical_content_is_unchanged(tmp_path: Path) -> None:
