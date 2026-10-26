@@ -220,7 +220,7 @@ A legacy `spec/` parameter-set IRI is accepted read-only (ruling 2026-10-12). Th
 
 A publisher prefix is a four-digit number held by one minting authority, such as a registry. The publisher mints records under `https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}` and defines its own terms under `https://w3id.org/battinfo/def/{prefix}/`. A prefix is a number, never a name, so renaming a publisher never moves its addresses.
 
-- The register is `src/battinfo/data/namespace/prefixes.json`. Each entry gives the number, its holder, whether records are minted under it, the resolver that serves it (or none), the host of its own record pages (or none) and the date it was allocated.
+- The register is `src/battinfo/data/namespace/prefixes.json`. Each entry gives the number, its holder, whether records are minted under it, where those records live (a URL pattern for a record's RDF and one for its human page, both built from the uid, or none) and the date it was allocated.
 - The maintainers of the battinfo entry on w3id.org allocate prefixes. A publisher asks for one by pull request to this repository.
 - Numbers are given out in sequence from 1000. A number is never reused or passed to another holder.
 - 1000 is BattINFO's own and holds definitions only: no record is minted under `id/1000/`. 1001 is the Battery Genome registry, and 1002 is Battery Data Commons.
