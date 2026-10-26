@@ -1,28 +1,28 @@
 {
-  "description": "The register of publisher prefixes under https://w3id.org/battinfo/ (IDENTIFIER_POLICY.md 6.4). A publisher mints records under id/{prefix}/ when records is true, and defines its own terms under def/{prefix}/. resolver is where the publisher's addresses are served, or null when the BattINFO registry dispatches them. landing is the host of the publisher's own record pages, or null; a browser that opens one of its record IRIs is sent to the record's page only when that page is on this host. Validated by prefixes.schema.json.",
+  "description": "The register of publisher prefixes under https://w3id.org/battinfo/ (IDENTIFIER_POLICY.md 6.4). A publisher mints records under id/{prefix}/ when records is true, and defines its own terms under def/{prefix}/. records_rdf and records_page say where the records minted under a prefix live: each is an https URL template, for a record's RDF and for its human page, in which {uid} stands for the record's uid and {segment}, which is optional, for its segment, such as cell. Both are null for a prefix that holds definitions only, for 1001, whose records the Battery Genome registry serves itself, and for a holder that serves no records by uid. Validated by prefixes.schema.json.",
   "prefixes": [
     {
       "prefix": "1000",
       "holder": "BattINFO",
       "records": false,
-      "resolver": null,
-      "landing": null,
+      "records_rdf": null,
+      "records_page": null,
       "allocated": "2026-10-22"
     },
     {
       "prefix": "1001",
       "holder": "Battery Genome registry",
       "records": true,
-      "resolver": null,
-      "landing": null,
+      "records_rdf": null,
+      "records_page": null,
       "allocated": "2026-10-22"
     },
     {
       "prefix": "1002",
       "holder": "Battery Data Commons",
       "records": true,
-      "resolver": null,
-      "landing": "https://batterydatacommons.org/",
+      "records_rdf": null,
+      "records_page": null,
       "allocated": "2026-10-25"
     }
   ]

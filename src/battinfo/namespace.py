@@ -113,51 +113,84 @@ SEGMENT_PATTERN = r"[a-z][a-z0-9-]*"
 #: A publisher prefix: a number of four or more digits, never a name.
 PREFIX_PATTERN = r"[1-9][0-9]{3,}"
 
+#: BattINFO itself. It holds definitions only (``def/1000/``), never records.
+BATTINFO_PREFIX = "1000"
+#: The Battery Genome registry, and the SDK's own prefix. The registry serves
+#: the records minted under it itself.
+BATTERY_GENOME_PREFIX = "1001"
+
 
 class PublisherPrefix(NamedTuple):
     """One entry of the publisher prefix register (``data/namespace/prefixes.json``).
 
-    *records* is false for a prefix that holds definitions only, and
-    *resolver* is ``None`` when the BattINFO registry dispatches the
-    publisher's addresses rather than a resolver of its own. *landing* is
-    the host of the publisher's own record pages, or ``None``: a browser that
-    opens one of its record IRIs is sent to the record's page only when that
-    page is on this host.
+    *records* is false for a prefix that holds definitions only.
+    *records_rdf* and *records_page* say where the records minted under the
+    prefix live: each is an https URL template, for a record's RDF and for its
+    human page, in which ``{uid}`` stands for the record's uid and
+    ``{segment}``, which is optional, for its segment, such as ``cell``. Both
+    are ``None`` for a prefix that holds definitions only, for 1001, whose
+    records the Battery Genome registry serves itself, and for a holder that
+    serves no records by uid.
     """
 
     prefix: str
     holder: str
     records: bool
-    resolver: str | None
-    landing: str | None
+    records_rdf: str | None
+    records_page: str | None
     allocated: date
 
 
-_REGISTER_PREFIX_RE = re.compile(r"[1-9][0-9]{3}")
+_PREFIX_RE = re.compile(PREFIX_PATTERN)
 _FIRST_PREFIX = 1000
+# A record pattern is an https URL on a fixed host whose only placeholders are
+# {uid}, which it must have, and {segment}. prefixes.schema.json says the same.
+_RECORD_PATTERN_URL_RE = re.compile(r"https://[^\s/{}]+/\S*")
+_PLACEHOLDER_RE = re.compile(r"\{[^{}]*\}")
+_RECORD_PATTERN_PLACEHOLDERS = frozenset({"{uid}", "{segment}"})
+
+
+def _record_pattern(prefix: str, field: str, template: Any) -> str | None:
+    """*template*, the *field* of register prefix *prefix*, checked to be ``None`` or a record pattern."""
+    if template is None:
+        return None
+    if not isinstance(template, str) or not _RECORD_PATTERN_URL_RE.fullmatch(template):
+        raise ValueError(f"register prefix {prefix} has a {field} that is not an https URL: {template!r}")
+    placeholders = set(_PLACEHOLDER_RE.findall(template))
+    rest = _PLACEHOLDER_RE.sub("", template)
+    if not placeholders <= _RECORD_PATTERN_PLACEHOLDERS or "{" in rest or "}" in rest:
+        raise ValueError(
+            f"register prefix {prefix} has a {field} with a placeholder other than {{uid}} and {{segment}}: "
+            f"{template!r}"
+        )
+    if "{uid}" not in placeholders:
+        raise ValueError(f"register prefix {prefix} has a {field} without {{uid}}: {template!r}")
+    return template
 
 
 def _register_entry(entry: Any) -> PublisherPrefix:
     if not isinstance(entry, Mapping) or set(entry) != set(PublisherPrefix._fields):
         raise ValueError(f"a prefix register entry has the fields {', '.join(PublisherPrefix._fields)}: {entry!r}")
-    prefix, holder, records, resolver = entry["prefix"], entry["holder"], entry["records"], entry["resolver"]
-    landing = entry["landing"]
-    if not isinstance(prefix, str) or not _REGISTER_PREFIX_RE.fullmatch(prefix):
-        raise ValueError(f"register prefix {prefix!r} is not a four-digit number")
+    prefix, holder, records, allocated = entry["prefix"], entry["holder"], entry["records"], entry["allocated"]
+    if not isinstance(prefix, str) or not _PREFIX_RE.fullmatch(prefix):
+        raise ValueError(f"register prefix {prefix!r} is not a number of four or more digits")
     if not isinstance(holder, str) or not holder.strip() or not isinstance(records, bool):
         raise ValueError(f"register prefix {prefix} needs a holder and a true or false records")
-    if resolver is not None and not (isinstance(resolver, str) and resolver.startswith("https://")):
-        raise ValueError(f"register prefix {prefix} has a resolver that is not an https URL: {resolver!r}")
-    if landing is not None and not (
-        isinstance(landing, str) and landing.startswith("https://") and landing.endswith("/")
-    ):
-        raise ValueError(
-            f"register prefix {prefix} has a landing host that is not an https URL ending in /: {landing!r}"
-        )
-    allocated = entry["allocated"]
+    records_rdf = _record_pattern(prefix, "records_rdf", entry["records_rdf"])
+    records_page = _record_pattern(prefix, "records_page", entry["records_page"])
+    if records_rdf is not None or records_page is not None:
+        if not records:
+            raise ValueError(
+                f"register prefix {prefix} holds definitions only, so its records_rdf and records_page must be null"
+            )
+        if prefix == BATTERY_GENOME_PREFIX:
+            raise ValueError(
+                f"register prefix {prefix} is the Battery Genome registry's, which serves its records itself, "
+                "so its records_rdf and records_page must be null"
+            )
     if not isinstance(allocated, str):
         raise ValueError(f"register prefix {prefix} needs its allocation date as YYYY-MM-DD: {allocated!r}")
-    return PublisherPrefix(prefix, holder, records, resolver, landing, date.fromisoformat(allocated))
+    return PublisherPrefix(prefix, holder, records, records_rdf, records_page, date.fromisoformat(allocated))
 
 
 def _load_prefix_register(document: Any) -> Mapping[str, PublisherPrefix]:
@@ -182,10 +215,6 @@ def publisher_prefix(prefix: str) -> PublisherPrefix | None:
     return PUBLISHER_PREFIXES.get(prefix)
 
 
-#: BattINFO itself. It holds definitions only (``def/1000/``), never records.
-BATTINFO_PREFIX = "1000"
-#: The Battery Genome registry, and the SDK's own prefix.
-BATTERY_GENOME_PREFIX = "1001"
 # A holder's name may change in the register; its number never does.
 if BATTINFO_PREFIX not in PUBLISHER_PREFIXES or PUBLISHER_PREFIXES[BATTINFO_PREFIX].records:
     raise ValueError(f"the prefix register must hold {BATTINFO_PREFIX} for definitions only")
@@ -207,7 +236,6 @@ _RESERVED_SEGMENTS = RESERVED_NAMESPACE_SEGMENTS
 _ROOT_PATTERN = re.escape(BATTINFO_ROOT)
 _SEGMENT_RE = re.compile(SEGMENT_PATTERN)
 _UID_RE = re.compile(UID_PATTERN)
-_PREFIX_RE = re.compile(PREFIX_PATTERN)
 _RECORD_IRI_RE = re.compile(
     rf"{_ROOT_PATTERN}(?:id/(?P<prefix>{PREFIX_PATTERN})/)?(?P<segment>{SEGMENT_PATTERN})/(?P<uid>{UID_PATTERN})"
 )
