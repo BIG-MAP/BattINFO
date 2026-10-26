@@ -1,7 +1,8 @@
 name: Docs
 
 # Builds the Sphinx documentation and checks that the guide notebooks parse,
-# so docs and the advertised notebooks cannot silently rot.
+# so docs and the advertised notebooks cannot silently rot. It also lays out
+# the publishers' vocabularies under def/ for GitHub Pages.
 #
 # The build is strict (-W): any Sphinx warning fails the job. Notebook
 # *execution* (nbmake) is deferred — the notebooks ship with stored outputs
@@ -54,6 +55,17 @@ jobs:
         with:
           name: docs-html
           path: docs/_build/html
+      # The publishers' vocabularies under def/, laid out as GitHub Pages serves
+      # them. The step fails when def/ fails its checks
+      # (scripts/check_def_vocabularies.py). It always writes def/index.html,
+      # so the artifact is never empty.
+      - name: Build the def/ vocabulary pages
+        run: uv run --no-sync python scripts/build_def_site.py docs/_build/def-site
+      - name: Upload the vocabulary pages
+        uses: actions/upload-artifact@v7
+        with:
+          name: def-site
+          path: docs/_build/def-site
 
   # Versioned deploy to gh-pages: main -> dev/, each v* tag -> its own folder.
   # A final release tag (vX.Y.Z) also updates switcher.json, and stable/ when
@@ -61,6 +73,10 @@ jobs:
   # alone (docs-deploy.sh). A final tag also publishes battinfo.ttl where w3id
   # serves the ontology from: battinfo/versions/X.Y.Z/, and the root when it is
   # the newest release, each with the battinfo-inferred.ttl ROBOT writes.
+  # Every deploy, of main or of any tag, adds the vocabulary releases under
+  # def/ that gh-pages lacks and never replaces a published one, so a release
+  # goes live when its pull request is merged. No path filter applies, so a
+  # change to def/ alone deploys too.
   # (Requires GitHub Pages to be enabled from the gh-pages branch.)
   deploy:
     name: Deploy versioned docs
@@ -88,6 +104,10 @@ jobs:
         with:
           name: docs-html
           path: docs/_build/html
+      - uses: actions/download-artifact@v8
+        with:
+          name: def-site
+          path: docs/_build/def-site
       # ROBOT, run with the runner's Java, writes battinfo-inferred.ttl for a
       # final tag (a pre-release tag downloads it for nothing). The file is
       # optional: when this step fails or stalls, ROBOT stays unset, the next

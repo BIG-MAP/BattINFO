@@ -4,3 +4,8 @@
 # checkout, making the LF-generated copy differ from the checked-out files.
 examples/** text eol=lf
 src/battinfo/data/examples/** text eol=lf
+
+# Publishers' vocabularies are published byte for byte and never change once
+# merged, so they are stored and checked out with LF, whatever a contributor's
+# editor wrote.
+def/** text eol=lf

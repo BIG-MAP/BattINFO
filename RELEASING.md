@@ -134,6 +134,10 @@ python scripts/check_hosted_files.py --ontology --tag vX.Y.Z
 
 The first wants the root, `/latest`, `/X.Y.Z` and the versionIRI to serve the tag's `battinfo.ttl`, apart from a `/latest` that is still pending on `master`, and the inferred and 0.8.0-beta IRIs to serve files that declare their versionIRIs. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`, and the inferred and 0.8.0-beta IRIs are checked as in the first. A release published without `battinfo-inferred.ttl` passes both: a 404 where the inferred file belongs is reported as `routed`, but a file that declares another versionIRI fails. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
 
+## Publisher vocabularies
+
+Releases of the vocabularies under `def/` are not tied to BattINFO releases. Each is added by a pull request as `def/{prefix}/{X.Y.Z}/vocab.ttl` ([def/README.md](def/README.md)) and goes live on the next deploy of `main`: the docs workflow lays the vocabularies out with `scripts/build_def_site.py`, and `docs-deploy.sh` adds each release that `gh-pages` lacks without replacing a published one. A tag's deploy does the same, so a tag cut from an older commit leaves newer releases in place. A broken release is withdrawn by hand, with a pull request that removes its folder from `def/` (a maintainer merges it past the unchanged-release check) and a commit to `gh-pages` that removes the published copy; its version number is never used again.
+
 ## Zenodo sandbox run
 
 Before a release, run `scripts/zenodo_sandbox_check.py` by hand against the release candidate, installed in a clean environment, with a token made on [sandbox.zenodo.org](https://sandbox.zenodo.org/account/settings/applications/) (scopes `deposit:write` and `deposit:actions`):
