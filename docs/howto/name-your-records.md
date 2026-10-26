@@ -109,7 +109,7 @@ Several record types seed their IRI from their name, so a new title would mint a
 | Cell without a serial number | `ws.add("cell", ..., iris=[...])`, one IRI per cell |
 | Test without data files or a start time | `ws.add("test", ..., iri=...)` or `uid=...` |
 | The datasets made from a test's data files | `ws.add("test", ..., dataset_iris=[...])`, in the order of `data=` |
-| A test published before 0.8.0, rebuilt in a new folder | `ws.add("test", ..., iri=...)` with its published IRI (a `uid=` mints under the new folder's base); the test seed changed in 0.8.0, and only a test saved in the folder you save to keeps its earlier IRI by itself |
+| A test published before 0.8.0, rebuilt in a new folder | `ws.add("test", ..., iri=...)` with its published IRI, or `uid=...`, which mints under the new folder's base and takes the published IRI when you submit or deposit; the test seed changed in 0.8.0, and only a test saved in the folder you save to keeps its earlier IRI by itself |
 | Test spec drafts | an `"id"` (or `"uid"`) key in the `.test-spec.json` file |
 | Material and electrode records | `uid=...` or `id=...` |
 | Datasets and collections written with `battinfo.Dataset` | `Dataset(id=...)`; a collection's IRI otherwise comes from its access URL and name |

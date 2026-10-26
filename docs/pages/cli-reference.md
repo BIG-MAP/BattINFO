@@ -1954,6 +1954,7 @@ $ battinfo dataset publish [OPTIONS] {folder}
 * `--token <str>`: Zenodo API token. Env: ZENODO_API_TOKEN (or legacy ZENODO_TOKEN).
 * `--community <str>`: Zenodo community identifier.  [default: battery-genome]
 * `--no-community`: Skip community submission.
+* `--allow-unchecked-iris`: Deposit IRIs minted under /id/1001/ that the registry could not be asked about as they are.
 * `--help`: Show this message and exit.
 
 ## `battinfo batch`

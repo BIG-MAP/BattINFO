@@ -58,6 +58,8 @@ _LEGACY_KEYWORDS = _LEGACY_CORE_KEYWORDS | frozenset(
         "datacite_filename",
         "dcat_filename",
         "base",
+        "registry_url",
+        "allow_unchecked_iris",
     }
 )
 
@@ -323,6 +325,14 @@ def _publish_cell_spec(
         api_key=resolved_api_key,
         api_key_header=config.api_key_header,
     )
+    adopted = submission_result.get("adopted") or {}
+    if adopted:
+        # The registry holds the spec in the old form, which the submission
+        # took: so does the folder, and its next save keeps it.
+        from battinfo._adoption import rewrite_files  # noqa: PLC0415
+
+        rewrite_files(sorted(workspace.root.rglob("*.json")), adopted)
+        cell_spec.id = adopted.get(cell_spec.id, cell_spec.id)
     response_payload = submission_result.get("response") or {}
     canonical_id_map = response_payload.get("canonical_id_map")
     canonical_iri_map = response_payload.get("canonical_iri_map")

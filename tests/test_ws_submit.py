@@ -9,13 +9,18 @@ Pins the curated-index submission contract:
 - an unknown only= token is rejected loudly (A-2);
 - submit() without a save this session refuses to publish leftovers (R-9).
 
-All offline: the registry is mocked at battinfo.api.submit_publication_package.
+All offline: the registry is mocked at battinfo.api.submit_publication_package,
+and its lookups (which ws.submit() makes for each /id/1001/ IRI, #483) answer
+that it holds none of the records.
 """
 
 from __future__ import annotations
 
 import copy
+import io
 import sys
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 import pytest
@@ -85,9 +90,16 @@ def _saved_ws(tmp_path: Path, n: int = 1) -> AuthoringWorkspace:
     return ws
 
 
+def _holds_none(request, timeout=None):  # noqa: ANN001, ANN202
+    """The registry's record lookup, for a registry that holds none of the records."""
+    url = request.full_url if isinstance(request, urllib.request.Request) else str(request)
+    raise urllib.error.HTTPError(url, 404, "Not Found", None, io.BytesIO(b'{"detail": "Resource not found."}'))  # type: ignore[arg-type]
+
+
 def _patch_registry(monkeypatch, behavior) -> _FakeRegistry:
     fake = _FakeRegistry(behavior)
     monkeypatch.setattr("battinfo.api.submit_publication_package", fake)
+    monkeypatch.setattr(urllib.request, "urlopen", _holds_none)
     return fake
 
 

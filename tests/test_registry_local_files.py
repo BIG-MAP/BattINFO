@@ -22,6 +22,8 @@ import battinfo
 from battinfo.api import submit_publication_package
 from battinfo.ws import AuthoringWorkspace, SubmitError
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 _CREDS = dict(registry_url="https://registry.example", api_key="k", workspace_id="w", publisher_id="p")
 CSV = "test_time_second,voltage_volt\n0,1.6\n3600,0.9\n"
 CREATORS = [{"name": "Doe, Jane"}]

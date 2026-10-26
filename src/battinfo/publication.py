@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from battinfo._adoption import adopt_model_iris
 from battinfo._deposit_files import UnsafeLocation, location_path
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
@@ -1851,6 +1852,9 @@ def publish(
     dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
     base: str = DEFAULT_RECORD_BASE,
+    registry_url: str | None = None,
+    allow_unchecked_iris: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     """Build the publication package of one cell spec, cell, test and dataset folder.
 
@@ -1859,6 +1863,13 @@ def publish(
     ``"https://w3id.org/battinfo/"`` for the old form. A record that the
     dataset folder's publication graph already names keeps the IRI it has
     there.
+
+    The package is built on this machine and asks no registry, unless it is
+    given one: ``registry_url``, else ``BATTINFO_REGISTRY_URL``. Then a record
+    that registry already holds in the old form keeps that IRI (``adopted`` in
+    the result lists it), and a registry that cannot be asked raises
+    ``UncheckedIrisError`` unless ``allow_unchecked_iris=True``. *checked_iris*
+    maps IRIs already looked up in that registry to the IRI to use for each.
     """
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
     if datasheet is not None and not datasheet.exists():
@@ -1890,6 +1901,15 @@ def publish(
     )
     if not dataset_dir.exists():
         raise FileNotFoundError(f"dataset_dir does not exist: {dataset_dir}")
+    # One record, one IRI: a record the registry already holds in the old form
+    # keeps that IRI in the package (IRI ruling, decision 5).
+    adopted = adopt_model_iris(
+        [bundle, *([normalized_cell_specification] if normalized_cell_specification is not None else [])],
+        registry_url=registry_url,
+        action="publish()",
+        allow_unchecked_iris=allow_unchecked_iris,
+        answers=dict(checked_iris or {}),
+    )
 
     dataset_files = _discover_dataset_files(dataset_dir, dataset_glob, publish_filename)
     publish_payload = _publication_graph(
@@ -1948,6 +1968,7 @@ def publish(
         "ro_crate_path": str(ro_crate_path) if ro_crate_path is not None else None,
         "datacite_metadata_path": str(datacite_path) if datacite_path is not None else None,
         "dcat_export_path": str(dcat_path) if dcat_path is not None else None,
+        "adopted": adopted,
     }
     if emit_html_page:
         html_path = save_publication_html(
@@ -1991,6 +2012,8 @@ def build_publication_package(
     dcat_filename: str = DEFAULT_DCAT_EXPORT_FILENAME,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
     base: str = DEFAULT_RECORD_BASE,
+    registry_url: str | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict[str, Any]:
     """Preferred name for locally building a publication package on disk (see :func:`publish`)."""
 
@@ -2014,6 +2037,8 @@ def build_publication_package(
         dcat_filename=dcat_filename,
         validation_policy=validation_policy,
         base=base,
+        registry_url=registry_url,
+        allow_unchecked_iris=allow_unchecked_iris,
     )
 
 
@@ -2044,8 +2069,14 @@ def publish_dataset_metadata(
     emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
     base: str = DEFAULT_RECORD_BASE,
+    registry_url: str | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict[str, Any]:
-    """Build a publication package in each of *dataset_dirs*, the IRIs they lack minted under *base* (see :func:`publish`)."""
+    """Build a publication package in each of *dataset_dirs*, the IRIs they lack minted under *base* (see :func:`publish`).
+
+    Given a registry, the shared cell spec and each package keep the old form
+    of an IRI that registry already holds, as :func:`publish` does.
+    """
     staging_root = _as_path(staging_root)
     dataset_dir_paths = [_as_path(path) for path in dataset_dirs]
     datasheet = _as_path(datasheet_path) if datasheet_path is not None else None
@@ -2090,6 +2121,16 @@ def publish_dataset_metadata(
         raise ValueError(
             "cell_spec.id must match the class IRI derived from cell_specification.id when both are provided."
         )
+    # Given a registry, the shared spec takes the old form it holds before it is
+    # written, and each package reuses the answer.
+    spec_answers: dict[str, str] = {}
+    adopt_model_iris(
+        [normalized_cell_spec, *([normalized_cell_specification] if normalized_cell_specification is not None else [])],
+        registry_url=registry_url,
+        action="publish_dataset_metadata()",
+        allow_unchecked_iris=allow_unchecked_iris,
+        answers=spec_answers,
+    )
 
     report_path = staging_root / report_filename
     shared_root = staging_root / "shared"
@@ -2166,6 +2207,9 @@ def publish_dataset_metadata(
             emit_html_page=emit_html_page,
             validation_policy=validation_policy,
             base=base,
+            registry_url=registry_url,
+            allow_unchecked_iris=allow_unchecked_iris,
+            checked_iris=spec_answers,
         )
 
         result_entry = {
@@ -2227,6 +2271,8 @@ def publish_cr2032_dataset_metadata(
     emit_html_page: bool = False,
     validation_policy: ValidationPolicy | str = PUBLISHER_POLICY,
     base: str = DEFAULT_RECORD_BASE,
+    registry_url: str | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict[str, Any]:
     dataset_dir_paths = [_as_path(path) for path in (dataset_dirs or DEFAULT_CR2032_DATASET_DIRS)]
     if not dataset_dir_paths:
@@ -2257,6 +2303,8 @@ def publish_cr2032_dataset_metadata(
         emit_html_page=emit_html_page,
         validation_policy=validation_policy,
         base=base,
+        registry_url=registry_url,
+        allow_unchecked_iris=allow_unchecked_iris,
     )
 
 

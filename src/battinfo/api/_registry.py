@@ -106,6 +106,8 @@ def submit_publication_package(
     max_attempts: int = 3,
     backoff_sec: float = 0.5,
     allow_local_files: bool = False,
+    allow_unchecked_iris: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
     """POST a publication package to the registry, defending against a hostile/cold registry.
 
@@ -128,13 +130,37 @@ def submit_publication_package(
     earlier versions carry, is left out of what is sent, and an editorial
     record path (``workspace.editorial.record_path``) is cut to the record's
     folder and file name.
+
+    Before the package is sent, each IRI it names that was minted under
+    ``https://w3id.org/battinfo/id/1001/`` is looked up in the registry. One
+    the registry already holds in the old form,
+    ``https://w3id.org/battinfo/{segment}/{uid}``, is sent in that form, and
+    the result's ``adopted`` maps it to that form. A registry that cannot be
+    asked raises ``UncheckedIrisError`` before anything is sent, naming the
+    IRIs, unless ``allow_unchecked_iris=True``. *checked_iris* maps the IRIs a
+    caller has already looked up in this registry to the IRI to use for each,
+    as ``ws.submit()`` does for a whole workspace; they are not asked about
+    again.
     """
+    from battinfo._adoption import adopt_registry_iris, adopted_iris, minted_iris, rewrite_iris  # noqa: PLC0415
+
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
     if not allow_local_files:
         offenders = _local_file_offenders(payload)
         if offenders:
             raise ValueError(local_files_message(offenders))
+    adopted = adopted_iris(
+        adopt_registry_iris(
+            minted_iris(payload),
+            registry_url=registry_base_url,
+            action="submit_publication_package()",
+            allow_unchecked_iris=allow_unchecked_iris,
+            answers=dict(checked_iris or {}),
+        )
+    )
+    if adopted:
+        payload = rewrite_iris(payload, adopted)
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
     request_payload = dict(payload)
     workspace = request_payload.get("workspace")
@@ -193,6 +219,7 @@ def submit_publication_package(
                 "url": request_url,
                 "status_code": status_code,
                 "response": response_payload,
+                "adopted": adopted,
             }
         except HTTPError as exc:
             body = _scrub_secret(exc.read().decode("utf-8", errors="replace")[:_REGISTRY_ERROR_BODY_LIMIT])

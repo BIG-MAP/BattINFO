@@ -501,14 +501,69 @@ def process_contribution(
 # ── Zenodo publish ─────────────────────────────────────────────────────────────
 
 
+# The files of a contribution that name records: its manifests, and the text
+# files of its ingest workspace, which the deposit uploads from dist/.
+_RECORD_TEXT_SUFFIXES = frozenset({".json", ".jsonld", ".ttl", ".html", ".yaml", ".yml"})
+
+
+def _adopt_contribution_iris(
+    root: Path, workspace_root: Path, *, registry_url: str | None, allow_unchecked_iris: bool
+) -> dict[str, str]:
+    """Adopt the old form of each ``/id/1001/`` IRI the contribution names that the registry holds in it.
+
+    The contribution's manifests and the text files of its ingest workspace
+    are rewritten to name the old form, so the deposit and the next build
+    both keep it (IRI ruling of 22 October 2026, decision 5). Returns the IRIs
+    adopted, each mapped to its old form.
+    """
+    from battinfo._adoption import (  # noqa: PLC0415
+        adopt_registry_iris,
+        adopted_iris,
+        minted_iris,
+        registry_url_or_default,
+        rewrite_files,
+    )
+
+    files = [root / CONTRIBUTION_MANIFEST, root / INGEST_MANIFEST]
+    files += [path for path in sorted(workspace_root.rglob("*")) if path.suffix.lower() in _RECORD_TEXT_SUFFIXES]
+    files = [path for path in files if path.is_file()]
+    found: set[str] = set()
+    for path in files:
+        try:
+            found |= minted_iris(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError):
+            continue
+    adopted = adopted_iris(
+        adopt_registry_iris(
+            found,
+            registry_url=registry_url_or_default(registry_url),
+            action="publish_to_zenodo()",
+            allow_unchecked_iris=allow_unchecked_iris,
+        )
+    )
+    rewrite_files(files, adopted)
+    return adopted
+
+
 def publish_to_zenodo(
     root: Path,
     *,
     token: str,
     sandbox: bool = False,
     community: str = "battery-genome",
+    registry_url: str | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict[str, Any]:
-    """Build (if needed) and publish to Zenodo. Returns deposit metadata."""
+    """Build (if needed) and publish to Zenodo. Returns deposit metadata.
+
+    Before anything is sent, each IRI the contribution minted under
+    ``https://w3id.org/battinfo/id/1001/`` is looked up in the registry at
+    ``registry_url`` (by default ``BATTINFO_REGISTRY_URL``, else the public
+    registry). A record the registry already holds in the old form keeps
+    that IRI: the contribution's files are rewritten to name it, and the
+    result's ``adopted`` lists it. A registry that cannot be asked raises
+    ``UncheckedIrisError``, naming the IRIs, unless ``allow_unchecked_iris=True``.
+    """
     from battinfo.zenodo import ZenodoClient
 
     root = Path(root).resolve()
@@ -518,6 +573,9 @@ def publish_to_zenodo(
     if not intake_path.exists():
         raise FileNotFoundError(f"No processed workspace found. Run `battinfo dataset process {root}` first.")
 
+    adopted = _adopt_contribution_iris(
+        root, dist.parent, registry_url=registry_url, allow_unchecked_iris=allow_unchecked_iris
+    )
     manifest = load_contribution_manifest(root)
     intake = json.loads(intake_path.read_text(encoding="utf-8"))
 
@@ -571,6 +629,7 @@ def publish_to_zenodo(
         "doi": deposit.get("doi") or deposit.get("prereserve_doi", {}).get("doi"),
         "files_uploaded": len(file_map),
         "status": "draft",
+        "adopted": adopted,
     }
 
 

@@ -32,6 +32,8 @@ from battinfo import zenodo as zmod
 from battinfo.ws import AuthoringWorkspace
 from battinfo.zenodo import ZenodoClient, ZenodoError
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 API = "https://zenodo.org/api"
 BUCKET = f"{API}/files/bucket-7"
 CREATORS = [{"name": "Doe, Jane", "affiliation": "Example Lab"}]

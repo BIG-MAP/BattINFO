@@ -1707,6 +1707,8 @@ class Workspace:
         emit_bundle_dir: bool = False,
         emit_html_page: bool = False,
         validation_policy: str = "strict",
+        registry_url: str | None = None,
+        allow_unchecked_iris: bool = False,
     ) -> dict[str, Any]:
         return self.build_publication_package(
             dataset,
@@ -1722,6 +1724,8 @@ class Workspace:
             emit_bundle_dir=emit_bundle_dir,
             emit_html_page=emit_html_page,
             validation_policy=validation_policy,
+            registry_url=registry_url,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def build_publication_package(
@@ -1743,8 +1747,15 @@ class Workspace:
         emit_datacite_metadata: bool = True,
         emit_dcat_export: bool = False,
         validation_policy: str = "strict",
+        registry_url: str | None = None,
+        allow_unchecked_iris: bool = False,
     ) -> dict[str, Any]:
-        """Preferred name for locally building a publication package from `Workspace`."""
+        """Preferred name for locally building a publication package from `Workspace`.
+
+        Given a registry (*registry_url*, else ``BATTINFO_REGISTRY_URL``), a
+        record it already holds in the old form keeps that IRI in the package
+        (see :func:`battinfo.publication.publish`).
+        """
 
         resolved_test, resolved_cell, resolved_cell_spec = self._resolve_dataset_chain(
             dataset,
@@ -1774,6 +1785,8 @@ class Workspace:
             emit_dcat_export=emit_dcat_export,
             validation_policy=validation_policy,
             base=self.record_base,
+            registry_url=registry_url,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def export_release(

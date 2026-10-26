@@ -218,19 +218,33 @@ def test_a_save_keeps_the_iri_a_folder_already_holds(tmp_path: Path) -> None:
     assert elsewhere["id"] == record_iri("spec", _uid(first["id"]), "1001")
 
 
-def test_a_save_of_the_other_form_of_a_saved_record_names_the_iri_it_keeps(tmp_path: Path) -> None:
-    """An explicit /id/1001/ id beside a file of the old form is refused, naming the saved IRI to use."""
+def test_a_save_of_the_1001_form_of_a_saved_record_keeps_the_old_form(tmp_path: Path) -> None:
+    """An explicit /id/1001/ id beside a file of the old form adopts the saved IRI (#483)."""
     records = tmp_path / "records"
     saved = api.save_cell_spec(dict(SPEC_FIELDS), source_root=records, base=OLD_FORM_BASE)
     other_form = record_iri("spec", _uid(saved["id"]), "1001")
     (path,) = (records / "cell-spec").glob("*.json")
     before = path.read_bytes()
 
+    again = api.save_cell_spec({"id": other_form, **SPEC_FIELDS}, source_root=records, mode="upsert")
+    assert again["id"] == saved["id"]
+    assert again["content_changed"] is False
+    assert path.read_bytes() == before
+
+
+def test_a_save_of_the_old_form_of_a_saved_record_names_the_iri_it_keeps(tmp_path: Path) -> None:
+    """An explicit old-form id beside a file of the /id/1001/ form is refused, naming the saved IRI to use."""
+    records = tmp_path / "records"
+    saved = api.save_cell_spec(dict(SPEC_FIELDS), source_root=records)
+    old_form = record_iri("spec", _uid(saved["id"]))
+    (path,) = (records / "cell-spec").glob("*.json")
+    before = path.read_bytes()
+
     with pytest.raises(ValueError) as refused:
-        api.save_cell_spec({"id": other_form, **SPEC_FIELDS}, source_root=records, mode="upsert")
+        api.save_cell_spec({"id": old_form, **SPEC_FIELDS}, source_root=records, mode="upsert")
     message = str(refused.value)
     assert f"already holds this record as {saved['id']}" in message
-    assert f"base={OLD_FORM_BASE!r}" in message
+    assert f"base={DEFAULT_RECORD_BASE!r}" in message
     assert "never reused across namespaces" not in message
     assert path.read_bytes() == before
 

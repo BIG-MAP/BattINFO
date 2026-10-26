@@ -7,6 +7,7 @@ Everything else lives in its home module (``battinfo.api``,
 the top level until 0.9.0, with a ``DeprecationWarning`` pointing there.
 """
 
+from battinfo._adoption import UncheckedIrisError
 from battinfo._publish import PublishResult, publish
 from battinfo._workspace import q, quantity
 from battinfo.api import (
@@ -45,6 +46,7 @@ __all__ = [
     "PublishResult",
     "Test",
     "TestSpec",
+    "UncheckedIrisError",
     "build_publication_package",
     "bulk_save_session",
     "load_publication_package",

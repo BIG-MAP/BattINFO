@@ -38,6 +38,8 @@ from battinfo import zenodo as zmod
 from battinfo.ws import AuthoringWorkspace
 from battinfo.zenodo import ZenodoClient, ZenodoError
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 CREATORS = [{"name": "Doe, Jane"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
 RECORD_URL = "https://zenodo.org/records/7"
