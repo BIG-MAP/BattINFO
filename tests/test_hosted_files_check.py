@@ -407,9 +407,12 @@ def test_without_tags_the_scheduled_check_fails_rather_than_pass_unchecked(tmp_p
 # at battinfo/versions/X.Y.Z/, where w3id sends https://w3id.org/battinfo/X.Y.Z,
 # and at the root, where w3id sends https://w3id.org/battinfo. The registry
 # answers the versionIRI, https://w3id.org/battinfo/X.Y.Z/battinfo, with a 303 to
-# https://w3id.org/battinfo/X.Y.Z. --ontology-routes checks where each IRI
-# leads, before the tag; --ontology checks, after it and every day, that they
-# serve the last release's battinfo.ttl.
+# https://w3id.org/battinfo/X.Y.Z. Beside each battinfo.ttl goes
+# battinfo-inferred.ttl, for /inferred and /X.Y.Z/inferred, and the 2024 file
+# is kept for the versionIRI it declares, 0.8.0-beta. --ontology-routes checks
+# where each IRI leads, before the tag; --ontology checks, after it and every
+# day, that they serve the last release's battinfo.ttl, or a file that declares
+# the expected versionIRI.
 
 PAGES = "https://big-map.github.io/BattINFO"
 OLD_IMPORT = "https://w3id.org/emmo/domain/battery/0.13.0-beta/battery"
@@ -429,14 +432,35 @@ def _ontology(version: str, imports: list[str] = IMPORTS, version_iri: str | Non
     return "\n".join(lines).encode("utf-8")
 
 
+BETA = "https://w3id.org/battinfo/0.8.0-beta/battinfo"
+BETA_FILE = f"{PAGES}/battinfo/versions/0.8.0-beta/battinfo.ttl"
+
+
+def _inferred(version: str) -> bytes:
+    """A battinfo-inferred.ttl as docs-deploy.sh publishes it for *version*."""
+    return (
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n"
+        "<https://w3id.org/battinfo/inferred> a owl:Ontology ;\n"
+        f"    owl:versionIRI <https://w3id.org/battinfo/{version}/inferred> ;\n"
+        f'    owl:versionInfo "{version}" .\n'
+    ).encode("utf-8")
+
+
 def _landings(ttl: bytes, version: str) -> dict[str, object]:
     """Where each ontology IRI lands once *version* is released and deployed, serving *ttl*."""
     versioned = f"{PAGES}/battinfo/versions/{version}/battinfo.ttl"
+    beta = _ontology("0.8.0", [OLD_IMPORT], version_iri=BETA)
     return {
         "https://w3id.org/battinfo": check.Landing(f"{PAGES}/battinfo.ttl", 200, ttl),
         "https://w3id.org/battinfo/latest": check.Landing(check.LATEST_FILE, 200, ttl),
         f"https://w3id.org/battinfo/{version}": check.Landing(versioned, 200, ttl),
         f"https://w3id.org/battinfo/{version}/battinfo": check.Landing(versioned, 200, ttl),
+        "https://w3id.org/battinfo/inferred": check.Landing(f"{PAGES}/battinfo-inferred.ttl", 200, _inferred(version)),
+        f"https://w3id.org/battinfo/{version}/inferred": check.Landing(
+            f"{PAGES}/battinfo/versions/{version}/battinfo-inferred.ttl", 200, _inferred(version)
+        ),
+        "https://w3id.org/battinfo/0.8.0-beta": check.Landing(BETA_FILE, 200, beta),
+        BETA: check.Landing(BETA_FILE, 200, beta),
     }
 
 
@@ -499,6 +523,10 @@ def test_the_ontology_check_passes_when_every_iri_serves_the_last_release(
         "https://w3id.org/battinfo",
         "https://w3id.org/battinfo/0.8.0",
         "https://w3id.org/battinfo/0.8.0/battinfo",
+        "https://w3id.org/battinfo/inferred",
+        "https://w3id.org/battinfo/0.8.0/inferred",
+        "https://w3id.org/battinfo/0.8.0-beta",
+        BETA,
     }
     assert {accept for _url, accept in traced.requests} == {"text/turtle"}
     assert "### Hosted ontology" in summary.read_text(encoding="utf-8")
@@ -566,7 +594,13 @@ def _before_the_tag() -> dict[str, object]:
     assert version
     landings = _landings(ttl, version)
     landings["https://w3id.org/battinfo"] = check.Landing(f"{PAGES}/battinfo.ttl", 200, _ontology("0.8.0-beta"))
-    for iri in (f"https://w3id.org/battinfo/{version}", f"https://w3id.org/battinfo/{version}/battinfo"):
+    beta_inferred = _ontology("0.8.0", [], version_iri="https://w3id.org/battinfo/0.8.0-beta/battinfo-inferred")
+    landings["https://w3id.org/battinfo/inferred"] = check.Landing(f"{PAGES}/battinfo-inferred.ttl", 200, beta_inferred)
+    for iri in (
+        f"https://w3id.org/battinfo/{version}",
+        f"https://w3id.org/battinfo/{version}/battinfo",
+        f"https://w3id.org/battinfo/{version}/inferred",
+    ):
         landing = landings[iri]
         assert isinstance(landing, check.Landing)
         landings[iri] = check.Landing(landing.url, 404)
@@ -580,9 +614,74 @@ def test_before_the_tag_the_routes_check_passes_when_each_iri_leads_where_w3id_s
     assert check.main(["--ontology-routes"], trace_url=traced) == 0
     out = capsys.readouterr().out
     assert f"https://w3id.org/battinfo/latest  (lands on {check.LATEST_FILE}" in out
-    assert len(traced.requests) == 4
+    assert "routed       https://w3id.org/battinfo/inferred  (" in out
+    assert f"same         {BETA}  (lands on {BETA_FILE} (HTTP 200)" in out
+    assert len(traced.requests) == 8
     # After the tag, every IRI must also serve the battinfo.ttl of the checkout.
     assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(_before_the_tag())) == 1
+
+
+def test_before_the_tag_the_beta_version_iri_must_reach_its_folder(capsys: pytest.CaptureFixture[str]) -> None:
+    # Until the deploy keeps the beta, its folder answers 404 in the right place.
+    landings = _before_the_tag()
+    for iri in ("https://w3id.org/battinfo/0.8.0-beta", BETA):
+        landings[iri] = check.Landing(BETA_FILE, 404)
+    assert check.main(["--ontology-routes"], trace_url=_Traced(landings)) == 0
+    capsys.readouterr()
+    # A registry that does not forward the beta's versionIRI fails the check.
+    registry = "https://battinfo-registry.onrender.com/w3id/0.8.0-beta/battinfo"
+    landings[BETA] = check.Landing(registry, 404)
+    assert check.main(["--ontology-routes"], trace_url=_Traced(landings)) == 1
+    assert f"misrouted    {BETA}  (lands on {registry} (HTTP 404), expected {BETA_FILE}" in capsys.readouterr().out
+
+
+def test_after_the_tag_the_inferred_files_and_the_beta_must_declare_their_version_iris(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    beta_inferred = _ontology("0.8.0", [], version_iri="https://w3id.org/battinfo/0.8.0-beta/battinfo-inferred")
+    landings["https://w3id.org/battinfo/inferred"] = check.Landing(f"{PAGES}/battinfo-inferred.ttl", 200, beta_inferred)
+    missing = f"{PAGES}/battinfo/versions/0.8.0/battinfo-inferred.ttl"
+    landings["https://w3id.org/battinfo/0.8.0/inferred"] = check.Landing(missing, 404)
+    landings["https://w3id.org/battinfo/0.8.0-beta"] = check.Landing(BETA_FILE, 200, _ontology("0.8.0"))
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 1
+    out = capsys.readouterr().out
+    assert (
+        "differs      https://w3id.org/battinfo/inferred  ("
+        f"lands on {PAGES}/battinfo-inferred.ttl (HTTP 200): versionIRI "
+        "https://w3id.org/battinfo/0.8.0-beta/battinfo-inferred, expected https://w3id.org/battinfo/0.8.0/inferred)"
+    ) in out
+    assert (
+        f"routed       https://w3id.org/battinfo/0.8.0/inferred  (lands on {missing} (HTTP 404): no inferred file published)"
+        in out
+    )
+    assert "differs      https://w3id.org/battinfo/0.8.0-beta  (" in out
+    assert f"same         {BETA}  (" in out
+
+
+def test_a_release_that_published_no_inferred_file_passes_the_daily_check(
+    ontology_releases: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    # docs-deploy.sh publishes the release without battinfo-inferred.ttl when
+    # the reasoner fails, and removes the root's of an older version.
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    root_file = f"{PAGES}/battinfo-inferred.ttl"
+    versioned = f"{PAGES}/battinfo/versions/0.8.0/battinfo-inferred.ttl"
+    landings["https://w3id.org/battinfo/inferred"] = check.Landing(root_file, 404)
+    landings["https://w3id.org/battinfo/0.8.0/inferred"] = check.Landing(versioned, 404)
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 0
+    out = capsys.readouterr().out
+    assert f"routed       https://w3id.org/battinfo/inferred  (lands on {root_file} (HTTP 404): no inferred file" in out
+    assert check.main(["--ontology-routes", "--served"], trace_url=_Traced(landings), root=ontology_releases) == 0
+    capsys.readouterr()
+    # Only the inferred file is optional: the release's own battinfo.ttl is not.
+    landings["https://w3id.org/battinfo/0.8.0"] = check.Landing(f"{PAGES}/battinfo/versions/0.8.0/battinfo.ttl", 404)
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 1
+    # Nor may the inferred IRIs lead anywhere else, such as to battinfo.ttl.
+    landings = _landings(_ontology("0.8.0"), "0.8.0")
+    landings["https://w3id.org/battinfo/inferred"] = check.Landing(f"{PAGES}/battinfo.ttl", 200, _ontology("0.8.0"))
+    assert check.main(["--ontology"], trace_url=_Traced(landings), root=ontology_releases) == 1
+    assert "misrouted    https://w3id.org/battinfo/inferred  (" in capsys.readouterr().out
 
 
 def test_a_route_that_leads_elsewhere_fails(capsys: pytest.CaptureFixture[str]) -> None:

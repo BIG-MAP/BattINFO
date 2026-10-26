@@ -9,7 +9,13 @@ release, so a backport does not replace it.
 A final tag also publishes the ontology where w3id looks for it: battinfo.ttl,
 and a small battinfo.html for browsers, in battinfo/versions/X.Y.Z/ for
 https://w3id.org/battinfo/X.Y.Z, and at the root for https://w3id.org/battinfo
-when the tag is the newest final release.
+when the tag is the newest final release. Beside each goes the
+battinfo-inferred.ttl that ROBOT writes, when it does; a stand-in for ROBOT
+answers here, and the deploy goes on without the file when it fails.
+
+Main's deploy and a final tag's also keep the 2024 root ontology at its
+versionIRI, 0.8.0-beta, and drop the root versions/ folder of mislabelled
+copies of it.
 
 The script runs with bash and git, against a local bare repository standing
 in for origin; nothing leaves the machine.
@@ -31,19 +37,64 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / ".github" / "workflows" / "docs-deploy.sh"
 
+# The ontology files published in 2024: the root battinfo.ttl declares the
+# versionIRI of 0.8.0-beta, and battinfo-inferred.ttl is its inferred form.
+BETA_IMPORT = "https://w3id.org/emmo/domain/battery/0.13.0-beta/battery"
+BETA = (
+    "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n"
+    "<https://w3id.org/battinfo> a owl:Ontology ;\n"
+    f"    owl:imports <{BETA_IMPORT}> ;\n"
+    "    owl:versionIRI <https://w3id.org/battinfo/0.8.0-beta/battinfo> ;\n"
+    '    owl:versionInfo "0.8.0" .\n'
+)
+BETA_INFERRED = (
+    "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n"
+    "<https://w3id.org/battinfo/battinfo-inferred> a owl:Ontology ;\n"
+    "    owl:versionIRI <https://w3id.org/battinfo/0.8.0-beta/battinfo-inferred> .\n"
+)
+
 # The gh-pages tree before the deploys: dev/, the v0.7.0 release and its stable/
 # copy, a switcher and root page that the script did not write, and the
-# ontology files published by hand before 0.8.0.
+# ontology files published by hand before 0.8.0, with the root versions/ folder
+# that holds copies of them under older release numbers.
 SEED = {
     "dev/index.html": "dev build\n",
     "v0.7.0/index.html": "v0.7.0 build\n",
     "stable/index.html": "v0.7.0 build\n",
     "switcher.json": '[{"version": "dev"}, {"version": "v0.7.0", "preferred": true}]\n',
     "index.html": "seeded root page\n",
-    "battinfo.ttl": "old ontology\n",
+    "battinfo.ttl": BETA,
+    "battinfo-inferred.ttl": BETA_INFERRED,
     "battinfo.html": "old class index\n",
+    "versions/0.5.0/battinfo.ttl": BETA,
+    "versions/v0.6.0/battinfo-inferred.ttl": BETA_INFERRED,
+    "versions/test/context/context.json": "{}\n",
     ".nojekyll": "",
 }
+
+# Stands in for ROBOT. It writes --output declaring the --version-iri it was
+# given, with the arguments other than the paths in a comment, unless
+# FAKE_ROBOT tells it to fail, to run too long or to declare another version.
+FAKE_ROBOT = """\
+import os, sys, time
+
+args = sys.argv[1:]
+mode = os.environ["FAKE_ROBOT"]
+if mode == "slow":
+    time.sleep(60)
+if mode == "fail":
+    sys.exit("ERROR There are 3670 unsatisfiable classes in the ontology.")
+shown = [arg for index, arg in enumerate(args) if index == 0 or args[index - 1] not in ("--catalog", "--input", "--output")]
+iri = args[args.index("--version-iri") + 1] if mode == "infer" else "https://w3id.org/battinfo/0.0.0/inferred"
+with open(args[args.index("--output") + 1], "w", encoding="utf-8") as out:
+    out.write("# robot " + " ".join(shown) + "\\n")
+    out.write("<https://w3id.org/battinfo/inferred> a owl:Ontology ;\\n    owl:versionIRI <" + iri + "> .\\n")
+"""
+REASONED = (
+    "# robot merge --catalog --input reason --reasoner HermiT annotate --ontology-iri https://w3id.org/battinfo/inferred "
+    "--version-iri https://w3id.org/battinfo/{0}/inferred "
+    "--link-annotation http://www.w3.org/ns/prov#wasDerivedFrom https://w3id.org/battinfo/{0}/battinfo --output\n"
+)
 
 IMPORTS = [
     "https://w3id.org/emmo/domain/battery/0.21.0/battery",
@@ -61,6 +112,14 @@ def _ontology(version: str) -> bytes:
         f"    owl:versionIRI <https://w3id.org/battinfo/{version}/battinfo> ;\n"
         f"{imports}"
         f'    owl:versionInfo "{version}" .\n'
+    ).encode("utf-8")
+
+
+def _inferred(version: str) -> bytes:
+    """The battinfo-inferred.ttl the stand-in for ROBOT writes for *version*."""
+    return (
+        REASONED.format(version) + "<https://w3id.org/battinfo/inferred> a owl:Ontology ;\n"
+        f"    owl:versionIRI <https://w3id.org/battinfo/{version}/inferred> .\n"
     ).encode("utf-8")
 
 
@@ -131,12 +190,20 @@ def site(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
 
 
 def _deploy(
-    site: tuple[Path, Path, dict[str, str]], version: str, *, ontology: str | None = None, ok: bool = True
+    site: tuple[Path, Path, dict[str, str]],
+    version: str,
+    *,
+    ontology: str | None = None,
+    ok: bool = True,
+    reasoner: str | None = None,
+    reasoner_timeout: str = "120",
 ) -> subprocess.CompletedProcess[str]:
     """Run the script as docs.yml does: in a fresh clone of the tag, holding the built docs.
 
     The clone's battinfo.ttl declares *ontology*, by default the tag's own
-    version (0.8.0 for a branch build or a pre-release).
+    version (0.8.0 for a branch build or a pre-release). With *reasoner*, ROBOT
+    is the stand-in, doing what FAKE_ROBOT says for that word; without it,
+    ROBOT is not set.
     """
     tmp_path, origin, env = site
     checkout = tmp_path / f"checkout-{len(list(tmp_path.glob('checkout-*')))}"
@@ -146,6 +213,11 @@ def _deploy(
     (build / "index.html").write_bytes(f"{version} build\n".encode())
     final = re.fullmatch(r"v(\d+\.\d+\.\d+)", version)
     (checkout / "battinfo.ttl").write_bytes(_ontology(ontology or (final.group(1) if final else "0.8.0")))
+    env = {**env, "ROBOT": "", "REASONER_TIMEOUT": reasoner_timeout}
+    if reasoner is not None:
+        robot = tmp_path / "fake_robot.py"
+        robot.write_text(FAKE_ROBOT, encoding="utf-8")
+        env.update(ROBOT=f'"{Path(sys.executable).as_posix()}" "{robot.as_posix()}"', FAKE_ROBOT=reasoner)
     bash = _bash()
     assert bash is not None
     proc = subprocess.run(
@@ -175,6 +247,33 @@ def _is_published(site: tuple[Path, Path, dict[str, str]], relative: str) -> boo
     return proc.returncode == 0
 
 
+def _listed(site: tuple[Path, Path, dict[str, str]], folder: str) -> list[str]:
+    _checkout, origin, env = site
+    proc = subprocess.run(
+        ["git", "--git-dir", str(origin), "ls-tree", "--name-only", f"gh-pages:{folder}"],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, proc.stderr
+    return [folder + name for name in proc.stdout.split()]
+
+
+def _add_to_site(site: tuple[Path, Path, dict[str, str]], files: dict[str, str]) -> None:
+    """Commit *files* to gh-pages on origin, as a deploy that stopped part-way might have."""
+    tmp_path, origin, env = site
+    clone = tmp_path / "add-to-site"
+    _git(tmp_path, env, "clone", "-q", "--branch", "gh-pages", str(origin), str(clone))
+    for relative, text in files.items():
+        path = clone / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(text.encode("utf-8"))
+    _git(clone, env, "add", "-A")
+    _git(clone, env, "commit", "-q", "-m", "add to the site")
+    _git(clone, env, "push", "-q", "origin", "gh-pages")
+
+
 def _switcher(site: tuple[Path, Path, dict[str, str]]) -> list[dict]:
     return json.loads(_published(site, "switcher.json"))
 
@@ -188,9 +287,11 @@ def test_a_release_candidate_gets_its_own_folder_and_leaves_stable_and_the_switc
     assert _published(site, "stable/index.html") == b"v0.7.0 build\n"
     assert _published(site, "switcher.json") == SEED["switcher.json"].encode()
     assert _published(site, "index.html") == SEED["index.html"].encode()
-    # A pre-release does not publish its ontology.
+    # A pre-release does not publish its ontology, nor tidy the old files.
     assert _published(site, "battinfo.ttl") == SEED["battinfo.ttl"].encode()
     assert _published(site, "battinfo.html") == SEED["battinfo.html"].encode()
+    assert _published(site, "battinfo-inferred.ttl") == SEED["battinfo-inferred.ttl"].encode()
+    assert _published(site, "versions/0.5.0/battinfo.ttl") == SEED["versions/0.5.0/battinfo.ttl"].encode()
     assert not _is_published(site, "battinfo/versions")
 
 
@@ -227,40 +328,132 @@ def test_a_final_release_updates_stable_and_the_switcher_and_a_backport_does_not
 def test_a_final_release_publishes_the_ontology_at_its_version_and_the_newest_at_the_root(
     site: tuple[Path, Path, dict[str, str]],
 ) -> None:
-    _deploy(site, "v0.8.0")
+    _deploy(site, "v0.8.0", reasoner="infer")
 
     for folder in ("battinfo/versions/0.8.0/", ""):
         assert _published(site, f"{folder}battinfo.ttl") == _ontology("0.8.0")
+        assert _published(site, f"{folder}battinfo-inferred.ttl") == _inferred("0.8.0")
         page = _published(site, f"{folder}battinfo.html").decode("utf-8")
         assert "BattINFO ontology 0.8.0" in page
         assert 'href="battinfo.ttl"' in page
+        assert 'href="battinfo-inferred.ttl"' in page
         assert "https://w3id.org/battinfo/0.8.0/battinfo" in page
         assert all(iri in page for iri in IMPORTS)
         assert "https://big-map.github.io/BattINFO/v0.8.0/" in page
     assert not _is_published(site, "battinfo/versions/v0.8.0")  # w3id's path has no v
 
     # A backport gets its version folder; the root keeps the newest release.
-    _deploy(site, "v0.7.1")
+    _deploy(site, "v0.7.1", reasoner="infer")
     assert _published(site, "battinfo/versions/0.7.1/battinfo.ttl") == _ontology("0.7.1")
+    assert _published(site, "battinfo/versions/0.7.1/battinfo-inferred.ttl") == _inferred("0.7.1")
     assert _published(site, "battinfo.ttl") == _ontology("0.8.0")
+    assert _published(site, "battinfo-inferred.ttl") == _inferred("0.8.0")
     assert "BattINFO ontology 0.8.0" in _published(site, "battinfo.html").decode("utf-8")
 
     # main's docs leave the ontology alone.
-    _deploy(site, "dev", ontology="0.9.0")
+    _deploy(site, "dev", ontology="0.9.0", reasoner="infer")
     assert _published(site, "battinfo.ttl") == _ontology("0.8.0")
+    assert _published(site, "battinfo-inferred.ttl") == _inferred("0.8.0")
     assert not _is_published(site, "battinfo/versions/0.9.0")
+
+    # Without the reasoner, a rerun keeps the inferred files the release has.
+    proc = _deploy(site, "v0.8.0")
+    assert "No docs changes to deploy." in proc.stdout, proc.stdout + proc.stderr
+    assert _published(site, "battinfo-inferred.ttl") == _inferred("0.8.0")
+
+
+def test_before_a_release_replaces_the_root_its_ontology_is_kept_at_its_version_iri(
+    site: tuple[Path, Path, dict[str, str]],
+) -> None:
+    # main's deploy keeps the 2024 files where w3id sends their versionIRI,
+    # https://w3id.org/battinfo/0.8.0-beta/battinfo, and leaves the root alone.
+    _deploy(site, "dev")
+
+    kept = "battinfo/versions/0.8.0-beta/"
+    assert _published(site, f"{kept}battinfo.ttl") == BETA.encode()
+    assert _published(site, f"{kept}battinfo-inferred.ttl") == BETA_INFERRED.encode()
+    page = _published(site, f"{kept}battinfo.html").decode("utf-8")
+    assert "BattINFO ontology 0.8.0-beta" in page
+    assert "https://w3id.org/battinfo/0.8.0-beta/battinfo" in page
+    assert BETA_IMPORT in page
+    assert 'href="battinfo.ttl"' in page and 'href="battinfo-inferred.ttl"' in page
+    assert "big-map.github.io/BattINFO/v0.8.0-beta" not in page  # no docs were published for it
+    assert _published(site, "battinfo.ttl") == BETA.encode()
+    assert _published(site, "battinfo-inferred.ttl") == BETA_INFERRED.encode()
+    # The root versions/ folder of mislabelled copies is gone.
+    assert not _is_published(site, "versions")
+
+    # Running again changes nothing.
+    proc = _deploy(site, "dev")
+    assert "No docs changes to deploy." in proc.stdout, proc.stdout + proc.stderr
+
+    # The release replaces the root; the beta stays in its folder.
+    _deploy(site, "v0.8.0", reasoner="infer")
+    assert _published(site, "battinfo.ttl") == _ontology("0.8.0")
+    assert _published(site, "battinfo-inferred.ttl") == _inferred("0.8.0")
+    assert _published(site, f"{kept}battinfo.ttl") == BETA.encode()
+    assert _published(site, f"{kept}battinfo-inferred.ttl") == BETA_INFERRED.encode()
+
+
+def test_a_partly_written_beta_folder_is_replaced_whole(site: tuple[Path, Path, dict[str, str]]) -> None:
+    # The folder is written beside its place and renamed into it; one that an
+    # older run left without its battinfo.ttl is replaced, not skipped.
+    _add_to_site(site, {"battinfo/versions/0.8.0-beta/battinfo.html": "half written\n"})
+    _deploy(site, "dev")
+
+    assert _published(site, "battinfo/versions/0.8.0-beta/battinfo.ttl") == BETA.encode()
+    assert _published(site, "battinfo/versions/0.8.0-beta/battinfo-inferred.ttl") == BETA_INFERRED.encode()
+    assert "BattINFO ontology 0.8.0-beta" in _published(site, "battinfo/versions/0.8.0-beta/battinfo.html").decode()
+    assert _listed(site, "battinfo/versions/") == ["battinfo/versions/0.8.0-beta"]  # nothing left beside it
+
+
+def test_a_release_tag_keeps_the_beta_and_drops_the_root_versions_folder_on_its_own(
+    site: tuple[Path, Path, dict[str, str]],
+) -> None:
+    # No main deploy between this change and the tag: the tag's deploy keeps the
+    # beta before it replaces the root.
+    _deploy(site, "v0.8.0", reasoner="infer")
+
+    assert _published(site, "battinfo/versions/0.8.0-beta/battinfo.ttl") == BETA.encode()
+    assert _published(site, "battinfo/versions/0.8.0-beta/battinfo-inferred.ttl") == BETA_INFERRED.encode()
+    assert _published(site, "battinfo.ttl") == _ontology("0.8.0")
+    assert not _is_published(site, "versions")
+
+
+@pytest.mark.parametrize(
+    ("reasoner", "said"),
+    [
+        (None, "ROBOT is not set"),
+        ("fail", "ROBOT exited with 1: ERROR There are 3670 unsatisfiable classes in the ontology."),
+        ("slow", "the reasoner ran for more than 2 s"),
+        ("other", "the file ROBOT wrote does not declare the versionIRI <https://w3id.org/battinfo/0.8.0/inferred>"),
+    ],
+)
+def test_without_a_reasoned_file_the_ontology_is_published_and_the_root_drops_the_beta_inferred_file(
+    site: tuple[Path, Path, dict[str, str]], reasoner: str | None, said: str
+) -> None:
+    proc = _deploy(site, "v0.8.0", reasoner=reasoner, reasoner_timeout="2")
+
+    for folder in ("battinfo/versions/0.8.0/", ""):
+        assert _published(site, f"{folder}battinfo.ttl") == _ontology("0.8.0")
+        assert not _is_published(site, f"{folder}battinfo-inferred.ttl")
+        assert "battinfo-inferred.ttl" not in _published(site, f"{folder}battinfo.html").decode("utf-8")
+    # /inferred no longer answers with the beta's file; its own folder keeps it.
+    assert _published(site, "battinfo/versions/0.8.0-beta/battinfo-inferred.ttl") == BETA_INFERRED.encode()
+    assert f"::warning::No battinfo-inferred.ttl for 0.8.0: {said}" in proc.stderr, proc.stderr
 
 
 def test_a_final_tag_whose_ontology_names_another_version_deploys_its_docs_but_not_the_ontology(
     site: tuple[Path, Path, dict[str, str]],
 ) -> None:
-    proc = _deploy(site, "v0.8.1", ontology="0.8.0", ok=False)
+    proc = _deploy(site, "v0.8.1", ontology="0.8.0", ok=False, reasoner="infer")
 
     assert "0.8.1" in proc.stderr and "battinfo.ttl" in proc.stderr, proc.stderr
     assert _published(site, "v0.8.1/index.html") == b"v0.8.1 build\n"
     assert not _is_published(site, "battinfo/versions/0.8.1")
     assert not _is_published(site, "battinfo/versions/0.8.0")
     assert _published(site, "battinfo.ttl") == SEED["battinfo.ttl"].encode()
+    assert _published(site, "battinfo-inferred.ttl") == SEED["battinfo-inferred.ttl"].encode()
 
 
 def test_deploys_run_one_at_a_time_and_a_running_one_is_never_cancelled() -> None:
@@ -270,3 +463,41 @@ def test_deploys_run_one_at_a_time_and_a_running_one_is_never_cancelled() -> Non
     assert deploy["concurrency"]["cancel-in-progress"] is False
     assert "${{" not in deploy["concurrency"]["group"]  # one group for every ref
     assert deploy["steps"][-1]["run"] == 'bash .github/workflows/docs-deploy.sh "$DOCS_VERSION"'
+
+
+def test_the_reasoner_reads_the_emmo_release_that_battinfo_ttl_pins() -> None:
+    # w3id answers the EMMO version IRI with a squashed file in which HermiT
+    # finds the closure incoherent; the catalog sends ROBOT to the release's
+    # own emmo.ttl, and must name the EMMO version battinfo.ttl is pinned to.
+    pinned = re.search(r"^#\s+EMMO core\s+(\S+)$", (ROOT / "battinfo.ttl").read_text(encoding="utf-8"), re.M)
+    assert pinned is not None
+    catalog = (ROOT / ".github" / "workflows" / "docs-deploy-catalog.xml").read_text(encoding="utf-8")
+    entries = re.findall(r'<uri name="([^"]+)" uri="([^"]+)"/>', catalog)
+    version = pinned.group(1)
+    assert entries == [
+        (f"https://w3id.org/emmo/{version}", f"https://raw.githubusercontent.com/emmo-repo/EMMO/{version}/emmo.ttl")
+    ]
+    assert 'CATALOG=".github/workflows/docs-deploy-catalog.xml"' in SCRIPT.read_text(encoding="utf-8")
+
+
+def test_robot_is_pinned_checked_and_cannot_stop_a_deploy() -> None:
+    docs = yaml.safe_load((ROOT / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8"))
+    deploy = docs["jobs"]["deploy"]
+    (install,) = [step for step in deploy["steps"] if "robot.jar" in step.get("run", "")]
+    assert install["continue-on-error"] is True
+    # A stalled download cannot take the deploy's time.
+    assert install["timeout-minutes"] <= 5
+    assert "--max-time 300" in install["run"]
+    # When it fails, a step says so.
+    (warn,) = [step for step in deploy["steps"] if step.get("if") == f"steps.{install['id']}.outcome == 'failure'"]
+    assert "::warning::" in warn["run"]
+    assert install["if"] == "startsWith(github.ref, 'refs/tags/v')"
+    assert re.fullmatch(r"\d+\.\d+\.\d+", install["env"]["ROBOT_VERSION"])
+    assert re.fullmatch(r"[0-9a-f]{64}", install["env"]["ROBOT_SHA256"])
+    assert "sha256sum --check" in install["run"]
+    # ROBOT is set only once the jar passed the check.
+    assert install["run"].index("sha256sum") < install["run"].index("GITHUB_ENV")
+    # The job outlasts the reasoner's time limit.
+    limit = re.search(r'get\("REASONER_TIMEOUT"\) or (\d+)', SCRIPT.read_text(encoding="utf-8"))
+    assert limit is not None
+    assert deploy["timeout-minutes"] * 60 >= int(limit.group(1)) + 5 * 60

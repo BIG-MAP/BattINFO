@@ -101,12 +101,19 @@ Section 11.1 of `IDENTIFIER_POLICY.md` says how many terms 0.8.0 freezes, and it
 
 `battinfo.ttl` is served from GitHub Pages. For a final tag `vX.Y.Z` the docs workflow (`.github/workflows/docs-deploy.sh`) copies it to `battinfo/versions/X.Y.Z/` on the `gh-pages` branch, and to the root of the site when the tag is the newest final release, each time with a short `battinfo.html` for browsers. A pre-release tag publishes no ontology. A tag whose `battinfo.ttl` declares another version deploys its documentation but not the ontology, and the deploy job fails.
 
+Beside each copy goes `battinfo-inferred.ttl`: [ROBOT](https://robot.obolibrary.org/) merges the import closure and adds what the HermiT reasoner infers, and the file declares the versionIRI `https://w3id.org/battinfo/X.Y.Z/inferred`. The docs workflow installs a pinned ROBOT for tags. ROBOT reads `.github/workflows/docs-deploy-catalog.xml`, which sends the EMMO version IRI to the release's own `emmo.ttl`, since the squashed EMMO that w3id serves there makes HermiT find the closure incoherent. When the EMMO core version in the header of `battinfo.ttl` changes, change it in the catalog too; a test compares them. The file is optional: when ROBOT cannot be installed, finds the closure incoherent or runs past 20 minutes (`REASONER_TIMEOUT`), the ontology is published without it, the job shows a warning, and a root `battinfo-inferred.ttl` of an older version is removed, so `/inferred` never answers for another version than the root.
+
+The deploys of `main` and of a final tag also keep the root's ontology at its versionIRI: before a release replaces it, a root `battinfo.ttl` whose `battinfo/versions/V/` folder does not exist is copied there with its `battinfo-inferred.ttl`. This keeps the 2024 file, `https://w3id.org/battinfo/0.8.0-beta/battinfo`, resolving. They also remove the root `versions/` folder, which held copies of that file under the numbers of older releases.
+
 | IRI | Where it leads |
 |---|---|
 | `https://w3id.org/battinfo` | `battinfo.ttl` at the root of the site (`battinfo.html` for a browser) |
 | `https://w3id.org/battinfo/X.Y.Z` | `battinfo/versions/X.Y.Z/battinfo.ttl` (`battinfo.html` for a browser) |
 | `https://w3id.org/battinfo/X.Y.Z/battinfo`, the `owl:versionIRI` | the registry, which answers with a 303 to `https://w3id.org/battinfo/X.Y.Z` |
 | `https://w3id.org/battinfo/latest` | `battinfo.ttl` on `main` |
+| `https://w3id.org/battinfo/inferred` | `battinfo-inferred.ttl` at the root of the site |
+| `https://w3id.org/battinfo/X.Y.Z/inferred` | `battinfo/versions/X.Y.Z/battinfo-inferred.ttl` |
+| `https://w3id.org/battinfo/0.8.0-beta/battinfo`, the 2024 file's `owl:versionIRI` | the registry, which answers with a 303 to `https://w3id.org/battinfo/0.8.0-beta`, that is `battinfo/versions/0.8.0-beta/battinfo.ttl` |
 
 The rules live in `battinfo/.htaccess` in [perma-id/w3id.org](https://github.com/perma-id/w3id.org); the versionIRI matches none of the ontology rules there and reaches the registry. `/latest` and its alias `/source` read the `master` branch until a perma-id pull request moves them to `main`, and the `raw/` rules in the same file read `master` still, so keep `master` when old branches are cleaned up.
 
@@ -116,7 +123,7 @@ Before the tag, on the frozen `main` and after the registry deploy, check where 
 python scripts/check_hosted_files.py --ontology-routes
 ```
 
-It takes the version and the versionIRI from the checkout's `battinfo.ttl` and follows every redirect. It passes when each IRI lands where the table says, even where the file is not there yet: before the tag, `/X.Y.Z` and the versionIRI land on a 404 in `battinfo/versions/X.Y.Z/`, and the root still serves the last release. Once the perma-id pull request has moved it, `/latest` already serves the frozen `main`. Until then `/latest` lands on `master`, and the check reports it as `pending` without failing: that pull request is reviewed outside this repository and does not block the tag. Any other landing place for `/latest` fails the check.
+It takes the version and the versionIRI from the checkout's `battinfo.ttl` and follows every redirect. It passes when each IRI lands where the table says, even where the file is not there yet: before the tag, `/X.Y.Z`, the versionIRI and `/X.Y.Z/inferred` land on a 404 in `battinfo/versions/X.Y.Z/`, and the root and `/inferred` still serve the last release. Once the perma-id pull request has moved it, `/latest` already serves the frozen `main`. Until then `/latest` lands on `master`, and the check reports it as `pending` without failing: that pull request is reviewed outside this repository and does not block the tag. Any other landing place for `/latest` fails the check. So does a registry that does not yet forward the 0.8.0-beta versionIRI (battery-genome/battinfo-registry#102).
 
 After the tag's docs deploy, from a checkout of the tag:
 
@@ -125,7 +132,7 @@ python scripts/check_hosted_files.py --ontology-routes --served
 python scripts/check_hosted_files.py --ontology --tag vX.Y.Z
 ```
 
-The first wants all four IRIs to serve the tag's `battinfo.ttl`, apart from a `/latest` that is still pending on `master`. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, and `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
+The first wants the root, `/latest`, `/X.Y.Z` and the versionIRI to serve the tag's `battinfo.ttl`, apart from a `/latest` that is still pending on `master`, and the inferred and 0.8.0-beta IRIs to serve files that declare their versionIRIs. The second is what `hosted-files.yml` runs every day against the newest final tag: the root declares the release's versionIRI and imports, `/X.Y.Z` and the versionIRI serve its `battinfo.ttl`, and the inferred and 0.8.0-beta IRIs are checked as in the first. A release published without `battinfo-inferred.ttl` passes both: a 404 where the inferred file belongs is reported as `routed`, but a file that declares another versionIRI fails. Neither runs in `release.yml`, because the versionIRI resolves only after the tag's own docs deploy.
 
 ## Zenodo sandbox run
 
