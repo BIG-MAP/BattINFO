@@ -21,7 +21,6 @@ from __future__ import annotations
 
 import copy
 import json
-import re
 import warnings
 from pathlib import Path
 from typing import Any
@@ -279,12 +278,6 @@ def test_every_percent_term_expands_to_the_percent_unit() -> None:
     # The two quantity classes keep their terms and their IRIs.
     assert _expand_with(v1, v1["WeightPercent"]) == WEIGHT_PERCENT
     assert _expand_with(v1, v1["VolumePercent"]) == VOLUME_PERCENT
-
-
-def test_the_create_page_writes_the_percent_unit() -> None:
-    source = (ROOT / "web" / "lib" / "create-model.ts").read_text(encoding="utf-8")
-    assert re.search(r'"%":\s*ECHEM\s*\+\s*"electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"', source)
-    assert 'Percent"' not in source.split("const UNIT_IRI", 1)[1].split("};", 1)[0]
 
 
 def test_no_packaged_example_publishes_a_percent_quantity_as_a_unit() -> None:

@@ -1,0 +1,45 @@
+/* State that depends on a node's OWN <details>, which Tailwind cannot express:
+   its group-open variant matches any open ancestor, so nested chevrons and
+   tags followed their parent instead of themselves. The child combinator
+   binds each rule to the summary's own details and no other. */
+
+.chevron {
+  transition: transform 150ms ease;
+}
+
+details[open] > summary .chevron {
+  transform: rotate(90deg);
+}
+
+details[open] > summary .hideWhenOpen {
+  display: none;
+}
+
+/* currentColor is the summary's own text colour, so the tint tracks the theme
+   without naming a palette value here. */
+details[open] > summary.tintWhenOpen {
+  background-color: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+/* A section reads as a heading over its contents only while it has contents on
+   show; closed, it is a row like any other and needs the divider that
+   separates rows. Open, the tint already separates it, so the rule steps back
+   rather than disappearing -- the height stays the same either way. */
+details[open] > summary.headWhenOpen {
+  /* Opaque, not a wash over whatever is behind: an open heading parks while
+     its own rows scroll under it, and a translucent one let them through. The
+     tint is the same either way -- paper is what was behind it before. */
+  background-color: color-mix(in srgb, currentColor 7%, rgb(var(--c-paper)));
+  border-bottom-color: transparent;
+}
+
+/* Parks under the toolbar while its contents scroll, and only while it is
+   open -- a shut section is a row like any other. Its `top` and stacking
+   order say which level it belongs to; Branch works those out, because CSS
+   cannot count the sections enclosing this one. The outermost sits highest,
+   so an inner heading slides under its parent rather than over it. */
+details[open] > summary.pinWhenOpen {
+  position: sticky;
+  top: var(--pin-top);
+  z-index: var(--pin-z);
+}
