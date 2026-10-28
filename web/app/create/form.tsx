@@ -23,8 +23,8 @@ import { ObjectNode } from "./node";
 import { MATERIAL_LIST, MATERIAL_SYMBOLS, PROPERTY_KEYS, PROPERTY_LIST, UNIT_LIST, UNIT_SYMBOLS } from "./vocab";
 import { HowToStart } from "./start";
 import { BackLink } from "./pick-file";
-import { asDraft, readFragment, type Loaded } from "./load";
-import { DERIVED_IDENTITY, notAuthored, slugOf, typeForSlug, type RecordType } from "./types";
+import { asDraft, findingsFor, readFragment, type Loaded } from "./load";
+import { notAuthored, slugOf, typeForSlug, type RecordType } from "./types";
 import { validateRecordAs } from "@/lib/validate";
 
 type Obj = Record<string, unknown>;
@@ -150,16 +150,12 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
   const result = useMemo(() => validateRecordAs(JSON.stringify(record), type.key), [record, type.key]);
 
   // The identity the library derives at save time. The schemas require an `id`
-  // (and a dataset's `identifier`), so a draft that rightly omits one is still
-  // reported as missing it. This is the only place the form sets the
+  // (and a dataset's `identifier`), so a new draft that rightly omits one is
+  // still reported as missing it. This is the only place the form sets the
   // validator's verdict aside, and it is set aside once, here: the form shows
   // no row for these, so a count that included them was a problem nobody could
-  // find.
-  const derived = useMemo(() => new Set(DERIVED_IDENTITY.map((key) => `${type.key}.${key}`)), [type.key]);
-  const findings = useMemo(
-    () => result.issues.filter((issue) => !derived.has(issue.path)),
-    [result, derived],
-  );
+  // find. See findingsFor for exactly what is excused.
+  const findings = useMemo(() => findingsFor(result.issues, type), [result, type]);
 
   // Those findings keyed by the dotted path they are reported at, so each row
   // in the tree can look up what is wrong with itself.

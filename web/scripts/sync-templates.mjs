@@ -9,7 +9,7 @@
 // The examples are copied verbatim, minted IRI and all. What turns one into a
 // template -- dropping that identity and, of the provenance, everything but the
 // kind of source -- is `asTemplate` in app/create/load.ts, applied when a
-// template is chosen. scripts/check-author.ts fails the build if a template
+// template is chosen. scripts/check-create.ts fails the build if a template
 // could reach the form still carrying either.
 //
 //   Run:   npm run sync:templates

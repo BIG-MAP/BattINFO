@@ -23,6 +23,8 @@ export interface Issue {
   severity: Severity;
   path: string;
   message: string;
+  /** Set when the issue is a required property that is absent: its name. */
+  missing?: string;
 }
 
 export interface ValidationResult {
@@ -103,7 +105,7 @@ function toIssue(error: ErrorObject): Issue {
   if (error.keyword === "required") {
     const missing = (error.params as { missingProperty: string }).missingProperty;
     const path = basePath === "(root)" ? missing : `${basePath}.${missing}`;
-    return { severity: "error", path, message: `Missing required property \`${missing}\`.` };
+    return { severity: "error", path, message: `Missing required property \`${missing}\`.`, missing };
   }
   if (error.keyword === "additionalProperties") {
     const extra = (error.params as { additionalProperty: string }).additionalProperty;

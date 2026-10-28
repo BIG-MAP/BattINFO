@@ -123,7 +123,7 @@ export function resolve(loc: Located): Located {
 // What kind of input a value needs. "const" is a value the schema fixes, so the
 // form sets it rather than asking. "opaque" is a value the author does not own.
 // "unsupported" is a shape this file cannot read; the tree falls back to a plain
-// text box for it, and scripts/check-author.ts fails the build if any reachable
+// text box for it, and scripts/check-create.ts fails the build if any reachable
 // field ever reaches it.
 export type Control =
   | { kind: "text"; format?: string }

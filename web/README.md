@@ -92,10 +92,14 @@ What it does *not* do is as deliberate as what it does:
 
 - **No identifier.** `id`, `short_id` and `identifier` are derived by the
   library at save time, and since BIG-MAP/BattINFO#435 a placeholder is
-  rejected outright. The form shows no row for them and strips them from
-  anything it opens. The schemas still require them, so this is the one place
-  the page sets the validator aside — for those paths and nothing else, once,
-  so the status line and the sections agree on what is left to do.
+  rejected outright. The form shows no row for them. A record opened from a
+  file or a link keeps the ones it has, so saving it again updates that
+  record; a template leaves its IRI behind. The schemas still require an `id`,
+  so this is the one place the page sets the validator aside: a *missing* id
+  (or dataset identifier) is excused, a wrong one is not (`findingsFor` in
+  `load.ts`). Ten component and equipment types have no natural key, so the
+  package cannot mint their IRI and refuses to save a new one without a uid;
+  their pages say so (`NO_NATURAL_KEY` in `types.ts`).
 - **No JSON-LD.** The transform has no JavaScript equivalent and this site runs
   without a server; `battinfo` emits it from the downloaded record.
 - **No free-form editing.** A schema that constrains nothing about its values
@@ -113,8 +117,8 @@ What it does *not* do is as deliberate as what it does:
 every field resolves to a control, every container can hold something,
 `blankFor` terminates, templates load without dropping anything and still
 validate once loaded, a "one or a list" field keeps its list, an organization
-reference keeps its IRIs, and no draft leaves with an identifier. It is wired
-into CI next to the other web checks.
+reference keeps its IRIs, an opened record keeps its identity and a template
+does not. It is wired into CI next to the other web checks.
 
 ### Opening a filled form from a link
 
@@ -134,14 +138,15 @@ near 2 kB where the raw JSON is five.
 const gz = await new Response(
   new Blob([JSON.stringify(record)]).stream().pipeThrough(new CompressionStream("gzip")),
 ).arrayBuffer();
-const encoded = btoa(String.fromCharCode(...new Uint8Array(gz)))
-  .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+let binary = "";
+for (const byte of new Uint8Array(gz)) binary += String.fromCharCode(byte);
+const encoded = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 const url = `https://battinfo.org/create/cell-spec#record=${encoded}`;
 ```
 
 What arrives is a stranger's JSON and is treated as one: the same intake as an
-upload, so a link cannot introduce a field the schemas do not define, and the
-identifier is dropped exactly as it is for a file. A fragment that carries no
+upload, so a link cannot introduce a field the schemas do not define, and it
+keeps its identity exactly as a file does. A fragment that carries no
 readable record says so rather than failing quietly, and the fragment is
 cleared from the address bar once read. `check:create` pins the format.
 

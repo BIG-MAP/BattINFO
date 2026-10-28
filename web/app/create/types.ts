@@ -1,7 +1,8 @@
-// What the form needs to know about one record type. Nothing here is a list:
-// the types come from lib/validate's DISCRIMINATORS (itself pinned to
+// What the form needs to know about one record type. Almost nothing here is
+// a list: the types come from lib/validate's DISCRIMINATORS (itself pinned to
 // battinfo.entities.ENTITY_KINDS by a Python test) and everything else from
-// the schemas.
+// the schemas, except NO_NATURAL_KEY, which the schemas cannot tell and a
+// Python test pins the same way.
 
 import { DISCRIMINATORS } from "@/lib/validate";
 import { fieldsOf, labelFor, resolve, schemaFor, type Located } from "./schema";
@@ -40,17 +41,37 @@ export function typeForSlug(slug: string): RecordType | undefined {
 // the same value. The value itself is read from that corpus, never written
 // down here -- see lib/schema-version.ts.
 //
-// DERIVED_IDENTITY is left out. docs/identifiers.md: "Records carry `id`,
-// `short_id`, and `identifier` -- all derived, never hand-authored. Draft
+// DERIVED_IDENTITY is not authored here. docs/identifiers.md: "Records carry
+// `id`, `short_id`, and `identifier` -- all derived, never hand-authored. Draft
 // inputs omit them; saving canonizes them." Since BIG-MAP/BattINFO#435 the
 // package rejects a placeholder outright and mints from the record's natural
-// key, so the form offers no identifier at all rather than inventing one.
+// key, so the form offers no identifier rather than inventing one. A record
+// opened from a file or a link keeps the one it has (see asDraft).
 //
 // The third kind -- a schema that constrains nothing about its values -- is
 // carried through untouched, and the tree works that one out on its own
 // (`controlFor` returns "opaque").
 export const STAMPED = ["schema_version"];
 export const DERIVED_IDENTITY = ["id", "short_id", "identifier"];
+
+// The record types the package cannot mint an IRI for: nothing in the record
+// identifies it, and a random IRI would make every re-run of a save a new
+// record, so a save without an id is refused. A new one needs a uid the form
+// does not offer, and the page says so. The schemas cannot say which types
+// these are, so they are listed, and tests/test_web_snippets.py holds the list
+// to what the package does with the records in examples/.
+export const NO_NATURAL_KEY = [
+  "separator_spec",
+  "separator",
+  "current_collector_spec",
+  "current_collector",
+  "electrolyte_spec",
+  "electrolyte",
+  "housing_spec",
+  "housing",
+  "equipment_spec",
+  "equipment",
+];
 
 // Which of three kinds a record is, worked out from the schemas rather than
 // listed here.

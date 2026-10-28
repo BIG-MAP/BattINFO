@@ -14,7 +14,7 @@ import { gzipSync } from "node:zlib";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blankFor, controlFor, fieldsOf, isDeprecated, join, type Located } from "../app/create/schema";
-import { asDraft, asTemplate, readFragment, sanitize } from "../app/create/load";
+import { asDraft, asTemplate, findingsFor, readFragment, sanitize } from "../app/create/load";
 import { SCHEMA_VERSION } from "../lib/schema-version";
 import {
   DERIVED_IDENTITY,
@@ -148,27 +148,65 @@ for (const template of TEMPLATES) {
   if (!reloaded.ok) fail(`template ${template.slug}: invalid once loaded — ${reloaded.issues[0]?.message}`);
 
   // 7. And picking it hands over a starting point, not a published record:
-  //    of the provenance, only the kind of source survives.
+  //    of the provenance, only the kind of source survives, and the
+  //    template's own IRI stays behind so saving mints the new record's.
   const started = asTemplate(structuredClone(record), type) as Obj;
   const kept = Object.keys((started.provenance ?? {}) as Obj).filter((key) => key !== "source_type");
   if (kept.length) fail(`template ${template.slug}: keeps the source record's provenance (${kept.join(", ")})`);
+  const startedBody = (started[type.key] ?? {}) as Obj;
+  for (const key of ["id", "short_id"]) {
+    if (key in startedBody) fail(`template ${template.slug}: hands over the template's ${key}`);
+  }
 }
 
-// 8. Whatever way a draft enters, it leaves the library's own fields alone: no
-//    identifier (the package mints it and rejects anything we put there) and
-//    the current schema_version (not whatever an older file carried).
+// 8. Whatever way a draft enters, it gets the current schema_version (not
+//    whatever an older file carried). A record opened from a file keeps its
+//    identity, so saving it again updates that record instead of minting
+//    another; the all-zero placeholder, which the package refuses, does not.
+//    A template drops its IRI but not an identifier of the author's own, such
+//    as a dataset's DOI.
 for (const type of RECORD_TYPES) {
-  const carried: Obj = {
-    schema_version: "0.0.1",
-    [type.key]: { id: "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd", short_id: "aaaabb", identifier: "x:y" },
+  const body = fieldsOf(type.root).find((field) => field.key === type.key);
+  const defined = DERIVED_IDENTITY.filter((key) => body?.loc && fieldsOf(body.loc).some((f) => f.key === key));
+  const identity: Obj = {
+    id: "https://w3id.org/battinfo/id/1001/spec/aaaa-bbbb-cccc-dddd",
+    short_id: "aaaabb",
+    identifier: "x:aaaa-bbbb-cccc-dddd",
   };
-  const draft = asDraft(carried, type) as Obj;
-  const body = (draft[type.key] ?? {}) as Obj;
-  for (const key of DERIVED_IDENTITY) {
-    if (key in body) fail(`${type.key}: asDraft kept ${key}`);
+
+  const draft = asDraft({ schema_version: "0.0.1", [type.key]: { ...identity } }, type) as Obj;
+  const opened = (draft[type.key] ?? {}) as Obj;
+  for (const key of defined) {
+    if (opened[key] !== identity[key]) fail(`${type.key}: an opened record lost its ${key}`);
   }
   if (draft.schema_version !== SCHEMA_VERSION) {
     fail(`${type.key}: asDraft left schema_version at ${String(draft.schema_version)}`);
+  }
+
+  const placeholder = asDraft(
+    {
+      [type.key]: {
+        id: "https://w3id.org/battinfo/id/1001/spec/0000-0000-0000-0000",
+        short_id: "000000",
+        identifier: "x:0000-0000-0000-0000",
+      },
+    },
+    type,
+  ) as Obj;
+  for (const key of DERIVED_IDENTITY) {
+    if (key in ((placeholder[type.key] ?? {}) as Obj)) fail(`${type.key}: asDraft kept the placeholder ${key}`);
+  }
+
+  // The form excuses a missing id, never a wrong one.
+  const wrong = asDraft({ [type.key]: { id: "not-an-iri" } }, type) as Obj;
+  const reported = findingsFor(validateRecordAs(JSON.stringify(wrong), type.key).issues, type);
+  if (!reported.some((issue) => issue.path === `${type.key}.id`)) fail(`${type.key}: a malformed id goes unreported`);
+
+  if (defined.includes("identifier")) {
+    const own = asTemplate({ [type.key]: { ...identity, identifier: "doi:10.5281/zenodo.1234567" } }, type) as Obj;
+    if (((own[type.key] ?? {}) as Obj).identifier !== "doi:10.5281/zenodo.1234567") {
+      fail(`${type.key}: a template dropped an identifier that was not derived from its IRI`);
+    }
   }
 }
 
@@ -229,8 +267,8 @@ for (const template of TEMPLATES) {
 
 // 12. And the whole corpus opens, not just the nine templates. Every canonical
 //     record the repo ships is loaded the way an upload would be: it must come
-//     out as a shape the tree can draw, and must still validate once the
-//     identity the form drops is excused. The same corpus check-agreement
+//     out as a shape the tree can draw, and must still validate with only what
+//     the form excuses (findingsFor) set aside. The same corpus check-agreement
 //     runs, asked a different question -- that one says the validator agrees
 //     with the library, this one says the form can show what the library
 //     wrote.
@@ -259,11 +297,8 @@ for (const template of TEMPLATES) {
     const name = file.slice(repoRoot.length + 1).split("\\").join("/");
     const draft = asDraft(record, type) as Obj;
     for (const where of unrenderable(draft, type.root)) fail(`${name}: ${where}`);
-    // The identity the form drops is the only thing it may become invalid for.
     const report = validateRecordAs(JSON.stringify(draft), type.key);
-    const real = report.issues.filter(
-      (issue) => !DERIVED_IDENTITY.some((key) => issue.path === `${type.key}.${key}`),
-    );
+    const real = findingsFor(report.issues, type);
     if (real.length) fail(`${name}: invalid once loaded — ${real[0].path} ${real[0].message}`);
   }
   if (opened < 100) fail(`only ${opened} corpus records were opened; the walk found too few`);
@@ -339,12 +374,12 @@ async function checkTheLinkFormat(): Promise<void> {
     fail("a link carrying a record read as carrying none");
   } else {
     if (loaded.removed.length) fail(`a linked record lost ${loaded.removed.join(", ")}`);
-    // What the page makes of it, which is where the identifier is dropped --
-    // readFragment only reads and sanitises, exactly as reading a file does.
+    // What the page makes of it. A linked record is a record that exists, so
+    // it keeps its IRI exactly as an opened file does.
     const draft = asDraft(loaded.record, type) as Obj;
-    if (DERIVED_IDENTITY.some((key) => key in ((draft[type.key] ?? {}) as Obj))) {
-      fail("a record opened from a link kept its identifier");
-    }
+    const sourceId = ((source[type.key] ?? {}) as Obj).id;
+    if (!sourceId) fail("the template the link check encodes has no id to keep");
+    else if (((draft[type.key] ?? {}) as Obj).id !== sourceId) fail("a record opened from a link lost its id");
     if (!String((draft[type.key] as Obj)?.name ?? "")) fail("a record opened from a link lost its name");
     for (const where of unrenderable(draft, type.root)) {
       fail(`a record opened from a link is unrenderable: ${where}`);

@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CreateForm from "../form";
 import { BetaBadge } from "../ui";
-import { RECORD_TYPES, slugOf, typeForSlug } from "../types";
+import { NO_NATURAL_KEY, RECORD_TYPES, slugOf, typeForSlug } from "../types";
 
 export const dynamicParams = false;
 
@@ -50,6 +50,18 @@ export default async function CreatePage({ params }: { params: Promise<{ type: s
           <h1 className="text-4xl font-bold tracking-tight text-ink">
             Create a {type.label.toLowerCase()}
           </h1>
+          <p className="mt-4 text-ink-muted">
+            Save the download with{" "}
+            <code className="rounded bg-paper-deep px-1 py-0.5 font-mono text-sm">
+              battinfo save record --input {slug}.json --source-root {"<folder>"} --mode upsert
+            </code>
+          </p>
+          {NO_NATURAL_KEY.includes(type.key) ? (
+            <p className="mt-2 text-ink-muted">
+              The package cannot derive an id for a {type.label.toLowerCase()}, so create new ones in Python
+              with <code className="font-mono text-sm">uid=</code>. One opened here keeps its own.
+            </p>
+          ) : null}
           <div className="mt-4">
             <BetaBadge />
           </div>

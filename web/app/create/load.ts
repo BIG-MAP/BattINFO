@@ -4,6 +4,7 @@
 import { controlFor, fieldsOf, join, type Located } from "./schema";
 import { DERIVED_IDENTITY, type RecordType } from "./types";
 import { SCHEMA_VERSION } from "@/lib/schema-version";
+import type { Issue } from "@/lib/validate";
 
 type Obj = Record<string, unknown>;
 
@@ -59,11 +60,32 @@ export function sanitize(value: unknown, loc: Located, path = "", removed: strin
   return out;
 }
 
+// The uid of the placeholder IRI templates used to carry
+// (battinfo.entities.PLACEHOLDER_UID). The package refuses it under every
+// policy, so a record still holding it has no identity worth keeping.
+const PLACEHOLDER_UID = "0000-0000-0000-0000";
+
+function uidOf(id: unknown): string | undefined {
+  return typeof id === "string" ? id.replace(/\/+$/, "").split("/").at(-1) : undefined;
+}
+
+// The identity the package mints on save, left out so that saving mints it
+// afresh: `id`, `short_id`, and an `identifier` only when it was derived from
+// that id. A dataset's DOI is the author's own and stays. The package's rule
+// for its own templates (battinfo.api._shared._without_minted_identity).
+function withoutMintedIdentity(body: Obj): Obj {
+  const uid = uidOf(body.id);
+  const rest = { ...body };
+  delete rest.id;
+  delete rest.short_id;
+  if (uid && typeof rest.identifier === "string" && rest.identifier.endsWith(uid)) delete rest.identifier;
+  return rest;
+}
+
 // Everything the form settles about a draft rather than asking: the record is
-// put in the shape the tree reads, the library's schema_version goes in, and
-// the identity it derives on save comes out. One definition, applied wherever
-// a draft enters -- a blank one, a template, an uploaded file, or a record
-// carried in a link.
+// put in the shape the tree reads and the library's schema_version goes in.
+// One definition, applied wherever a draft enters -- a blank one, a template,
+// an uploaded file, or a record carried in a link.
 //
 // Sanitising here and not only on upload is what makes that true. Several
 // schemas say "one X or a list of X", the tree renders whichever shape the
@@ -75,23 +97,44 @@ export function sanitize(value: unknown, loc: Located, path = "", removed: strin
 // schema_version overrides whatever a loaded record arrived with, because the
 // draft is being edited against these schemas and claiming an older version it
 // no longer matches would be a lie.
+//
+// The identity stays. A record opened from a file or a link is a record that
+// exists, and saving it again has to update that record rather than mint
+// another; the form shows no row for it, so it cannot be edited out of step.
+// Only the placeholder goes. A template's IRI is dropped where the template
+// is taken (asTemplate), because a template is not the record being written.
 export function asDraft(record: Obj, type: RecordType): Obj {
   const clean = sanitize(record, type.root) as Obj;
-  const body = { ...((clean[type.key] ?? {}) as Obj) };
-  for (const key of DERIVED_IDENTITY) delete body[key];
-  return { ...clean, schema_version: SCHEMA_VERSION, [type.key]: body };
+  const body = (clean[type.key] ?? {}) as Obj;
+  const kept = uidOf(body.id) === PLACEHOLDER_UID ? withoutMintedIdentity(body) : { ...body };
+  return { ...clean, schema_version: SCHEMA_VERSION, [type.key]: kept };
 }
 
 // A template is a starting point, never a history. The curated records carry a
 // provenance block naming the source file, DOI and retrieval time they were
 // built from; kept, it would have a new record claim a past it never had. Only
 // the kind of source stays: a record started from a template is still entered
-// the way the template was. (Their minted IRI goes too, but every draft loses
-// that -- see asDraft.) scripts/sync-templates.mjs points here for the rule.
+// the way the template was. Its minted IRI goes too, so saving the new record
+// mints its own. scripts/sync-templates.mjs points here for the rule.
 export function asTemplate(record: Obj, type: RecordType): Obj {
   const { provenance, ...rest } = record;
   const sourceType = (provenance as Obj | undefined)?.source_type;
-  return asDraft(sourceType === undefined ? rest : { ...rest, provenance: { source_type: sourceType } }, type);
+  const body = rest[type.key];
+  const started =
+    body && typeof body === "object" && !Array.isArray(body)
+      ? { ...rest, [type.key]: withoutMintedIdentity(body as Obj) }
+      : rest;
+  return asDraft(sourceType === undefined ? started : { ...started, provenance: { source_type: sourceType } }, type);
+}
+
+// The validator's findings, less the one it raises for every new draft: the
+// schemas require an `id` (and a dataset's `identifier`), which the package
+// mints on save and the form shows no row for. Only a *missing* one is set
+// aside; a value that is there and wrong is still reported.
+export function findingsFor(issues: Issue[], type: RecordType): Issue[] {
+  return issues.filter(
+    (issue) => !(issue.missing && DERIVED_IDENTITY.some((key) => issue.path === `${type.key}.${key}`)),
+  );
 }
 
 /** A parsed record, checked for the two things it must not be, then put
@@ -127,7 +170,7 @@ export async function read(file: File, type: RecordType): Promise<Loaded> {
 //
 // What arrives is a stranger's JSON and is treated as one: the same intake as
 // an upload, so a link cannot introduce a field the schemas do not define,
-// and the identifier is dropped exactly as it is for a file.
+// and its identity is kept exactly as a file's is.
 const RECORD_FRAGMENT = "record";
 
 function fromBase64url(text: string): Uint8Array {

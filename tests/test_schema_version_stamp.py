@@ -9,8 +9,8 @@ with the package again.
 
 Scope note: this covers the canonical corpus (``examples/``) and the
 *generated* web fixtures (``web/lib/*.generated.ts``). Hand-written web source
-(e.g. ``web/lib/create-model.ts``) is out of scope here — it is not a committed
-fixture and is regenerated/authored elsewhere.
+is out of scope here: the Create page reads its stamp from the generated
+examples (``web/lib/schema-version.ts``).
 """
 
 from __future__ import annotations
