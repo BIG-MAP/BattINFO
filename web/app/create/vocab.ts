@@ -9,10 +9,11 @@
 // These are suggestions, never restrictions: the schema does allow other
 // values, and a datalist offers without forbidding.
 
-export { MATERIAL_SYMBOLS, PROPERTY_KEYS, UNIT_SYMBOLS } from "@/lib/vocab.generated";
+export { NEGATIVE_BASES, POSITIVE_BASES, PROPERTY_KEYS, UNIT_SYMBOLS } from "@/lib/vocab.generated";
 
 export const UNIT_LIST = "vocab-units";
-export const MATERIAL_LIST = "vocab-materials";
+export const POSITIVE_LIST = "vocab-positive-bases";
+export const NEGATIVE_LIST = "vocab-negative-bases";
 export const PROPERTY_LIST = "vocab-properties";
 
 // The one place a field name is bound to a vocabulary. The schemas offer no
@@ -21,6 +22,6 @@ export const PROPERTY_LIST = "vocab-properties";
 export const SUGGESTS: Record<string, string> = {
   unit: UNIT_LIST,
   unit_code: UNIT_LIST,
-  positive_electrode_basis: MATERIAL_LIST,
-  negative_electrode_basis: MATERIAL_LIST,
+  positive_electrode_basis: POSITIVE_LIST,
+  negative_electrode_basis: NEGATIVE_LIST,
 };

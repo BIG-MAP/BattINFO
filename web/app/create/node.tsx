@@ -316,9 +316,9 @@ export function ObjectNode({
 
   // One control lookup per field, reused by every decision below. A value the
   // schema fixes (`const`) is already set and not worth a row.
-  const rows: Row[] = fieldsOf(loc)
+  const rows: Row[] = fieldsOf(loc, value)
     .filter((field) => !omit?.includes(join(path, field.key)))
-    .map((field) => ({ field, kind: controlFor(field.loc).kind }))
+    .map((field) => ({ field, kind: controlFor(field.loc, value[field.key]).kind }))
     .filter((row) => row.kind !== "const");
   const byKey = (key: string) => rows.find((row) => row.field.key === key);
 
@@ -333,7 +333,7 @@ export function ObjectNode({
   // selector option resolving to no field would crash the row rather than fill
   // it. No schema does that today; twenty-two record types is not the place to
   // rely on it.
-  const groups = requiredGroups(loc)
+  const groups = requiredGroups(loc, value)
     .map((keys) => keys.filter(byKey))
     .filter((keys) => keys.length > 1)
     .map((keys) => {

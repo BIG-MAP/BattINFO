@@ -20,7 +20,16 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ObjectNode } from "./node";
-import { MATERIAL_LIST, MATERIAL_SYMBOLS, PROPERTY_KEYS, PROPERTY_LIST, UNIT_LIST, UNIT_SYMBOLS } from "./vocab";
+import {
+  NEGATIVE_BASES,
+  NEGATIVE_LIST,
+  POSITIVE_BASES,
+  POSITIVE_LIST,
+  PROPERTY_KEYS,
+  PROPERTY_LIST,
+  UNIT_LIST,
+  UNIT_SYMBOLS,
+} from "./vocab";
 import { HowToStart } from "./start";
 import { BackLink } from "./pick-file";
 import { asDraft, findingsFor, readFragment, type Loaded } from "./load";
@@ -98,6 +107,7 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
   // Null until the second question is answered. There is no form before then,
   // so there is nothing to render behind the question.
   const [begun, setBegun] = useState<Loaded | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   // A record handed over in the link answers both questions at once: another
   // tool chose the kind by linking here and supplied the contents.
@@ -106,12 +116,18 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
     async function fromLink() {
       try {
         const linked = await readFragment(window.location.hash, type);
-        if (cancelled || !linked) return;
+        if (cancelled) return;
+        if (!linked) {
+          setLinkError(null);
+          return;
+        }
         history.replaceState(null, "", window.location.pathname + window.location.search);
+        setLinkError(null);
         setBegun(linked);
-      } catch {
-        // A link nobody can read is not a reason to withhold the page; the
-        // chooser below is what the reader gets.
+      } catch (problem) {
+        // A link nobody can read is not a reason to withhold the page: the
+        // chooser below is still offered, under a line saying what went wrong.
+        if (!cancelled) setLinkError(problem instanceof Error ? problem.message : String(problem));
       }
     }
     const again = () => void fromLink();
@@ -138,6 +154,7 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
         Back to Create
       </BackLink>
       {children}
+      {!begun && linkError ? <p className="mt-6 text-sm text-error">{linkError}</p> : null}
       {begun ? <Record type={type} begun={begun} /> : <HowToStart type={type} onBegin={setBegun} />}
     </>
   );
@@ -269,9 +286,14 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
           <option key={key} value={key} />
         ))}
       </datalist>
-      <datalist id={MATERIAL_LIST}>
-        {MATERIAL_SYMBOLS.map((material) => (
-          <option key={material} value={material} />
+      <datalist id={POSITIVE_LIST}>
+        {POSITIVE_BASES.map((basis) => (
+          <option key={basis} value={basis} />
+        ))}
+      </datalist>
+      <datalist id={NEGATIVE_LIST}>
+        {NEGATIVE_BASES.map((basis) => (
+          <option key={basis} value={basis} />
         ))}
       </datalist>
     </>

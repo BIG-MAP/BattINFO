@@ -18,7 +18,7 @@ export interface Loaded {
 // a reason the form cannot show -- the tree only draws fields the schema names,
 // so an unknown key would be invisible and still in the output.
 export function sanitize(value: unknown, loc: Located, path = "", removed: string[] = []): unknown {
-  const control = controlFor(loc);
+  const control = controlFor(loc, value);
   // The schema allows any shape here, so every key under it is "known" and
   // none of it is ours to rewrite. Walking in would drop the lot as unknown --
   // which is exactly how a test protocol's conditions and setpoints used to
@@ -50,7 +50,7 @@ export function sanitize(value: unknown, loc: Located, path = "", removed: strin
 
   if (control.kind !== "object") return value;
 
-  const known = new Map(fieldsOf(loc).map((field) => [field.key, field.loc]));
+  const known = new Map(fieldsOf(loc, value).map((field) => [field.key, field.loc]));
   const out: Obj = {};
   for (const [key, item] of Object.entries(value as Obj)) {
     const child = known.get(key);
@@ -173,22 +173,50 @@ export async function read(file: File, type: RecordType): Promise<Loaded> {
 // and its identity is kept exactly as a file's is.
 const RECORD_FRAGMENT = "record";
 
+// Gzip lets a short link inflate into gigabytes, so reading stops here. The
+// largest record in examples/ is a 170 kB parameter set; five megabytes leaves
+// room for bigger tables than that.
+export const MAX_LINKED_BYTES = 5_000_000;
+
 function fromBase64url(text: string): Uint8Array {
   const padded = text.replace(/-/g, "+").replace(/_/g, "/");
   const binary = atob(padded + "=".repeat((4 - (padded.length % 4)) % 4));
   return Uint8Array.from(binary, (c) => c.charCodeAt(0));
 }
 
+async function inflate(bytes: Uint8Array): Promise<string | null> {
+  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip")).getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return new Blob(chunks).text();
+    size += value.byteLength;
+    if (size > MAX_LINKED_BYTES) {
+      await reader.cancel();
+      return null;
+    }
+    chunks.push(value);
+  }
+}
+
 export async function readFragment(fragment: string, type: RecordType): Promise<Loaded | null> {
   const encoded = new URLSearchParams(fragment.replace(/^#/, "")).get(RECORD_FRAGMENT);
   if (!encoded) return null;
-  let text: string;
+  let text: string | null;
   try {
-    const bytes = fromBase64url(encoded);
-    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-    text = await new Response(stream).text();
+    text = await inflate(fromBase64url(encoded));
   } catch {
     throw new Error("That link does not carry a readable record (expected gzipped JSON in base64url).");
   }
-  return take(JSON.parse(text), type);
+  if (text === null) {
+    throw new Error(`The record in that link is larger than ${MAX_LINKED_BYTES / 1_000_000} MB, so it was not opened.`);
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    throw new Error("The record in that link is not valid JSON.");
+  }
+  return take(parsed, type);
 }
