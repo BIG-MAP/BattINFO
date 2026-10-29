@@ -86,19 +86,20 @@ function sameShape(a?: Schema, b?: Schema): boolean {
 }
 
 // A genuine choice between object shapes (a brand given as a Brand or as an
-// Organization) is settled by the value, when there is one: the branch its
-// `type` names, or else the first branch with a place for every key it holds.
-// Taking the first branch regardless dropped an Organization brand's
-// `same_as` on open and called it a field the schemas do not define. With no
-// value, or none that fits better, the usual branch stands.
+// Organization, a dataset's main entity as a Table or a TableGroup) is settled
+// by the value, when there is one: the branch its `type` names, or else the
+// branch with a place for the most of its keys. Taking the first branch
+// regardless dropped an Organization brand's `same_as` on open and called it a
+// field the schemas do not define. With no value, or a tie, the usual branch
+// stands.
 function fitting(branches: Located[], value: unknown, usual: Located): Located {
   if (!value || typeof value !== "object" || Array.isArray(value)) return usual;
   const shapes = branches.filter((b) => b.schema?.type === "object" && b.schema.properties);
   if (shapes.length < 2) return usual;
   const held = value as Record<string, unknown>;
   const named = shapes.find((b) => typeof held.type === "string" && b.schema.properties.type?.const === held.type);
-  const holds = (b: Located) => !!b.schema?.properties && Object.keys(held).every((key) => key in b.schema.properties);
-  return named ?? (holds(usual) ? usual : (shapes.find(holds) ?? usual));
+  const placed = (b: Located) => Object.keys(held).filter((key) => key in (b.schema?.properties ?? {})).length;
+  return named ?? shapes.reduce((best, b) => (placed(b) > placed(best) ? b : best), usual);
 }
 
 export function resolve(loc: Located, value?: unknown): Located {
@@ -140,7 +141,8 @@ export function resolve(loc: Located, value?: unknown): Located {
 // form sets it rather than asking. "opaque" is a value the author does not own.
 // "unsupported" is a shape this file cannot read; the tree falls back to a plain
 // text box for it, and scripts/check-create.ts fails the build if any reachable
-// field ever reaches it.
+// field ever reaches it. A list's `items` and a map's `values` stop short of a
+// union, as a field's `loc` does, so each item can settle its own branch.
 export type Control =
   | { kind: "text"; format?: string }
   | { kind: "number"; integer: boolean }
@@ -171,9 +173,9 @@ function mapOrObject(schema: Schema, file: string): Control {
       string | undefined,
       Schema | undefined,
     ];
-    if (values) return { kind: "map", values: resolve({ schema: values, file }), keyPattern };
+    if (values) return { kind: "map", values: deref({ schema: values, file }), keyPattern };
     const extra = schema.additionalProperties;
-    if (extra && typeof extra === "object") return { kind: "map", values: resolve({ schema: extra, file }) };
+    if (extra && typeof extra === "object") return { kind: "map", values: deref({ schema: extra, file }) };
     if (extra === true) return { kind: "opaque" };
   }
   return { kind: "object" };
@@ -215,7 +217,7 @@ export function controlFor(loc: Located, value?: unknown): Control {
     case "object":
       return mapOrObject(schema, file);
     case "array":
-      return { kind: "array", items: resolve({ schema: schema.items ?? {}, file }) };
+      return { kind: "array", items: deref({ schema: schema.items ?? {}, file }) };
     default:
       return schema.properties || schema.patternProperties ? mapOrObject(schema, file) : { kind: "unsupported" };
   }

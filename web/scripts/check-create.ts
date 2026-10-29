@@ -283,6 +283,23 @@ for (const template of TEMPLATES) {
       fail(`brand ${JSON.stringify(value)} loads as ${JSON.stringify(kept)}, dropping ${removed.join(", ") || "nothing"}`);
     }
   }
+  // A key no shape defines is dropped, and does not cost the brand the keys
+  // its shape does define.
+  const stray = brand({ name: "Duracell", same_as: wikidata, bogus: 1 });
+  if (stray.removed.join() !== "cell_spec.brand.bogus") {
+    fail(`a brand with an unknown key loses ${stray.removed.join(", ")}, not just the unknown key`);
+  }
+
+  // The choice is made per item in a list too: a dataset's main entity is a
+  // list of Tables or TableGroups, and a group keeps its tables.
+  const dataset = RECORD_TYPES.find((type) => type.key === "dataset")!;
+  const group = { type: "TableGroup", name: "cycles", table: [{ type: "Table", name: "t1", url: "https://example.org/t1.csv" }] };
+  for (const entities of [[group], [{ type: "Table", name: "t0", url: "https://example.org/t0.csv" }, group]]) {
+    const removed: string[] = [];
+    sanitize({ dataset: { main_entity: entities } }, dataset.root, "", removed);
+    if (removed.length) fail(`main_entity ${JSON.stringify(entities.map((e) => e.type))} loses ${removed.join(", ")}`);
+  }
+
   const body = fieldsOf(cellSpec.root).find((field) => field.key === "cell_spec");
   const brandField = body && fieldsOf(body.loc).find((field) => field.key === "brand");
   if (!brandField || (blankFor(brandField.loc) as Obj).type !== "Brand") fail("a new brand no longer starts as a Brand");

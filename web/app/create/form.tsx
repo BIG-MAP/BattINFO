@@ -108,6 +108,14 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
   // so there is nothing to render behind the question.
   const [begun, setBegun] = useState<Loaded | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
+  // Counts the records begun on this page. The draft is built once from the
+  // record it began with, so a second record (a new link while one is open)
+  // needs a fresh draft rather than the old one under a new banner.
+  const [round, setRound] = useState(0);
+  const begin = (loaded: Loaded) => {
+    setBegun(loaded);
+    setRound((n) => n + 1);
+  };
 
   // A record handed over in the link answers both questions at once: another
   // tool chose the kind by linking here and supplied the contents.
@@ -123,7 +131,7 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
         }
         history.replaceState(null, "", window.location.pathname + window.location.search);
         setLinkError(null);
-        setBegun(linked);
+        begin(linked);
       } catch (problem) {
         // A link nobody can read is not a reason to withhold the page: the
         // chooser below is still offered, under a line saying what went wrong.
@@ -155,7 +163,7 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
       </BackLink>
       {children}
       {!begun && linkError ? <p className="mt-6 text-sm text-error">{linkError}</p> : null}
-      {begun ? <Record type={type} begun={begun} /> : <HowToStart type={type} onBegin={setBegun} />}
+      {begun ? <Record key={round} type={type} begun={begun} /> : <HowToStart type={type} onBegin={begin} />}
     </>
   );
 }
