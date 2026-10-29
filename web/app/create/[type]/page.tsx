@@ -53,7 +53,7 @@ export default async function CreatePage({ params }: { params: Promise<{ type: s
           <p className="mt-4 text-ink-muted">
             Save the download with{" "}
             <code className="rounded bg-paper-deep px-1 py-0.5 font-mono text-sm">
-              battinfo save record --input {slug}.json --source-root {"<folder>"} --mode upsert
+              battinfo save record --input {slug}.json --source-root {"<folder>"}
             </code>
           </p>
           {NO_NATURAL_KEY.includes(type.key) ? (
