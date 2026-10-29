@@ -729,19 +729,12 @@ PERCENT_UNIT = _ELECTROCHEMISTRY + "8430be19_6cae_4a15_a570_3c15d0d190eb"
 WEIGHT_PERCENT = _ELECTROCHEMISTRY + "2c0e66c8_d58d_44b2_b0ce_ba55194bd505"
 VOLUME_PERCENT = _ELECTROCHEMISTRY + "db37b358_b2f0_4e06_b6ae_8c56c8fbb6ba"
 
-_CREATE_MODEL = ROOT / "web" / "lib" / "create-model.ts"
-
-
-def _create_model_unit_iris() -> dict[str, str]:
-    """The Create page's hand-written ``UNIT_IRI`` table: unit token -> IRI."""
-    source = _CREATE_MODEL.read_text(encoding="utf-8")
-    prefixes = dict(re.findall(r'^const (\w+) = "([^"]+)";', source, flags=re.MULTILINE))
-    block = source.split("const UNIT_IRI: Record<string, string> = {", 1)[1].split("};", 1)[0]
-    table: dict[str, str] = {}
-    for token, prefix, local in re.findall(r'("[^"]+"|[A-Za-z]\w*)\s*:\s*(\w+)\s*\+\s*"([^"]+)"', block):
-        table[token.strip('"')] = prefixes[prefix] + local
-    assert table, "the UNIT_IRI table of create-model.ts was not found"
-    return table
+# The Create page used to keep a hand-written UNIT_IRI table, and two tests
+# here held it equal to the emitter's. The page writes no IRI now: it offers
+# unit *symbols* from web/lib/vocab.generated.ts, synced from the same
+# unit_map.curated.json the emitter reads and drift-checked by
+# `npm run sync:vocab -- --check`. The page and the library agree because they
+# read one table, not because two tables are compared.
 
 
 def _written_unit_iris() -> dict[str, list[str]]:
@@ -769,8 +762,6 @@ def _written_unit_iris() -> dict[str, list[str]]:
             add(_expand_with(context, context[term]), f"{name}:{term}")
         for symbol, value in CONTEXT_UNIT_SYMBOLS.items():
             add(_expand_with(context, value), f"CONTEXT_UNIT_SYMBOLS:{symbol}")
-    for token, iri in _create_model_unit_iris().items():
-        add(iri, f"create-model.ts:{token}")
     return found
 
 
@@ -854,21 +845,6 @@ def test_the_percent_quantities_are_read_back_but_never_written_as_units() -> No
         assert table["%"] == table["vol%"] == PERCENT_UNIT
         assert not {WEIGHT_PERCENT, VOLUME_PERCENT} & set(table.values())
     assert CONTEXT_UNIT_SYMBOLS["%"] == "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
-
-
-def test_the_create_page_units_agree_with_the_unit_map() -> None:
-    """Each unit the Create page writes is the one the Python emitter writes for
-    the same symbol, so a record made on the page and the same record saved
-    with the library publish the same unit IRI."""
-    from battinfo.transform.json_to_jsonld import _unit_iri
-
-    table = _create_model_unit_iris()
-    assert table["%"] == PERCENT_UNIT
-    disagree = {token: (iri, _unit_iri(token)) for token, iri in table.items() if _unit_iri(token) not in (None, iri)}
-    assert not disagree, disagree
-    closure_units = set(_load_json(_CLOSURE_TERMS)["measurement_units"])
-    unknown = {token: iri for token, iri in table.items() if _unit_iri(token) is None and iri not in closure_units}
-    assert not unknown, unknown
 
 
 # Classes that name a bound: a single max_value (or min_value) on a quantity

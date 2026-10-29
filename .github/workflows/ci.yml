@@ -258,12 +258,16 @@ jobs:
         run: npm run sync:schemas -- --check
       - name: Vendored records context is in sync
         run: npm run sync:context -- --check
+      - name: Vendored vocabularies are in sync
+        run: npm run sync:vocab -- --check
+      - name: Vendored templates are in sync
+        run: npm run sync:templates -- --check
       - name: Browser validator agrees with the canonical corpus
         run: npm run check:agreement
       - name: JSON-LD workbench core checks
         run: npm run check:workbench
-      - name: Create-page emitter terms match the records context
-        run: npm run check:create-model
+      - name: Create page renders every record type and opens the corpus
+        run: npm run check:create
       - name: Build
         run: npm run build
 

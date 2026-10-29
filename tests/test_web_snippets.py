@@ -9,7 +9,9 @@ philosophy as the executable docs funnel, applied to marketing.
 
 from __future__ import annotations
 
+import copy
 import io
+import json
 import re
 import sys
 from contextlib import redirect_stdout
@@ -126,6 +128,48 @@ def test_web_validator_discriminators_match_the_entity_registry() -> None:
     assert web_map == expected, (
         "web/lib/validate.ts DISCRIMINATORS drifted from battinfo.entities.ENTITY_KINDS: "
         f"web-only={set(web_map) - set(expected)}, missing={set(expected) - set(web_map)}"
+    )
+
+
+def test_create_page_knows_which_records_the_package_cannot_mint() -> None:
+    """The Create page tells authors of these types that a new record needs a uid.
+
+    Its NO_NATURAL_KEY list (web/app/create/types.ts) must be exactly the record
+    types whose packaged examples, saved without an id, the package refuses.
+    """
+    from battinfo.api._records import _with_minted_id
+    from battinfo.entities import kind_for_doc
+
+    source = (ROOT / "web" / "app" / "create" / "types.ts").read_text(encoding="utf-8")
+    match = re.search(r"export const NO_NATURAL_KEY[^=]*= \[(.*?)\];", source, re.DOTALL)
+    assert match, "NO_NATURAL_KEY not found in web/app/create/types.ts"
+    web = set(re.findall(r'"(\w+)"', match.group(1)))
+
+    refused: dict[str, set[bool]] = {}
+    for path in sorted((ROOT / "examples").rglob("*.json")):
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError:
+            continue
+        kind = kind_for_doc(doc) if isinstance(doc, dict) else None
+        if kind is None or not isinstance(doc.get(kind.record_key), dict):
+            continue
+        draft = copy.deepcopy(doc)
+        for key in ("id", "short_id", "identifier"):
+            draft[kind.record_key].pop(key, None)
+        try:
+            _with_minted_id(draft)
+        except ValueError:
+            refused.setdefault(kind.record_key, set()).add(True)
+        else:
+            refused.setdefault(kind.record_key, set()).add(False)
+
+    mixed = {key for key, outcomes in refused.items() if len(outcomes) > 1}
+    assert not mixed, f"examples of {sorted(mixed)} are minted for some records and refused for others"
+    unmintable = {key for key, outcomes in refused.items() if outcomes == {True}}
+    assert web == unmintable, (
+        "web/app/create/types.ts NO_NATURAL_KEY drifted from the package: "
+        f"web-only={sorted(web - unmintable)}, missing={sorted(unmintable - web)}"
     )
 
 

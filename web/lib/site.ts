@@ -38,13 +38,19 @@ export const site = {
   },
 } as const;
 
-// Every primary item is either a browser tool you USE (Playground, Validate) or
-// a guide/reference you READ (Publish, About, Docs) — split by user intent, not
+// Every primary item is either a browser tool you USE (Create, Validate) or a
+// guide/reference you READ (Publish, About, Docs) — split by user intent, not
 // by mechanism. Convert folds into Publish (it is Publish's first stage) and
 // Examples into the tools' presets plus the docs gallery; both stay reachable
 // (footer, deep links, cross-links), just not as top-level peers.
+//
+// Create is the schema-driven authoring form. It replaced a playground that
+// lived at the same address and hand-listed six object types: two pages both
+// offering to build a record was the confusing part, and the playground's own
+// teaching value — the Python that authors a record — already lives in /docs,
+// which is where someone goes looking for it.
 export const primaryNav = [
-  { label: "Playground", href: "/create" },
+  { label: "Create", href: "/create" },
   { label: "Validate", href: "/validate" },
   { label: "Publish", href: "/publish" },
   { label: "About", href: "/about" },
@@ -94,7 +100,7 @@ export const footerNav = [
   {
     heading: "Tools",
     links: [
-      { label: "Playground", href: "/create" },
+      { label: "Create a record", href: "/create" },
       { label: "Validate a record", href: "/validate" },
       { label: "Properties & units", href: "/properties" },
       { label: "About BattINFO", href: "/about" },
