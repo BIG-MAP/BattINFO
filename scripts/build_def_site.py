@@ -7,7 +7,7 @@ it passes, writes for each release ``def/{prefix}/{X.Y.Z}/vocab.ttl``:
 * ``OUT_DIR/def/{prefix}/{X.Y.Z}/index.html``, a page laid out like a
   vocabulary's documentation usually is: the title, publisher and
   description, a table of the ontology and version IRIs, issue date,
-  namespace, licence, download and releases, links to the publisher's own
+  creators, namespace, licence, download and releases, links to the publisher's own
   documentation, a list of the terms, an outline of each concept scheme, and
   a block for each term, anchored by its local name, with its IRI,
   definition, notes, other labels, broader and narrower terms and SKOS
@@ -321,6 +321,12 @@ def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str
     ]
     facts += [("Previous release", _link(prior, prior.rsplit("/", 1)[-1])) for prior in vocabulary.prior_versions]
     facts += [("Issued", _escape(date)) for date in vocabulary.issued]
+    creators = [
+        (_link(iri, name) if iri else _escape(name)) + (f", {_escape(affiliation)}" if affiliation else "")
+        for name, affiliation, iri in vocabulary.creators
+    ]
+    if creators:
+        facts.append(("Creators", "\n".join(["<ul>", *(f"<li>{entry}</li>" for entry in creators), "</ul>"])))
     facts += [
         ("Namespace", f"<code>{_escape(space)}</code>"),
         ("Licence", licences),

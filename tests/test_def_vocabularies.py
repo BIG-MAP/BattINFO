@@ -503,6 +503,58 @@ def test_a_publisher_without_a_name_or_homepage_is_shown_by_what_it_has(tmp_path
     assert '<a href="HTTPS://LOUD.EXAMPLE/">Loud Lab</a>' in page
 
 
+CREATORS = """
+<https://w3id.org/battinfo/def/1000> dcterms:creator
+    [ <http://xmlns.com/foaf/0.1/name> "Ada <Lab>" ;
+      <https://schema.org/affiliation> [ <http://xmlns.com/foaf/0.1/name> "Example University" ] ],
+    <https://orcid.org/0000-0002-1825-0097> ,
+    "Plain Name" .
+<https://orcid.org/0000-0002-1825-0097> <http://schema.org/name> "Josiah Carberry" ;
+    <http://schema.org/affiliation> "Brown University" .
+"""
+
+
+def test_a_page_lists_the_creators_with_their_affiliations(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", CREATORS)
+    vocabulary = check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl")
+    assert vocabulary.creators == (
+        ("Ada <Lab>", "Example University", ""),
+        ("Josiah Carberry", "Brown University", "https://orcid.org/0000-0002-1825-0097"),
+        ("Plain Name", "", ""),
+    )
+    page = site.release_page("1000", "1.1.0", vocabulary)
+    assert (
+        "<tr><th>Creators</th><td><ul>\n<li>Ada &lt;Lab&gt;, Example University</li>\n"
+        '<li><a href="https://orcid.org/0000-0002-1825-0097">Josiah Carberry</a>, Brown University</li>\n'
+        "<li>Plain Name</li>\n</ul></td></tr>" in page
+    )
+
+
+def test_the_battery_data_commons_release_1_0_1_names_its_creators(tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert site.build(out) == []
+    page = (out / "def" / "1002" / "1.0.1" / "index.html").read_text(encoding="utf-8")
+    for person in (
+        "Marwan Hassini, Université Gustave Eiffel",
+        "Philipp Dechent, Toshiba Europe GmbH",
+        "Sara Luciani, Toshiba Europe GmbH",
+        "Shiyun Liu, University of Leeds",
+        "Simon Clark, SINTEF AS",
+        "Paul Gasper, National Lab of the Rockies",
+        "Gonçalo dos Reis, University of Edinburgh",
+    ):
+        assert f"<li>{person}</li>" in page
+    assert (
+        '<tr><th>Previous release</th><td><a href="https://w3id.org/battinfo/def/1002/1.0.0">1.0.0</a></td></tr>'
+        in page
+    )
+    # The ontology IRI serves the newest release.
+    assert (out / "def" / "1002" / "index.html").read_bytes() == (
+        out / "def" / "1002" / "1.0.1" / "index.html"
+    ).read_bytes()
+
+
 def test_a_page_outlines_each_concept_scheme_and_links_the_hierarchy_both_ways(tmp_path: Path) -> None:
     def_dir = _copy(tmp_path)
     _add(def_dir, "1.1.0", CONDITIONS)
