@@ -168,10 +168,10 @@ class Vocabulary:
     dcterms:publisher as a (name, homepage) pair, from foaf:name or
     rdfs:label and foaf:homepage, the homepage empty when there is none) and
     *pages* (its rdfs:seeAlso and foaf:page), and *creators* (each
-    dcterms:creator as a (name, affiliation, IRI) triple, the name from
-    foaf:name, schema:name or rdfs:label, the affiliation from the name of
-    each schema:affiliation, the IRI empty for a blank node or a name given
-    as text).
+    dcterms:creator as a (name, affiliations, IRI) triple, the name from
+    foaf:name, schema:name or rdfs:label, each schema:affiliation a (name,
+    IRI) pair named the same way; an IRI stands for a name that is not given,
+    and is empty for a blank node or a name given as text).
     """
 
     ontologies: tuple[str, ...]
@@ -189,7 +189,7 @@ class Vocabulary:
     issued: tuple[str, ...] = ()
     publishers: tuple[tuple[str, str], ...] = ()
     pages: tuple[str, ...] = ()
-    creators: tuple[tuple[str, str, str], ...] = ()
+    creators: tuple[tuple[str, tuple[tuple[str, str], ...], str], ...] = ()
 
 
 def release_key(version: str) -> tuple[tuple[int, ...], int, tuple[tuple[int, int, str], ...]]:
@@ -304,21 +304,19 @@ def read_vocabulary(path: Path) -> Vocabulary:
         fallback = str(node) if isinstance(node, URIRef) else ""
         return (names[0] if names else fallback, homepages[0] if homepages else fallback)
 
-    def creator(node: Any) -> tuple[str, str, str]:
-        """(name, affiliation, IRI) of the creator *node*; an IRI stands for the name when none is given."""
+    def name_and_iri(node: Any) -> tuple[str, str]:
+        """(name, IRI) of the person or organization *node*; an IRI stands for the name when none is given."""
         if isinstance(node, Literal):
-            return (str(node).strip(), "", "")
-        name_predicates = (_FOAF + "name", *(space + "name" for space in _SCHEMA), _RDFS + "label")
-        affiliations: list[str] = []
-        for space in _SCHEMA:
-            for organisation in graph.objects(node, URIRef(space + "affiliation")):
-                if isinstance(organisation, Literal):
-                    affiliations.append(str(organisation).strip())
-                else:
-                    affiliations += texts(organisation, *name_predicates)[:1]
-        names = texts(node, *name_predicates)
+            return (str(node).strip(), "")
+        names = texts(node, _FOAF + "name", *(space + "name" for space in _SCHEMA), _RDFS + "label")
         iri = str(node) if isinstance(node, URIRef) else ""
-        return (names[0] if names else iri, ", ".join(sorted({a for a in affiliations if a})), iri)
+        return (names[0] if names else iri, iri)
+
+    def creator(node: Any) -> tuple[str, tuple[tuple[str, str], ...], str]:
+        """(name, affiliations, IRI) of the creator *node*, each affiliation a (name, IRI) pair."""
+        name, iri = name_and_iri(node)
+        found = {name_and_iri(o) for space in _SCHEMA for o in graph.objects(node, URIRef(space + "affiliation"))}
+        return (name, tuple(sorted(affiliation for affiliation in found if affiliation[0])), iri)
 
     ontologies = sorted(set(graph.subjects(URIRef(_RDF + "type"), URIRef(_OWL + "Ontology"))), key=str)
     fields: dict[str, tuple[str, ...]] = {
@@ -333,7 +331,7 @@ def read_vocabulary(path: Path) -> Vocabulary:
         "pages": (),
     }
     publishers: tuple[tuple[str, str], ...] = ()
-    creators: tuple[tuple[str, str, str], ...] = ()
+    creators: tuple[tuple[str, tuple[tuple[str, str], ...], str], ...] = ()
     if len(ontologies) == 1:
         ontology = ontologies[0]
         licences = list(graph.objects(ontology, URIRef(_DCTERMS + "license")))

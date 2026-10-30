@@ -321,9 +321,10 @@ def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str
     ]
     facts += [("Previous release", _link(prior, prior.rsplit("/", 1)[-1])) for prior in vocabulary.prior_versions]
     facts += [("Issued", _escape(date)) for date in vocabulary.issued]
+    # Each creator, then their affiliations, linked when they have an IRI.
     creators = [
-        (_link(iri, name) if iri else _escape(name)) + (f", {_escape(affiliation)}" if affiliation else "")
-        for name, affiliation, iri in vocabulary.creators
+        ", ".join(_link(iri, name) if iri else _escape(name) for name, iri in ((person, person_iri), *affiliations))
+        for person, affiliations, person_iri in vocabulary.creators
     ]
     if creators:
         facts.append(("Creators", "\n".join(["<ul>", *(f"<li>{entry}</li>" for entry in creators), "</ul>"])))
