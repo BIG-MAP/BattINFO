@@ -12,6 +12,8 @@ uv run python scripts/check_def_vocabularies.py
 
 CI runs the same checks on the pull request, and also fails it when it changes a release that is already merged.
 
+When a prefix is allocated it gets an empty release 0.1.0, so its address answers from the start; the holder's first terms then go in a release of their own, such as 1.0.0.
+
 A release goes live on the next deploy of the documentation from `main`, a few minutes after the merge. Vocabulary releases are not tied to BattINFO releases.
 
 ## Rules
@@ -32,7 +34,7 @@ Each vocabulary states its own licence with at least one `dcterms:license` that 
 
 ## Maintainers
 
-A publisher's folder can get a line in the repository's CODEOWNERS file, so that the publisher's own maintainers approve changes to it.
+A change to a publisher's folder is approved in the pull request by one of the publisher's maintainers before a BattINFO maintainer merges it.
 
 ## The release page
 

@@ -57,6 +57,10 @@ More segment rules keep old links alive and new ones honest:
 - **Parameter sets minted under `/spec/` before 2026-10-11 keep their IRIs.** Each resolves as a superseded record that points at its replacement, a new `/dataset/` record with a uid of its own. A uid is never reused under another namespace.
 - **Reserved segments** (`id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`) can never become record namespaces. The standard, the resolver and the publisher branches use them. The list, with a reason for each, is `src/battinfo/data/namespace/reserved-segments.json` (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
 
+## Definitions under def/
+
+Publishers define their own terms under `https://w3id.org/battinfo/def/{prefix}/`, where the prefix is their number in the [prefix register](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/namespace/prefixes.json). Each vocabulary is kept in the [`def/` folder](https://github.com/BIG-MAP/BattINFO/tree/main/def) of the repository, released by pull request, and served with a page for each release at [big-map.github.io/BattINFO/def/](https://big-map.github.io/BattINFO/def/). The rules for adding a vocabulary or a release are in [def/README.md](https://github.com/BIG-MAP/BattINFO/blob/main/def/README.md), and section 6.6 of the identifier policy governs them.
+
 ## Why w3id.org (the PURL layer)
 
 `w3id.org` is the W3C Permanent Identifier Community Group's redirect

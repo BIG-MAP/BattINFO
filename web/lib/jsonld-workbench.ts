@@ -39,9 +39,16 @@ const JSONLD_KEYWORDS = new Set([
 //   https://w3id.org/battinfo/<segment>/<uid>   uid = 4×4 Crockford-ish groups.
 //   https://w3id.org/battinfo/id/<prefix>/<segment>/<uid>   prefix = 4+ digits.
 // A spec's described individual is skolemized as <spec-IRI>#described — the
-// one legal fragment on a canonical IRI.
+// one legal fragment on a canonical IRI. Besides records, a node may name a
+// shared thing, https://w3id.org/battinfo/id/<uid>, or a publisher's
+// vocabulary, a release of it or a term: https://w3id.org/battinfo/def/<prefix>,
+// .../def/<prefix>/<version> and .../def/<prefix>/<term>.
 const UID = "[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}";
-const BATTINFO_IRI = new RegExp(`^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?[a-z-]+/${UID}(?:#described)?$`);
+const PREFIX = "[1-9][0-9]{3,}";
+const BATTINFO_IRI = new RegExp(
+  `^https://w3id\\.org/battinfo/(?:(?:id/${PREFIX}/)?[a-z-]+/${UID}(?:#described)?|id/${UID}` +
+    `|def/${PREFIX}(?:/[A-Za-z][A-Za-z0-9_]*|/[0-9][^/#]*)?)$`,
+);
 const BATTINFO_PREFIX = "https://w3id.org/battinfo/";
 
 /** URLs we can resolve offline from the vendored context. */
@@ -294,7 +301,7 @@ function walkSemantics(node: unknown, path: string, out: LayeredIssue[]): void {
       layer: "semantic",
       severity: "error",
       path: `${path}.@id`,
-      message: `\`${id}\` claims a battinfo identifier but is not a canonical https://w3id.org/battinfo/<type>/<uid> IRI.`,
+      message: `\`${id}\` is under https://w3id.org/battinfo/ but is not a record IRI, a shared thing (id/<uid>) or a def/ IRI.`,
     });
   }
 
