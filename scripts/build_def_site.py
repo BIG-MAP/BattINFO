@@ -102,6 +102,8 @@ _STYLE = (
     ".facts td{padding:.45rem 0;vertical-align:top}"
     ".facts tr+tr>*{border-top:1px solid var(--bi-border)}"
     "a,code{overflow-wrap:anywhere}code{font-size:.88em}"
+    # A link inside running text is underlined, not told apart by colour alone (WCAG 1.4.1).
+    ".byline a,.lead a,.facts td a,footer a{text-decoration:underline;text-underline-offset:3px}"
     ".bi-badge{padding:2px 10px;font-size:12px}"
     ".bi-badge.deprecated{background:var(--bi-warning-bg);color:var(--bi-warning)}"
     ".term{scroll-margin-top:1rem}.term:target{border-color:var(--bi-brand-text)}"
@@ -113,11 +115,12 @@ _STYLE = (
     ".facts tr{display:block;padding:.4rem 0}.facts tr+tr{border-top:1px solid var(--bi-border)}"
     ".facts th,.facts td{display:block;width:auto;padding:.1rem 0;border:0!important}}"
 )
-# Sets data-theme before the page paints: the theme chosen on the BattINFO
-# docs site (same origin, same localStorage key), else the system's. Without
-# JavaScript the page stays light.
+# Sets data-theme before the page paints: light or dark as chosen on the
+# BattINFO docs site (same origin; pydata-sphinx-theme keeps the choice under
+# the localStorage key "mode"), else as the system is set, which is also what
+# "auto" means there. Without JavaScript the page stays light.
 _THEME = (
-    "<script>(function(){var t;try{t=localStorage.getItem('theme')}catch(e){}"
+    "<script>(function(){var t;try{t=localStorage.getItem('mode')}catch(e){}"
     "if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches"
     "?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})()</script>"
 )
@@ -130,7 +133,7 @@ def _escape(text: str) -> str:
 def _link(iri: str, text: str | None = None) -> str:
     """A link to *iri*, or the IRI as text when it is not an http(s) URL."""
     shown = _escape(text if text is not None else iri)
-    if not re.match(r"https?://", iri):
+    if not re.match(r"https?://", iri, re.IGNORECASE):
         return f"<code>{shown}</code>"
     return f'<a href="{_escape(iri)}">{shown}</a>'
 
@@ -212,7 +215,7 @@ def _page(title: str, body: list[str], footer: str, head: str = "", *, index: bo
             '<header class="top">',
             *marks,
             f'<a class="home" href="{HOME}">BattINFO</a>',
-            '<span class="crumb">/</span>',
+            '<span class="crumb" aria-hidden="true">/</span>',
             section,
             "</header>",
             "<main>",

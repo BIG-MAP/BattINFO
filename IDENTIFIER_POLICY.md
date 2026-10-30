@@ -293,7 +293,7 @@ How things are curated is not part of this policy; it is the subject of issue #4
 
 A prefix holder defines its terms in one vocabulary, an OWL ontology whose IRI is `https://w3id.org/battinfo/def/{prefix}`. BattINFO's own definitions are under 1000.
 
-- A prefix gets an empty first release, 0.1.0, when it is allocated, so that `def/{prefix}` answers before its holder releases any terms.
+- A prefix whose holder has no terms to release yet gets an empty release 0.1.0, so that `def/{prefix}` answers before the first terms are released.
 - Each release is a file, `def/{prefix}/{X.Y.Z}/vocab.ttl`, in the BattINFO repository. It is added by pull request, checked in CI and served from the repository's GitHub Pages. Section 11 says how releases and terms are versioned.
 - A term is `https://w3id.org/battinfo/def/{prefix}/{term}`, and a vocabulary defines terms only under its own prefix.
 - Each vocabulary states its own licence, which applies to it in place of the licence of the BattINFO repository.
@@ -325,7 +325,7 @@ Every address under `https://w3id.org/battinfo/` fits exactly one of these cases
 - A version of a record, the record's IRI followed by `/v{n}` (11). These addresses are reserved and not yet served.
 - A shared thing, `id/{uid}` (6.5).
 
-`latest`, `source` and `raw/{path}` follow the repository's default branch and change with it. The addresses of a release, `{version}`, its `inferred` and `turtle` forms and `raw/{version}/{path}`, do not change.
+Some of these addresses serve whatever is newest and others name one release. `latest` and `source` serve the ontology's source as it develops, and `def/{prefix}` and its terms serve the vocabulary's newest release, so what they return can change. An ontology release at `{version}`, with its `inferred` and `turtle` forms, and a vocabulary release at `def/{prefix}/{X.Y.Z}` do not change.
 
 A record or thing that was superseded or merged keeps answering at its IRI, with its tombstone (10). Under 1001, the other form of a record's IRI resolves to that record (5.3).
 

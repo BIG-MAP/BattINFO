@@ -290,6 +290,8 @@ def read_vocabulary(path: Path) -> Vocabulary:
 
     def publisher(node: Any) -> tuple[str, str]:
         """(name, homepage) of the publisher *node*; an IRI stands for both when they are not given."""
+        if isinstance(node, Literal):
+            return (str(node).strip(), "")
         names = texts(node, _FOAF + "name", _RDFS + "label")
         homepages = iris(node, _FOAF + "homepage")
         fallback = str(node) if isinstance(node, URIRef) else ""

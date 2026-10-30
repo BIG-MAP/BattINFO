@@ -12,7 +12,7 @@ uv run python scripts/check_def_vocabularies.py
 
 CI runs the same checks on the pull request, and also fails it when it changes a release that is already merged.
 
-When a prefix is allocated it gets an empty release 0.1.0, so its address answers from the start; the holder's first terms then go in a release of their own, such as 1.0.0.
+A prefix whose holder has no terms to release yet gets an empty release 0.1.0, so its address answers from the start; the first terms then go in a release of their own, such as 1.0.0.
 
 A release goes live on the next deploy of the documentation from `main`, a few minutes after the merge. Vocabulary releases are not tied to BattINFO releases.
 

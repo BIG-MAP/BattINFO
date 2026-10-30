@@ -490,6 +490,18 @@ def test_a_publisher_without_a_name_or_homepage_is_shown_by_what_it_has(tmp_path
     page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
     assert '<p class="byline">Published by A lab</p>' in page
 
+    # A publisher given as plain text is shown as it is, and a homepage is linked whatever the case of its scheme.
+    def_dir = _copy(tmp_path / "literal")
+    _add(
+        def_dir,
+        "1.1.0",
+        '\n<https://w3id.org/battinfo/def/1000> dcterms:publisher "Plain Lab"@en, '
+        '[ <http://xmlns.com/foaf/0.1/name> "Loud Lab" ; <http://xmlns.com/foaf/0.1/homepage> <HTTPS://LOUD.EXAMPLE/> ] .\n',
+    )
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "Published by" in page and "Plain Lab" in page
+    assert '<a href="HTTPS://LOUD.EXAMPLE/">Loud Lab</a>' in page
+
 
 def test_a_page_outlines_each_concept_scheme_and_links_the_hierarchy_both_ways(tmp_path: Path) -> None:
     def_dir = _copy(tmp_path)
@@ -551,7 +563,7 @@ def test_the_pages_carry_the_battinfo_style_and_stand_alone(tmp_path: Path) -> N
         assert '<span class="mark-light" aria-hidden="true"><svg' in page
         assert '<span class="mark-dark" aria-hidden="true"><svg' in page
         assert '<html lang="en" data-theme="light">' in page
-        assert "localStorage.getItem('theme')" in page and "prefers-color-scheme: dark" in page
+        assert "localStorage.getItem('mode')" in page and "prefers-color-scheme: dark" in page
         assert "Hosted in the BattINFO namespace" in page
     release = (out / "def" / "1000" / "1.1.0" / "index.html").read_text(encoding="utf-8")
     assert (
