@@ -232,7 +232,7 @@ Superseded segments (`material-spec/`, `electrode-spec/`, `separator-spec/`, `el
 
 Reserved segments (never usable as entity namespaces): `id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`.
 
-The list, with the reason each segment is held, is kept as data in `src/battinfo/data/namespace/reserved-segments.json`, and code that builds or serves BattINFO IRIs reads it from there. `id` is the branch for records and shared things (6.4, 6.5), and `def` the branch for prefix holders' definitions (6.6). `raw`, `inferred`, `turtle`, `latest` and `source` are claimed by the ontology rules in the upstream w3id.org `.htaccess`, so requests to those paths never reach the record resolver.
+The list, with the reason each segment is held, is kept as data in `src/battinfo/data/namespace/reserved-segments.json`, and code that builds or serves BattINFO IRIs reads it from there. `id` is the branch for records and shared things (6.4, 6.5), and `def` the branch for prefix holders' definitions (6.6). `raw`, `inferred`, `turtle`, `latest` and `source` are claimed by the ontology rules in the upstream w3id.org `.htaccess`, so requests to those paths never reach the record resolver. So are `def/{prefix}`, its releases and its terms, which those rules send to the vocabularies on GitHub Pages (6.6).
 
 ### 6.2 Equipment and channels (ratified 2026-07-08)
 
@@ -293,6 +293,7 @@ How things are curated is not part of this policy; it is the subject of issue #4
 
 A prefix holder defines its terms in one vocabulary, an OWL ontology whose IRI is `https://w3id.org/battinfo/def/{prefix}`. BattINFO's own definitions are under 1000.
 
+- A prefix whose holder has no terms to release yet gets an empty release 0.1.0, so that `def/{prefix}` answers before the first terms are released.
 - Each release is a file, `def/{prefix}/{X.Y.Z}/vocab.ttl`, in the BattINFO repository. It is added by pull request, checked in CI and served from the repository's GitHub Pages. Section 11 says how releases and terms are versioned.
 - A term is `https://w3id.org/battinfo/def/{prefix}/{term}`, and a vocabulary defines terms only under its own prefix.
 - Each vocabulary states its own licence, which applies to it in place of the licence of the BattINFO repository.
@@ -323,6 +324,8 @@ Every address under `https://w3id.org/battinfo/` fits exactly one of these cases
 - A record under a superseded segment, when the record is of a type that minted under it (6.1).
 - A version of a record, the record's IRI followed by `/v{n}` (11). These addresses are reserved and not yet served.
 - A shared thing, `id/{uid}` (6.5).
+
+Some of these addresses serve whatever is newest and others name one release. `latest` and `source` serve the ontology's source as it develops, and `def/{prefix}` and its terms serve the vocabulary's newest release, so what they return can change. An ontology release at `{version}`, with its `inferred` and `turtle` forms, and a vocabulary release at `def/{prefix}/{X.Y.Z}` do not change.
 
 A record or thing that was superseded or merged keeps answering at its IRI, with its tombstone (10). Under 1001, the other form of a record's IRI resolves to that record (5.3).
 

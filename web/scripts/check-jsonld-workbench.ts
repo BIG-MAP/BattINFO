@@ -123,6 +123,30 @@ async function main() {
     );
   });
 
+  // 6a. Records in either form, shared things and def/ IRIs are all legitimate @ids.
+  await check("semantic layer accepts def/ terms, releases and shared things as @id", () => {
+    const framed = {
+      "@id": "https://w3id.org/battinfo/id/1001/dataset/7jnc-cjtw-5h3a-5t52",
+      theme: [
+        { "@id": "https://w3id.org/battinfo/def/1002/DurabilityData" },
+        { "@id": "https://w3id.org/battinfo/def/1002" },
+        { "@id": "https://w3id.org/battinfo/def/1002/1.0.0" },
+      ],
+      about: { "@id": "https://w3id.org/battinfo/id/7k2m-q9xd-4tnw-h3ra" },
+      source: { "@id": "https://w3id.org/battinfo/spec/nm6t-ceph-frax-1mk1#described" },
+    };
+    const idErrors = checkSemantics(framed).filter((i) => i.severity === "error" && /@id/.test(i.path));
+    assert.equal(idErrors.length, 0, `unexpected @id errors: ${JSON.stringify(idErrors)}`);
+    for (const bad of [
+      "https://w3id.org/battinfo/def/0999/Term",
+      "https://w3id.org/battinfo/def/1002/Bad-Term",
+      "https://w3id.org/battinfo/id/1001/spec/not-a-real-uid",
+    ]) {
+      const issues = checkSemantics({ "@id": bad });
+      assert.ok(issues.some((i) => i.severity === "error" && /@id/.test(i.path)), `expected an @id error for ${bad}`);
+    }
+  });
+
   // 6b. A range carries its bounds instead of one number: no missing-value warning.
   await check("semantic layer accepts a quantity given as a range", () => {
     const framed = {

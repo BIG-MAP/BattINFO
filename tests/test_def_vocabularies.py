@@ -405,7 +405,7 @@ def test_a_concept_scheme_may_take_its_label_and_definition_from_dcterms(tmp_pat
     )
     assert check.check(def_dir) == []
     page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
-    assert '<dt id="Conditions"><a href="#Conditions">storage conditions</a> <small>concept scheme</small></dt>' in page
+    assert '<h3><a href="#Conditions">storage conditions</a> <span class="bi-badge">concept scheme</span></h3>' in page
 
 
 def test_an_individual_is_a_term_on_the_page(tmp_path: Path) -> None:
@@ -413,7 +413,177 @@ def test_an_individual_is_a_term_on_the_page(tmp_path: Path) -> None:
     _add(def_dir, "1.1.0", GLOVEBOX)
     assert check.check(def_dir) == []
     page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
-    assert '<dt id="Glovebox"><a href="#Glovebox">glovebox</a> <small>individual</small></dt>' in page
+    assert '<article class="bi-card term" id="Glovebox">' in page
+    assert '<h3><a href="#Glovebox">glovebox</a> <span class="bi-badge">individual</span></h3>' in page
+
+
+ABOUT = """
+<https://w3id.org/battinfo/def/1000>
+    dcterms:description "Terms for <storing> samples."@en ;
+    dcterms:issued "2026-10-30" ;
+    dcterms:publisher [ <http://xmlns.com/foaf/0.1/name> "Example & Co" ;
+        <http://xmlns.com/foaf/0.1/homepage> <https://example.org/> ] ;
+    <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://example.org/docs/> .
+"""
+
+# A scheme with a top concept given from each side, a narrower concept given
+# by skos:broader alone, a cycle, and matches to an EMMO term the domain-battery
+# context names (Simulation) and to an IRI it does not.
+CONDITIONS = """
+ex:Conditions a skos:ConceptScheme ;
+    dcterms:title "storage conditions"@en ;
+    dcterms:description "The conditions a sample is kept in."@en ;
+    skos:hasTopConcept ex:Cold .
+
+ex:Cold a skos:Concept ;
+    skos:prefLabel "cold"@en ;
+    skos:altLabel "chilled"@en, "kalt"@de ;
+    skos:definition "Kept below 5 degrees Celsius."@en ;
+    skos:scopeNote "Not <frozen>."@en ;
+    skos:relatedMatch <https://w3id.org/emmo#EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b> ;
+    skos:closeMatch <https://example.org/cold> .
+
+ex:Frozen a skos:Concept ;
+    skos:prefLabel "frozen"@en ;
+    skos:definition "Kept below 0 degrees Celsius."@en ;
+    skos:broader ex:Cold .
+
+ex:Warm a skos:Concept ;
+    skos:prefLabel "warm"@en ;
+    skos:definition "Kept above 25 degrees Celsius."@en ;
+    skos:topConceptOf ex:Conditions ;
+    skos:broader ex:Hot .
+
+ex:Hot a skos:Concept ;
+    skos:prefLabel "hot"@en ;
+    skos:definition "Kept above 40 degrees Celsius."@en ;
+    skos:broader ex:Warm .
+"""
+
+
+def test_a_page_names_the_publisher_and_links_further_documentation(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", ABOUT)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert '<p class="lead">Terms for &lt;storing&gt; samples.</p>' in page
+    assert '<meta name="description" content="Terms for &lt;storing&gt; samples.">' in page
+    assert '<p class="byline">Published by <a href="https://example.org/">Example &amp; Co</a></p>' in page
+    assert "<tr><th>Issued</th><td>2026-10-30</td></tr>" in page
+    assert (
+        '<tr><th>Documentation</th><td><a href="https://example.org/docs/">https://example.org/docs/</a></td></tr>'
+        in page
+    )
+
+
+def test_a_publisher_without_a_name_or_homepage_is_shown_by_what_it_has(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", "\n<https://w3id.org/battinfo/def/1000> dcterms:publisher <https://example.org/lab> .\n")
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert 'Published by <a href="https://example.org/lab">https://example.org/lab</a>' in page
+
+    def_dir = _copy(tmp_path / "named")
+    _add(
+        def_dir,
+        "1.1.0",
+        '\n<https://w3id.org/battinfo/def/1000> dcterms:publisher [ <http://xmlns.com/foaf/0.1/name> "A lab" ] .\n',
+    )
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert '<p class="byline">Published by A lab</p>' in page
+
+    # A publisher given as plain text is shown as it is, and a homepage is linked whatever the case of its scheme.
+    def_dir = _copy(tmp_path / "literal")
+    _add(
+        def_dir,
+        "1.1.0",
+        '\n<https://w3id.org/battinfo/def/1000> dcterms:publisher "Plain Lab"@en, '
+        '[ <http://xmlns.com/foaf/0.1/name> "Loud Lab" ; <http://xmlns.com/foaf/0.1/homepage> <HTTPS://LOUD.EXAMPLE/> ] .\n',
+    )
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "Published by" in page and "Plain Lab" in page
+    assert '<a href="HTTPS://LOUD.EXAMPLE/">Loud Lab</a>' in page
+
+
+def test_a_page_outlines_each_concept_scheme_and_links_the_hierarchy_both_ways(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", CONDITIONS)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+
+    outline = page[page.index('<h2 id="schemes">') : page.index('<h2 id="terms">')]
+    assert outline == (
+        '<h2 id="schemes">Concept schemes</h2>\n'
+        '<div class="bi-card tree">\n'
+        '<p><strong><a href="#Conditions">storage conditions</a></strong></p>\n'
+        "<ul>\n"
+        '<li><a href="#Cold">cold</a><ul><li><a href="#Frozen">frozen</a></li></ul></li>\n'
+        '<li><a href="#Warm">warm</a><ul><li><a href="#Hot">hot</a></li></ul></li>\n'
+        "</ul>\n"
+        "</div>\n"
+    )
+    # skos:broader on Frozen alone makes it narrower of Cold, and the reverse.
+    assert '<tr><th>Narrower</th><td><a href="#Frozen">frozen</a></td></tr>' in page
+    assert '<tr><th>Broader</th><td><a href="#Cold">cold</a></td></tr>' in page
+    assert "<tr><th>Note</th><td>Not &lt;frozen&gt;.</td></tr>" in page
+    assert "<tr><th>Also called</th><td>chilled</td></tr>" in page and "kalt" not in page
+    assert (
+        '<tr><th>Related match</th><td><a href="https://w3id.org/emmo#EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b">'
+        "Simulation</a></td></tr>" in page
+    )
+    assert (
+        '<tr><th>Close match</th><td><a href="https://example.org/cold">https://example.org/cold</a></td></tr>' in page
+    )
+
+
+def test_a_page_without_a_concept_scheme_has_no_outline(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "Concept schemes" not in page and "Published by" not in page and "Documentation" not in page
+
+
+def test_the_battery_data_commons_page_documents_its_dataset_kinds(tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert site.build(out) == []
+    page = (out / "def" / "1002" / "1.0.0" / "index.html").read_text(encoding="utf-8")
+    assert 'Published by <a href="https://batterydatacommons.org/">Battery Data Commons</a>' in page
+    assert (
+        '<li><a href="#ModelingData">Modelling data</a><ul><li><a href="#SyntheticData">Synthetic data</a></li></ul></li>'
+        in page
+    )
+    assert ">ReferencePerformanceTest</a>" in page and ">CyclingTest</a>" in page and ">ThermalRunawayTest</a>" in page
+    assert "<tr><th>Also called</th><td>performance</td></tr>" in page
+
+
+def test_the_pages_carry_the_battinfo_style_and_stand_alone(tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert site.build(out, FIXTURE) == []
+    tokens = (ROOT / "brand" / "tokens.css").read_text(encoding="utf-8").strip()
+    for path in ("def/1000/1.1.0/index.html", "def/index.html"):
+        page = (out / path).read_text(encoding="utf-8")
+        # The design tokens and both symbols are in the page, so it needs nothing else from the site.
+        assert tokens in page
+        assert '<span class="mark-light" aria-hidden="true"><svg' in page
+        assert '<span class="mark-dark" aria-hidden="true"><svg' in page
+        assert '<html lang="en" data-theme="light">' in page
+        assert "localStorage.getItem('mode')" in page and "prefers-color-scheme: dark" in page
+        assert "Hosted in the BattINFO namespace" in page
+    release = (out / "def" / "1000" / "1.1.0" / "index.html").read_text(encoding="utf-8")
+    assert (
+        'Source: <a href="https://github.com/BIG-MAP/BattINFO/blob/main/def/1000/1.1.0/vocab.ttl">'
+        "def/1000/1.1.0/vocab.ttl</a>" in release
+    )
+    assert '<a href="https://big-map.github.io/BattINFO/def/">Publisher vocabularies</a>' in release
+
+
+def test_the_page_rules_use_the_semantic_tokens_only() -> None:
+    # brand/AGENTS.md rule 1: no literal colours and no --raw-* primitives.
+    assert not re.search(r"#[0-9A-Fa-f]{3,8}\b|rgba?\(|--raw-", site._STYLE)
+    assert "var(--bi-" in site._STYLE
+
+
+def test_a_page_is_still_written_without_the_brand_files(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(site, "BRAND", tmp_path / "no-brand")
+    monkeypatch.setattr(site, "_brand", None)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(FIXTURE / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "<svg" not in page and "<h1>Example vocabulary</h1>" in page
 
 
 def test_a_licence_given_as_text_beside_an_iri_passes(tmp_path: Path) -> None:
@@ -567,16 +737,19 @@ def test_the_site_build_lays_out_each_release_and_serves_the_newest_final_one(tm
         assert (folder / "vocab.ttl").read_bytes() == (FIXTURE / "1000" / version / "vocab.ttl").read_bytes()
         page = (folder / "index.html").read_text(encoding="utf-8")
         assert "<h1>Example vocabulary</h1>" in page
-        assert f"Version IRI: <code>{ONTOLOGY}/{version}</code>" in page
+        assert f"<tr><th>Version IRI</th><td><code>{ONTOLOGY}/{version}</code></td></tr>" in page
         assert '<a href="https://creativecommons.org/licenses/by/4.0/">' in page
         assert '<a href="vocab.ttl">vocab.ttl</a>' in page
         assert 'href="https://big-map.github.io/BattINFO/def/#1000"' in page
-        assert '<dt id="Sample"><a href="#Sample">sample</a> <small>class</small></dt>' in page
+        assert '<h3><a href="#Sample">sample</a> <span class="bi-badge">class</span></h3>' in page
     beta = (out / "def" / "1000" / "1.1.0-beta.1" / "index.html").read_text(encoding="utf-8")
-    assert f'Previous release: <a href="{ONTOLOGY}/1.0.0">1.0.0</a>' in beta
-    assert '<dt id="OldName"><a href="#OldName">old name</a> <small>class, deprecated</small></dt>' in beta
-    assert 'Replaced by <a href="#NewName">NewName</a>' in beta
-    assert '<dt id="Dry"><a href="#Dry">dry</a> <small>concept</small></dt>' in beta
+    assert f'<tr><th>Previous release</th><td><a href="{ONTOLOGY}/1.0.0">1.0.0</a></td></tr>' in beta
+    assert (
+        '<h3><a href="#OldName">old name</a> <span class="bi-badge">class</span> '
+        '<span class="bi-badge deprecated">deprecated</span></h3>' in beta
+    )
+    assert '<tr><th>Replaced by</th><td><a href="#NewName">new name</a></td></tr>' in beta
+    assert '<h3><a href="#Dry">dry</a> <span class="bi-badge">concept</span></h3>' in beta
     assert "Previous release" not in (out / "def" / "1000" / "1.0.0" / "index.html").read_text(encoding="utf-8")
 
     # The vocabulary's own address serves the newest final release, not the pre-release.
@@ -586,7 +759,7 @@ def test_the_site_build_lays_out_each_release_and_serves_the_newest_final_one(tm
     ).read_bytes()
     index = (out / "def" / "index.html").read_text(encoding="utf-8")
     assert '<h2 id="1000">Example vocabulary</h2>' in index
-    assert "Prefix: 1000, BattINFO" in index
+    assert "<tr><th>Prefix</th><td>1000, BattINFO</td></tr>" in index
     assert re.findall(r'<li><a href="1000/([^/]+)/">', index) == ["1.1.0", "1.1.0-beta.1", "1.0.0"]
     assert '<a href="1000/1.1.0/">1.1.0</a>, served at the ontology IRI' in index
 
@@ -616,7 +789,8 @@ def test_the_pages_escape_what_the_vocabulary_says(tmp_path: Path) -> None:
     assert "<h1>Example &lt;i&gt;vocabulary&lt;/i&gt; &amp; co</h1>" in page
     assert "mass &quot;fraction&quot; &lt;b&gt;" in page
     assert "&lt;script&gt;alert(1)&lt;/script&gt;" in page
-    assert "<script" not in page and "<b>" not in page
+    # The one script is the page's own theme switch; nothing the vocabulary says becomes markup.
+    assert page.count("<script") == 1 and "<script>alert" not in page and "<b>" not in page
     assert 'href="javascript' not in page and "<code>javascript:alert(1)</code>" in page
     # def/index.html reads the title back from the page, and escapes it again.
     assert '<h2 id="1000">Example &lt;i&gt;vocabulary&lt;/i&gt; &amp; co</h2>' in (

@@ -12,6 +12,8 @@ uv run python scripts/check_def_vocabularies.py
 
 CI runs the same checks on the pull request, and also fails it when it changes a release that is already merged.
 
+A prefix whose holder has no terms to release yet gets an empty release 0.1.0, so its address answers from the start; the first terms then go in a release of their own, such as 1.0.0.
+
 A release goes live on the next deploy of the documentation from `main`, a few minutes after the merge. Vocabulary releases are not tied to BattINFO releases.
 
 ## Rules
@@ -32,7 +34,11 @@ Each vocabulary states its own licence with at least one `dcterms:license` that 
 
 ## Maintainers
 
-A publisher's folder can get a line in the repository's CODEOWNERS file, so that the publisher's own maintainers approve changes to it.
+A change to a publisher's folder is approved in the pull request by one of the publisher's maintainers before a BattINFO maintainer merges it.
+
+## The release page
+
+Each release gets a page, built from its file, so a vocabulary documents itself by what it states. The page is in the BattINFO style ([brand/](../brand/BRAND.md)), light or dark as the reader has set the docs site or their system, and stands alone, with no files from the rest of the site. Next to the title, version and licence, the page shows the ontology's `dcterms:description`, its `dcterms:publisher` (a `foaf:name` and a `foaf:homepage`) and its `dcterms:issued` date, and links to the publisher's own documentation of the vocabulary when the ontology names it with `rdfs:seeAlso` or `foaf:page`. Each concept scheme is outlined with its top concepts and their narrower concepts. Each term shows its label and definition, and also its `skos:scopeNote`, its English `skos:altLabel` values, its broader and narrower terms and its SKOS matches, with a matched EMMO term shown by its name.
 
 ## Where it is served
 

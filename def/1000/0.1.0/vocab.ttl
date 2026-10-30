@@ -1,0 +1,25 @@
+# BattINFO definitions, release 0.1.0
+#
+# Publisher: BattINFO, prefix 1000 in src/battinfo/data/namespace/prefixes.json.
+# A released folder is never edited; a change is a new release in a new folder.
+#
+# This release defines no terms. It gives https://w3id.org/battinfo/def/1000 something to
+# answer with until BattINFO releases its first terms here.
+#
+# Licence of this file: Apache-2.0, the licence of the BattINFO ontology.
+
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+
+<https://w3id.org/battinfo/def/1000> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/battinfo/def/1000/0.1.0> ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:issued "2026-10-30"^^xsd:date ;
+    dcterms:title "BattINFO definitions"@en ;
+    dcterms:description "Terms that BattINFO defines under its own prefix, 1000. Release 0.1.0 defines none yet."@en ;
+    dcterms:publisher [ a foaf:Organization ;
+        foaf:name "BattINFO" ;
+        foaf:homepage <https://battinfo.org/> ] ;
+    dcterms:license <https://www.apache.org/licenses/LICENSE-2.0> .
