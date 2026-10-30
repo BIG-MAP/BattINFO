@@ -84,6 +84,15 @@ _RDFS = "http://www.w3.org/2000/01/rdf-schema#"
 _OWL = "http://www.w3.org/2002/07/owl#"
 _SKOS = "http://www.w3.org/2004/02/skos/core#"
 _DCTERMS = "http://purl.org/dc/terms/"
+_FOAF = "http://xmlns.com/foaf/0.1/"
+#: The SKOS mapping properties, with the words a page uses for each.
+MATCHES = {
+    _SKOS + "exactMatch": "Exact match",
+    _SKOS + "closeMatch": "Close match",
+    _SKOS + "broadMatch": "Broad match",
+    _SKOS + "narrowMatch": "Narrow match",
+    _SKOS + "relatedMatch": "Related match",
+}
 #: The types that make a subject a term, with the word a page uses for each.
 TERM_TYPES = {
     _OWL + "Class": "class",
@@ -116,6 +125,13 @@ class Term:
     first: skos before rdfs, English before other languages. A concept
     scheme's English dcterms:title counts as a label, and its
     dcterms:description as a definition.
+
+    The site build alone reads the rest: *alt_labels* and *scope_notes*
+    (skos:altLabel, skos:scopeNote); *broader*, *narrower*, *in_scheme* and
+    *top_concepts*, each read from either side, so that skos:broader on one
+    concept is skos:narrower on the other and skos:topConceptOf on a concept
+    is skos:hasTopConcept on its scheme; *matches*, each (mapping property,
+    IRI) pair of the SKOS mapping properties; and *see_also* (rdfs:seeAlso).
     """
 
     iri: str
@@ -124,6 +140,14 @@ class Term:
     definitions: tuple[str, ...]
     deprecated: bool
     replaced_by: tuple[str, ...]
+    alt_labels: tuple[str, ...] = ()
+    scope_notes: tuple[str, ...] = ()
+    broader: tuple[str, ...] = ()
+    narrower: tuple[str, ...] = ()
+    in_scheme: tuple[str, ...] = ()
+    top_concepts: tuple[str, ...] = ()
+    matches: tuple[tuple[str, str], ...] = ()
+    see_also: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -136,6 +160,12 @@ class Vocabulary:
     subject that is an IRI, *deprecated* those marked owl:deprecated true,
     *replacements* each (subject, dcterms:isReplacedBy IRI) pair, and *terms*
     the subjects typed as terms.
+
+    The site build alone reads *descriptions* (the ontology's
+    dcterms:description), *issued* (its dcterms:issued), *publishers* (each
+    dcterms:publisher as a (name, homepage) pair, from foaf:name or
+    rdfs:label and foaf:homepage, the homepage empty when there is none) and
+    *pages* (its rdfs:seeAlso and foaf:page).
     """
 
     ontologies: tuple[str, ...]
@@ -149,6 +179,10 @@ class Vocabulary:
     deprecated: frozenset[str]
     replacements: tuple[tuple[str, str], ...]
     terms: tuple[Term, ...]
+    descriptions: tuple[str, ...] = ()
+    issued: tuple[str, ...] = ()
+    publishers: tuple[tuple[str, str], ...] = ()
+    pages: tuple[str, ...] = ()
 
 
 def release_key(version: str) -> tuple[tuple[int, ...], int, tuple[tuple[int, int, str], ...]]:
@@ -248,6 +282,19 @@ def read_vocabulary(path: Path) -> Vocabulary:
     def iris(subject: Any, predicate: str) -> tuple[str, ...]:
         return tuple(sorted(str(v) for v in graph.objects(subject, URIRef(predicate)) if isinstance(v, URIRef)))
 
+    def related(subject: Any, predicate: str, inverse: str) -> tuple[str, ...]:
+        """The IRIs *subject* reaches by *predicate*, and those that reach it by *inverse*."""
+        found = {*iris(subject, predicate)}
+        found.update(str(s) for s in graph.subjects(URIRef(inverse), subject) if isinstance(s, URIRef))
+        return tuple(sorted(found))
+
+    def publisher(node: Any) -> tuple[str, str]:
+        """(name, homepage) of the publisher *node*; an IRI stands for both when they are not given."""
+        names = texts(node, _FOAF + "name", _RDFS + "label")
+        homepages = iris(node, _FOAF + "homepage")
+        fallback = str(node) if isinstance(node, URIRef) else ""
+        return (names[0] if names else fallback, homepages[0] if homepages else fallback)
+
     ontologies = sorted(set(graph.subjects(URIRef(_RDF + "type"), URIRef(_OWL + "Ontology"))), key=str)
     fields: dict[str, tuple[str, ...]] = {
         "version_iris": (),
@@ -256,7 +303,11 @@ def read_vocabulary(path: Path) -> Vocabulary:
         "licences": (),
         "licence_literals": (),
         "prior_versions": (),
+        "descriptions": (),
+        "issued": (),
+        "pages": (),
     }
+    publishers: tuple[tuple[str, str], ...] = ()
     if len(ontologies) == 1:
         ontology = ontologies[0]
         licences = list(graph.objects(ontology, URIRef(_DCTERMS + "license")))
@@ -267,7 +318,12 @@ def read_vocabulary(path: Path) -> Vocabulary:
             licences=tuple(sorted(str(v) for v in licences if isinstance(v, URIRef))),
             licence_literals=tuple(sorted(str(v) for v in licences if not isinstance(v, URIRef))),
             prior_versions=iris(ontology, _OWL + "priorVersion"),
+            descriptions=texts(ontology, _DCTERMS + "description"),
+            issued=tuple(sorted(str(v) for v in graph.objects(ontology, URIRef(_DCTERMS + "issued")))),
+            pages=tuple(sorted({*iris(ontology, _RDFS + "seeAlso"), *iris(ontology, _FOAF + "page")})),
         )
+        named = (publisher(node) for node in graph.objects(ontology, URIRef(_DCTERMS + "publisher")))
+        publishers = tuple(sorted(found for found in named if found[0]))
 
     subjects = sorted({subject for subject in graph.subjects() if isinstance(subject, URIRef)}, key=str)
     deprecated = {
@@ -304,6 +360,14 @@ def read_vocabulary(path: Path) -> Vocabulary:
                 ),
                 deprecated=str(subject) in deprecated,
                 replaced_by=iris(subject, _DCTERMS + "isReplacedBy"),
+                alt_labels=texts(subject, _SKOS + "altLabel", english_only=True),
+                scope_notes=texts(subject, _SKOS + "scopeNote"),
+                broader=related(subject, _SKOS + "broader", _SKOS + "narrower"),
+                narrower=related(subject, _SKOS + "narrower", _SKOS + "broader"),
+                in_scheme=related(subject, _SKOS + "inScheme", _SKOS + "hasTopConcept"),
+                top_concepts=related(subject, _SKOS + "hasTopConcept", _SKOS + "topConceptOf"),
+                matches=tuple((predicate, iri) for predicate in MATCHES for iri in iris(subject, predicate)),
+                see_also=iris(subject, _RDFS + "seeAlso"),
             )
         )
     return Vocabulary(
@@ -314,6 +378,7 @@ def read_vocabulary(path: Path) -> Vocabulary:
             (str(subject), target) for subject in subjects for target in iris(subject, _DCTERMS + "isReplacedBy")
         ),
         terms=tuple(terms),
+        publishers=publishers,
         **fields,
     )
 

@@ -5,8 +5,12 @@ it passes, writes for each release ``def/{prefix}/{X.Y.Z}/vocab.ttl``:
 
 * ``OUT_DIR/def/{prefix}/{X.Y.Z}/vocab.ttl``, a byte copy;
 * ``OUT_DIR/def/{prefix}/{X.Y.Z}/index.html``, a page with the title, the
-  version IRI, the licence, links to the Turtle and to the other releases, and
-  the terms, each anchored by its local name;
+  description, the publisher, the version IRI, the licence, links to the
+  Turtle, to the other releases and to further documentation, an outline of
+  each concept scheme, and the terms, each anchored by its local name, with
+  its definition, notes, other labels, broader and narrower terms and SKOS
+  matches (a matched EMMO term shown by its name, read from the vendored
+  domain-battery JSON-LD context);
 
 and then, from the release folders under ``OUT_DIR/def``:
 
@@ -59,10 +63,13 @@ import check_def_vocabularies as check  # noqa: E402
 PAGES_DEF = "https://big-map.github.io/BattINFO/def/"
 SOURCE_DEF = "https://github.com/BIG-MAP/BattINFO/tree/main/def"
 REGISTER = check.ROOT / "src" / "battinfo" / "data" / "namespace" / "prefixes.json"
+#: Names for EMMO IRIs that a vocabulary matches its terms to.
+EMMO_NAMES = check.ROOT / "src" / "battinfo" / "data" / "context" / "domain-battery.context.json"
+EMMO_BASE = "https://w3id.org/emmo"
 PAGE_FILE = "index.html"
 _STYLE = (
     "body{font-family:system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.5}"
-    "a{overflow-wrap:anywhere}dt{margin-top:.75rem}dd{margin-left:1.5rem}small{color:#555}"
+    "a,code{overflow-wrap:anywhere}dt{margin-top:.75rem}dd{margin-left:1.5rem}small{color:#555}"
 )
 
 
@@ -76,6 +83,31 @@ def _link(iri: str, text: str | None = None) -> str:
     if not re.match(r"https?://", iri):
         return f"<code>{shown}</code>"
     return f'<a href="{_escape(iri)}">{shown}</a>'
+
+
+_emmo_names: dict[str, str] | None = None
+
+
+def emmo_name(iri: str) -> str | None:
+    """The name of the EMMO term *iri* in the vendored domain-battery context, or None.
+
+    Where the context gives one IRI several names, such as a corrected
+    spelling beside the old one, the first in sorted order is used.
+    """
+    global _emmo_names
+    if _emmo_names is None:
+        try:
+            context = json.loads(EMMO_NAMES.read_text(encoding="utf-8"))["@context"]
+        except (OSError, ValueError, KeyError):
+            context = {}
+        names: dict[str, str] = {}
+        for name in sorted(context):
+            value = context[name]
+            target = value.get("@id") if isinstance(value, dict) else value
+            if isinstance(target, str) and target.startswith(EMMO_BASE):
+                names.setdefault(target, name)
+        _emmo_names = names
+    return _emmo_names.get(iri)
 
 
 def _page(title: str, body: list[str], head: str = "") -> str:
@@ -102,6 +134,7 @@ def _page(title: str, body: list[str], head: str = "") -> str:
 def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str:
     """The index.html of the release *version* of the vocabulary of *prefix*, read as *vocabulary*."""
     ontology = check.DEF_BASE + prefix
+    space = ontology + "/"
     title = vocabulary.titles[0]
     licences = ", ".join(_link(iri) for iri in vocabulary.licences)
     releases = []
@@ -111,23 +144,70 @@ def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str
     releases.append(f"<li>All releases: {_link(f'{PAGES_DEF}#{prefix}', PAGES_DEF)}</li>")
 
     terms = check.own_terms(vocabulary, prefix)
+
+    def label_of(local: str) -> str:
+        return terms[local].labels[0] if terms[local].labels else local
+
+    def sort_key(local: str) -> tuple[str, str]:
+        return (label_of(local).casefold(), local)
+
+    def own(iri: str) -> str | None:
+        """The local name of *iri* when it is a term of this release."""
+        local = iri[len(space) :] if iri.startswith(space) else None
+        return local if local in terms else None
+
+    def ref(iri: str) -> str:
+        """A link to *iri*: to its entry when it is a term here, else to the IRI, by its EMMO name if it has one."""
+        local = own(iri)
+        if local is not None:
+            return f'<a href="#{_escape(local)}">{_escape(label_of(local))}</a>'
+        return _link(iri, emmo_name(iri))
+
+    def refs(iris: tuple[str, ...]) -> str:
+        return ", ".join(ref(iri) for iri in sorted(iris, key=lambda iri: (own(iri) is None, iri)))
+
+    def outline(iris: tuple[str, ...], seen: frozenset[str]) -> list[str]:
+        """Nested lists of the terms *iris* and their narrower terms, each term once on a branch."""
+        items = []
+        found = {local for iri in iris if (local := own(iri)) is not None}
+        for local in sorted(found - seen, key=sort_key):
+            below = outline(terms[local].narrower, seen | {local})
+            items.append(f"<li>{ref(space + local)}{''.join(below)}</li>")
+        return ["<ul>", *items, "</ul>"] if items else []
+
+    schemes = [local for local in sorted(terms, key=sort_key) if "concept scheme" in terms[local].kinds]
+    contents = []
+    for local in schemes:
+        contents += [f"<p>{ref(space + local)}</p>", *outline(terms[local].top_concepts, frozenset({local}))]
+
     entries = []
-    for local in sorted(terms, key=lambda name: (name.casefold(), name)):
+    for local in sorted(terms, key=sort_key):
         term = terms[local]
         anchor = _escape(local)
-        label = term.labels[0] if term.labels else local
         about = ", ".join(term.kinds) + (", deprecated" if term.deprecated else "")
         entries.append(
-            f'<dt id="{anchor}"><a href="#{anchor}">{_escape(label)}</a> <small>{_escape(about)}</small></dt>'
+            f'<dt id="{anchor}"><a href="#{anchor}">{_escape(label_of(local))}</a> <small>{_escape(about)}</small></dt>'
         )
         lines = [f"<code>{_escape(term.iri)}</code>"]
         if term.definitions:
             lines.append(_escape(term.definitions[0]))
+        lines += [f"Note: {_escape(note)}" for note in term.scope_notes]
+        if term.alt_labels:
+            lines.append("Also called: " + ", ".join(_escape(text) for text in term.alt_labels))
+        if term.broader:
+            lines.append("Broader: " + refs(term.broader))
+        if term.narrower:
+            lines.append("Narrower: " + refs(term.narrower))
+        for predicate, word in check.MATCHES.items():
+            matched = tuple(iri for found, iri in term.matches if found == predicate)
+            if matched:
+                lines.append(f"{word}: {refs(matched)}")
+        if term.see_also:
+            lines.append("See also: " + ", ".join(_link(iri) for iri in term.see_also))
         if term.replaced_by:
-            space = ontology + "/"
             replacements = [
                 f'<a href="#{_escape(iri[len(space) :])}">{_escape(iri[len(space) :])}</a>'
-                if iri.startswith(space) and iri[len(space) :] in terms
+                if own(iri) is not None
                 else _link(iri)
                 for iri in term.replaced_by
             ]
@@ -135,12 +215,23 @@ def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str
         entries.append(f"<dd>{'<br>'.join(lines)}</dd>")
     listed = ["<dl>", *entries, "</dl>"] if entries else ["<p>This release defines no terms.</p>"]
 
+    facts = []
+    for name, homepage in vocabulary.publishers:
+        facts.append("Publisher: " + (_link(homepage, name) if homepage else _escape(name)))
+    facts.append(f"Version: {_escape(version)}")
+    facts += [f"Issued: {_escape(date)}" for date in vocabulary.issued]
+    facts += [
+        f"Version IRI: <code>{_escape(f'{ontology}/{version}')}</code>",
+        f"Ontology IRI: <code>{_escape(ontology)}</code>",
+        f"Licence: {licences}",
+    ]
+    if vocabulary.pages:
+        facts.append("Documentation: " + ", ".join(_link(iri) for iri in vocabulary.pages))
+
     body = [
         f"<h1>{_escape(title)}</h1>",
-        f"<p>Version: {_escape(version)}<br>"
-        f"Version IRI: <code>{_escape(f'{ontology}/{version}')}</code><br>"
-        f"Ontology IRI: <code>{_escape(ontology)}</code><br>"
-        f"Licence: {licences}</p>",
+        *(f"<p>{_escape(text)}</p>" for text in vocabulary.descriptions[:1]),
+        f"<p>{'<br>'.join(facts)}</p>",
         "<h2>Files</h2>",
         "<ul>",
         f'<li><a href="{check.VOCABULARY_FILE}">{check.VOCABULARY_FILE}</a> (Turtle)</li>',
@@ -149,10 +240,13 @@ def release_page(prefix: str, version: str, vocabulary: check.Vocabulary) -> str
         "<ul>",
         *releases,
         "</ul>",
+        *(["<h2>Concept schemes</h2>", *contents] if contents else []),
         f"<h2>Terms ({len(terms)})</h2>",
         *listed,
     ]
     head = f'<link rel="alternate" type="text/turtle" href="{check.VOCABULARY_FILE}">'
+    if vocabulary.descriptions:
+        head += f'\n<meta name="description" content="{_escape(vocabulary.descriptions[0])}">'
     return _page(f"{title} {version}", body, head)
 
 

@@ -34,6 +34,10 @@ Each vocabulary states its own licence with at least one `dcterms:license` that 
 
 A publisher's folder can get a line in the repository's CODEOWNERS file, so that the publisher's own maintainers approve changes to it.
 
+## The release page
+
+Each release gets a page, built from its file, so a vocabulary documents itself by what it states. Next to the title, version and licence, the page shows the ontology's `dcterms:description`, its `dcterms:publisher` (a `foaf:name` and a `foaf:homepage`) and its `dcterms:issued` date, and links to the publisher's own documentation of the vocabulary when the ontology names it with `rdfs:seeAlso` or `foaf:page`. Each concept scheme is outlined with its top concepts and their narrower concepts. Each term shows its label and definition, and also its `skos:scopeNote`, its English `skos:altLabel` values, its broader and narrower terms and its SKOS matches, with a matched EMMO term shown by its name.
+
 ## Where it is served
 
 The pages and files are published on GitHub Pages under `https://big-map.github.io/BattINFO/def/`, and w3id redirects to them:

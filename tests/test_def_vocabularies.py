@@ -416,6 +416,123 @@ def test_an_individual_is_a_term_on_the_page(tmp_path: Path) -> None:
     assert '<dt id="Glovebox"><a href="#Glovebox">glovebox</a> <small>individual</small></dt>' in page
 
 
+ABOUT = """
+<https://w3id.org/battinfo/def/1000>
+    dcterms:description "Terms for <storing> samples."@en ;
+    dcterms:issued "2026-10-30" ;
+    dcterms:publisher [ <http://xmlns.com/foaf/0.1/name> "Example & Co" ;
+        <http://xmlns.com/foaf/0.1/homepage> <https://example.org/> ] ;
+    <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://example.org/docs/> .
+"""
+
+# A scheme with a top concept given from each side, a narrower concept given
+# by skos:broader alone, a cycle, and matches to an EMMO term the domain-battery
+# context names (Simulation) and to an IRI it does not.
+CONDITIONS = """
+ex:Conditions a skos:ConceptScheme ;
+    dcterms:title "storage conditions"@en ;
+    dcterms:description "The conditions a sample is kept in."@en ;
+    skos:hasTopConcept ex:Cold .
+
+ex:Cold a skos:Concept ;
+    skos:prefLabel "cold"@en ;
+    skos:altLabel "chilled"@en, "kalt"@de ;
+    skos:definition "Kept below 5 degrees Celsius."@en ;
+    skos:scopeNote "Not <frozen>."@en ;
+    skos:relatedMatch <https://w3id.org/emmo#EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b> ;
+    skos:closeMatch <https://example.org/cold> .
+
+ex:Frozen a skos:Concept ;
+    skos:prefLabel "frozen"@en ;
+    skos:definition "Kept below 0 degrees Celsius."@en ;
+    skos:broader ex:Cold .
+
+ex:Warm a skos:Concept ;
+    skos:prefLabel "warm"@en ;
+    skos:definition "Kept above 25 degrees Celsius."@en ;
+    skos:topConceptOf ex:Conditions ;
+    skos:broader ex:Hot .
+
+ex:Hot a skos:Concept ;
+    skos:prefLabel "hot"@en ;
+    skos:definition "Kept above 40 degrees Celsius."@en ;
+    skos:broader ex:Warm .
+"""
+
+
+def test_a_page_names_the_publisher_and_links_further_documentation(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", ABOUT)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "<p>Terms for &lt;storing&gt; samples.</p>" in page
+    assert '<meta name="description" content="Terms for &lt;storing&gt; samples.">' in page
+    assert (
+        'Publisher: <a href="https://example.org/">Example &amp; Co</a><br>Version: 1.1.0<br>Issued: 2026-10-30' in page
+    )
+    assert 'Documentation: <a href="https://example.org/docs/">https://example.org/docs/</a>' in page
+
+
+def test_a_publisher_without_a_name_or_homepage_is_shown_by_what_it_has(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", "\n<https://w3id.org/battinfo/def/1000> dcterms:publisher <https://example.org/lab> .\n")
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert 'Publisher: <a href="https://example.org/lab">https://example.org/lab</a>' in page
+
+    def_dir = _copy(tmp_path / "named")
+    _add(
+        def_dir,
+        "1.1.0",
+        '\n<https://w3id.org/battinfo/def/1000> dcterms:publisher [ <http://xmlns.com/foaf/0.1/name> "A lab" ] .\n',
+    )
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "Publisher: A lab<br>" in page
+
+
+def test_a_page_outlines_each_concept_scheme_and_links_the_hierarchy_both_ways(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", CONDITIONS)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+
+    outline = page[page.index("<h2>Concept schemes</h2>") : page.index("<h2>Terms")]
+    assert outline == (
+        "<h2>Concept schemes</h2>\n"
+        '<p><a href="#Conditions">storage conditions</a></p>\n'
+        "<ul>\n"
+        '<li><a href="#Cold">cold</a><ul><li><a href="#Frozen">frozen</a></li></ul></li>\n'
+        '<li><a href="#Warm">warm</a><ul><li><a href="#Hot">hot</a></li></ul></li>\n'
+        "</ul>\n"
+    )
+    # skos:broader on Frozen alone makes it narrower of Cold, and the reverse.
+    assert 'Narrower: <a href="#Frozen">frozen</a>' in page
+    assert 'Broader: <a href="#Cold">cold</a>' in page
+    assert "Note: Not &lt;frozen&gt;." in page
+    assert "Also called: chilled<br>" in page and "kalt" not in page
+    assert (
+        'Related match: <a href="https://w3id.org/emmo#EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b">Simulation</a>'
+        in page
+    )
+    assert 'Close match: <a href="https://example.org/cold">https://example.org/cold</a>' in page
+
+
+def test_a_page_without_a_concept_scheme_has_no_outline(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    page = site.release_page("1000", "1.1.0", check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl"))
+    assert "Concept schemes" not in page and "Publisher:" not in page and "Documentation:" not in page
+
+
+def test_the_battery_data_commons_page_documents_its_dataset_kinds(tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert site.build(out) == []
+    page = (out / "def" / "1002" / "1.0.0" / "index.html").read_text(encoding="utf-8")
+    assert 'Publisher: <a href="https://batterydatacommons.org/">Battery Data Commons</a>' in page
+    assert (
+        '<li><a href="#ModelingData">Modelling data</a><ul><li><a href="#SyntheticData">Synthetic data</a></li></ul></li>'
+        in page
+    )
+    assert ">ReferencePerformanceTest</a>" in page and ">CyclingTest</a>" in page and ">ThermalRunawayTest</a>" in page
+    assert "Also called: performance" in page
+
+
 def test_a_licence_given_as_text_beside_an_iri_passes(tmp_path: Path) -> None:
     def_dir = _copy(tmp_path)
     _edit(
