@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battery Genome definitions 0.1.0</title>
+<script>(function(){var t;try{t=localStorage.getItem('mode')}catch(e){}if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="alternate" type="text/turtle" href="vocab.ttl">
+<meta name="description" content="Terms that the Battery Genome registry defines under its prefix, 1001. Release 0.1.0 defines none yet.">
+<style>/* ============================================================================
+   BattINFO — Design Tokens  (v1.1, dual-mode)
+   ----------------------------------------------------------------------------
+   ONE contract, TWO value sets. Build every UI surface from the SEMANTIC
+   tokens below (--bi-bg-*, --bi-text-*, --bi-brand-*, …).
+   NEVER hard-code a raw hex in a component, and NEVER reference a --raw-*
+   primitive directly — those exist only to feed the semantic layer.
+
+   Theme switch:  <html data-theme="light">  or  <html data-theme="dark">
+   (Also works with a `.dark` class — both selectors are wired.)
+   ========================================================================== */
+
+/* ---- 1. PRIMITIVES (raw palette — do NOT use directly in components) ---- */
+:root {
+  --raw-ink-900:   #0B1622;  /* deepest navy-black (dark base)  */
+  --raw-ink-800:   #102A43;  /* brand ink (light text, dark UI) */
+  --raw-ink-700:   #1D3A57;
+  --raw-ink-600:   #2E4257;
+
+  --raw-paper:     #F3F2EE;  /* warm light base                 */
+  --raw-white:     #FFFFFF;
+  --raw-cloud:     #ECEAE4;  /* light inset                     */
+
+  --raw-slate-500: #5A6570;
+  --raw-slate-400: #6B7580;
+
+  /* Teal ramp — brand shifts BRIGHTER as background darkens */
+  --raw-teal-700:  #0C7A6E;  /* teal TEXT on light  (AA 5.2)    */
+  --raw-teal-500:  #12A394;  /* brand fill (light), large only  */
+  --raw-teal-400:  #2DCAB6;  /* teal TEXT on dark   (AA 8.9)    */
+  --raw-teal-300:  #2DD4BF;  /* brand fill (dark)               */
+
+  /* Semantic-state ramps (light / dark tuned) */
+  --raw-success-l: #178050;  --raw-success-d: #4ADE9E;
+  --raw-warning-l: #946007;  --raw-warning-d: #F0B429;
+  --raw-error-l:   #C8372D;  --raw-error-d:   #F87171;
+  --raw-info-l:    #2563B8;  --raw-info-d:    #6BA8F5;
+}
+
+/* ---- 2. SEMANTIC TOKENS — LIGHT (default) ---- */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces — base is the page; elevate by getting LIGHTER */
+  --bi-bg-base:      var(--raw-paper);
+  --bi-bg-surface:   var(--raw-white);   /* cards, panels        */
+  --bi-bg-raised:    var(--raw-white);   /* popovers, menus      */
+  --bi-bg-inset:     var(--raw-cloud);   /* code blocks, wells   */
+  --bi-bg-brand-subtle: #E4F4F1;         /* tag / badge wash     */
+
+  /* Text — never the brand fill color */
+  --bi-text-primary:   var(--raw-ink-800);
+  --bi-text-secondary: var(--raw-ink-600);
+  --bi-text-muted:     var(--raw-slate-500);
+  --bi-text-on-brand:  var(--raw-white); /* text on a teal fill  */
+  --bi-text-inverse:   var(--raw-white);
+
+  /* Borders / lines */
+  --bi-border:         #E2E0D9;
+  --bi-border-strong:  #CBD3DA;
+
+  /* Brand */
+  --bi-brand:        var(--raw-teal-500); /* fills, ≥24px display */
+  --bi-brand-text:   var(--raw-teal-700); /* links, teal text, small labels */
+  --bi-brand-strong: var(--raw-ink-800);  /* primary button bg    */
+
+  /* Focus */
+  --bi-focus-ring:   var(--raw-teal-700);
+
+  /* States */
+  --bi-success: var(--raw-success-l); --bi-success-bg: #E4F4EC;
+  --bi-warning: var(--raw-warning-l); --bi-warning-bg: #FBF0DA;
+  --bi-error:   var(--raw-error-l);   --bi-error-bg:   #FBE7E4;
+  --bi-info:    var(--raw-info-l);    --bi-info-bg:    #E5EEFA;
+
+  /* Elevation — soft, colored-shadow on light */
+  --bi-shadow-sm: 0 1px 3px rgba(16,42,67,0.06);
+  --bi-shadow-md: 0 4px 16px rgba(16,42,67,0.08);
+  --bi-shadow-lg: 0 12px 32px rgba(16,42,67,0.12);
+}
+
+/* ---- 3. SEMANTIC TOKENS — DARK (override same names) ---- */
+:root[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces — base is DARKEST; elevate by getting LIGHTER (not darker!) */
+  --bi-bg-base:      var(--raw-ink-900);  /* #0B1622 page         */
+  --bi-bg-surface:   #13212F;             /* cards sit ABOVE base  */
+  --bi-bg-raised:    #1A2A3A;             /* popovers, higher      */
+  --bi-bg-inset:     #0E1B27;             /* code wells sink BELOW */
+  --bi-bg-brand-subtle: rgba(45,212,191,0.12);
+
+  /* Text — near-white, NEVER ink navy (that was the invisible-hero bug) */
+  --bi-text-primary:   #EAF1F6;
+  --bi-text-secondary: #AEBDC9;
+  --bi-text-muted:     #7A8996;
+  --bi-text-on-brand:  #06231E;           /* dark ink on bright teal fill */
+  --bi-text-inverse:   var(--raw-ink-800);
+
+  /* Borders */
+  --bi-border:         #23323F;
+  --bi-border-strong:  #33475A;
+
+  /* Brand — brighter ramp; mid-teal is muddy on dark */
+  --bi-brand:        var(--raw-teal-300); /* #2DD4BF fills        */
+  --bi-brand-text:   var(--raw-teal-400); /* #2DCAB6 links/text   */
+  --bi-brand-strong: var(--raw-teal-300); /* primary btn = teal, NOT dark ink */
+
+  /* Focus — brighter ring for dark */
+  --bi-focus-ring:   var(--raw-teal-300);
+
+  /* States — brighter tints, low-alpha backgrounds */
+  --bi-success: var(--raw-success-d); --bi-success-bg: rgba(74,222,158,0.14);
+  --bi-warning: var(--raw-warning-d); --bi-warning-bg: rgba(240,180,41,0.14);
+  --bi-error:   var(--raw-error-d);   --bi-error-bg:   rgba(248,113,113,0.15);
+  --bi-info:    var(--raw-info-d);    --bi-info-bg:    rgba(107,168,245,0.15);
+
+  /* Elevation — shadows barely read on dark; lean on surface lightness + border */
+  --bi-shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
+  --bi-shadow-md: 0 6px 20px rgba(0,0,0,0.45);
+  --bi-shadow-lg: 0 16px 40px rgba(0,0,0,0.55);
+}
+
+/* ---- 4. GLOBAL BASE (safe defaults so nothing renders unstyled) ---- */
+html { background: var(--bi-bg-base); }
+body {
+  margin: 0;
+  background: var(--bi-bg-base);
+  color: var(--bi-text-primary);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--bi-brand-text); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+code, pre, kbd, samp { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+:focus-visible { outline: 2px solid var(--bi-focus-ring); outline-offset: 2px; }
+
+/* ---- 5. COMPONENT RECIPES (all mode-agnostic — they read semantic tokens) ---- */
+
+/* Card / panel */
+.bi-card {
+  background: var(--bi-bg-surface);
+  border: 1px solid var(--bi-border);
+  border-radius: 14px;
+  box-shadow: var(--bi-shadow-sm);
+}
+
+/* Code block — sits in an inset well, distinct from cards */
+.bi-code {
+  background: var(--bi-bg-inset);
+  border: 1px solid var(--bi-border);
+  border-radius: 12px;
+  color: var(--bi-text-primary);
+}
+
+/* Buttons */
+.bi-btn { font: 700 15px/1 'Plus Jakarta Sans', sans-serif; border-radius: 10px;
+  padding: 12px 22px; cursor: pointer; border: 1px solid transparent; transition: .15s; }
+
+.bi-btn-primary { background: var(--bi-brand-strong); color: var(--bi-text-on-brand); }
+:root[data-theme="light"] .bi-btn-primary { color: #fff; }            /* ink bg → white text */
+.bi-btn-primary:hover { filter: brightness(1.08); }
+.bi-btn-primary:active { filter: brightness(0.94); }
+
+/* Secondary / ghost — MUST carry a visible border in BOTH modes
+   (the disappearing dark-on-dark "Validate a record" button) */
+.bi-btn-secondary {
+  background: transparent;
+  color: var(--bi-text-primary);
+  border-color: var(--bi-border-strong);
+}
+.bi-btn-secondary:hover { background: var(--bi-bg-inset); }
+
+.bi-btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+
+/* Badge / pill */
+.bi-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bi-bg-brand-subtle);
+  color: var(--bi-brand-text);
+  border: 1px solid transparent;
+  border-radius: 999px; padding: 5px 12px;
+  font: 600 13px 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Inputs */
+.bi-input {
+  background: var(--bi-bg-surface);
+  border: 1px solid var(--bi-border-strong);
+  color: var(--bi-text-primary);
+  border-radius: 8px; padding: 10px 12px;
+  font: 500 15px 'Plus Jakarta Sans', sans-serif;
+}
+.bi-input::placeholder { color: var(--bi-text-muted); }
+.bi-input:focus-visible { border-color: var(--bi-brand-text); outline: 2px solid var(--bi-focus-ring); outline-offset: 1px; }
+.shell{max-width:52rem;margin:0 auto;padding:0 1rem 3rem;line-height:1.55}.top{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:1rem 0;margin-bottom:2rem;border-bottom:1px solid var(--bi-border);font-size:.95rem}.top svg{display:block;width:20px;height:auto}.top .home{color:var(--bi-text-primary);font-weight:700}.top .crumb{color:var(--bi-text-muted)}:root[data-theme="dark"] .mark-light,:root:not([data-theme="dark"]) .mark-dark{display:none}h1{font-size:2rem;line-height:1.2;margin:.25rem 0 .5rem}h2{font-size:1.35rem;margin:2.5rem 0 .75rem}h3{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:1.1rem;margin:0 0 .5rem}.eyebrow{margin:0;color:var(--bi-text-muted);font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}.byline{margin:0 0 1rem;color:var(--bi-text-secondary)}.lead{font-size:1.1rem;color:var(--bi-text-secondary)}.bi-card{padding:.75rem 1.25rem;margin:1rem 0}.bi-card>h2{margin:.5rem 0}.facts td>ul{margin:0;padding-left:1.25rem}.facts{width:100%;border-collapse:collapse}.facts th{width:9.5rem;padding:.45rem 1rem .45rem 0;text-align:left;vertical-align:top;font-weight:600;color:var(--bi-text-secondary)}.facts td{padding:.45rem 0;vertical-align:top}.facts tr+tr>*{border-top:1px solid var(--bi-border)}a,code{overflow-wrap:anywhere}code{font-size:.88em}.byline a,.lead a,.facts td a,footer a{text-decoration:underline;text-underline-offset:3px}.bi-badge{padding:2px 10px;font-size:12px}.bi-badge.deprecated{background:var(--bi-warning-bg);color:var(--bi-warning)}.term{scroll-margin-top:1rem}.term:target{border-color:var(--bi-brand-text)}.toc ul{columns:2;column-gap:2rem;margin:.5rem 0;padding-left:1.25rem}.tree ul{margin:.25rem 0;padding-left:1.25rem}footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--bi-border);color:var(--bi-text-muted);font-size:.9rem}@media (max-width:40rem){h1{font-size:1.6rem}.toc ul{columns:1}.facts tr{display:block;padding:.4rem 0}.facts tr+tr{border-top:1px solid var(--bi-border)}.facts th,.facts td{display:block;width:auto;padding:.1rem 0;border:0!important}}</style>
+</head>
+<body>
+<div class="shell">
+<header class="top">
+<span class="mark-light" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="100" height="112" viewBox="0 0 100 112" fill="none" role="img" aria-label="BattINFO symbol">
+  <rect x="38" y="6" width="24" height="11" rx="3.5" fill="#102A43"></rect>
+  <rect x="19" y="17" width="62" height="86" rx="13" fill="none" stroke="#102A43" stroke-width="6.5"></rect>
+  <line x1="56" y1="41" x2="65" y2="74" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <line x1="65" y1="74" x2="33" y2="65" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <line x1="33" y1="65" x2="56" y2="41" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <circle cx="56" cy="41" r="7.5" fill="#12A394"></circle>
+  <circle cx="65" cy="74" r="7.5" fill="#12A394"></circle>
+  <circle cx="33" cy="65" r="7.5" fill="#12A394"></circle>
+</svg></span>
+<span class="mark-dark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="100" height="112" viewBox="0 0 100 112" fill="none" role="img" aria-label="BattINFO symbol reversed">
+  <rect x="38" y="6" width="24" height="11" rx="3.5" fill="#FFFFFF"></rect>
+  <rect x="19" y="17" width="62" height="86" rx="13" fill="none" stroke="#FFFFFF" stroke-width="6.5"></rect>
+  <line x1="56" y1="41" x2="65" y2="74" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <line x1="65" y1="74" x2="33" y2="65" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <line x1="33" y1="65" x2="56" y2="41" stroke="#12A394" stroke-width="6" stroke-linecap="round"></line>
+  <circle cx="56" cy="41" r="7.5" fill="#12A394"></circle>
+  <circle cx="65" cy="74" r="7.5" fill="#12A394"></circle>
+  <circle cx="33" cy="65" r="7.5" fill="#12A394"></circle>
+</svg></span>
+<a class="home" href="https://battinfo.org/">BattINFO</a>
+<span class="crumb" aria-hidden="true">/</span>
+<a href="https://big-map.github.io/BattINFO/def/">Publisher vocabularies</a>
+</header>
+<main>
+<p class="eyebrow">Vocabulary, prefix 1001</p>
+<h1>Battery Genome definitions</h1>
+<p class="byline">Published by <a href="https://www.battery-genome.org/">Battery Genome</a></p>
+<p class="lead">Terms that the Battery Genome registry defines under its prefix, 1001. Release 0.1.0 defines none yet.</p>
+<section class="bi-card">
+<table class="facts">
+<tr><th>Ontology IRI</th><td><code>https://w3id.org/battinfo/def/1001</code></td></tr>
+<tr><th>Version IRI</th><td><code>https://w3id.org/battinfo/def/1001/0.1.0</code></td></tr>
+<tr><th>Version</th><td>0.1.0</td></tr>
+<tr><th>Issued</th><td>2026-10-30</td></tr>
+<tr><th>Namespace</th><td><code>https://w3id.org/battinfo/def/1001/</code></td></tr>
+<tr><th>Licence</th><td><a href="https://creativecommons.org/licenses/by/4.0/">https://creativecommons.org/licenses/by/4.0/</a></td></tr>
+<tr><th>Download</th><td><a href="vocab.ttl">vocab.ttl</a> (Turtle)</td></tr>
+<tr><th>Releases</th><td><a href="https://w3id.org/battinfo/def/1001">newest</a>, <a href="https://big-map.github.io/BattINFO/def/#1001">all releases</a></td></tr>
+</table>
+</section>
+<h2 id="terms">Terms (0)</h2>
+<p>This release defines no terms.</p>
+</main>
+<footer>Hosted in the BattINFO namespace, <code>https://w3id.org/battinfo/</code>. Source: <a href="https://github.com/BIG-MAP/BattINFO/blob/main/def/1001/0.1.0/vocab.ttl">def/1001/0.1.0/vocab.ttl</a></footer>
+</div>
+</body>
+</html>
