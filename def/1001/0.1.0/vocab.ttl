@@ -1,0 +1,25 @@
+# Battery Genome definitions, release 0.1.0
+#
+# Publisher: the Battery Genome registry, prefix 1001 in src/battinfo/data/namespace/prefixes.json.
+# A released folder is never edited; a change is a new release in a new folder.
+#
+# This release defines no terms. It gives https://w3id.org/battinfo/def/1001 something to
+# answer with until Battery Genome releases its first terms here.
+#
+# Licence of this file: CC BY 4.0, whatever the licence of the repository that holds it.
+
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+
+<https://w3id.org/battinfo/def/1001> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/battinfo/def/1001/0.1.0> ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:issued "2026-10-30"^^xsd:date ;
+    dcterms:title "Battery Genome definitions"@en ;
+    dcterms:description "Terms that the Battery Genome registry defines under its prefix, 1001. Release 0.1.0 defines none yet."@en ;
+    dcterms:publisher [ a foaf:Organization ;
+        foaf:name "Battery Genome" ;
+        foaf:homepage <https://www.battery-genome.org/> ] ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
