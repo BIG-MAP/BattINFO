@@ -36,7 +36,7 @@ A publisher's folder can get a line in the repository's CODEOWNERS file, so that
 
 ## The release page
 
-Each release gets a page, built from its file, so a vocabulary documents itself by what it states. Next to the title, version and licence, the page shows the ontology's `dcterms:description`, its `dcterms:publisher` (a `foaf:name` and a `foaf:homepage`) and its `dcterms:issued` date, and links to the publisher's own documentation of the vocabulary when the ontology names it with `rdfs:seeAlso` or `foaf:page`. Each concept scheme is outlined with its top concepts and their narrower concepts. Each term shows its label and definition, and also its `skos:scopeNote`, its English `skos:altLabel` values, its broader and narrower terms and its SKOS matches, with a matched EMMO term shown by its name.
+Each release gets a page, built from its file, so a vocabulary documents itself by what it states. The page is in the BattINFO style ([brand/](../brand/BRAND.md)), light or dark as the reader has set the docs site or their system, and stands alone, with no files from the rest of the site. Next to the title, version and licence, the page shows the ontology's `dcterms:description`, its `dcterms:publisher` (a `foaf:name` and a `foaf:homepage`) and its `dcterms:issued` date, and links to the publisher's own documentation of the vocabulary when the ontology names it with `rdfs:seeAlso` or `foaf:page`. Each concept scheme is outlined with its top concepts and their narrower concepts. Each term shows its label and definition, and also its `skos:scopeNote`, its English `skos:altLabel` values, its broader and narrower terms and its SKOS matches, with a matched EMMO term shown by its name.
 
 ## Where it is served
 

@@ -565,7 +565,10 @@ def test_vocabulary_releases_are_published_and_the_vocabulary_serves_its_newest_
     _deploy(site, "dev", vocabularies=beta_only)
     assert _published(site, "def/1000/1.1.0-beta.1/vocab.ttl") == _release(beta_only, "1.1.0-beta.1")
     beta_page = _published(site, "def/1000/1.1.0-beta.1/index.html")
-    assert b"Version IRI: <code>https://w3id.org/battinfo/def/1000/1.1.0-beta.1</code>" in beta_page
+    assert (
+        b"<tr><th>Version IRI</th><td><code>https://w3id.org/battinfo/def/1000/1.1.0-beta.1</code></td></tr>"
+        in beta_page
+    )
     assert _published(site, "def/1000/vocab.ttl") == _release(beta_only, "1.1.0-beta.1")
     assert _published(site, "def/1000/index.html") == beta_page
     assert b'<a href="1000/1.1.0-beta.1/">1.1.0-beta.1</a>, served at the ontology IRI' in _published(
