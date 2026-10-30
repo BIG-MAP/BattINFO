@@ -147,8 +147,9 @@ const url = `https://battinfo.org/create/cell-spec#record=${encoded}`;
 What arrives is a stranger's JSON and is treated as one: the same intake as an
 upload, so a link cannot introduce a field the schemas do not define, and it
 keeps its identity exactly as a file does. A fragment that carries no
-readable record says so rather than failing quietly, and the fragment is
-cleared from the address bar once read. `check:create` pins the format.
+readable record, or one that inflates past 5 MB, says so above the start
+screen rather than failing quietly, and the fragment is cleared from the
+address bar once read. `check:create` pins the format.
 
 It replaced a playground at this same address that hand-listed six object
 types and showed each as Python, canonical JSON and JSON-LD. Two pages both

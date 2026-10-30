@@ -20,7 +20,16 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { ObjectNode } from "./node";
-import { MATERIAL_LIST, MATERIAL_SYMBOLS, PROPERTY_KEYS, PROPERTY_LIST, UNIT_LIST, UNIT_SYMBOLS } from "./vocab";
+import {
+  NEGATIVE_BASES,
+  NEGATIVE_LIST,
+  POSITIVE_BASES,
+  POSITIVE_LIST,
+  PROPERTY_KEYS,
+  PROPERTY_LIST,
+  UNIT_LIST,
+  UNIT_SYMBOLS,
+} from "./vocab";
 import { HowToStart } from "./start";
 import { BackLink } from "./pick-file";
 import { asDraft, findingsFor, readFragment, type Loaded } from "./load";
@@ -98,6 +107,15 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
   // Null until the second question is answered. There is no form before then,
   // so there is nothing to render behind the question.
   const [begun, setBegun] = useState<Loaded | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
+  // Counts the records begun on this page. The draft is built once from the
+  // record it began with, so a second record (a new link while one is open)
+  // needs a fresh draft rather than the old one under a new banner.
+  const [round, setRound] = useState(0);
+  const begin = (loaded: Loaded) => {
+    setBegun(loaded);
+    setRound((n) => n + 1);
+  };
 
   // A record handed over in the link answers both questions at once: another
   // tool chose the kind by linking here and supplied the contents.
@@ -106,12 +124,18 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
     async function fromLink() {
       try {
         const linked = await readFragment(window.location.hash, type);
-        if (cancelled || !linked) return;
+        if (cancelled) return;
+        if (!linked) {
+          setLinkError(null);
+          return;
+        }
         history.replaceState(null, "", window.location.pathname + window.location.search);
-        setBegun(linked);
-      } catch {
-        // A link nobody can read is not a reason to withhold the page; the
-        // chooser below is what the reader gets.
+        setLinkError(null);
+        begin(linked);
+      } catch (problem) {
+        // A link nobody can read is not a reason to withhold the page: the
+        // chooser below is still offered, under a line saying what went wrong.
+        if (!cancelled) setLinkError(problem instanceof Error ? problem.message : String(problem));
       }
     }
     const again = () => void fromLink();
@@ -138,7 +162,8 @@ function Stages({ type, children }: { type: RecordType; children: React.ReactNod
         Back to Create
       </BackLink>
       {children}
-      {begun ? <Record type={type} begun={begun} /> : <HowToStart type={type} onBegin={setBegun} />}
+      {!begun && linkError ? <p className="mt-6 text-sm text-error">{linkError}</p> : null}
+      {begun ? <Record key={round} type={type} begun={begun} /> : <HowToStart type={type} onBegin={begin} />}
     </>
   );
 }
@@ -269,9 +294,14 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
           <option key={key} value={key} />
         ))}
       </datalist>
-      <datalist id={MATERIAL_LIST}>
-        {MATERIAL_SYMBOLS.map((material) => (
-          <option key={material} value={material} />
+      <datalist id={POSITIVE_LIST}>
+        {POSITIVE_BASES.map((basis) => (
+          <option key={basis} value={basis} />
+        ))}
+      </datalist>
+      <datalist id={NEGATIVE_LIST}>
+        {NEGATIVE_BASES.map((basis) => (
+          <option key={basis} value={basis} />
         ))}
       </datalist>
     </>

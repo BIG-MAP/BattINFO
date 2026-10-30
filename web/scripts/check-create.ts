@@ -14,7 +14,7 @@ import { gzipSync } from "node:zlib";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath } from "node:url";
 import { blankFor, controlFor, fieldsOf, isDeprecated, join, type Located } from "../app/create/schema";
-import { asDraft, asTemplate, findingsFor, readFragment, sanitize } from "../app/create/load";
+import { MAX_LINKED_BYTES, asDraft, asTemplate, findingsFor, readFragment, sanitize } from "../app/create/load";
 import { SCHEMA_VERSION } from "../lib/schema-version";
 import {
   DERIVED_IDENTITY,
@@ -37,7 +37,7 @@ const fail = (message: string) => failures.push(message);
 // a text control stringifies a list into "a,b" and loses it on the next edit.
 function unrenderable(value: unknown, loc: Located, path = "", depth = 0): string[] {
   if (depth > 10 || value === null || value === undefined) return [];
-  const control = controlFor(loc);
+  const control = controlFor(loc, value);
   const at = path || "(root)";
   if (control.kind === "array") {
     if (!Array.isArray(value)) return [`${at} holds ${typeof value}, but its control is a list`];
@@ -51,7 +51,7 @@ function unrenderable(value: unknown, loc: Located, path = "", depth = 0): strin
     );
   }
   if (control.kind !== "object") return [];
-  const known = new Map(fieldsOf(loc).map((field) => [field.key, field.loc]));
+  const known = new Map(fieldsOf(loc, value).map((field) => [field.key, field.loc]));
   return Object.entries(value as Obj).flatMap(([key, item]) => {
     const child = known.get(key);
     return child ? unrenderable(item, child, join(path, key), depth + 1) : [];
@@ -249,7 +249,7 @@ for (const template of TEMPLATES) {
   }
 }
 
-// 10. A manufacturer is "a name, or an organization holding that name": the
+// 11. A manufacturer is "a name, or an organization holding that name": the
 //     form edits the organization, so its IRIs survive and a plain name loads
 //     as that organization.
 {
@@ -263,11 +263,51 @@ for (const template of TEMPLATES) {
   if (JSON.stringify(maker("Celgard")) !== JSON.stringify({ name: "Celgard" })) {
     fail(`a manufacturer name loads as ${JSON.stringify(maker("Celgard"))}, not an organization`);
   }
+
+  // A brand is a Brand or an Organization, and only the second has `same_as`.
+  // The form reads whichever one the record holds, by its `type` or by the
+  // keys it has, so neither loses anything on open; a new brand is a Brand.
+  const brand = (value: unknown) => {
+    const removed: string[] = [];
+    const out = sanitize({ cell_spec: { brand: value } }, cellSpec.root, "", removed) as Obj;
+    return { removed, kept: ((out.cell_spec ?? {}) as Obj).brand };
+  };
+  const wikidata = "http://www.wikidata.org/entity/Q1"; // illustrative
+  for (const value of [
+    { type: "Organization", name: "Duracell", same_as: wikidata },
+    { name: "Duracell", same_as: wikidata },
+    { type: "Brand", name: "Duracell", url: "https://www.duracell.com" },
+  ]) {
+    const { removed, kept } = brand(value);
+    if (removed.length || JSON.stringify(kept) !== JSON.stringify(value)) {
+      fail(`brand ${JSON.stringify(value)} loads as ${JSON.stringify(kept)}, dropping ${removed.join(", ") || "nothing"}`);
+    }
+  }
+  // A key no shape defines is dropped, and does not cost the brand the keys
+  // its shape does define.
+  const stray = brand({ name: "Duracell", same_as: wikidata, bogus: 1 });
+  if (stray.removed.join() !== "cell_spec.brand.bogus") {
+    fail(`a brand with an unknown key loses ${stray.removed.join(", ")}, not just the unknown key`);
+  }
+
+  // The choice is made per item in a list too: a dataset's main entity is a
+  // list of Tables or TableGroups, and a group keeps its tables.
+  const dataset = RECORD_TYPES.find((type) => type.key === "dataset")!;
+  const group = { type: "TableGroup", name: "cycles", table: [{ type: "Table", name: "t1", url: "https://example.org/t1.csv" }] };
+  for (const entities of [[group], [{ type: "Table", name: "t0", url: "https://example.org/t0.csv" }, group]]) {
+    const removed: string[] = [];
+    sanitize({ dataset: { main_entity: entities } }, dataset.root, "", removed);
+    if (removed.length) fail(`main_entity ${JSON.stringify(entities.map((e) => e.type))} loses ${removed.join(", ")}`);
+  }
+
+  const body = fieldsOf(cellSpec.root).find((field) => field.key === "cell_spec");
+  const brandField = body && fieldsOf(body.loc).find((field) => field.key === "brand");
+  if (!brandField || (blankFor(brandField.loc) as Obj).type !== "Brand") fail("a new brand no longer starts as a Brand");
 }
 
 // 12. And the whole corpus opens, not just the nine templates. Every canonical
-//     record the repo ships is loaded the way an upload would be: it must come
-//     out as a shape the tree can draw, and must still validate with only what
+//     record the repo ships is loaded the way an upload would be: it must lose
+//     nothing, come out as a shape the tree can draw, and still validate with only what
 //     the form excuses (findingsFor) set aside. The same corpus check-agreement
 //     runs, asked a different question -- that one says the validator agrees
 //     with the library, this one says the form can show what the library
@@ -295,6 +335,11 @@ for (const template of TEMPLATES) {
     if (!type) continue;
     opened++;
     const name = file.slice(repoRoot.length + 1).split("\\").join("/");
+    // Opening it drops nothing: every key the package wrote is one the form
+    // has a place for.
+    const removed: string[] = [];
+    sanitize(structuredClone(record), type.root, "", removed);
+    if (removed.length) fail(`${name}: opening it would drop ${removed.join(", ")}`);
     const draft = asDraft(record, type) as Obj;
     for (const where of unrenderable(draft, type.root)) fail(`${name}: ${where}`);
     const report = validateRecordAs(JSON.stringify(draft), type.key);
@@ -363,7 +408,7 @@ for (const template of TEMPLATES) {
 //     JSON>` is a format another tool writes, so it is pinned here rather
 //     than left to drift: a record encoded the documented way comes back out
 //     intact, through the same intake an upload uses, and a link that carries
-//     nothing readable is refused rather than silently ignored.
+//     nothing readable, or too much, is refused rather than silently ignored.
 async function checkTheLinkFormat(): Promise<void> {
   const type = RECORD_TYPES.find((candidate) => candidate.key === "cell_spec")!;
   const source = TEMPLATES.find((template) => template.slug === "coin-detailed")!.record as Obj;
@@ -388,13 +433,23 @@ async function checkTheLinkFormat(): Promise<void> {
 
   if ((await readFragment("#other=1", type)) !== null) fail("a fragment with no record returned one");
 
-  let refused = false;
-  try {
-    await readFragment("#record=not-gzipped-at-all", type);
-  } catch {
-    refused = true;
-  }
-  if (!refused) fail("a link whose record cannot be decoded was accepted");
+  // Each bad link is refused with its own reason, which the page shows.
+  const refusal = async (fragment: string): Promise<string | null> => {
+    try {
+      await readFragment(fragment, type);
+      return null;
+    } catch (error) {
+      return (error as Error).message;
+    }
+  };
+  if (!(await refusal("#record=not-gzipped-at-all"))) fail("a link whose record cannot be decoded was accepted");
+  const notJson = await refusal(`#record=${gzipSync(Buffer.from("not json")).toString("base64url")}`);
+  if (!notJson?.includes("not valid JSON")) fail(`a link holding text that is not JSON gave: ${notJson}`);
+  // Six megabytes of spaces gzip to a few kilobytes: the shape of a link
+  // that would otherwise inflate until the tab ran out of memory.
+  const bomb = gzipSync(Buffer.alloc(MAX_LINKED_BYTES + 1_000_000, 0x20)).toString("base64url");
+  const tooBig = await refusal(`#record=${bomb}`);
+  if (!tooBig?.includes("larger than")) fail(`a link that inflates past the cap gave: ${tooBig}`);
 }
 
 // The only asynchronous check, so the verdict waits for it. tsx compiles this
