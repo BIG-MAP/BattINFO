@@ -4,7 +4,8 @@
 # A released folder is never edited; a change is a new release in a new folder.
 #
 # Release 1.0.1 names the creators of the vocabulary, the people the Battery Data Commons
-# site lists, with their affiliations. Its terms are those of release 1.0.0, unchanged.
+# site lists, by their ORCID iDs and with their affiliations. Its terms are those of
+# release 1.0.0, unchanged.
 #
 # The labels of the EMMO classes named in skos:relatedMatch are comments here, not statements
 # about those classes.
@@ -34,28 +35,44 @@
         foaf:name "Battery Data Commons" ;
         foaf:homepage <https://batterydatacommons.org/> ] ;
     dcterms:creator
-        [ a foaf:Person ;
-            foaf:name "Marwan Hassini" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "Université Gustave Eiffel" ] ],
-        [ a foaf:Person ;
-            foaf:name "Philipp Dechent" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "Toshiba Europe GmbH" ] ],
-        [ a foaf:Person ;
-            foaf:name "Sara Luciani" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "Toshiba Europe GmbH" ] ],
-        [ a foaf:Person ;
-            foaf:name "Shiyun Liu" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "University of Leeds" ] ],
-        [ a foaf:Person ;
-            foaf:name "Simon Clark" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "SINTEF AS" ] ],
-        [ a foaf:Person ;
-            foaf:name "Paul Gasper" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "National Lab of the Rockies" ] ],
-        [ a foaf:Person ;
-            foaf:name "Gonçalo dos Reis" ;
-            schema:affiliation [ a foaf:Organization ; foaf:name "University of Edinburgh" ] ] ;
+        <https://orcid.org/0000-0003-4713-5220>,
+        <https://orcid.org/0000-0003-3041-1436>,
+        <https://orcid.org/0000-0002-5900-1409>,
+        <https://orcid.org/0000-0003-4447-9319>,
+        <https://orcid.org/0000-0002-8758-6109>,
+        <https://orcid.org/0000-0001-8834-9458>,
+        <https://orcid.org/0000-0002-4993-2672> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+# The creators, by their ORCID iDs.
+
+<https://orcid.org/0000-0003-4713-5220> a foaf:Person ;
+    foaf:name "Marwan Hassini" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "Université Gustave Eiffel" ] .
+
+<https://orcid.org/0000-0003-3041-1436> a foaf:Person ;
+    foaf:name "Philipp Dechent" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "Toshiba Europe GmbH" ] .
+
+<https://orcid.org/0000-0002-5900-1409> a foaf:Person ;
+    foaf:name "Sara Luciani" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "Toshiba Europe GmbH" ] .
+
+<https://orcid.org/0000-0003-4447-9319> a foaf:Person ;
+    foaf:name "Shiyun Liu" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "University of Leeds" ] .
+
+<https://orcid.org/0000-0002-8758-6109> a foaf:Person ;
+    foaf:name "Simon Clark" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "SINTEF AS" ] .
+
+<https://orcid.org/0000-0001-8834-9458> a foaf:Person ;
+    foaf:name "Paul Gasper" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "National Lab of the Rockies" ] .
+
+<https://orcid.org/0000-0002-4993-2672> a foaf:Person ;
+    foaf:name "Gonçalo dos Reis" ;
+    schema:affiliation [ a foaf:Organization ; foaf:name "University of Edinburgh" ] .
 
 bdcv:DatasetKind a skos:ConceptScheme ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;

@@ -535,16 +535,16 @@ def test_the_battery_data_commons_release_1_0_1_names_its_creators(tmp_path: Pat
     out = tmp_path / "out"
     assert site.build(out) == []
     page = (out / "def" / "1002" / "1.0.1" / "index.html").read_text(encoding="utf-8")
-    for person in (
-        "Marwan Hassini, Université Gustave Eiffel",
-        "Philipp Dechent, Toshiba Europe GmbH",
-        "Sara Luciani, Toshiba Europe GmbH",
-        "Shiyun Liu, University of Leeds",
-        "Simon Clark, SINTEF AS",
-        "Paul Gasper, National Lab of the Rockies",
-        "Gonçalo dos Reis, University of Edinburgh",
+    for orcid, person, affiliation in (
+        ("0000-0003-4713-5220", "Marwan Hassini", "Université Gustave Eiffel"),
+        ("0000-0003-3041-1436", "Philipp Dechent", "Toshiba Europe GmbH"),
+        ("0000-0002-5900-1409", "Sara Luciani", "Toshiba Europe GmbH"),
+        ("0000-0003-4447-9319", "Shiyun Liu", "University of Leeds"),
+        ("0000-0002-8758-6109", "Simon Clark", "SINTEF AS"),
+        ("0000-0001-8834-9458", "Paul Gasper", "National Lab of the Rockies"),
+        ("0000-0002-4993-2672", "Gonçalo dos Reis", "University of Edinburgh"),
     ):
-        assert f"<li>{person}</li>" in page
+        assert f'<li><a href="https://orcid.org/{orcid}">{person}</a>, {affiliation}</li>' in page
     assert (
         '<tr><th>Previous release</th><td><a href="https://w3id.org/battinfo/def/1002/1.0.0">1.0.0</a></td></tr>'
         in page
