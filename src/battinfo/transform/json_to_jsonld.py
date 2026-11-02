@@ -955,9 +955,14 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "current": "ElectricCurrent",
     "current_density": "ElectricCurrentDensity",
     "temperature": "CelsiusTemperature",
+    # The class the records context already gives the ambient_temperature key.
+    "ambient_temperature": "AmbientCelsiusTemperature",
     "lower_voltage_limit": "LowerVoltageLimit",
     "upper_voltage_limit": "UpperVoltageLimit",
     "voltage": "Voltage",
+    "state_of_charge": "StateOfCharge",
+    "initial_state_of_charge": "StateOfCharge",
+    "applied_pressure": "Pressure",
 }
 
 # Recognized reference-electrode couples: notation -> electrochemistry classes.
