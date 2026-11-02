@@ -236,6 +236,14 @@ def test_a_generated_test_title_keeps_the_protocol_and_cell_label() -> None:
     assert _fidelity(doc, records) == []
 
 
+def test_a_given_name_is_kept_as_the_record_writes_it() -> None:
+    records = _record_sets()
+    records["test"][0]["test"]["name"] = "Demo cell 7  cycling 25 degC run"
+    doc = _graph(records)
+    assert _nodes(doc)[TEST_RUN]["schema:name"] == "Demo cell 7  cycling 25 degC run"
+    assert _fidelity(doc, records) == []
+
+
 def test_conformance_is_unchanged(graph: dict) -> None:
     nodes = _nodes(graph)
     run, ok = nodes[TEST_RUN], nodes[TEST_OK]
@@ -377,6 +385,14 @@ def test_fidelity_check_reports_dropped_fields(graph: dict) -> None:
     assert by_field["name"].endswith("carries another value for it.")
     assert by_field["status"].endswith("carries nothing for it.")
     assert TEST_RUN in by_field["status"]
+
+
+def test_fidelity_check_reports_a_reference_missing_from_a_shared_term(graph: dict) -> None:
+    # prov:used holds the cell as well, so the protocol must be one of its entries.
+    lossy = copy.deepcopy(graph)
+    run = _nodes(lossy)[TEST_RUN]
+    run["prov:used"] = [ref for ref in run["prov:used"] if ref["@id"] != PROTOCOL]
+    assert _fidelity(lossy, _record_sets()) == [("test", "protocol_id")]
 
 
 def test_fidelity_check_reports_fields_the_graph_has_no_term_for(graph: dict) -> None:

@@ -9104,15 +9104,15 @@ class AuthoringWorkspace:
                         # is labelled by its protocol and cell, so agents and
                         # consumers see more than an opaque IRI.
                         _cell_nm = _cell_name(cell_id)
-                        _label = (
-                            given_test_name(
-                                test.get("name"),
-                                kind=test.get("kind"),
-                                protocol_name=protocol,
-                                cell_labels=_test_cell_labels(cell_id, _cell_nm, instances.get(cell_id)),
-                            )
-                            or ""
+                        _given = given_test_name(
+                            test.get("name"),
+                            kind=test.get("kind"),
+                            protocol_name=protocol,
+                            cell_labels=_test_cell_labels(cell_id, _cell_nm, instances.get(cell_id)),
                         )
+                        # The name as the record writes it: given_test_name only
+                        # decides, its normalised text is not the record's name.
+                        _label = str(test["name"]).strip() if _given is not None else ""
                         if not _label:
                             _label = (protocol or test.get("kind", "")).strip()
                             if _label and _cell_nm:

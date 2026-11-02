@@ -524,7 +524,7 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
 # Fields are named by their path in the record: "test.name" is in the record's
 # body, "notes" at its top level. Each maps to the graph terms any one of which
 # carries it; an empty tuple marks a field the deposit graph has no term for
-# yet, reported whenever a record fills it. tests/test_record_fidelity.py fails
+# yet, reported whenever a record fills it. tests/test_deposit_record_fidelity.py fails
 # when a schema field is in neither table.
 RECORD_FIELD_TERMS: dict[str, dict[str, tuple[str, ...]]] = {
     "test": {
@@ -644,6 +644,13 @@ _FIDELITY_BODY_KEYS = {"test": "test", "cell-instance": "cell_instance", "datase
 # Fields copied verbatim into one term: the node must carry the record's value,
 # not merely some value (a test node used to carry a label built from its
 # protocol and cell instead of the test's name).
+# Fields naming another record whose term also holds other references (a
+# test's prov:used holds its cell as well): the term must hold this one.
+_FIDELITY_REFERENCE_TERMS = {
+    "test.channel_id": "prov:used",
+    "test.protocol_id": "prov:used",
+}
+
 _FIDELITY_VALUE_TERMS = {
     "test.name": "schema:name",
     "test.description": "schema:description",
@@ -726,8 +733,13 @@ def record_fidelity_report(
                     continue
                 terms = table[field]
                 value_term = _FIDELITY_VALUE_TERMS.get(field)
+                reference_term = _FIDELITY_REFERENCE_TERMS.get(field)
                 if value_term is not None and isinstance(value, str):
                     carried = str(node.get(value_term) or "").strip() == value.strip()
+                elif reference_term is not None:
+                    held = node.get(reference_term)
+                    held = held if isinstance(held, list) else [held]
+                    carried = any(isinstance(ref, dict) and ref.get("@id") == value for ref in held)
                 else:
                     carried = any(_populated(node.get(term)) for term in terms)
                 if carried:
