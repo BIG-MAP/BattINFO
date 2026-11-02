@@ -153,7 +153,7 @@ validation warns `semantic.property_unmapped`.
 | `specific_heat_capacity` | `J/(kg.K)` | [SpecificHeatCapacity](https://w3id.org/emmo#EMMO_b4f4ed28_d24c_4a00_9583_62ab839abeca) |
 | `thermal_conductivity` | `W/(m.K)` | [ThermalConductivity](https://w3id.org/emmo#EMMO_8dd40ec6_2c5a_43f3_bf64_cadcd447a1c1) |
 
-## Units (76)
+## Units (77)
 
 Every percent spelling (`%`, `percent`, `pct`, `wt%`, `wt.%`, `vol%`,
 `vol.%`, `v/v%`) is the unit PercentUnit. A spelling that states a basis
@@ -228,6 +228,7 @@ Validation and the JSON-LD export read the usual alternative spellings as the li
 | `mW` | [MilliWatt](https://w3id.org/emmo#MilliWatt) |
 | `mΩ` | [MilliOhm](https://w3id.org/emmo#MilliOhm) |
 | `nm` | [NanoMetre](https://w3id.org/emmo#NanoMetre) |
+| `Pa` | [Pascal](https://w3id.org/emmo#Pascal) |
 | `s` | [Second](https://w3id.org/emmo#Second) |
 | `S/cm` | [SiemensPerCentiMetre](https://w3id.org/emmo#SiemensPerCentiMetre) |
 | `S/m` | [SiemensPerMetre](https://w3id.org/emmo#SiemensPerMetre) |

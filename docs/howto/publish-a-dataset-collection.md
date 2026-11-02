@@ -115,7 +115,7 @@ for issue in report.issues:
 assert not report.issues
 ```
 
-A clean run prints `Gold-standard: PASS (no validation issues)`. The checks that matter for a collection:
+A clean run prints `Gold-standard: PASS (no validation issues)`. Errors make `ws.zenodo()` refuse the deposit; warnings do not. The preview also compares each test, cell and dataset node with the record it came from and warns, as `publication.record_field_not_emitted`, about a field the record fills and the node does not carry; the count is printed next to the node count. `battinfo.validate.record_fidelity_report(graph, record_sets)` runs that comparison on its own. The checks that matter for a collection:
 
 - every member needs a non-empty `schema:about` and at least one distribution; the collection is exempt from both;
 - a member's `dcat:inSeries` must point at a node typed `dcat:DatasetSeries` when that node is in the graph (`publication.series_target_not_series` otherwise);

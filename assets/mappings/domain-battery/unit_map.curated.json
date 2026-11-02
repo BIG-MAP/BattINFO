@@ -1,5 +1,5 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.1",
   "status": "review",
   "notes": [
     "Curated unit mappings promoted from decisions in interactive review.",
@@ -13,7 +13,8 @@
     "0.5.2: added the SI units BPX states its parameters in: m2, m3, mol/m3, m2/s, J/mol, V/K, S/m, 1/m, mol.m-2.s-1, J/(kg.K), W/(m.K) and W/(m2.K). IRIs checked in EMMO 1.0.2 disciplines/units/coherentsiunits.ttl (SquareMetre, CubicMetre, MolePerCubicMetre, SquareMetrePerSecond, JoulePerMole, VoltPerKelvin, SiemensPerMetre, PerMetre, MolePerSquareMetrePerSecond, JoulePerKilogramKelvin, WattPerMetreKelvin, WattPerSquareMetreKelvin), all present in the bundled domain-battery context.",
     "0.5.3: added mAh/g and Ah/kg for specific capacities, mAh/cm2 for areal capacities, S/cm for conductivities, and kPa and MPa for pressures, which the export had kept as text (schema:unitText) only. The IRIs (MilliAmpereHourPerGram, AmpereHourPerKilogram, MilliAmpereHourPerSquareCentiMetre, SiemensPerCentiMetre, KiloPascal, MegaPascal) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context.",
     "0.5.4: added W/Wh for a power-to-energy ratio, kW and mW for powers, mm2 for areas, mm3 for volumes and day for a calendar life: units validation accepts on cell-spec properties, which the export had kept as text (schema:unitText) only. The IRIs (electrochemistry:WattPerWattHour, KiloWatt, MilliWatt, SquareMilliMetre, CubicMilliMetre, Day) are measurement units of the pinned EMMO closure and terms of the bundled domain-battery context.",
-    "0.6.0: % and vol% name PercentUnit (domain-electrochemistry 0.39.0), the closure's only percent unit. They named WeightPercent and VolumePercent, which are PercentQuantity classes, quantities rather than units. The basis a spelling states is not a unit: the emitter adds WeightPercent (wt%, wt.%) or VolumePercent (vol%, vol.%, v/v%) as an extra class of the quantity, and on porosity, mass_fraction and volume_fraction rescales every percent spelling to [0, 1] with UnitOne. W/L moves from the QUDT IRI W-PER-L to emmo:WattPerLitre."
+    "0.6.0: % and vol% name PercentUnit (domain-electrochemistry 0.39.0), the closure's only percent unit. They named WeightPercent and VolumePercent, which are PercentQuantity classes, quantities rather than units. The basis a spelling states is not a unit: the emitter adds WeightPercent (wt%, wt.%) or VolumePercent (vol%, vol.%, v/v%) as an extra class of the quantity, and on porosity, mass_fraction and volume_fraction rescales every percent spelling to [0, 1] with UnitOne. W/L moves from the QUDT IRI W-PER-L to emmo:WattPerLitre.",
+    "0.6.1: added Pa for pressures, so a test condition such as applied_pressure in Pa emits the unit instead of unit text. The IRI (Pascal) is a measurement unit of the pinned EMMO closure and a term of the bundled domain-battery context."
   ],
   "mappings": [
     {
@@ -624,6 +625,15 @@
       "unit_qname": "emmo:SiemensPerCentiMetre",
       "unit_pref_label": "SiemensPerCentiMetre",
       "unit_label": "S/cm",
+      "confidence": 1.0
+    },
+    {
+      "symbol": "Pa",
+      "status": "curated",
+      "unit_iri": "https://w3id.org/emmo#Pascal",
+      "unit_qname": "emmo:Pascal",
+      "unit_pref_label": "Pascal",
+      "unit_label": "Pa",
       "confidence": 1.0
     },
     {

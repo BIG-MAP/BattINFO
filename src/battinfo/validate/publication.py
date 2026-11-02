@@ -513,6 +513,252 @@ def _shape_issues(data: dict[str, Any], policy: ValidationPolicy) -> ValidationR
     return ValidationReport(issues=tuple(issues), policy=policy)
 
 
+# ── Record fidelity ───────────────────────────────────────────────────────
+# The deposit graph builds the nodes of tests, cells and datasets field by field
+# from their records (ws.AuthoringWorkspace._assemble_zenodo_jsonld). The check
+# below compares each node with its record, so a field the builder drops is
+# reported instead of passing unseen. Cell specs, test protocols and the
+# standalone kinds are built by the record emitters themselves and are not
+# compared here.
+#
+# Fields are named by their path in the record: "test.name" is in the record's
+# body, "notes" at its top level. Each maps to the graph terms any one of which
+# carries it; an empty tuple marks a field the deposit graph has no term for
+# yet, reported whenever a record fills it. tests/test_deposit_record_fidelity.py fails
+# when a schema field is in neither table.
+RECORD_FIELD_TERMS: dict[str, dict[str, tuple[str, ...]]] = {
+    "test": {
+        "test.cell_id": ("hasTestObject",),
+        "test.channel_id": ("prov:used",),
+        "test.conditions": ("hasMeasurementParameter", "schema:additionalProperty"),
+        "test.conformance": ("dqv:hasQualityAnnotation",),
+        "test.dataset_ids": ("hasOutput",),
+        "test.description": ("schema:description",),
+        "test.ended_at": ("prov:endedAtTime",),
+        "test.equipment_id": ("hasTestEquipment",),
+        "test.instrument_name": ("hasTestEquipment",),
+        "test.kind": ("schema:additionalType",),
+        "test.name": ("schema:name",),
+        "test.protocol_id": ("prov:used",),
+        "test.protocol_name": ("schema:measurementTechnique",),
+        "test.protocol_url": (),
+        "test.started_at": ("prov:startedAtTime",),
+        "test.status": ("schema:actionStatus",),
+        "artifacts": ("dcat:distribution",),
+        "notes": ("schema:comment",),
+    },
+    "cell-instance": {
+        "cell_instance.batch_id": ("schema:identifier",),
+        "cell_instance.battery_status": (),
+        "cell_instance.cell_spec_id": ("hasDescription",),
+        "cell_instance.conformance": ("dqv:hasQualityAnnotation",),
+        "cell_instance.counter_electrode_id": ("hasCounterElectrode",),
+        "cell_instance.dpp_status": (),
+        "cell_instance.expires_at": ("schema:expires",),
+        "cell_instance.grade": ("schema:quality",),
+        "cell_instance.manufactured_at": ("schema:productionDate",),
+        "cell_instance.name": ("schema:name",),
+        "cell_instance.serial_number": ("schema:serialNumber",),
+        "cell_instance.service_start_date": (),
+        "cell_instance.supersedes": (),
+        "cell_instance.working_electrode_id": ("hasWorkingElectrode",),
+        "measured": ("hasProperty",),
+        "notes": ("schema:comment",),
+    },
+    "dataset": {
+        "dataset.about": ("schema:about",),
+        "dataset.access_url": ("schema:url",),
+        "dataset.citations": ("schema:citation",),
+        "dataset.conditions_of_access": (),
+        "dataset.created_at": ("schema:dateCreated",),
+        "dataset.creators": ("schema:creator",),
+        "dataset.description": ("schema:description",),
+        "dataset.distributions": ("dcat:distribution",),
+        "dataset.funders": (),
+        "dataset.in_language": (),
+        "dataset.included_in_data_catalog": (),
+        "dataset.is_accessible_for_free": (),
+        "dataset.is_based_on": ("schema:isBasedOn",),
+        "dataset.keywords": ("schema:keywords",),
+        "dataset.license": ("schema:license",),
+        "dataset.main_entity": (),
+        "dataset.measurement_methods": ("schema:measurementMethod",),
+        "dataset.measurement_techniques": ("schema:measurementTechnique",),
+        "dataset.modified_at": ("schema:dateModified",),
+        "dataset.name": ("schema:name",),
+        "dataset.publisher": ("dcterms:publisher",),
+        "dataset.same_as": ("schema:sameAs",),
+        "dataset.series_id": ("dcat:inSeries",),
+        "dataset.spatial_coverage": ("schema:spatialCoverage",),
+        "dataset.temporal_coverage": ("schema:temporalCoverage",),
+        "dataset.variable_measured": ("schema:variableMeasured",),
+        "dataset.version": ("schema:version",),
+        "funding": ("schema:funding",),
+        "notes": ("schema:comment",),
+    },
+}
+
+# Fields the deposit graph leaves out of a node on purpose, with the reason.
+_LOCAL_NAMES = "a local name or alias of the record; the node is named by its IRI"
+_CATALOG_AGENTS = "the deposit credits its creators and contributors on the catalog node"
+_AUTHORING = "authoring provenance (tool version, retrieval time, local source paths)"
+RECORD_FIELDS_NOT_EMITTED: dict[str, dict[str, str]] = {
+    "test": {
+        "test.id": "the node's @id",
+        "test.short_id": _LOCAL_NAMES,
+        "test.handle": _LOCAL_NAMES,
+        "test.identifier": _LOCAL_NAMES,
+        "contributor": _CATALOG_AGENTS,
+        "funding": "the deposit's grant, on the catalog and the member datasets",
+        "license": "the deposit's licence, on the catalog and the member datasets",
+        "provenance": _AUTHORING,
+        "schema_version": "the record format version",
+    },
+    "cell-instance": {
+        "cell_instance.id": "the node's @id",
+        "cell_instance.short_id": _LOCAL_NAMES,
+        "cell_instance.handle": _LOCAL_NAMES,
+        "datasets": "each dataset names the cell in its schema:about",
+        "contributor": _CATALOG_AGENTS,
+        "funding": "the deposit's grant, on the catalog and the member datasets",
+        "license": "the deposit's licence, on the catalog and the member datasets",
+        "provenance": _AUTHORING,
+        "schema_version": "the record format version",
+    },
+    "dataset": {
+        "dataset.id": "the node's @id",
+        "dataset.short_id": _LOCAL_NAMES,
+        "dataset.handle": _LOCAL_NAMES,
+        "dataset.identifier": _LOCAL_NAMES,
+        "dataset.additional_type": "decides the node's @type (a collection is a dcat:DatasetSeries)",
+        "dataset.published_at": "a member is not published on its own; the deposit's date is on the catalog",
+        "contributor": _CATALOG_AGENTS,
+        "provenance": _AUTHORING,
+        "schema_version": "the record format version",
+    },
+}
+
+# The record key of each compared kind's body.
+_FIDELITY_BODY_KEYS = {"test": "test", "cell-instance": "cell_instance", "dataset": "dataset"}
+
+# Fields copied verbatim into one term: the node must carry the record's value,
+# not merely some value (a test node used to carry a label built from its
+# protocol and cell instead of the test's name).
+# Fields naming another record whose term also holds other references (a
+# test's prov:used holds its cell as well): the term must hold this one.
+_FIDELITY_REFERENCE_TERMS = {
+    "test.channel_id": "prov:used",
+    "test.protocol_id": "prov:used",
+}
+
+_FIDELITY_VALUE_TERMS = {
+    "test.name": "schema:name",
+    "test.description": "schema:description",
+    "cell_instance.name": "schema:name",
+    "cell_instance.serial_number": "schema:serialNumber",
+    "dataset.name": "schema:name",
+    "dataset.description": "schema:description",
+}
+
+
+def _populated(value: Any) -> bool:
+    return value is not None and value != "" and value != [] and value != {}
+
+
+def _fidelity_applies(field: str, value: Any, body: dict[str, Any], nodes: dict[str, dict[str, Any]]) -> bool:
+    """Whether the graph is expected to carry *field* with this *value*.
+
+    A local ``file:`` access URL is not published (only a web address is),
+    and a test title BattINFO generated from the test's cell and protocol is
+    replaced by a label of the same parts (``entities.given_test_name``).
+    """
+    if field == "dataset.access_url":
+        return isinstance(value, str) and value.startswith(("http://", "https://"))
+    if field == "test.name":
+        from battinfo.entities import given_test_name  # noqa: PLC0415
+
+        cell_id = str(body.get("cell_id") or "")
+        cell = nodes.get(cell_id, {})
+        labels = [cell.get(term) for term in ("schema:name", "schema:serialNumber", "schema:identifier")]
+        labels.append(cell_id.rstrip("/").rsplit("/", 1)[-1])
+        given = given_test_name(
+            value,
+            kind=body.get("kind"),
+            protocol_name=body.get("protocol_name"),
+            cell_labels=[label for label in labels if isinstance(label, str)],
+        )
+        return given is not None
+    return True
+
+
+def record_fidelity_report(
+    data: dict[str, Any],
+    record_sets: dict[str, list[Any]],
+    *,
+    policy: ValidationPolicy | str = DEFAULT_POLICY,
+) -> ValidationReport:
+    """Compare a deposit graph with the records it was built from.
+
+    *data* is the deposit graph (``ws.preview_jsonld()`` writes it) and
+    *record_sets* the records it was built from, by record folder
+    (``"test"``, ``"cell-instance"``, ``"dataset"``, ...). For each test, cell
+    and dataset record, every filled field the node with the record's IRI
+    carries nothing for, or carries another value for, is reported as
+    ``publication.record_field_not_emitted``, naming the record kind, IRI and
+    field. A record with no node is left to the checks that report records
+    left out of the graph.
+
+    The findings are always warnings: they never refuse a deposit. A
+    downloaded deposit has no records next to it, which is why this is not
+    part of :func:`validate_publication_report`.
+    """
+    resolved_policy = get_validation_policy(policy) if isinstance(policy, str) else policy
+    if resolved_policy.publication == "off":
+        return ValidationReport(policy=resolved_policy)
+    nodes = {node["@id"]: node for _path, node in _graph_nodes(data) if isinstance(node.get("@id"), str)}
+    issues: list[ValidationIssue] = []
+    for kind, body_key in _FIDELITY_BODY_KEYS.items():
+        table = RECORD_FIELD_TERMS[kind]
+        for record in record_sets.get(kind) or []:
+            body = record.get(body_key) if isinstance(record, dict) else None
+            if not isinstance(body, dict) or not isinstance(body.get("id"), str):
+                continue
+            node = nodes.get(body["id"])
+            if node is None:
+                continue
+            fields = [(f"{body_key}.{key}", value) for key, value in body.items()]
+            fields += [(key, value) for key, value in record.items() if key != body_key]
+            for field, value in fields:
+                if field not in table or not _populated(value) or not _fidelity_applies(field, value, body, nodes):
+                    continue
+                terms = table[field]
+                value_term = _FIDELITY_VALUE_TERMS.get(field)
+                reference_term = _FIDELITY_REFERENCE_TERMS.get(field)
+                if value_term is not None and isinstance(value, str):
+                    carried = str(node.get(value_term) or "").strip() == value.strip()
+                elif reference_term is not None:
+                    held = node.get(reference_term)
+                    held = held if isinstance(held, list) else [held]
+                    carried = any(isinstance(ref, dict) and ref.get("@id") == value for ref in held)
+                else:
+                    carried = any(_populated(node.get(term)) for term in terms)
+                if carried:
+                    continue
+                short = field.split(".", 1)[1] if field.startswith(f"{body_key}.") else field
+                other = value_term is not None and _populated(node.get(value_term))
+                _append_issue(
+                    issues,
+                    code="publication.record_field_not_emitted",
+                    severity="warning",  # a nudge, never a publish blocker
+                    path=f"{kind}:{body['id']}.{short}",
+                    message=(
+                        f"The {kind} record {body['id']} has {short!r}, but its node in the deposit "
+                        f"carries {'another value' if other else 'nothing'} for it."
+                    ),
+                )
+    return ValidationReport(issues=tuple(issues), policy=resolved_policy)
+
+
 def validate_publication_report(
     data: dict[str, Any],
     *,

@@ -303,6 +303,9 @@ TEST_CONDITION_CLASS: dict[str, str] = {
     "temperature": "ConventionalProperty",
     "ambient_temperature": "ConventionalProperty",
     "room_temperature": "ConventionalProperty",
+    "state_of_charge": "StateOfCharge",
+    "initial_state_of_charge": "StateOfCharge",
+    "applied_pressure": "Pressure",
 }
 # Quantity classes whose @type is generic and so should carry a human rdfs:label.
 TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
@@ -384,6 +387,8 @@ TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
     "ElectricCurrent": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
     "Duration": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
     "NumberOfIterations": "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
+    "StateOfCharge": "electrochemistry:electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
+    "Pressure": "emmo:EMMO_50a44256_9dc5_434b_bad4_74a4d9a29989",
     "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour",
 }
 
@@ -1181,12 +1186,52 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
         node["schema:productionDate"] = ci["manufactured_at"]
     if ci.get("expires_at"):
         node["schema:expires"] = ci["expires_at"]
+    measured = cell_measured_property_nodes(record.get("measured"), context_label=str(ci.get("id") or "cell"))
+    if measured:
+        node["hasProperty"] = measured
     if datasets:
         node["schema:workExample"] = [{"@id": d["id"]} for d in datasets if d.get("id")]
     if prov:
         node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def cell_measured_property_nodes(measured: Any, *, context_label: str = "") -> list[dict]:
+    """``hasProperty`` quantity nodes for a cell's ``measured`` block.
+
+    The block uses the keys of a cell spec's ``properties``, each read as the
+    value measured on this cell, so its nodes take the shape the cell-spec
+    node gives its properties. A quantity that states no ``value_basis`` is
+    a MeasuredProperty rather than the key's declared basis, so its
+    conditions emit as the parameters of the measurement it is the output of.
+    Shared by :func:`cell_instance_to_jsonld` and the deposit graph that
+    ``ws.zenodo()`` builds.
+    """
+    if not isinstance(measured, Mapping) or not measured:
+        return []
+    from battinfo.transform.cell_spec_node import cell_spec_property_nodes  # noqa: PLC0415
+
+    quantities = {
+        key: {**quantity, "value_basis": quantity.get("value_basis") or quantity.get("co_type") or "Measured"}
+        for key, quantity in measured.items()
+        if isinstance(quantity, Mapping)
+    }
+    return cell_spec_property_nodes(quantities, context_label=context_label)
+
+
+def dataset_is_based_on(values: Any) -> list[dict]:
+    """A dataset's ``is_based_on`` IRIs as ``schema:isBasedOn`` references.
+
+    The shape the resolver writes, shared by :func:`dataset_to_jsonld` and the
+    deposit graph that ``ws.zenodo()`` builds. Entries that are not strings
+    are skipped.
+    """
+    if isinstance(values, str):
+        values = [values]
+    if not isinstance(values, list):
+        return []
+    return [{"@id": item} for item in values if isinstance(item, str) and item]
 
 
 def test_to_jsonld(record: dict) -> dict:
@@ -1232,70 +1277,81 @@ def test_to_jsonld(record: dict) -> dict:
         # Skip None / non-string entries so a partial record never emits {"@id": null}
         # (invalid JSON-LD — @id must be a string IRI).
         node["schema:result"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
-    conditions = test.get("conditions")
-    if isinstance(conditions, Mapping) and conditions:
-        # Per-execution conditions are an open snake_case map (temperature,
-        # voltage window, C-rate, ...); values may be scalars, strings, or
-        # {value, unit} quantities. The test IS the measurement activity, so
-        # each condition also emits as a typed hasMeasurementParameter node on
-        # this node — the same shape quantity-level conditions take on their
-        # isOutputOf measurement node, so one query reads both rungs. The
-        # schema:PropertyValue copy stays as the standards-legible layer.
-        # voltage_reference is a datum, not a parameter: it emits as a
-        # PropertyValue whose valueReference carries the class-typed couple
-        # (never hasMetrologicalReference — that slot belongs to units on
-        # Quantity nodes, and a test activity is not a Quantity).
-        from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
-            _MEASUREMENT_PARAMETER_TERMS,
-            _descriptor_quantity_node,
-            _voltage_reference_node,
-            schema_quantity_fields,
-        )
-
-        props: list[dict] = []
-        params: list[dict] = []
-        for name in sorted(conditions):
-            value = conditions[name]
-            if name == "voltage_reference":
-                ref = _voltage_reference_node(value)
-                if ref is not None:
-                    if ref.get("@type") == "schema:PropertyValue":
-                        ref_pv: dict = {**ref, "schema:name": name}
-                    else:
-                        ref_pv = {
-                            "@type": "schema:PropertyValue",
-                            "schema:name": name,
-                            "schema:value": ref.get("skos:prefLabel"),
-                            "schema:valueReference": ref,
-                        }
-                    props.append(ref_pv)
-                    continue
-            pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
-            if isinstance(value, Mapping):
-                pv.update(schema_quantity_fields(value))
-            else:
-                pv["schema:value"] = value
-            props.append(pv)
-            if isinstance(value, Mapping):
-                quantity = dict(value)
-            elif isinstance(value, str):
-                quantity = {"value_text": value}
-            elif isinstance(value, (int, float)) and not isinstance(value, bool):
-                quantity = {"value": value}
-            else:
-                continue
-            pnode = _descriptor_quantity_node(name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name))
-            if pnode is not None:
-                pnode["skos:prefLabel"] = name
-                params.append(pnode)
-        if props:
-            node["schema:additionalProperty"] = props
-        if params:
-            node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
+    node.update(as_run_condition_terms(test.get("conditions")))
     if prov:
         node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def as_run_condition_terms(conditions: Any) -> dict:
+    """The terms a test's as-run ``conditions`` add to its node, or ``{}``.
+
+    Shared by :func:`test_to_jsonld` and the deposit graph that ``ws.zenodo()``
+    builds, so a test reads the same as a record and in a deposit.
+
+    Per-execution conditions are an open snake_case map (temperature, voltage
+    window, C-rate, ...); values may be scalars, strings, or {value, unit}
+    quantities. The test IS the measurement activity, so each condition also
+    emits as a typed hasMeasurementParameter node on the test node — the same
+    shape quantity-level conditions take on their isOutputOf measurement node,
+    so one query reads both rungs. The schema:PropertyValue copy stays as the
+    standards-legible layer. voltage_reference is a datum, not a parameter: it
+    emits as a PropertyValue whose valueReference carries the class-typed
+    couple (never hasMetrologicalReference; that slot belongs to units on
+    Quantity nodes, and a test activity is not a Quantity).
+    """
+    if not isinstance(conditions, Mapping) or not conditions:
+        return {}
+    from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
+        _MEASUREMENT_PARAMETER_TERMS,
+        _descriptor_quantity_node,
+        _voltage_reference_node,
+        schema_quantity_fields,
+    )
+
+    props: list[dict] = []
+    params: list[dict] = []
+    for name in sorted(conditions):
+        value = conditions[name]
+        if name == "voltage_reference":
+            ref = _voltage_reference_node(value)
+            if ref is not None:
+                if ref.get("@type") == "schema:PropertyValue":
+                    ref_pv: dict = {**ref, "schema:name": name}
+                else:
+                    ref_pv = {
+                        "@type": "schema:PropertyValue",
+                        "schema:name": name,
+                        "schema:value": ref.get("skos:prefLabel"),
+                        "schema:valueReference": ref,
+                    }
+                props.append(ref_pv)
+                continue
+        pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
+        if isinstance(value, Mapping):
+            pv.update(schema_quantity_fields(value))
+        else:
+            pv["schema:value"] = value
+        props.append(pv)
+        if isinstance(value, Mapping):
+            quantity = dict(value)
+        elif isinstance(value, str):
+            quantity = {"value_text": value}
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            quantity = {"value": value}
+        else:
+            continue
+        pnode = _descriptor_quantity_node(name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name))
+        if pnode is not None:
+            pnode["skos:prefLabel"] = name
+            params.append(pnode)
+    terms: dict = {}
+    if props:
+        terms["schema:additionalProperty"] = props
+    if params:
+        terms["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
+    return terms
 
 
 def _schema_variable_measured(values: Any) -> list[dict]:
@@ -1433,6 +1489,9 @@ def dataset_to_jsonld(record: dict) -> dict:
     variables = _schema_variable_measured(ds.get("variable_measured"))
     if variables:
         node["schema:variableMeasured"] = variables
+    based_on = dataset_is_based_on(ds.get("is_based_on"))
+    if based_on:
+        node["schema:isBasedOn"] = based_on
     citations = _schema_citations(ds.get("citations"))
     if citations:
         node["schema:citation"] = citations

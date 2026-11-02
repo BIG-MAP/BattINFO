@@ -56,6 +56,9 @@ WAIVERS: dict[str, str] = {
     "web/scripts/check-jsonld-workbench.ts": "CI check exercising the canonical (described-side) example",
     # Vocabulary tables, not graph readers.
     "src/battinfo/electrodes.py": "role -> relation vocabulary table (no graph access)",
+    # Reads instance nodes only: a cell instance is the physical individual, so its
+    # properties and electrode roles sit on the node, with no description to walk.
+    "src/battinfo/validate/publication.py": "record fidelity check reads cell-instance nodes (physical, no description)",
 }
 
 
