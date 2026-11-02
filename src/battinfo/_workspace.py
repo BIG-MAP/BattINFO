@@ -309,6 +309,11 @@ def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     for key in _DERIVED_BACK_LINKS:
         if key in data:
             data[key] = []
+    if isinstance(entity, Dataset) and "published_at" not in data and entity._seed_published_at is not None:
+        # Seed rules are a public contract from 0.8.0 on. The 0.8.0 model gave a dataset
+        # built with created_at and no published_at that created_at as published_at, and
+        # this seed carried it. The model no longer sets it, so the seed keeps the value.
+        data["published_at"] = entity._seed_published_at
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
@@ -2805,8 +2810,9 @@ class Workspace:
         as a cell spec's ``properties``) included. Left out are the record's
         own IRI, the volatile timestamps, the schema and BattINFO versions that
         wrote it, the derived back-links (``dataset_ids``, a cell's
-        ``datasets``) and, for a dataset that has none of its own, the
-        publication time and licence a save fills in.
+        ``datasets``) and, for a dataset that has none of its own, the licence
+        a save fills in and the publication time, which a publish on Zenodo
+        sets on the saved record (and which earlier releases set at save).
         """
         builders: dict[type, Callable[[Any], dict[str, Any]]] = {
             CellSpec: _record_from_cell_spec,

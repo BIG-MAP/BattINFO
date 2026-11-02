@@ -1687,6 +1687,8 @@ def _record_from_dataset(
     # Save-time canonicalization: dates default to now and convert to Unix; provenance
     # gets the schema-required source_type category default and a retrieval timestamp. The
     # model's to_record() handles the schema.org field mapping and distribution assembly.
+    # published_at gets no default, since a dataset is not published by being saved.
+    # ws.zenodo() sets it when a deposit is published.
     # A dataset that states when it was published but not when it was created (a new
     # version of a published record, read back with from_record) existed by then, so its
     # created_at defaults to published_at, not to now, which would fall after it. This
@@ -1701,7 +1703,7 @@ def _record_from_dataset(
     finalized.modified_at = _resolved_time(
         "modified_at", finalized.modified_at, _now_unix() if created_from_published else created
     )
-    finalized.published_at = published if published is not None else created
+    finalized.published_at = published
     if finalized.source.type is None:
         finalized.source.type = "other"
     finalized.source.retrieved_at = _resolved_retrieved_at(finalized.source.retrieved_at)
@@ -2242,8 +2244,7 @@ def save_dataset(
       the number without one).
       The comparison ignores the record's own ``id``, ``uid`` and the ``created_at``,
       ``modified_at``, ``retrieved_at``, ``generated_at`` and ``imported_at``
-      timestamps, but not ``published_at``: a ``Dataset`` saved without one
-      gets the save time, so its re-save compares as changed.
+      timestamps.
     - ``"exists"`` (``mode="create_only"`` with
       ``duplicate_policy="return_existing"``): nothing was written; ``path``
       is the saved record and there is no ``content_changed`` key.

@@ -1059,6 +1059,41 @@ def _colliding_pairs(root: Path, base: str | None) -> dict[str, str]:
     for capacity, spec in specs.items():
         rows[f"cell-spec | engine | colliding pair, {capacity} Ah"] = str(spec.id)
 
+    # Two datasets with one identity (cell, URL, name), told apart by their content.
+    # The model no longer defaults published_at to created_at, but a dataset built with
+    # created_at seeds as it did when it did; one that states published_at keeps it.
+    for case, dates in {
+        "created_at in Unix seconds": {"created_at": 1700000000},
+        "created_at as ISO text": {"created_at": "2023-11-14T22:13:20Z"},
+        "no created_at": {},
+    }.items():
+        engine = _engine(root / "datasets" / case.replace(" ", "-"), base)
+        cell = engine.cell(engine.cell_spec(**SPEC), serial_number="C01")
+        pair = [
+            engine.dataset(cell, title="C01 run", access_url=REMOTE_URL, description=text, **dates)
+            for text in ("a", "b")
+        ]
+        engine.render()
+        rows[f"dataset | engine | colliding pair, {case}"] = ", ".join(sorted(str(d.id) for d in pair))
+    engine = _engine(root / "datasets" / "published_at-stated", base)
+    cell = engine.cell(engine.cell_spec(**SPEC), serial_number="C01")
+    engine.render()
+    pair = [
+        Dataset(
+            name="C01 run",
+            access_url=REMOTE_URL,
+            description=text,
+            cell_instance_id=cell.id,
+            created_at=1700000000,
+            published_at=1750000000,
+        )
+        for text in ("a", "b")
+    ]
+    for dataset in pair:
+        engine.add(dataset)
+    engine.render()
+    rows["dataset | engine | colliding pair, published_at stated"] = ", ".join(sorted(str(d.id) for d in pair))
+
     ws = _workspace(root / "ws", base)
     for name in ("a.csv", "b.csv"):
         path = root / "ws" / "data" / name
