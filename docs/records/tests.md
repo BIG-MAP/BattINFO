@@ -406,6 +406,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasMeasurementParameter": {
     "@type": [
+      "AmbientCelsiusTemperature",
       "ConventionalProperty"
     ],
     "skos:prefLabel": "ambient_temperature",
@@ -2954,15 +2955,15 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
-    }
-  ],
-  "schema:additionalProperty": [
+    },
     {
-      "@type": "schema:PropertyValue",
-      "schema:name": "state_of_charge",
-      "schema:propertyID": "conditions",
-      "schema:value": 50.0,
-      "schema:unitText": "%"
+      "@type": "StateOfCharge",
+      "hasNumericalPart": {
+        "hasNumberValue": 50.0
+      },
+      "hasMeasurementUnit": {
+        "@id": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+      }
     }
   ],
   "dcterms:source": {
@@ -3155,15 +3156,15 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
-    }
-  ],
-  "schema:additionalProperty": [
+    },
     {
-      "@type": "schema:PropertyValue",
-      "schema:name": "initial_state_of_charge",
-      "schema:propertyID": "conditions",
-      "schema:value": 100.0,
-      "schema:unitText": "%"
+      "@type": "StateOfCharge",
+      "hasNumericalPart": {
+        "hasNumberValue": 100.0
+      },
+      "hasMeasurementUnit": {
+        "@id": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+      }
     }
   ],
   "dcterms:source": {
@@ -3383,15 +3384,15 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
-    }
-  ],
-  "schema:additionalProperty": [
+    },
     {
-      "@type": "schema:PropertyValue",
-      "schema:name": "state_of_charge",
-      "schema:propertyID": "conditions",
-      "schema:value": 50.0,
-      "schema:unitText": "%"
+      "@type": "StateOfCharge",
+      "hasNumericalPart": {
+        "hasNumberValue": 50.0
+      },
+      "hasMeasurementUnit": {
+        "@id": "electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb"
+      }
     }
   ],
   "dcterms:source": {
