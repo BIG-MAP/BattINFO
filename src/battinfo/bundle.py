@@ -3299,7 +3299,7 @@ class Dataset(BundleJsonModel):
     published_at: int | str | None = Field(
         default=None,
         validation_alias=AliasChoices("published_at", "datePublished"),
-        description="Publication time; empty until the dataset is published.",
+        description="Publication time; empty until the dataset is published (ws.zenodo() sets it on publish).",
     )
     temporal_coverage: str | None = Field(
         default=None,

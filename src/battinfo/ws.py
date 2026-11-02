@@ -83,6 +83,7 @@ from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import (
     _now_iso,
+    _now_unix,
     is_dataset_series,
     is_local_location,
     is_real_number,
@@ -847,6 +848,30 @@ def _deposit_record_iris(record_sets: Mapping[str, list[dict]], graph: Mapping[s
         entity_id_from_doc(record) for records in record_sets.values() for record in records if isinstance(record, dict)
     }
     return sorted(iri for iri in iris if iri and iri in node_ids)
+
+
+def _zenodo_publication_time(deposit: object, called_at: int) -> int:
+    """The publication time Zenodo reports in *deposit*, its answer to the publish, in Unix seconds.
+
+    Zenodo reports a publication date (``metadata.publication_date``), not a
+    time. A date before the day of the publish call (UTC), one the deposit's
+    metadata gave, counts from midnight UTC. The day of the call, a later day
+    (Zenodo's calendar may be ahead of UTC) or no date gives *called_at*, so
+    the time is never later than the publish.
+    """
+    import datetime as _dt  # noqa: PLC0415
+
+    metadata = deposit.get("metadata") if isinstance(deposit, dict) else None
+    reported = metadata.get("publication_date") if isinstance(metadata, dict) else None
+    if not isinstance(reported, str):
+        return called_at
+    try:
+        day = _dt.date.fromisoformat(reported.strip())
+    except ValueError:
+        return called_at
+    if day >= _dt.datetime.fromtimestamp(called_at, tz=_dt.timezone.utc).date():
+        return called_at
+    return int(_dt.datetime(day.year, day.month, day.day, tzinfo=_dt.timezone.utc).timestamp())
 
 
 def _with_citation_doi(record: dict, doi: str | None) -> dict:
@@ -7091,6 +7116,46 @@ class AuthoringWorkspace:
             if isinstance(provenance, dict) and isinstance(provenance.get("source_url"), str):
                 dataset.source.url = provenance["source_url"]
 
+    def _date_published_datasets(self, held: Iterable[str], reported: int, called_at: int) -> int:
+        """Give each dataset record of *held* that states no ``published_at`` its publication time.
+
+        Runs once Zenodo has published the deposit that holds the records
+        (*held*, their IRIs). The time is *reported*, the one Zenodo gave
+        (:func:`_zenodo_publication_time`), or *called_at*, the time of the
+        publish call, for a dataset created after *reported*, as its record or
+        the dataset in memory says: that dataset was published by this call,
+        and strict validation refuses a ``published_at`` before
+        ``created_at``. A record that already states when it was published
+        keeps that time, so the datasets of a new version keep the date they
+        were first published. The datasets in memory get the same time, so a
+        later :meth:`save` keeps it. Returns the number of records dated.
+        """
+        ds_dir = self._ws.source_root / "dataset"
+        held_ids = set(held)
+        if not held_ids or not ds_dir.is_dir():
+            return 0
+        # A session that added its datasets again holds its own creation times.
+        created_in_memory = {dataset.id: dataset.created_at for dataset in self._ws.datasets if dataset.id}
+        dated: dict[str, int] = {}
+        for record_path in sorted(ds_dir.glob("*.json")):
+            # Read as the deposit read it, and leave alone what is not a dataset
+            # record: this runs after a publish, and must not fail.
+            raw = _read_json(record_path)
+            ds = raw.get("dataset") if isinstance(raw, dict) else None
+            if not isinstance(ds, dict) or ds.get("id") not in held_ids or ds.get("published_at") is not None:
+                continue
+            created = (ds.get("created_at"), created_in_memory.get(ds["id"]))
+            later = any(isinstance(value, (int, float)) and value > reported for value in created)
+            when = called_at if later else reported
+            ds["published_at"] = when
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
+            self._session_paths.add(record_path)
+            dated[ds["id"]] = when
+        for dataset in self._ws.datasets:
+            if dataset.id in dated and dataset.published_at is None:
+                dataset.published_at = dated[dataset.id]
+        return len(dated)
+
     def upload(
         self,
         bucket: str | None = None,
@@ -7432,7 +7497,12 @@ class AuthoringWorkspace:
         :meth:`save` keeps the URLs. Each distribution then states the sha256 of
         the file the deposit holds (and its size, when it gives one), as the
         deposit graph does, so a file that changed since it was added is
-        described as it is now.
+        described as it is now. A publish also gives each dataset record the
+        deposit holds its ``published_at``: the time of the publish call, or
+        midnight UTC of the publication date Zenodo reports when that is an
+        earlier day and the record was created by then. A record that already
+        states one keeps it, so the datasets of a new version keep the date
+        they were first published. A draft and a sandbox deposit date nothing.
 
         A record pointed at its deposited copy keeps its data in later deposits.
         ``.battinfo/deposit-files.json`` records the local file behind each
@@ -7957,10 +8027,13 @@ class AuthoringWorkspace:
         # ── 11. and 12. Publish, and record the deposit as published ───────────
         doi = prereserved_doi
         published = False
+        publication_times: tuple[int, int] | None = None
 
         if publish:
             self._assert_publishable(jsonld)  # fail closed BEFORE minting an irreversible DOI (R-7)
             pub = client.publish_deposit(deposit_id)
+            called_at = _now_unix()
+            publication_times = (_zenodo_publication_time(pub, called_at), called_at)
             doi = pub.get("doi", prereserved_doi)
             published = True
             # Published, the record is the version the next one is made from.
@@ -7981,13 +8054,18 @@ class AuthoringWorkspace:
         # draft moves only the records that still name a local file: a record
         # on the copy a published version holds has a working URL, and moves
         # when the new version is published. A sandbox deposit is a dry run,
-        # and its URLs must never reach a record.
+        # and its URLs must never reach a record. Once published, the dataset
+        # records the deposit holds get their publication time, a draft none.
         if sandbox:
             print("  The dataset records are left as they are: a sandbox deposit is a dry run.")
         else:
             patched = self._apply_zenodo_file_urls(record_url, plan, local_only=not publish)
             if patched:
                 print(f"  Dataset records updated with Zenodo file URLs: {patched}")
+            if publication_times is not None:
+                dated = self._date_published_datasets(held_records, *publication_times)
+                if dated:
+                    print(f"  Dataset records given their publication time: {dated}")
 
         return ZenodoResult(
             record_id=str(zenodo_record_id),

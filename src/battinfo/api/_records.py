@@ -1688,6 +1688,7 @@ def _record_from_dataset(
     # gets the schema-required source_type category default and a retrieval timestamp. The
     # model's to_record() handles the schema.org field mapping and distribution assembly.
     # published_at gets no default, since a dataset is not published by being saved.
+    # ws.zenodo() sets it when a deposit is published.
     # A dataset that states when it was published but not when it was created (a new
     # version of a published record, read back with from_record) existed by then, so its
     # created_at defaults to published_at, not to now, which would fall after it. This

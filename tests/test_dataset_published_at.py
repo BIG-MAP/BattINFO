@@ -3,11 +3,13 @@
 Saving a dataset gave it ``published_at`` equal to its ``created_at``, so every
 saved record, and its JSON-LD (``schema:datePublished``, ``dcterms:issued``),
 said it was published when it was saved. A save now leaves ``published_at``
-empty unless the dataset states one, and a stated one is kept.
+empty unless the dataset states one, and a stated one is kept. ``ws.zenodo()``
+sets it when it publishes a deposit (tests/test_zenodo_deposit_versions.py).
 """
 
 from __future__ import annotations
 
+import calendar
 import copy
 import json
 from collections.abc import Iterator
@@ -18,7 +20,7 @@ import pytest
 import battinfo
 from battinfo.api._resolver import _resolver_jsonld
 from battinfo.jsonld import dataset_to_jsonld
-from battinfo.ws import AuthoringWorkspace
+from battinfo.ws import AuthoringWorkspace, _zenodo_publication_time
 
 CELL = "https://w3id.org/battinfo/cell/epb7-1s8v-p342-469z"
 FILE_URL = "https://example.org/data/run-01.bdf.parquet"
@@ -118,3 +120,26 @@ def test_a_stated_publication_time_survives_a_resave(tmp_path: Path) -> None:
 def test_a_stated_iso_publication_time_is_kept_as_unix_seconds(tmp_path: Path) -> None:
     record = _record(_save(_dataset(published_at="2025-06-16T00:00:00Z"), tmp_path))
     assert record["dataset"]["published_at"] == PUBLISHED
+
+
+# ── The time a Zenodo publish reports ─────────────────────────────────────────
+
+CALLED_AT = calendar.timegm((2026, 11, 2, 14, 30, 5))  # 2026-11-02T14:30:05Z
+
+
+@pytest.mark.parametrize(
+    ("answer", "expected"),
+    [
+        ({"doi": "10.5281/zenodo.7"}, CALLED_AT),
+        ({"metadata": {"publication_date": "2026-11-02"}}, CALLED_AT),
+        # Zenodo's calendar may already be on the next day.
+        ({"metadata": {"publication_date": "2026-11-03"}}, CALLED_AT),
+        ({"metadata": {"publication_date": "2025-06-16"}}, PUBLISHED),
+        ({"metadata": {"publication_date": "2025"}}, CALLED_AT),
+        ({"metadata": {"publication_date": None}}, CALLED_AT),
+        (None, CALLED_AT),
+    ],
+    ids=["no date", "the day of the call", "a later day", "an earlier day", "not a date", "null", "no answer"],
+)
+def test_the_publication_time_of_a_zenodo_answer(answer: object, expected: int) -> None:
+    assert _zenodo_publication_time(answer, CALLED_AT) == expected

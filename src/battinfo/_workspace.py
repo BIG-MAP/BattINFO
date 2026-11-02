@@ -2806,8 +2806,8 @@ class Workspace:
         own IRI, the volatile timestamps, the schema and BattINFO versions that
         wrote it, the derived back-links (``dataset_ids``, a cell's
         ``datasets``) and, for a dataset that has none of its own, the licence
-        a save fills in and the publication time, which earlier releases set
-        at save.
+        a save fills in and the publication time, which a publish on Zenodo
+        sets on the saved record (and which earlier releases set at save).
         """
         builders: dict[type, Callable[[Any], dict[str, Any]]] = {
             CellSpec: _record_from_cell_spec,
