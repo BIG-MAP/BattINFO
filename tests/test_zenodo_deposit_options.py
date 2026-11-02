@@ -142,12 +142,12 @@ def test_without_the_options_the_form_is_what_it_was(tmp_path: Path) -> None:
     ("options", "fields"),
     [
         (
-            {"access_right": "embargoed", "embargo_date": dt.date(2027, 1, 31)},
-            {"access_right": "embargoed", "embargo_date": "2027-01-31"},
+            {"access_right": "embargoed", "embargo_date": dt.date(2099, 1, 31)},
+            {"access_right": "embargoed", "embargo_date": "2099-01-31"},
         ),
         (
-            {"access_right": "embargoed", "embargo_date": " 2027-01-31 "},
-            {"access_right": "embargoed", "embargo_date": "2027-01-31"},
+            {"access_right": "embargoed", "embargo_date": " 2099-01-31 "},
+            {"access_right": "embargoed", "embargo_date": "2099-01-31"},
         ),
         (
             {"access_right": "restricted", "access_conditions": "On request to the data steward."},
@@ -190,12 +190,13 @@ def test_version_publication_date_and_related_identifiers_reach_the_form(
         ({"access_right": "public"}, "access_right='public' is not one of"),
         ({"access_right": "embargoed"}, "access_right='embargoed' needs embargo_date="),
         ({"access_right": "embargoed", "embargo_date": "31.01.2027"}, "embargo_date='31.01.2027' is not a date"),
-        ({"embargo_date": "2027-01-31"}, "embargo_date= applies to access_right='embargoed', not 'open'"),
+        ({"embargo_date": "2099-01-31"}, "embargo_date= applies to access_right='embargoed', not 'open'"),
         ({"access_right": "restricted"}, "access_right='restricted' needs access_conditions="),
         ({"access_right": "closed", "access_conditions": "x"}, "access_conditions= applies to access_right="),
         ({"publication_date": "Nov 2026"}, "publication_date='Nov 2026' is not a date"),
         ({"related_identifiers": [{"identifier": "10.1234/example"}]}, "related identifier 1 needs an identifier"),
         ({"related_identifiers": ["10.1234/example"]}, "related identifier 1 needs an identifier"),
+        ({"access_right": "embargoed", "embargo_date": "2020-01-31"}, "is not in the future"),
     ],
 )
 def test_a_form_option_zenodo_cannot_take_is_refused(tmp_path: Path, options: dict, message: str) -> None:
@@ -227,6 +228,8 @@ def test_auto_keywords_false_sends_the_given_keywords_alone_and_each_once(tmp_pa
     assert "Example Lab" in keywords and "example-lab" not in keywords and keywords[-1] == "cycle life"
     # With nothing to send the form has no keywords.
     assert "keywords" not in _form(ws, auto_keywords=False)
+    # Only separators fold: a keyword that differs in other punctuation is its own.
+    assert _form(ws, extra_keywords=["Li", "Li+", "Na/Na+"], auto_keywords=False)["keywords"] == ["Li", "Li+", "Na/Na+"]
 
 
 # ── The deposit ───────────────────────────────────────────────────────────────
@@ -242,7 +245,7 @@ def test_zenodo_sends_the_options_to_the_form_and_the_graph(tmp_path: Path, zeno
         keywords=["LFP", "lfp"],
         auto_keywords=False,
         access_right="embargoed",
-        embargo_date="2027-01-31",
+        embargo_date="2099-01-31",
         version="1.0.0",
         related_identifiers=related,
         publication_date="2026-11-01",
@@ -250,7 +253,7 @@ def test_zenodo_sends_the_options_to_the_form_and_the_graph(tmp_path: Path, zeno
     )
 
     form = zenodo.metadata
-    assert form["access_right"] == "embargoed" and form["embargo_date"] == "2027-01-31"
+    assert form["access_right"] == "embargoed" and form["embargo_date"] == "2099-01-31"
     assert form["version"] == "1.0.0" and form["publication_date"] == "2026-11-01"
     assert form["related_identifiers"] == related
     assert form["keywords"] == ["LFP"]
@@ -271,7 +274,7 @@ def test_zenodo_sends_the_options_to_the_form_and_the_graph(tmp_path: Path, zeno
     [
         ({"access_right": "public"}, "access_right='public'"),
         ({"access_right": "embargoed"}, "needs embargo_date="),
-        ({"embargo_date": "2027-01-31"}, "embargo_date= applies to"),
+        ({"embargo_date": "2099-01-31"}, "embargo_date= applies to"),
         ({"access_right": "restricted"}, "needs access_conditions="),
         ({"publication_date": "Nov 2026"}, "publication_date='Nov 2026'"),
         ({"related_identifiers": [{"relation": "cites"}]}, "related identifier 1"),

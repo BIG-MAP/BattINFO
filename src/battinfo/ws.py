@@ -1488,6 +1488,15 @@ def _zenodo_access(
         if embargo_date is None:
             raise ValueError("access_right='embargoed' needs embargo_date=, the day the files open.")
         fields["embargo_date"] = _zenodo_date(embargo_date, "embargo_date")
+        import datetime as dt  # noqa: PLC0415
+
+        # Zenodo refuses an embargo that does not end in the future, and only
+        # once a draft exists, so the date is checked before anything is sent.
+        if dt.date.fromisoformat(fields["embargo_date"]) <= dt.datetime.now(dt.timezone.utc).date():
+            raise ValueError(
+                f"embargo_date={fields['embargo_date']!r} is not in the future: Zenodo takes an embargo "
+                "that ends after today."
+            )
     elif embargo_date is not None:
         raise ValueError(f"embargo_date= applies to access_right='embargoed', not {access_right!r}.")
     if access_right == "restricted":
@@ -1538,10 +1547,11 @@ def _zenodo_description_html(text: str) -> str:
 
 
 def _keyword_key(keyword: str) -> str:
-    """The form under which two keywords count as one: case-folded, punctuation and spaces as one space."""
+    """The form under which two keywords count as one: case-folded, each run of spaces, hyphens, underscores
+    and slashes as one space. Other punctuation is kept, so ``Li`` and ``Li+`` stay two keywords."""
     import unicodedata  # noqa: PLC0415
 
-    return " ".join(re.sub(r"[\W_]+", " ", unicodedata.normalize("NFKC", keyword).casefold()).split())
+    return " ".join(re.sub(r"[\s\-_/]+", " ", unicodedata.normalize("NFKC", keyword).casefold()).split())
 
 
 def _unique_keywords(keywords: Iterable[str]) -> list[str]:
@@ -7763,7 +7773,8 @@ class AuthoringWorkspace:
             as given. Text that holds HTML tags goes as it is.
         keywords:
             Extra keywords appended to auto-derived list. A keyword that differs
-            from an earlier one only in case, spaces or punctuation (``LFP`` and
+            from an earlier one only in case, spaces, hyphens, underscores or
+            slashes (``LFP`` and
             ``lfp``, ``li-ion`` and ``Li ion``) is left out.
         archive_hosted_files:
             Archive the data files :meth:`upload` put in R2 storage, which a

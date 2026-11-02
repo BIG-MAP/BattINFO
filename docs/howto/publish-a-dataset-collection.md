@@ -223,11 +223,11 @@ result = ws.zenodo(
 )
 ```
 
-- `access_right` is `"open"` unless you pass `"embargoed"`, `"restricted"` or `"closed"`. An embargo needs `embargo_date`, the day the files open, and restricted access needs `access_conditions`.
+- `access_right` is `"open"` unless you pass `"embargoed"`, `"restricted"` or `"closed"`. An embargo needs `embargo_date`, the day the files open, which has to be after today, and restricted access needs `access_conditions`.
 - `version` goes on the form and into the deposit graph as `schema:version`. Without `publication_date`, Zenodo dates the record the day it is published.
 - Zenodo's related identifiers go in `related_identifiers`; the page of a funding project set with `ws.project()` is added after them.
 - Zenodo shows the description as HTML, so a description of several paragraphs, separated by blank lines, goes to the form as HTML paragraphs. The deposit graph keeps the text as you wrote it.
-- The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces or punctuation is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
+- The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces, hyphens, underscores or slashes is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
 - `publisher` is the organisation the deposit graph names as its publisher, by name, by ROR (`"ror"`) or by registry organization IRI (`"id"`). Without it the graph takes the first affiliation among the creators and contributors. Zenodo's form does not get it.
 - The deposit joins the `battery-knowledge-base` community unless you pass another one as `community`, or `None`.
 
