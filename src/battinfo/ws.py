@@ -98,6 +98,7 @@ from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import (
     entity_id_from_doc,
+    given_test_name,
     held_record_iri,
     is_dashed_uid,
     kind_for_type,
@@ -1852,6 +1853,39 @@ def _shown_list(items: list[str], limit: int = 10) -> str:
     """*items* on one line for a message: the first *limit*, then how many more."""
     shown = "; ".join(items[:limit])
     return shown + (f"; and {len(items) - limit} more" if len(items) > limit else "")
+
+
+def _test_cell_labels(cell_id: str, cell_name: str, instance: dict | None) -> tuple[str, ...]:
+    """What a title BattINFO generated for a test on *cell_id* may start with.
+
+    The cell's name, serial number and batch, and its uid: a cell known only
+    by its IRI is named after its uid (``entities.given_test_name``).
+    """
+    body = instance or {}
+    uid = str(cell_id or "").rstrip("/").rsplit("/", 1)[-1]
+    return tuple(str(value) for value in (cell_name, body.get("serial_number"), body.get("batch_id"), uid) if value)
+
+
+def _record_fidelity_summary(issues: Iterable[Any]) -> builtins.list[str]:
+    """``publication.record_field_not_emitted`` findings, one line per record kind and field.
+
+    A deposit of hundreds of records repeats one gap hundreds of times, so the
+    lines count the records and name the first.
+    """
+    groups: dict[tuple[str, str, bool], builtins.list[str]] = {}
+    for issue in issues:
+        kind, _, rest = str(issue.path).partition(":")
+        iri, _, field = rest.rpartition(".")
+        other_value = str(issue.message).endswith("carries another value for it.")
+        groups.setdefault((kind, field, other_value), []).append(iri)
+    lines = []
+    for (kind, field, other_value), iris in groups.items():
+        what = "another value for it" if other_value else "nothing for it"
+        lines.append(
+            f"{len(iris)} {kind} record(s) have {field!r}, but their nodes in the deposit carry {what} "
+            f"(first: {iris[0]})"
+        )
+    return lines
 
 
 def _not_found_locally_note(iris: list[str]) -> str:
@@ -7960,7 +7994,13 @@ class AuthoringWorkspace:
                 publisher=given_publisher,
                 omissions=omissions,
             )
-            self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
+            self._assert_publishable(
+                placeholder_graph,
+                omissions=omissions,
+                nothing_sent=True,
+                draft=not publish,
+                record_sets=deposit_records if first else None,
+            )
             return deposit_records, plan, kept_files, omissions, placeholder_graph
 
         deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=True)
@@ -8514,6 +8554,7 @@ class AuthoringWorkspace:
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
+        fidelity_count: int | None = None
 
         # Gold-standard review runs BEFORE the file is written, so a metadata-poor or
         # non-conformant record is surfaced up front rather than after an authoritative-looking
@@ -8522,11 +8563,14 @@ class AuthoringWorkspace:
         # The record check ws.zenodo() runs on the parameter sets before it deposits
         # counts here too.
         try:
-            from battinfo.validate import validate_publication_report  # noqa: PLC0415
+            from battinfo.validate import record_fidelity_report, validate_publication_report  # noqa: PLC0415
 
             report = validate_publication_report(jsonld, policy="publisher")
             deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
             _print_replaced_legacy_parameter_sets(replaced_legacy)
+            # What the records hold and the graph does not carry (warnings).
+            fidelity = record_fidelity_report(jsonld, deposit_records, policy="publisher").warnings
+            fidelity_count = len(fidelity)
             errors = [f"left out of the deposit: {omission}" for omission in dict.fromkeys(omissions)]
             errors += [i.message for i in report.issues if i.severity == "error"] + [
                 f"parameter set {problem}" for problem in _parameter_set_publication_errors(deposit_records)
@@ -8534,16 +8578,20 @@ class AuthoringWorkspace:
             if not creators:
                 errors.append(f"no creators: ws.zenodo() refuses a deposit without them. {_CREATORS_HINT}")
             warnings = [i for i in report.issues if i.severity == "warning"]
-            if not errors and not warnings:
+            fidelity_lines = _record_fidelity_summary(fidelity)
+            if not errors and not warnings and not fidelity_lines:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(
-                    f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) -- address before publishing:"
+                    f"  Gold-standard: {len(errors)} error(s), {len(warnings) + len(fidelity)} warning(s). "
+                    "ws.zenodo() refuses a deposit with errors; warnings do not stop it."
                 )
                 for message in errors:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
+                for line in fidelity_lines:
+                    print(f"    warning {line}")
             # A record left out above has no node because it could not be
             # converted, not because it is missing locally.
             left_out = {omission.record for omission in omissions}
@@ -8555,7 +8603,8 @@ class AuthoringWorkspace:
 
         out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Written: {out}")
-        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
+        not_carried = "" if fidelity_count is None else f" ({fidelity_count} record field(s) not carried)"
+        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}{not_carried}")
         print(f"  Data files:  {len(plan.deposited_names())}")
         return out
 
@@ -8566,6 +8615,7 @@ class AuthoringWorkspace:
         omissions: Iterable[Omission] = (),
         nothing_sent: bool = False,
         draft: bool = False,
+        record_sets: dict[str, builtins.list[Any]] | None = None,
     ) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
@@ -8577,7 +8627,10 @@ class AuthoringWorkspace:
         plan (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
         deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo).
         With ``draft`` the refusal is of the deposit itself: :meth:`zenodo` checks a
-        draft as it checks a publish, since a draft is one click from published."""
+        draft as it checks a publish, since a draft is one click from published.
+        With *record_sets* (the records the graph was built from), the record
+        fields the graph does not carry are printed as warnings; they never
+        refuse."""
         verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         left_out = list(dict.fromkeys(omissions))
@@ -8595,11 +8648,14 @@ class AuthoringWorkspace:
                 f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
         try:
-            from battinfo.validate import validate_publication_report  # noqa: PLC0415
+            from battinfo.validate import record_fidelity_report, validate_publication_report  # noqa: PLC0415
 
             report = validate_publication_report(jsonld, policy="publisher")
+            fidelity = record_fidelity_report(jsonld, record_sets, policy="publisher").warnings if record_sets else ()
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"Could not validate the record before {doing}: {exc}") from exc
+        for line in _record_fidelity_summary(fidelity):
+            print(f"  warning {line}")
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
             unresolved = _unresolved_record_references(jsonld)
@@ -9043,7 +9099,11 @@ class AuthoringWorkspace:
         """
         given_publisher = _deposit_publisher(publisher)
         from battinfo.jsonld import (
+            _schema_variable_measured,
+            as_run_condition_terms,
+            cell_measured_property_nodes,
             checksum_node,
+            dataset_is_based_on,
             dataset_series_edges,
             dataset_to_jsonld,
             electrode_role_links,
@@ -9202,6 +9262,9 @@ class AuthoringWorkspace:
                 # The electrode records built into this cell, kept
                 # whole so the node builder can role-type them.
                 "cell_instance": ci,
+                # What was measured on this cell: a block of the record, beside
+                # cell_instance, keyed like a cell spec's properties.
+                "measured": raw.get("measured") if isinstance(raw, dict) else None,
             }
 
         # Published records this deposit may point at without carrying them:
@@ -9373,18 +9436,38 @@ class AuthoringWorkspace:
                             # reaches the cell; the spec is appended in _apply below.
                             "prov:used": [{"@id": cell_id}],
                         }
-                        # Human label so agents/consumers see more than an opaque IRI.
+                        # The name the test was given; a test without one, or with
+                        # the title BattINFO generates from its cell and protocol,
+                        # is labelled by its protocol and cell, so agents and
+                        # consumers see more than an opaque IRI.
                         _cell_nm = _cell_name(cell_id)
-                        _label = (protocol or test.get("kind", "")).strip()
-                        if _label and _cell_nm:
-                            _label = f"{_label} — {_cell_nm}"
+                        _given = given_test_name(
+                            test.get("name"),
+                            kind=test.get("kind"),
+                            protocol_name=protocol,
+                            cell_labels=_test_cell_labels(cell_id, _cell_nm, instances.get(cell_id)),
+                        )
+                        # The name as the record writes it: given_test_name only
+                        # decides, its normalised text is not the record's name.
+                        _label = str(test["name"]).strip() if _given is not None else ""
+                        if not _label:
+                            _label = (protocol or test.get("kind", "")).strip()
+                            if _label and _cell_nm:
+                                _label = f"{_label} — {_cell_nm}"
                         if _label:
                             tnode["schema:name"] = _label
                             tnode["rdfs:label"] = _label
+                        if test.get("description"):
+                            tnode["schema:description"] = test["description"]
                         if test.get("kind"):
                             tnode["schema:additionalType"] = test["kind"]
+                        if test.get("status"):
+                            tnode["schema:actionStatus"] = test["status"]
                         if protocol:
                             tnode["schema:measurementTechnique"] = protocol
+                        # As-run conditions (temperature, state of charge, pressure,
+                        # ...), built as the test record's own JSON-LD builds them.
+                        tnode.update(as_run_condition_terms(test.get("conditions")))
                         # Equipment provenance (EMMO-canonical; schema.org has no apt
                         # predicate — schema:instrument is an Action property and this
                         # node is an Activity, so it is intentionally omitted).
@@ -9739,6 +9822,14 @@ class AuthoringWorkspace:
                 member["schema:measurementTechnique"] = list(_ds["measurement_techniques"])
             if _ds.get("measurement_methods"):
                 member["schema:measurementMethod"] = list(_ds["measurement_methods"])
+            # The columns and their units, and the datasets this one was derived
+            # from, in the shape the record's own JSON-LD gives them.
+            _variables = _schema_variable_measured(_ds.get("variable_measured"))
+            if _variables:
+                member["schema:variableMeasured"] = _variables
+            _based_on = dataset_is_based_on(_ds.get("is_based_on"))
+            if _based_on:
+                member["schema:isBasedOn"] = _based_on
             # Dates: Unix times as ISO 8601, ISO strings as they are. A time that
             # is no date (one in milliseconds) is left out with a warning.
             for _field, _term in (("created_at", "schema:dateCreated"), ("modified_at", "schema:dateModified")):
@@ -9798,6 +9889,11 @@ class AuthoringWorkspace:
                     inode["schema:expires"] = _typed_date(inst["expires_at"])
                 if inst.get("batch_id"):
                     inode["schema:identifier"] = inst["batch_id"]
+                # Measured values (capacity, energy, ...) as typed quantities,
+                # each with the conditions it was measured under.
+                _measured = cell_measured_property_nodes(inst.get("measured"), context_label=cell_iri)
+                if _measured:
+                    inode["hasProperty"] = _measured
                 # Conformance assessment (vs the cell spec) as a DQV annotation; the
                 # instance-of link above already ties the cell to its spec.
                 _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
