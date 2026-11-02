@@ -8031,8 +8031,9 @@ class AuthoringWorkspace:
 
         if publish:
             self._assert_publishable(jsonld)  # fail closed BEFORE minting an irreversible DOI (R-7)
-            pub = client.publish_deposit(deposit_id)
+            # Taken before the call, so no dataset is dated later than Zenodo's publish.
             called_at = _now_unix()
+            pub = client.publish_deposit(deposit_id)
             publication_times = (_zenodo_publication_time(pub, called_at), called_at)
             doi = pub.get("doi", prereserved_doi)
             published = True
