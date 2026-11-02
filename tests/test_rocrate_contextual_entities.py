@@ -122,12 +122,33 @@ def test_a_creator_who_is_also_a_contributor_is_one_entity_that_keeps_the_role()
     assert people["#person-doe-jane"]["affiliation"] == {"@id": "#org-example-lab"}
 
 
-def test_an_entry_without_an_orcid_is_the_person_with_the_only_orcid_of_that_name() -> None:
-    creators = [{"name": "Lovelace, Ada", "orcid": ORCID}]
+def test_an_entry_without_an_orcid_is_never_taken_for_a_person_with_one() -> None:
+    # A shared name does not prove one person: the role and the affiliation of the
+    # entry without an ORCID must not be published on the ORCID holder.
+    creators = [{"name": "Lee, Kim", "orcid": ORCID, "affiliation": "Lab One"}]
+    contributors = [{"name": "Lee, Kim", "affiliation": "Lab Two", "type": "Supervisor"}]
+    creator_refs, contributor_refs, entities = _rocrate_agents(creators, contributors)
+    assert creator_refs == [{"@id": f"https://orcid.org/{ORCID}"}]
+    assert contributor_refs == [{"@id": "#person-lee-kim"}]
+    people = _people(entities)
+    holder = people[f"https://orcid.org/{ORCID}"]
+    assert "roleName" not in holder
+    assert holder["affiliation"] == {"@id": "#org-lab-one"}
+    assert people["#person-lee-kim"]["roleName"] == "Supervisor"
+
+
+def test_entries_without_an_orcid_of_one_name_are_one_person() -> None:
+    creators = [{"name": "Lovelace, Ada"}]
     contributors = [{"name": "Lovelace, Ada", "type": "DataCurator"}]
     creator_refs, contributor_refs, entities = _rocrate_agents(creators, contributors)
-    assert creator_refs == contributor_refs == [{"@id": f"https://orcid.org/{ORCID}"}]
+    assert creator_refs == contributor_refs == [{"@id": "#person-lovelace-ada"}]
     assert len(entities) == 1 and entities[0]["roleName"] == "DataCurator"
+
+
+def test_a_blank_affiliation_names_no_organisation() -> None:
+    _creators, _contributors, entities = _rocrate_agents([{"name": "Doe, Jane", "affiliation": "   "}], [])
+    assert [node["@type"] for node in entities] == ["Person"]
+    assert "affiliation" not in entities[0]
 
 
 def test_people_of_one_name_with_different_orcids_stay_apart() -> None:

@@ -1120,11 +1120,13 @@ def _rocrate_agents(
     an organisation's is the ROR URL, else ``#org-`` and a slug of the name
     (:func:`_crate_local_ids`). ``affiliation_ror`` gives the ROR of an
     entry's first affiliation, as in the deposit graph (:func:`_agent_node`).
-    Entries with the same ORCID are one person, and an entry without one is
-    the person with an ORCID of the same name when exactly one ORCID goes
-    with that name, else the person of that name. Organisations are matched
-    the same way by ROR and name. So someone listed as a creator and as a
-    contributor is one entity, which both lists reference. A person points at
+    Entries with the same ORCID are one person, and entries without one are
+    one person when they have the same name. An entry without an ORCID is
+    never taken for a person who has one: a name does not prove it, and the
+    crate is published with the deposit's DOI. An organisation without a ROR
+    is the organisation of that name with a ROR when exactly one ROR goes
+    with the name. So someone listed as a creator and as a contributor is
+    one entity, which both lists reference. A person points at
     each organisation by ``affiliation``, and the Zenodo ``type`` of each of
     their contributor entries is kept as the person's ``roleName``.
     """
@@ -1134,14 +1136,13 @@ def _rocrate_agents(
         """``(name, ROR URL or "")`` of each affiliation of *agent*."""
         names = [_clean_name(name) for name in _affiliation_names(agent.get("affiliation"))]
         ror = _ror_url(agent["affiliation_ror"]) if agent.get("affiliation_ror") else ""
-        return [(name, ror if position == 0 else "") for position, name in enumerate(names)]
+        pairs = [(name, ror if position == 0 else "") for position, name in enumerate(names)]
+        # An affiliation that is blank once cleaned names no organisation.
+        return [(name, org_ror) for name, org_ror in pairs if name]
 
-    # The ORCIDs given with each person's name, and the RORs with each organisation's.
-    orcids: dict[str, set[str]] = {}
+    # The RORs given with each organisation's name.
     rors: dict[str, set[str]] = {}
     for _role, agent in entries:
-        if agent.get("orcid"):
-            orcids.setdefault(_clean_name(agent.get("name")), set()).add(f"https://orcid.org/{agent['orcid']}")
         for name, ror in affiliations(agent):
             if ror:
                 rors.setdefault(name, set()).add(ror)
@@ -1158,7 +1159,7 @@ def _rocrate_agents(
     for _role, agent in entries:
         name = _clean_name(agent.get("name"))
         orcid = f"https://orcid.org/{agent['orcid']}" if agent.get("orcid") else ""
-        person_ids.append((name, known_id(name, orcid, orcids)))
+        person_ids.append((name, orcid))
         org_ids.append([(org, known_id(org, ror, rors)) for org, ror in affiliations(agent)])
     local_people = _crate_local_ids((name for name, iri in person_ids if not iri), "person")
     local_orgs = _crate_local_ids((name for orgs in org_ids for name, iri in orgs if not iri), "org")
@@ -1276,7 +1277,8 @@ def _warn_rocrate_problems(crate: Mapping[str, Any]) -> None:
     if unread:
         messages.append(f"The deposit's {_ROCRATE_FILENAME} was only partly checked: {unread}")
     for message in messages:
-        warnings.warn(message, stacklevel=4)
+        # From zenodo(), through prepare() and _assert_publishable(), to the caller.
+        warnings.warn(message, stacklevel=5)
         print(f"  WARNING: {message}")
 
 
