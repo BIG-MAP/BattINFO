@@ -200,3 +200,55 @@ ws.save()
 ```
 
 `series_id` takes the collection's IRI and nothing else. A value that is not a `https://w3id.org/battinfo/dataset/...` IRI is refused before any record is created, and so is `series_id` without `data=`. Membership is not part of a record's identity, so adding or dropping `series_id` never moves the IRI of the test or its datasets. The collection itself is still saved with `Dataset` and `save_dataset`, before its members, as in step 2. `ws.zenodo()` uploads the data file with the deposit and points the dataset's distribution at its copy there.
+
+## Deposit options
+
+`ws.zenodo()` fills in the Zenodo form from the workspace, and a few keywords change what it sends. Without them the deposit is the one described above.
+
+<!-- doc-snippet: skip -->
+```python
+result = ws.zenodo(
+    title="Graphite half-cell pOCV",
+    description="Pseudo-OCV curves of four graphite coin half cells.\n\nOne dataset per cell.",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    keywords=["graphite", "pseudo-OCV"],
+    auto_keywords=False,
+    access_right="embargoed",
+    embargo_date="2027-06-30",
+    related_identifiers=[{"identifier": "10.1234/example", "relation": "isSupplementTo"}],
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+)
+```
+
+- `access_right` is `"open"` unless you pass `"embargoed"`, `"restricted"` or `"closed"`. An embargo needs `embargo_date`, the day the files open, and restricted access needs `access_conditions`.
+- `version` goes on the form and into the deposit graph as `schema:version`. Without `publication_date`, Zenodo dates the record the day it is published.
+- Zenodo's related identifiers go in `related_identifiers`; the page of a funding project set with `ws.project()` is added after them.
+- Zenodo shows the description as HTML, so a description of several paragraphs, separated by blank lines, goes to the form as HTML paragraphs. The deposit graph keeps the text as you wrote it.
+- The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces or punctuation is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
+- `publisher` is the organisation the deposit graph names as its publisher, by name, by ROR (`"ror"`) or by registry organization IRI (`"id"`). Without it the graph takes the first affiliation among the creators and contributors. Zenodo's form does not get it.
+- The deposit joins the `battery-knowledge-base` community unless you pass another one as `community`, or `None`.
+
+Zenodo takes at most 100 files in one record by default. A deposit of more than 90 data files is therefore zipped one archive per test kind, which is `bundle="by_kind"`, the default. `bundle="single"` zips every data file into one archive, named by `archive_name` (`data.zip` when not given), however few there are. `bundle="none"` deposits each file as itself, and `ws.zenodo()` warns before it sends anything when the deposit would then hold more than 100 files. A dataset whose file is in an archive links to the archive and names its own file. `ws.publish(zenodo=True)` has no `bundle` option, and without R2 storage it refuses a deposit of more than 90 data files, since the registry cannot yet point a record at a file inside an archive.
+
+The deposit graph names the concept record, the Zenodo record that groups every version, as `dcterms:isVersionOf`, and the version a new version follows as `dcat:previousVersion`. `ws.zenodo()` takes both from Zenodo. `ws.preview_jsonld()` has no deposit to ask, so give them there as `is_version_of` and `previous_version`, with the other options that reach the graph:
+
+```python
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    is_version_of="https://zenodo.org/records/1234566",
+    previous_version="https://zenodo.org/records/1234567",
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print(catalog["dcterms:isVersionOf"], catalog["dcat:previousVersion"])
+```
+
+`ws.preview_rocrate()` takes `bundle` and `archive_name` as well.

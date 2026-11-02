@@ -471,6 +471,48 @@ def test_a_draft_leaves_records_on_a_published_copy_until_it_is_published(
     assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == (tmp_path / "C01" / "cycling.csv").read_bytes()
 
 
+# ── Version links ─────────────────────────────────────────────────────────────
+
+
+def _version_links(graph: dict) -> dict[str, str]:
+    """The concept and the previous version the deposit graph's catalog names."""
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in (node.get("@type") or []))
+    return {term: catalog[term]["@id"] for term in ("dcterms:isVersionOf", "dcat:previousVersion") if term in catalog}
+
+
+def test_each_version_names_its_concept_and_the_version_it_follows(tmp_path: Path, zenodo: _Zenodo) -> None:
+    records = f"{HOSTS['production']}/records"
+    ws = _workspace(tmp_path)
+    first = _deposit(ws, publish=True)
+    concept = zenodo.deposit(int(first.record_id)).concept
+    # A new record's first version belongs to its concept and follows nothing.
+    assert _version_links(zenodo.graph(int(first.record_id))) == {"dcterms:isVersionOf": f"{records}/{concept}"}
+
+    # A new version, a draft, follows the published record it was made from.
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws)
+    assert not second.published and second.record_id != first.record_id
+    expected = {"dcterms:isVersionOf": f"{records}/{concept}", "dcat:previousVersion": f"{records}/{first.record_id}"}
+    assert _version_links(zenodo.graph(int(second.record_id))) == expected
+
+    # Updating that draft keeps both links: the concept is not the previous version.
+    with pytest.warns(UserWarning, match="updating that draft in place"):
+        third = _deposit(ws, version="2")
+    assert third.record_id == second.record_id
+    graph = zenodo.graph(int(third.record_id))
+    assert _version_links(graph) == expected
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in (node.get("@type") or []))
+    assert catalog["schema:version"] == "2"
+
+    # An explicit record id forks a new version from it in the same way.
+    zenodo.website_publish(int(third.record_id))
+    fourth = _deposit(ws, record_id=third.record_id)
+    assert _version_links(zenodo.graph(int(fourth.record_id))) == {
+        "dcterms:isVersionOf": f"{records}/{concept}",
+        "dcat:previousVersion": f"{records}/{third.record_id}",
+    }
+
+
 # ── Versions, retries and a new record ────────────────────────────────────────
 
 
