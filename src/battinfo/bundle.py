@@ -3299,7 +3299,7 @@ class Dataset(BundleJsonModel):
     published_at: int | str | None = Field(
         default=None,
         validation_alias=AliasChoices("published_at", "datePublished"),
-        description="Publication time; defaults to created_at.",
+        description="Publication time; empty until the dataset is published.",
     )
     temporal_coverage: str | None = Field(
         default=None,
@@ -3518,8 +3518,6 @@ class Dataset(BundleJsonModel):
             )
         if self.modified_at is None:
             self.modified_at = self.created_at
-        if self.published_at is None:
-            self.published_at = self.created_at
         if self.identifier is None and self.id is not None:
             self.identifier = _identifier("dataset", self.id)
         return self
@@ -3753,8 +3751,6 @@ class Dataset(BundleJsonModel):
             dataset_obj["modified_at"] = self.created_at
         if self.published_at is not None:
             dataset_obj["published_at"] = self.published_at
-        elif self.created_at is not None:
-            dataset_obj["published_at"] = self.created_at
         if self.temporal_coverage is not None:
             dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:

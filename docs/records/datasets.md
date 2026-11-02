@@ -435,8 +435,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T08:54:36Z",
   "dcterms:modified": "2026-06-18T08:54:36Z",
-  "dcterms:issued": "2026-06-18T08:54:36Z",
-  "schema:datePublished": "2026-06-18T08:54:36Z",
   "schema:measurementTechnique": [
     "cycling"
   ],
@@ -593,8 +591,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T08:54:36Z",
   "dcterms:modified": "2026-06-18T08:54:36Z",
-  "dcterms:issued": "2026-06-18T08:54:36Z",
-  "schema:datePublished": "2026-06-18T08:54:36Z",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "catalog",
@@ -650,8 +646,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T10:27:48Z",
   "dcterms:modified": "2026-06-18T10:27:48Z",
-  "dcterms:issued": "2026-06-18T10:27:48Z",
-  "schema:datePublished": "2026-06-18T10:27:48Z",
   "schema:measurementTechnique": [
     "X-ray diffraction"
   ],

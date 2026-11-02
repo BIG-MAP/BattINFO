@@ -2805,8 +2805,9 @@ class Workspace:
         as a cell spec's ``properties``) included. Left out are the record's
         own IRI, the volatile timestamps, the schema and BattINFO versions that
         wrote it, the derived back-links (``dataset_ids``, a cell's
-        ``datasets``) and, for a dataset that has none of its own, the
-        publication time and licence a save fills in.
+        ``datasets``) and, for a dataset that has none of its own, the licence
+        a save fills in and the publication time, which earlier releases set
+        at save.
         """
         builders: dict[type, Callable[[Any], dict[str, Any]]] = {
             CellSpec: _record_from_cell_spec,

@@ -40,6 +40,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **A manufacturer or supplier given as an organization object reaches the JSON-LD.** Component records already allowed one, but the writer took only a name and dropped the object.
 - **An electrode may be a monolithic `material` alone**, such as a lithium-metal counter electrode, as the field's description already said; the schema rejected it unless another field was present.
 - **The cell-conformance graph test checks each cell's own spec link.** It counted every `dcterms:conformsTo` edge in the corpus, which cell instances do not emit, and passed only because the counts happened to match; it now requires every cell instance to link its spec through `schema:isVariantOf`.
+- **A saved dataset no longer claims to be published.** A save gave every dataset without a `published_at` its `created_at` as one, so each saved record, and its JSON-LD (`schema:datePublished`, `dcterms:issued`), dated a publication that had not happened. `published_at` now stays empty until the dataset is published, a stated one is kept, and a re-save of a dataset without one no longer reports a change. A record saved before this change keeps the date it was given until it is saved again from a session that adds the dataset anew. Four example datasets lose the save-time `published_at` they carried.
 
 ## [0.8.0] - 2026-10-13
 
