@@ -1214,8 +1214,7 @@ warning that names each text value moved (a numeric string is read as
 the number without one).
 The comparison ignores the record’s own <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">uid</span></code> and the <code class="docutils literal notranslate"><span class="pre">created_at</span></code>,
 <code class="docutils literal notranslate"><span class="pre">modified_at</span></code>, <code class="docutils literal notranslate"><span class="pre">retrieved_at</span></code>, <code class="docutils literal notranslate"><span class="pre">generated_at</span></code> and <code class="docutils literal notranslate"><span class="pre">imported_at</span></code>
-timestamps, but not <code class="docutils literal notranslate"><span class="pre">published_at</span></code>: a <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> saved without one
-gets the save time, so its re-save compares as changed.</p></li>
+timestamps.</p></li>
 <li><p><strong>with</strong> (<em>- &quot;exists&quot;</em><em> (</em><em>mode=&quot;create_only&quot;</em>) – <code class="docutils literal notranslate"><span class="pre">duplicate_policy=&quot;return_existing&quot;</span></code>): nothing was written; <code class="docutils literal notranslate"><span class="pre">path</span></code>
 is the saved record and there is no <code class="docutils literal notranslate"><span class="pre">content_changed</span></code> key.</p></li>
 <li><p><strong>&quot;dry-run&quot;</strong> (<em>-</em>) – be for the real save.</p></li>
