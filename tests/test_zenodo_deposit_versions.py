@@ -18,6 +18,9 @@
   it, and a record on a published copy only once the new version is
   published. A file that changed is described as the deposit holds it, with
   its own sha256 and size, in the graph, the RO-Crate and the record.
+- A publish gives each dataset record the deposit holds its ``published_at``,
+  in memory too, and a record that has one keeps it, in a new version as
+  well. A draft and a sandbox deposit date nothing.
 - A recorded draft is checked with Zenodo, so one published on the website
   gets a new version, and ``ws.submit()`` records its DOI. One deleted there
   stops the run, which names the way on that keeps the record's lineage.
@@ -46,6 +49,7 @@ import hashlib
 import io
 import json
 import sys
+import time
 import types
 import urllib.error
 import warnings
@@ -105,7 +109,8 @@ class _Zenodo:
     new version starts as a draft holding a copy of every file of the version
     it was made from, as Zenodo's does. A published deposit refuses edits.
     ``requests`` logs ``"<environment> METHOD path"``; a request line in
-    ``fail`` is answered with HTTP 500 as many times as it says.
+    ``fail`` is answered with HTTP 500 as many times as it says. A published
+    deposit reports ``publication_date`` in its metadata when one is set.
     """
 
     def __init__(self) -> None:
@@ -113,6 +118,7 @@ class _Zenodo:
         self._next = {"production": 7000, "sandbox": 500}
         self.requests: list[str] = []
         self.fail: dict[str, int] = {}
+        self.publication_date: str | None = None
 
     # ── the service ──────────────────────────────────────────────────────────
 
@@ -151,6 +157,8 @@ class _Zenodo:
         if deposit.published:
             reply["doi"] = doi
             reply["metadata"]["doi"] = doi
+            if self.publication_date is not None:
+                reply["metadata"]["publication_date"] = self.publication_date
         return reply
 
     def urlopen(self, request, timeout: float | None = None) -> _Reply:  # noqa: ANN001
@@ -995,6 +1003,101 @@ def test_a_sandbox_url_in_a_production_deposit_is_refused(tmp_path: Path, zenodo
     assert message.startswith("Refusing to deposit: 1 record(s) would go into the deposit incomplete: ")
     assert f"its data file is at {url}, in a record on the Zenodo sandbox (sandbox.zenodo.org)" in message
     assert zenodo.requests == []
+
+
+# ── Publication dates ─────────────────────────────────────────────────────────
+
+
+def _publication_times(ws: AuthoringWorkspace) -> dict[str, object]:
+    """Each saved dataset record's ``published_at`` (``None`` without one), by dataset IRI."""
+    return {record["dataset"]["id"]: record["dataset"].get("published_at") for _path, record in _datasets(ws)}
+
+
+def test_a_publish_dates_the_dataset_records_and_a_draft_does_not(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    _deposit(ws)  # a draft
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
+
+    before = int(time.time())
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        result = _deposit(ws, publish=True)
+    after = int(time.time())
+
+    assert result.published
+    times = _publication_times(ws)
+    assert len(times) == 2 and len(set(times.values())) == 1
+    [published_at] = set(times.values())
+    assert isinstance(published_at, int) and before <= published_at <= after
+    assert {dataset.id: dataset.published_at for dataset in ws._ws.datasets} == times
+    # The datasets in memory carry it, so a later save keeps it and changes nothing.
+    saved = ws.save()
+    assert [item["content_changed"] for item in saved["datasets"]] == [False, False]
+    assert _publication_times(ws) == times
+
+
+CREATED_2023 = 1700000000  # 2023-11-14
+MARCH_2024 = 1709251200  # 2024-03-01T00:00:00Z
+
+
+def _created_in_2023(ws: AuthoringWorkspace) -> None:
+    """Make each saved dataset, and each dataset in memory, one created in 2023."""
+    _edit_datasets(ws, lambda dataset: dataset.update(created_at=CREATED_2023))
+    for dataset in ws._ws.datasets:
+        dataset.created_at = CREATED_2023
+
+
+def test_a_new_version_keeps_the_date_its_datasets_were_first_published(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    [first_iri] = _publication_times(ws)
+    # A dataset created in 2023, in a deposit whose metadata gives 2024-03-01
+    # as its publication date: the record takes that date, from midnight UTC.
+    _created_in_2023(ws)
+    zenodo.publication_date = "2024-03-01"
+    _deposit(ws, publish=True)
+    assert _publication_times(ws) == {first_iri: MARCH_2024}
+
+    # Data saved since joins the record in a new version, whose metadata still
+    # gives 2024-03-01. The new dataset was created after that day, so it was
+    # published by this call; the first one keeps the date it was published.
+    _data_file(tmp_path, "C02")
+    ws.add("test", type="cycling", cell="C01", data="C02/cycling.csv")
+    ws.save()
+    before = int(time.time())
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+    after = int(time.time())
+
+    assert second.published and second.is_new_version
+    times = _publication_times(ws)
+    assert times.pop(first_iri) == MARCH_2024
+    [new_time] = times.values()
+    assert isinstance(new_time, int) and before <= new_time <= after
+    # Both still save under the strict policy, unchanged.
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False, False]
+
+
+def test_a_dataset_this_session_created_after_the_reported_date_takes_the_publish_time(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    """A record saved in 2023 that this session added again: the dataset in memory was created now."""
+    ws = _workspace(tmp_path)
+    _edit_datasets(ws, lambda dataset: dataset.update(created_at=CREATED_2023))
+    zenodo.publication_date = "2024-03-01"
+    before = int(time.time())
+    _deposit(ws, publish=True)
+
+    [published_at] = _publication_times(ws).values()
+    assert isinstance(published_at, int) and before <= published_at <= int(time.time())
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False]
+
+
+def test_a_sandbox_publish_dates_nothing(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    result = _deposit(ws, sandbox=True, publish=True)
+    assert result.published
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
 
 
 # ── R2 storage ────────────────────────────────────────────────────────────────
