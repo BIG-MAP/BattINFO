@@ -519,7 +519,8 @@ class DepositFilePlan:
     #: file could be planned for them, and data file locations the screen
     #: refused (see :func:`location_path`).
     omissions: list[Omission] = field(default_factory=list)
-    #: True when the files travel in one zip archive per test kind.
+    #: True when the local files travel in zip archives: one per test kind, or
+    #: one for all of them (``bundle="single"``).
     zipped: bool = False
     #: False when the files were located and named but not read (no sizes or digests).
     measured: bool = True
@@ -592,6 +593,41 @@ def _archive_name(kind: str) -> str:
     return f"{safe or 'other'}.zip"
 
 
+#: How a deposit packs its data files: ``by_kind`` zips them one archive per
+#: test kind when there are more than the zip threshold, ``single`` puts them
+#: all in one archive, and ``none`` deposits each file as itself.
+BUNDLE_MODES = ("by_kind", "single", "none")
+#: The archive of a ``single`` deposit when the caller names none.
+DEFAULT_SINGLE_ARCHIVE = "data.zip"
+# Characters a file name cannot hold on Windows, besides the path separators.
+_UNSAFE_NAME = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
+
+
+def single_archive_name(bundle: object, archive_name: object = None) -> str | None:
+    """The archive that carries every data file of a *bundle* ``"single"`` deposit, else ``None``.
+
+    Raises ``ValueError`` for a *bundle* outside :data:`BUNDLE_MODES`, for an
+    *archive_name* given with another mode, and for one that is not a plain
+    file name ending in ``.zip``. Without *archive_name* a single archive is
+    :data:`DEFAULT_SINGLE_ARCHIVE`.
+    """
+    if bundle not in BUNDLE_MODES:
+        raise ValueError(f"bundle={bundle!r} is not one of {', '.join(repr(mode) for mode in BUNDLE_MODES)}.")
+    if bundle != "single":
+        if archive_name is not None:
+            raise ValueError(f"archive_name= names the archive of bundle='single', not of bundle={bundle!r}.")
+        return None
+    if archive_name is None:
+        return DEFAULT_SINGLE_ARCHIVE
+    name = unicodedata.normalize("NFC", archive_name.strip()) if isinstance(archive_name, str) else ""
+    if not name.lower().endswith(".zip") or name.lower() == ".zip" or _UNSAFE_NAME.search(name):
+        raise ValueError(
+            f"archive_name={archive_name!r} is not a file name ending in .zip, such as 'data.zip'. "
+            'It cannot hold a folder or any of \\ / : * ? " < > |.'
+        )
+    return name
+
+
 def _path_label(path: Path, root: Path) -> str:
     """What a colliding name is told apart by: the file's path inside *root*, else its folder and name."""
     try:
@@ -630,6 +666,8 @@ def build_deposit_file_plan(
     remote: Iterable[tuple[RemoteSource, str]] = (),
     unplaced: Mapping[str, Iterable[tuple[str, str]]] | None = None,
     held: Mapping[str, IndexedFile] | None = None,
+    bundle: str = "by_kind",
+    archive_name: str | None = None,
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -676,11 +714,16 @@ def build_deposit_file_plan(
     ``3f2a9c1d-Data.csv``. The first file keeps its name, so a deposit without
     such clashes has the URLs it always had.
 
-    With more than *zip_threshold* local files, each is assigned to the
-    archive ``<kind>.zip``; a kept file stays as it is. Without *measure* the
-    files are located and named but not read, which is enough to count them
-    or to build the graph.
+    *bundle* says how the local files travel (see :data:`BUNDLE_MODES`). With
+    ``"by_kind"``, the default, and more than *zip_threshold* local files,
+    each is assigned to the archive :func:`_archive_name` gives its test kind,
+    ``<kind>.zip``. With ``"single"`` every local file is assigned to one
+    archive, *archive_name* (``data.zip`` when not given), however many there
+    are. With ``"none"`` no file is zipped. A kept file stays as it is in
+    each mode. Without *measure* the files are located and named but not
+    read, which is enough to count them or to build the graph.
     """
+    single = single_archive_name(bundle, archive_name)
     found: list[tuple[str, Path, str]] = []  # (path key, resolved path, kind)
     seen: set[str] = set()
     key_of_location: dict[str, str] = {}
@@ -789,12 +832,18 @@ def build_deposit_file_plan(
         names[key] = name
         taken.add(name_key(name))
 
-    zipped = zip_threshold is not None and len(found) > zip_threshold
+    if single is not None:
+        zipped = bool(found)
+    else:
+        zipped = bundle == "by_kind" and zip_threshold is not None and len(found) > zip_threshold
     by_key: dict[str, DepositFile] = {}
     by_location: dict[str, DepositFile | None] = {}
     for key, path, kind in found:
         size, md5, sha256 = _measure(path) if measure else (0, "", "")
         name = names[key]
+        # _archive_name is looked up in this module on each call, so a caller
+        # that replaces it still names the archives of a by_kind deposit.
+        archive = (single or _archive_name(kind)) if zipped else ""
         by_key[key] = DepositFile(
             path=path,
             name=name,
@@ -803,7 +852,7 @@ def build_deposit_file_plan(
             md5=md5,
             sha256=sha256,
             kind=kind,
-            archive=_archive_name(kind) if zipped else "",
+            archive=archive,
         )
     for location, key in key_of_location.items():
         by_location[location] = by_key[key]
