@@ -985,6 +985,7 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;hasMeasurementParameter&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="s2">&quot;AmbientCelsiusTemperature&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="s2">&quot;ConventionalProperty&quot;</span>
 <span class="w">    </span><span class="p">],</span>
 <span class="w">    </span><span class="nt">&quot;skos:prefLabel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ambient_temperature&quot;</span><span class="p">,</span>
@@ -5191,15 +5192,15 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:DegreeCelsius&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;state_of_charge&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;conditions&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">50.0</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;%&quot;</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StateOfCharge&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">50.0</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -5515,15 +5516,15 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:DegreeCelsius&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;initial_state_of_charge&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;conditions&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;%&quot;</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StateOfCharge&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
@@ -5881,15 +5882,15 @@ JSON-LD</label><div class="sd-tab-content docutils">
 <span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emmo:DegreeCelsius&quot;</span>
 <span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;schema:additionalProperty&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;schema:PropertyValue&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;state_of_charge&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:propertyID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;conditions&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">50.0</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;schema:unitText&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;%&quot;</span>
+<span class="w">      </span><span class="nt">&quot;@type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StateOfCharge&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;hasNumericalPart&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;hasNumberValue&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">50.0</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;hasMeasurementUnit&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;@id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;electrochemistry:electrochemistry_8430be19_6cae_4a15_a570_3c15d0d190eb&quot;</span>
+<span class="w">      </span><span class="p">}</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">&quot;dcterms:source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
