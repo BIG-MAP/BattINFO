@@ -24,10 +24,13 @@ import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope an
 import copy
 import difflib
 import functools
+import hashlib
 import json
 import os
 import re
+import unicodedata
 import warnings
+from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -1073,6 +1076,248 @@ def _agent_from_record_contributor(c: dict) -> dict:
     if affiliations:
         out["affiliation"] = affiliations[0] if len(affiliations) == 1 else affiliations
     return out
+
+
+# ── RO-Crate people and organisations ────────────────────────────────────────
+# RO-Crate 1.1 metadata is flattened JSON-LD: every entity it describes is a
+# direct entry of the @graph with an @id, and other entities point at it by
+# that @id. The deposit's people and their organisations are such contextual
+# entities. One with no ORCID (or ROR) gets a crate-local "#" identifier, the
+# kind of local identifier RO-Crate recommends.
+
+
+def _clean_name(value: object) -> str:
+    """*value* as a string, with each run of whitespace a single space."""
+    return " ".join(str(value or "").split())
+
+
+def _name_slug(name: str) -> str:
+    """The lower-case ASCII letters and digits of *name*, each run of anything else a hyphen."""
+    folded = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]+", "-", folded.lower()).strip("-")
+
+
+def _crate_local_ids(names: Iterable[str], kind: str) -> dict[str, str]:
+    """A crate-local ``#<kind>-<slug>`` @id for each distinct name, no two alike.
+
+    The slug is :func:`_name_slug` of the name, so ``"Doe, Jane"`` becomes
+    ``#person-doe-jane``. Names that share a slug, or have none, also carry
+    the first 12 hex digits of the sha256 of the name, and should two ids
+    still coincide every name carries its full digest. Two different names
+    therefore never share an @id, and the ids depend on the set of names only,
+    not on their order.
+    """
+    slugs = {name: _name_slug(name) for name in sorted(set(names))}
+    shared = Counter(slugs.values())
+
+    def local_id(name: str, slug: str, digits: int) -> str:
+        digest = hashlib.sha256(name.encode("utf-8")).hexdigest()[:digits]
+        return f"#{kind}-" + "-".join(part for part in (slug, digest) if part)
+
+    ids = {name: local_id(name, slug, 0 if slug and shared[slug] == 1 else 12) for name, slug in slugs.items()}
+    if len(set(ids.values())) < len(ids):
+        ids = {name: local_id(name, slug, 64) for name, slug in slugs.items()}
+    return ids
+
+
+def _add_value(node: dict, key: str, value: object) -> None:
+    """Add *value* to ``node[key]`` once: the value alone, or a list once there are several."""
+    current = node.get(key)
+    if current is None:
+        node[key] = value
+        return
+    values = current if isinstance(current, list) else [current]
+    if value not in values:
+        node[key] = [*values, value]
+
+
+def _rocrate_agents(
+    creators: Iterable[Mapping[str, Any]], contributors: Iterable[Mapping[str, Any]]
+) -> tuple[list[dict], list[dict], list[dict]]:
+    """The people and organisations of a deposit's RO-Crate, and the references to them.
+
+    *creators* and *contributors* are dicts as :func:`_deposit_agents` returns
+    them. Returns the ``creator`` references and the ``contributor``
+    references of the root dataset (``{"@id": ...}``, each person once, in the
+    order given), and the Person and Organization entities for the
+    ``@graph``, people first.
+
+    A person's @id is the ORCID URL, else ``#person-`` and a slug of the name;
+    an organisation's is the ROR URL, else ``#org-`` and a slug of the name
+    (:func:`_crate_local_ids`). ``affiliation_ror`` gives the ROR of an
+    entry's first affiliation, as in the deposit graph (:func:`_agent_node`).
+    Entries with the same ORCID are one person, and entries without one are
+    one person when they have the same name. An entry without an ORCID is
+    never taken for a person who has one: a name does not prove it, and the
+    crate is published with the deposit's DOI. An organisation without a ROR
+    is the organisation of that name with a ROR when exactly one ROR goes
+    with the name. So someone listed as a creator and as a contributor is
+    one entity, which both lists reference. A person points at
+    each organisation by ``affiliation``, and the Zenodo ``type`` of each of
+    their contributor entries is kept as the person's ``roleName``.
+    """
+    entries = [("creator", agent) for agent in creators] + [("contributor", agent) for agent in contributors]
+
+    def affiliations(agent: Mapping[str, Any]) -> list[tuple[str, str]]:
+        """``(name, ROR URL or "")`` of each affiliation of *agent*."""
+        names = [_clean_name(name) for name in _affiliation_names(agent.get("affiliation"))]
+        ror = _ror_url(agent["affiliation_ror"]) if agent.get("affiliation_ror") else ""
+        pairs = [(name, ror if position == 0 else "") for position, name in enumerate(names)]
+        # An affiliation that is blank once cleaned names no organisation.
+        return [(name, org_ror) for name, org_ror in pairs if name]
+
+    # The RORs given with each organisation's name.
+    rors: dict[str, set[str]] = {}
+    for _role, agent in entries:
+        for name, ror in affiliations(agent):
+            if ror:
+                rors.setdefault(name, set()).add(ror)
+
+    def known_id(name: str, given: str, by_name: dict[str, set[str]]) -> str:
+        """The identifier given, else the only one given with *name* elsewhere, else ""."""
+        if given:
+            return given
+        found = by_name.get(name, set())
+        return next(iter(found)) if len(found) == 1 else ""
+
+    person_ids: list[tuple[str, str]] = []
+    org_ids: list[list[tuple[str, str]]] = []
+    for _role, agent in entries:
+        name = _clean_name(agent.get("name"))
+        orcid = f"https://orcid.org/{agent['orcid']}" if agent.get("orcid") else ""
+        person_ids.append((name, orcid))
+        org_ids.append([(org, known_id(org, ror, rors)) for org, ror in affiliations(agent)])
+    local_people = _crate_local_ids((name for name, iri in person_ids if not iri), "person")
+    local_orgs = _crate_local_ids((name for orgs in org_ids for name, iri in orgs if not iri), "org")
+
+    people: dict[str, dict] = {}
+    organisations: dict[str, dict] = {}
+    references: dict[str, list[dict]] = {"creator": [], "contributor": []}
+    for (role, agent), (name, iri), orgs in zip(entries, person_ids, org_ids, strict=True):
+        person_id = iri or local_people[name]
+        person = people.setdefault(person_id, {"@id": person_id, "@type": "Person", "name": name})
+        for org_name, org_iri in orgs:
+            org_id = org_iri or local_orgs[org_name]
+            organisations.setdefault(org_id, {"@id": org_id, "@type": "Organization", "name": org_name})
+            _add_value(person, "affiliation", {"@id": org_id})
+        if role == "contributor" and agent.get("type"):
+            _add_value(person, "roleName", str(agent["type"]))
+        if {"@id": person_id} not in references[role]:
+            references[role].append({"@id": person_id})
+    return references["creator"], references["contributor"], [*people.values(), *organisations.values()]
+
+
+def _rocrate_shape_problems(crate: Mapping[str, Any]) -> list[str]:
+    """What keeps *crate* from the flattened form RO-Crate 1.1 metadata takes.
+
+    Every entity is a direct entry of the ``@graph`` with its own ``@id``, no
+    ``@id`` is described twice, a property points at an entity by ``@id``
+    alone instead of describing it in place, and every crate-local ``#``
+    identifier pointed at is described. An empty list when all of that holds.
+    """
+    graph = crate.get("@graph")
+    if not isinstance(graph, list):
+        return ["it has no @graph list"]
+    problems: list[str] = []
+    entities: list[Mapping[str, Any]] = []
+    described: set[str] = set()
+    for position, entity in enumerate(graph, start=1):
+        entity_id = entity.get("@id") if isinstance(entity, Mapping) else None
+        if not isinstance(entity_id, str) or not entity_id:
+            problems.append(f"@graph entry {position} has no @id")
+            continue
+        if entity_id in described:
+            problems.append(f"{entity_id} is described more than once in the @graph")
+        described.add(entity_id)
+        entities.append(entity)
+    for entity in entities:
+        for key, value in entity.items():
+            if key.startswith("@"):
+                continue
+            for item in value if isinstance(value, list) else [value]:
+                if not isinstance(item, Mapping) or "@value" in item:
+                    continue
+                target = item.get("@id")
+                if set(item) - {"@id"}:
+                    kind = item.get("@type")
+                    label = " ".join(
+                        str(part)
+                        for part in ("/".join(map(str, kind)) if isinstance(kind, list) else kind, item.get("name"))
+                        if part
+                    )
+                    problems.append(
+                        f"{entity['@id']} describes its {key!r} in place ({label or 'no type or name'}); "
+                        "RO-Crate wants each entity as its own @graph entry, referenced by @id"
+                    )
+                elif isinstance(target, str) and target.startswith("#") and target not in described:
+                    problems.append(
+                        f"{entity['@id']} points at {target} under {key!r}, which the @graph does not describe"
+                    )
+    return problems
+
+
+def _read_rocrate(crate: Mapping[str, Any], feature: str) -> Any:
+    """*crate* as the rocrate library reads it (a ``rocrate.rocrate.ROCrate``).
+
+    Raises ImportError naming the publish extra and *feature* when the
+    library is not installed, and whatever the library raises for a crate it
+    cannot read.
+    """
+    from battinfo._util import require_extra  # noqa: PLC0415
+
+    rocrate = require_extra("rocrate.rocrate", "publish", feature)
+    # The library takes the entities it reads apart, so it gets a copy.
+    return rocrate.ROCrate(copy.deepcopy(dict(crate)))
+
+
+def _rocrate_check(crate: Mapping[str, Any]) -> tuple[list[str], str]:
+    """The problems the RO-Crate check finds in *crate*, and why the rocrate library did not read it.
+
+    The shape check (:func:`_rocrate_shape_problems`) always runs; what the
+    library refuses comes first. The second value is the teaching ImportError
+    message when the publish extra is not installed, else ``""``.
+    """
+    problems = _rocrate_shape_problems(crate)
+    try:
+        _read_rocrate(crate, "the RO-Crate check reads the crate with the rocrate library")
+    except ImportError as exc:
+        return problems, str(exc)
+    except Exception as exc:  # noqa: BLE001 - a crate the library refuses is a problem to report
+        problems.insert(0, f"the rocrate library cannot read it: {exc}")
+    return problems, ""
+
+
+def _warn_rocrate_problems(crate: Mapping[str, Any]) -> None:
+    """Warn, and print, what the RO-Crate check finds in a deposit's ``ro-crate-metadata.json``.
+
+    Never raises: a deposit goes ahead whatever the check finds, and when the
+    publish extra is not installed the warning says so.
+    """
+    problems, unread = _rocrate_check(crate)
+    messages: list[str] = []
+    if problems:
+        messages.append(
+            f"The deposit's {_ROCRATE_FILENAME} fails the RO-Crate check ({len(problems)} problem(s)), "
+            "which does not stop the deposit: " + "; ".join(problems)
+        )
+    if unread:
+        messages.append(f"The deposit's {_ROCRATE_FILENAME} was only partly checked: {unread}")
+    for message in messages:
+        # From zenodo(), through prepare() and _assert_publishable(), to the caller.
+        warnings.warn(message, stacklevel=5)
+        print(f"  WARNING: {message}")
+
+
+def _planned_deposit_files(plan: DepositFilePlan) -> list[DepositFile]:
+    """The data files *plan* deposits, for an RO-Crate made before any archive is packed.
+
+    The files themselves, or for a zipped deposit one entry per archive, not
+    yet measured, followed by the files the deposit keeps.
+    """
+    if not plan.zipped:
+        return list(plan.files)
+    archives = [DepositFile(path=Path(), name=name, segment=url_segment(name)) for name in plan.archives()]
+    return [*archives, *plan.kept_files()]
 
 
 # ── Funding / project provenance ─────────────────────────────────────────────
@@ -7849,7 +8094,9 @@ class AuthoringWorkspace:
             ``False`` (default) leaves a draft for review: publish it by clicking
             on Zenodo, or re-run with ``publish=True``. Either way the publication
             check runs before Zenodo is contacted, so a refusal leaves no draft
-            behind. With ``True`` the deposit's files are checked after the
+            behind. It checks the deposit's RO-Crate too
+            (:meth:`validate_rocrate`), and what it finds there is a warning,
+            never a refusal. With ``True`` the deposit's files are checked after the
             upload and before the publish, and a draft whose files do not match
             stays a draft.
         sandbox:
@@ -8064,12 +8311,30 @@ class AuthoringWorkspace:
                 publisher=given_publisher,
                 omissions=omissions,
             )
+            # The RO-Crate is checked with it, once, and only warned about: the
+            # people in it do not change when an adoption rewrites the records.
+            placeholder_crate = (
+                self._rocrate_metadata(
+                    _planned_deposit_files(plan),
+                    title=title,
+                    description=description or "",
+                    creators=creators,
+                    contributors=contributors,
+                    license=license,
+                    zenodo_record_id=0,
+                    prereserved_doi="10.5281/zenodo.RECORD_ID",
+                    sandbox=sandbox,
+                )
+                if first
+                else None
+            )
             self._assert_publishable(
                 placeholder_graph,
                 omissions=omissions,
                 nothing_sent=True,
                 draft=not publish,
                 record_sets=deposit_records if first else None,
+                rocrate=placeholder_crate,
             )
             return deposit_records, plan, kept_files, omissions, placeholder_graph
 
@@ -8419,11 +8684,18 @@ class AuthoringWorkspace:
     def validate_rocrate(self, path: str | Path | None = None) -> bool:
         """Validate a ``ro-crate-metadata.json`` using the official rocrate library.
 
+        Reads the crate with the rocrate library and checks the flattened form
+        RO-Crate 1.1 metadata takes: every entity is its own ``@graph`` entry
+        with an ``@id``, and a property points at an entity by ``@id`` instead
+        of describing it in place. :meth:`zenodo` runs the same check on the
+        deposit's crate and warns about what it finds.
+
         Parameters
         ----------
         path:
-            Path to the RO-Crate directory or to ``ro-crate-metadata.json``
-            directly.  Defaults to the workspace root.
+            Path to the RO-Crate directory or to the metadata file itself
+            (``ro-crate-metadata.json`` or ``ro-crate-metadata.preview.json``).
+            Defaults to the workspace root.
 
         Returns
         -------
@@ -8440,7 +8712,7 @@ class AuthoringWorkspace:
         from battinfo._util import require_extra
 
         try:
-            ROCrate = require_extra("rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata").ROCrate
+            require_extra("rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata")
         except ImportError as exc:
             print(f"  {exc}")
             print("  Alternatively validate at: https://www.researchobject.org/ro-crate/")
@@ -8448,33 +8720,37 @@ class AuthoringWorkspace:
 
         p = Path(path) if path else self._root
         if p.is_file():
-            p = p.parent  # accept the metadata file itself, use its directory
-
-        metadata_path = p / "ro-crate-metadata.json"
-        if not metadata_path.exists():
-            metadata_path = p / "ro-crate-metadata.preview.json"
+            metadata_path = p
+        else:
+            metadata_path = p / _ROCRATE_FILENAME
+            if not metadata_path.exists():
+                metadata_path = p / "ro-crate-metadata.preview.json"
         if not metadata_path.exists():
             print(f"  No ro-crate-metadata.json found in {p}")
             print("  Run ws.preview_rocrate() first.")
             return False
 
-        import shutil
-        import tempfile
-
-        # rocrate library requires the file to be named ro-crate-metadata.json
-        tmpdir = Path(tempfile.mkdtemp())
         try:
-            shutil.copy2(metadata_path, tmpdir / "ro-crate-metadata.json")
-            crate = ROCrate(str(tmpdir))
-            entities = list(crate.get_entities())
-            print(f"  Valid RO-Crate 1.1  ({len(entities)} entities)")
-            print(f"  Root: {crate.root_dataset.id}")
-            return True
-        except Exception as exc:
-            print(f"  Validation failed: {exc}")
+            crate = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"  Validation failed: {metadata_path} cannot be read as JSON ({exc})")
             return False
-        finally:
-            remove_temp_tree(tmpdir)
+        if not isinstance(crate, dict):
+            print(f"  Validation failed: {metadata_path} does not hold a JSON object")
+            return False
+        problems = _rocrate_shape_problems(crate)
+        try:
+            reader = _read_rocrate(crate, "validate_rocrate() checks RO-Crate metadata")
+            entities = len(list(reader.get_entities()))
+        except Exception as exc:  # noqa: BLE001 - whatever stops the reader fails the validation
+            problems.insert(0, str(exc))
+        if problems:
+            for problem in problems:
+                print(f"  Validation failed: {problem}")
+            return False
+        print(f"  Valid RO-Crate 1.1  ({entities} entities)")
+        print(f"  Root: {reader.root_dataset.id}")
+        return True
 
     def preview_rocrate(
         self,
@@ -8491,9 +8767,14 @@ class AuthoringWorkspace:
         """Generate ``ro-crate-metadata.json`` locally for review.
 
         Uses placeholder values for the Zenodo URL. The creators and their
-        ORCIDs are the ones :meth:`zenodo` would give the deposit. Pass the
-        *bundle* and *archive_name* you will give :meth:`zenodo`: a zipped
-        deposit's archives are built here, to measure them.
+        ORCIDs are the ones :meth:`zenodo` would give the deposit. Each
+        person and organisation is an entity of its own, identified by ORCID
+        or ROR, else by a ``#person-`` or ``#org-`` identifier made from the
+        name. The preview then prints what the RO-Crate check
+        (:meth:`validate_rocrate`) finds, which :meth:`zenodo` warns about
+        and does not refuse. Pass the *bundle* and *archive_name* you will
+        give :meth:`zenodo`: a zipped deposit's archives are built here, to
+        measure them.
 
         Example::
 
@@ -8518,7 +8799,7 @@ class AuthoringWorkspace:
             # Write a placeholder linked-data file so contentSize is available
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
-            self._build_rocrate(
+            crate = self._build_rocrate(
                 tmpdir,
                 data_files,
                 title=title,
@@ -8536,6 +8817,15 @@ class AuthoringWorkspace:
             remove_temp_tree(tmpdir)
 
         print(f"  Written: {out}")
+        problems, unread = _rocrate_check(crate)
+        if unread:
+            print(f"  RO-Crate check: partial, as {unread}")
+        if problems:
+            print(f"  RO-Crate check: {len(problems)} problem(s), which ws.zenodo() warns about and does not refuse:")
+            for problem in problems:
+                print(f"    warning {problem}")
+        elif not unread:
+            print("  RO-Crate check: PASS")
         return out
 
     def preview_jsonld(
@@ -8695,6 +8985,7 @@ class AuthoringWorkspace:
         nothing_sent: bool = False,
         draft: bool = False,
         record_sets: dict[str, builtins.list[Any]] | None = None,
+        rocrate: Mapping[str, Any] | None = None,
     ) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
@@ -8709,7 +9000,12 @@ class AuthoringWorkspace:
         draft as it checks a publish, since a draft is one click from published.
         With *record_sets* (the records the graph was built from), the record
         fields the graph does not carry are printed as warnings; they never
-        refuse."""
+        refuse.
+
+        *rocrate* is the deposit's ``ro-crate-metadata.json``. When given, and
+        the deposit is not refused, the RO-Crate check runs on it and what it
+        finds is a warning only (:func:`_warn_rocrate_problems`), as is a
+        missing publish extra."""
         verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         left_out = list(dict.fromkeys(omissions))
@@ -8748,6 +9044,8 @@ class AuthoringWorkspace:
                 + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
                 + sent_note
             )
+        if rocrate is not None:
+            _warn_rocrate_problems(rocrate)
 
     def _bundle_data_files(self, tmpdir: Path, plan: DepositFilePlan) -> builtins.list[DepositFile]:
         """The data files to upload, each under its deposit name in *plan*.
@@ -10314,38 +10612,64 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         sandbox: bool = False,
-    ) -> None:
-        """Write a conforming ``ro-crate-metadata.json`` to *tmpdir*.
+    ) -> dict:
+        """Write a conforming ``ro-crate-metadata.json`` to *tmpdir*, and return what it holds.
 
-        Produces a minimal RO-Crate 1.1 that:
+        Writes :meth:`_rocrate_metadata` for the arguments, with the size of
+        the ``battinfo.json`` in *tmpdir* when there is one.
+        """
+        jsonld_path = tmpdir / BATTINFO_LD_FILENAME
+        crate = self._rocrate_metadata(
+            data_files,
+            title=title,
+            description=description,
+            creators=creators,
+            contributors=contributors,
+            license=license,
+            zenodo_record_id=zenodo_record_id,
+            prereserved_doi=prereserved_doi,
+            sandbox=sandbox,
+            jsonld_size=jsonld_path.stat().st_size if jsonld_path.exists() else None,
+        )
+        (tmpdir / _ROCRATE_FILENAME).write_text(
+            json.dumps(crate, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        return crate
+
+    @staticmethod
+    def _rocrate_metadata(
+        data_files: builtins.list[DepositFile],
+        *,
+        title: str,
+        description: str,
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict],
+        license: str,
+        zenodo_record_id: int,
+        prereserved_doi: str,
+        sandbox: bool = False,
+        jsonld_size: int | None = None,
+    ) -> dict:
+        """The ``ro-crate-metadata.json`` of a deposit.
+
+        A minimal RO-Crate 1.1 that:
         - Lists ``battinfo.json`` and all data files as ``hasPart``
         - References the Zenodo record URL and DOI
+        - Describes the creators and contributors, and their organisations, as
+          contextual entities the root references by ``@id`` (:func:`_rocrate_agents`)
         - Is processable by any RO-Crate-aware tool (EOSC portals, WorkflowHub, etc.)
 
         *data_files* are the data files the deposit holds: those
         :meth:`_bundle_data_files` uploads and those it keeps. A file's ``@id``
         is its deposit name percent-encoded, a relative URL, and its ``name``
-        the name itself; size and sha256 come from the plan.
+        the name itself; size and sha256 come from the plan. *jsonld_size* is
+        the size of ``battinfo.json`` in bytes, when known.
         """
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
 
-        def _creator_node(c: dict) -> dict:
-            node: dict = {"@type": "Person", "name": c.get("name", "")}
-            if c.get("affiliation"):
-                node["affiliation"] = {"@type": "Organization", "name": c["affiliation"]}
-            if c.get("orcid"):
-                node["@id"] = f"https://orcid.org/{c['orcid']}"
-            return node
-
-        def _contributor_node(c: dict) -> dict:
-            node = _creator_node(c)
-            if c.get("type"):
-                node["roleName"] = c["type"]
-            return node
-
-        creator_nodes = [_creator_node(c) for c in creators] if creators else []
-        contributor_nodes = [_contributor_node(c) for c in contributors] if contributors else []
+        creator_refs, contributor_refs, agent_entities = _rocrate_agents(creators or [], contributors or [])
 
         # Root Dataset
         parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
@@ -10360,10 +10684,10 @@ class AuthoringWorkspace:
             "identifier": prereserved_doi,
             "hasPart": parts,
         }
-        if creator_nodes:
-            root["creator"] = creator_nodes if len(creator_nodes) > 1 else creator_nodes[0]
-        if contributor_nodes:
-            root["contributor"] = contributor_nodes if len(contributor_nodes) > 1 else contributor_nodes[0]
+        if creator_refs:
+            root["creator"] = creator_refs if len(creator_refs) > 1 else creator_refs[0]
+        if contributor_refs:
+            root["contributor"] = contributor_refs if len(contributor_refs) > 1 else contributor_refs[0]
 
         # linked-data file entity
         jsonld_entity: dict = {
@@ -10374,9 +10698,8 @@ class AuthoringWorkspace:
             "encodingFormat": "application/ld+json",
             "conformsTo": {"@id": "https://w3id.org/battinfo/"},
         }
-        jsonld_path = tmpdir / BATTINFO_LD_FILENAME
-        if jsonld_path.exists():
-            jsonld_entity["contentSize"] = str(jsonld_path.stat().st_size)
+        if jsonld_size is not None:
+            jsonld_entity["contentSize"] = str(jsonld_size)
 
         # Data file entities
         file_entities: list[dict] = []
@@ -10412,16 +10735,13 @@ class AuthoringWorkspace:
             root,
             jsonld_entity,
             *file_entities,
+            *agent_entities,
         ]
 
-        crate = {
+        return {
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph": graph,
         }
-        (tmpdir / _ROCRATE_FILENAME).write_text(
-            json.dumps(crate, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
 
     def _deposit_spec_summaries(self) -> builtins.list[dict]:
         """Manufacturer, model, chemistry, format and IEC code of each saved cell spec, by file name."""

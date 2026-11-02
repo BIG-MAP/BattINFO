@@ -6,7 +6,9 @@
   refuse before any request, and ws.publish() before it saves or uploads.
 - Every ORCID reaches Zenodo as a bare id, and the deposit graph and the
   RO-Crate with one ``https://orcid.org/`` in front, however it was given.
-- A draft gets the check a publish gets, before the deposit exists.
+- A draft gets the check a publish gets, before the deposit exists. The
+  check reads the RO-Crate too, and what it finds there, or a missing
+  publish extra, is a warning: the deposit goes ahead.
 - The metadata goes up as soon as the deposit exists, before any file, and an
   ``errors`` list in Zenodo's reply stops the run there, with the draft saved
   for the next run to update.
@@ -21,6 +23,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from urllib.parse import unquote
@@ -28,8 +31,9 @@ from urllib.parse import unquote
 import pytest
 
 import battinfo
+import battinfo.ws as wsmod
 from battinfo import zenodo as zmod
-from battinfo.ws import AuthoringWorkspace
+from battinfo.ws import AuthoringWorkspace, _rocrate_check
 from battinfo.zenodo import ZenodoClient, ZenodoError
 
 pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
@@ -122,9 +126,13 @@ class _ZenodoAPI:
     def graph(self) -> dict:
         return json.loads(self.files["battinfo.json"])
 
-    def crate_root(self) -> dict:
+    def crate_entities(self) -> dict[str, dict]:
+        """The entities of the deposited RO-Crate, by @id."""
         crate = json.loads(self.files["ro-crate-metadata.json"])
-        return next(node for node in crate["@graph"] if node["@id"] == "./")
+        return {node["@id"]: node for node in crate["@graph"]}
+
+    def crate_root(self) -> dict:
+        return self.crate_entities()["./"]
 
 
 @pytest.fixture()
@@ -281,9 +289,9 @@ def test_creators_come_from_the_argument_then_the_contributors_then_the_config(
     assert api.metadata is not None and api.metadata["creators"] == expected
     creators = _catalog(api.graph())["schema:creator"]
     assert [node["schema:name"] for node in creators] == [c["name"] for c in expected]
-    root_creators = api.crate_root()["creator"]
-    root_creators = root_creators if isinstance(root_creators, list) else [root_creators]
-    assert [node["name"] for node in root_creators] == [c["name"] for c in expected]
+    # The RO-Crate root points at each creator, an entity of its own.
+    entities = api.crate_entities()
+    assert [entities[iri]["name"] for iri in _ids(entities["./"]["creator"])] == [c["name"] for c in expected]
 
 
 def test_a_creator_needs_a_name(tmp_path: Path, api: _ZenodoAPI) -> None:
@@ -364,6 +372,63 @@ def test_an_invalid_orcid_is_refused_naming_its_creator(tmp_path: Path, api: _Ze
     with pytest.raises(ValueError, match=r"creator 'Lovelace, Ada': invalid ORCID iD"):
         getattr(ws, call)(creators=creators, **kwargs)
     assert api.requests == []
+
+
+# ── The RO-Crate check ───────────────────────────────────────────────────────
+
+
+def test_the_deposited_crate_describes_a_creator_without_an_orcid_and_passes_the_check(
+    tmp_path: Path, api: _ZenodoAPI, recwarn: pytest.WarningsRecorder
+) -> None:
+    pytest.importorskip("rocrate")
+    ws = _workspace(tmp_path)
+    ws.zenodo(token="placeholder", creators=CREATORS, publish=True)
+    entities = api.crate_entities()
+    assert entities["./"]["creator"] == {"@id": "#person-doe-jane"}
+    assert entities["#person-doe-jane"]["affiliation"] == {"@id": "#org-example-lab"}
+    assert entities["#org-example-lab"]["@type"] == "Organization"
+    assert _rocrate_check(json.loads(api.files["ro-crate-metadata.json"])) == ([], "")
+    assert not [w for w in recwarn if "RO-Crate" in str(w.message)]
+
+
+def test_what_the_rocrate_check_finds_is_a_warning_given_before_anything_is_sent(
+    tmp_path: Path, api: _ZenodoAPI, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path)
+    requests_at_check: list[list[str]] = []
+
+    def one_problem(crate: dict) -> list[str]:
+        requests_at_check.append(list(api.requests))
+        return ["./ describes its 'creator' in place (Person Doe, Jane)"]
+
+    monkeypatch.setattr(wsmod, "_rocrate_shape_problems", one_problem)
+    with pytest.warns(
+        UserWarning, match=r"fails the RO-Crate check \(1 problem\(s\)\), which does not stop the deposit"
+    ):
+        result = ws.zenodo(token="placeholder", creators=CREATORS, publish=True)
+    assert requests_at_check == [[]]  # once, before any request
+    assert result.published
+    assert "WARNING: The deposit's ro-crate-metadata.json fails the RO-Crate check" in capsys.readouterr().out
+
+
+def test_without_the_publish_extra_the_crate_check_says_so_and_the_deposit_goes_ahead(
+    tmp_path: Path, api: _ZenodoAPI, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path)
+    for name in list(sys.modules):
+        if name == "rocrate" or name.startswith("rocrate."):
+            monkeypatch.delitem(sys.modules, name)
+    monkeypatch.setitem(sys.modules, "rocrate", None)  # type: ignore[arg-type]
+    hint = r"needs the \[publish\] extra: pip install battinfo\[publish\]"
+    with pytest.warns(UserWarning, match=rf"ro-crate-metadata\.json was only partly checked: .*{hint}"):
+        result = ws.zenodo(token="placeholder", creators=CREATORS)
+    assert "POST /deposit/depositions" in api.requests and not result.published
+    assert "ro-crate-metadata.json" in api.files
+    capsys.readouterr()
+    ws.preview_rocrate()
+    assert "RO-Crate check: partial, as the RO-Crate check reads the crate with the rocrate library" in (
+        capsys.readouterr().out
+    )
 
 
 # ── The order of the steps ────────────────────────────────────────────────────
