@@ -70,8 +70,8 @@ record id, record id, deposit id and DOI, whether the record is published,
 the published record a draft of a new version was made from
 (``version_of``), the IRIs of the records the deposit holds
 (``ws.submit()`` records the DOI on those only), and the names of the extra
-files the last run deposited (``extra_files``), which the next run warns
-about when it leaves them out.
+files the last run sent, or was about to send when it stopped
+(``extra_files``), which the next run warns about when it leaves them out.
 
 The files are written atomically. One that cannot be read raises
 :class:`DepositIndexError`, naming the file, and is never written over,

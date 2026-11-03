@@ -1964,16 +1964,32 @@ def _dropped_extra_files(state: Mapping[str, Any], extra_files: Sequence[Deposit
 
 
 def _warn_dropped_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
-    """Warn that the deposit no longer holds the extra files *dropped*, which *recorded_in* lists for it."""
+    """Warn that this run will remove the extra files *dropped*, which *recorded_in* lists for the deposit."""
     if not dropped:
         return
     message = (
-        f"This deposit leaves out the extra files {recorded_in} records from the last ws.zenodo() run: "
-        f"{_shown_list(list(dropped))}. A deposit holds the extra files the call names, so these are "
-        "removed from the draft. Pass them in extra_files= to keep them."
+        f"This run does not name the extra files {recorded_in} records for the deposit: "
+        f"{_shown_list(list(dropped))}. A deposit holds the extra files the call names, so the run will "
+        "remove them from the draft. Pass them in extra_files= to keep them."
     )
     warnings.warn(message, stacklevel=3)
     print(f"  WARNING: {message}")
+
+
+def _refuse_publish_dropping_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
+    """Refuse a publish whose call names none of the extra files *dropped*, which *recorded_in* lists for the deposit.
+
+    A published record keeps its files for good, so the extra files of a
+    reviewed draft are not left out of it unless the call says so with
+    ``extra_files=[]``.
+    """
+    raise ValueError(
+        f"Refusing to publish: {recorded_in} records the extra files {_shown_list(list(dropped))} for this "
+        "deposit, and this call does not name them, so the published record would hold none of them. "
+        "Pass them again in extra_files=, or extra_files=[] to publish without them. Nothing was sent. "
+        "ws.publish(zenodo=True) passes no extra files; publish such a deposit with "
+        "ws.zenodo(publish=True, extra_files=[...])."
+    )
 
 
 # Record-type subdirectories under a workspace's records source folder
@@ -2850,6 +2866,7 @@ _DEPOSIT_OWN_FILES = {
     BATTINFO_LD_FILENAME: "deposit graph",
     _ROCRATE_FILENAME: "RO-Crate metadata",
     BATTINFO_LD_FILENAME_LEGACY: "deposit graph's former name, which ws.import_() reads",
+    "ro-crate-metadata.jsonld": "RO-Crate 1.0 metadata file name, which crate readers look for",
 }
 # A Zenodo deposit of more than this many data files is zipped, one archive per
 # test kind (bundle="by_kind", the default; see AuthoringWorkspace._bundle_data_files),
@@ -8199,8 +8216,11 @@ class AuthoringWorkspace:
         ``schema:DigitalDocument`` under ``schema:hasPart``, each with its
         media type, size and sha256. The state file records their names. A
         run describes the whole deposit, so an extra file the last run
-        deposited and this one does not name is removed, with a warning that
-        names it, and one that has not changed since is not uploaded again.
+        deposited and this one does not name is removed from the draft, with
+        a warning that names it, and one that has not changed since is not
+        uploaded again. A publish (``publish=True``) that would leave such a
+        file out of the record is refused before anything is sent, unless
+        the call passes ``extra_files=[]``.
 
         Each data file location in the records is screened from its text before
         anything asks the file system about it. A file on this computer is read
@@ -8330,7 +8350,9 @@ class AuthoringWorkspace:
             ``battinfo.jsonld`` or another extra file, ignoring case and
             Unicode normalisation. They count toward the 100 files Zenodo
             takes in one record, which the call warns about before anything is
-            sent. :meth:`publish` passes none.
+            sent. :meth:`publish` passes none, so it refuses to publish a draft
+            that holds extra files; publish one with
+            ``zenodo(publish=True, extra_files=...)``.
 
         Returns
         -------
@@ -8497,8 +8519,18 @@ class AuthoringWorkspace:
 
         deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=True)
         # Extra files an earlier run deposited and this one does not name go
-        # from the deposit, with a warning that names them.
-        _warn_dropped_extra_files(_dropped_extra_files(state, extras), recorded_in)
+        # from the draft, with a warning that names them; a publish that would
+        # leave them out of the record for good is refused unless the call
+        # passed extra_files=[] itself. They belong to the record the state
+        # file continues, not to another one record_id= names.
+        dropped = (
+            _dropped_extra_files(state, extras)
+            if record_id is None or record_id == str(state.get("record_id") or "")
+            else []
+        )
+        if dropped and publish and extra_files is None:
+            _refuse_publish_dropping_extra_files(dropped, recorded_in)
+        _warn_dropped_extra_files(dropped, recorded_in)
         # One record, one IRI: once the records pass the checks above, a record
         # minted here under /id/1001/ that the registry already holds in the old
         # form takes that IRI (IRI ruling, decision 5), and the deposit is

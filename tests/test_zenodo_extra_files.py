@@ -312,7 +312,7 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
     assert _state(tmp_path)["extra_files"] == ["README.md", "notes.txt"]  # type: ignore[index]
 
     def left_out(caught: list[warnings.WarningMessage]) -> str:
-        [warning] = [str(w.message) for w in caught if "leaves out the extra files" in str(w.message)]
+        [warning] = [str(w.message) for w in caught if "does not name the extra files" in str(w.message)]
         return warning
 
     # A run that names one of them leaves out the other, and says so. (It
@@ -320,8 +320,8 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
     with pytest.warns(UserWarning) as caught:
         _deposit(ws, extra_files=["README.md"])
     assert left_out(caught.list).startswith(
-        "This deposit leaves out the extra files .battinfo/zenodo.json records from the last "
-        "ws.zenodo() run: notes.txt."
+        "This run does not name the extra files .battinfo/zenodo.json records for the deposit: notes.txt. "
+        "A deposit holds the extra files the call names, so the run will remove them from the draft."
     )
     assert set(zenodo.files()) == OWN_FILES | {"run.bdf.csv", "README.md"}
     assert _state(tmp_path)["extra_files"] == ["README.md"]  # type: ignore[index]
@@ -330,8 +330,8 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
     capsys.readouterr()
     with pytest.warns(UserWarning) as caught:
         _deposit(ws)
-    assert "from the last ws.zenodo() run: README.md. " in left_out(caught.list)
-    assert "WARNING: This deposit leaves out the extra files" in capsys.readouterr().out
+    assert "records for the deposit: README.md. " in left_out(caught.list)
+    assert "WARNING: This run does not name the extra files" in capsys.readouterr().out
     assert set(zenodo.files()) == OWN_FILES | {"run.bdf.csv"}
     assert "README.md" in zenodo.deleted
     assert "extra_files" not in _state(tmp_path)  # type: ignore[operator]
@@ -342,6 +342,56 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         _deposit(ws)
+    assert not [w for w in caught if "extra files" in str(w.message)]
+
+
+def test_a_publish_that_would_leave_out_extra_files_is_refused_unless_the_call_says_so(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    ws = _workspace(tmp_path)
+    _deposit(ws, extra_files=["README.md", "notes.txt"])
+    held = dict(zenodo.files())
+    uploads = len(zenodo.uploaded)
+
+    # A published record keeps its files for good: publishing the reviewed
+    # draft without naming its extra files is refused, and nothing is sent.
+    with pytest.raises(ValueError, match="Refusing to publish") as refused:
+        _deposit(ws, publish=True)
+    assert "README.md; notes.txt" in str(refused.value)
+    assert "extra_files=[] to publish without them" in str(refused.value)
+    assert "ws.zenodo(publish=True, extra_files=[...])" in str(refused.value)
+    assert zenodo.files() == held and len(zenodo.uploaded) == uploads and not zenodo.deleted
+    assert not zenodo.published
+    assert _state(tmp_path)["extra_files"] == ["README.md", "notes.txt"]  # type: ignore[index]
+
+    # Naming them again publishes them.
+    _deposit(ws, publish=True, extra_files=["README.md", "notes.txt"])
+    assert zenodo.published == {7000}
+    assert {"README.md", "notes.txt"} <= set(zenodo.files())
+
+
+def test_extra_files_empty_publishes_without_them(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    _deposit(ws, extra_files=["README.md"])
+    with pytest.warns(UserWarning, match="does not name the extra files"):
+        _deposit(ws, publish=True, extra_files=[])
+    assert zenodo.published == {7000}
+    assert "README.md" not in zenodo.files() and "README.md" in zenodo.deleted
+
+
+def test_extra_files_of_this_workspaces_record_are_not_another_records(tmp_path: Path, zenodo: _Zenodo) -> None:
+    # record_id= names a record the state file does not continue; the extra
+    # files the state records belong to its own record, so the run does not
+    # warn about them, nor refuse to publish over them.
+    ws = _workspace(tmp_path)
+    _deposit(ws, extra_files=["README.md"])
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        # The in-memory Zenodo makes no new version of another record, so the
+        # call stops there, after the point that would have warned or refused.
+        with pytest.raises(Exception) as stopped:
+            _deposit(ws, publish=True, record_id=1234)
+    assert "Refusing to publish" not in str(stopped.value)
     assert not [w for w in caught if "extra files" in str(w.message)]
 
 
@@ -372,6 +422,7 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
             "RO-Crate-Metadata.json is the name of ro-crate-metadata.json, the RO-Crate metadata",
         ),
         ({"notes.txt": "battinfo.jsonld"}, {}, ValueError, "the deposit graph's former name"),
+        ({"notes.txt": "ro-crate-metadata.jsonld"}, {}, ValueError, "RO-Crate 1.0 metadata file name"),
         (["README.md", "docs/README.md"], {}, ValueError, "docs/README.md and README.md would both be deposited as"),
         ({"README.md": "notes.md", "notes.txt": "Notes.md"}, {}, ValueError, "would both be deposited as Notes.md"),
         ({"run.bdf.csv": "copy.csv"}, {}, ValueError, "is the data file run.bdf.csv of the deposit already"),
@@ -392,6 +443,7 @@ def test_a_rerun_without_extra_files_removes_them_and_names_them_in_a_warning(
         "graph",
         "rocrate",
         "legacy-graph",
+        "rocrate-1.0",
         "two-extras-own-names",
         "two-extras-given-names",
         "a-data-file-itself",
