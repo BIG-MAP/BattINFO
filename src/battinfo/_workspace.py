@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import mimetypes
 import shutil
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
@@ -13,10 +12,12 @@ if TYPE_CHECKING:
 from battinfo._fs_guard import is_empty_or_missing, remove_tree, write_marker
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._util import (
+    EXTENSION_MEDIA_TYPE_MAP,  # noqa: F401 - imported from here by name
     LOCATION_FIELDS,
     _as_path,
     _now_unix,
     _sha256,
+    file_media_type,
     file_uri_to_path,
     is_file_uri,
     is_local_location,
@@ -90,15 +91,6 @@ from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
 
 PathLike = str | Path
-EXTENSION_MEDIA_TYPE_MAP = {
-    ".csv": "text/csv",
-    ".tsv": "text/tab-separated-values",
-    ".json": "application/json",
-    ".jsonld": "application/ld+json",
-    ".h5": "application/x-hdf5",
-    ".hdf5": "application/x-hdf5",
-    ".parquet": "application/vnd.apache.parquet",
-}
 
 
 def quantity(
@@ -552,14 +544,7 @@ def _path_from_file_uri(uri: str) -> Path | None:
     return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
-def _guess_media_type(value: str | None) -> str | None:
-    if value is None:
-        return None
-    suffix = Path(value).suffix.lower()
-    if suffix in EXTENSION_MEDIA_TYPE_MAP:
-        return EXTENSION_MEDIA_TYPE_MAP[suffix]
-    guessed, _ = mimetypes.guess_type(value)
-    return guessed
+_guess_media_type = file_media_type
 
 
 def _sync_model_state(target: Any, source: Any) -> None:

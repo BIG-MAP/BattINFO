@@ -86,6 +86,7 @@ from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import (
+    PARQUET_MEDIA_TYPE,
     _now_iso,
     _now_unix,
     is_dataset_series,
@@ -93,6 +94,7 @@ from battinfo._util import (
     is_real_number,
     local_file_references,
     path_name,
+    registered_media_type,
     url_segment,
 )
 from battinfo._util import file_uri_to_path as _file_uri_to_path
@@ -628,11 +630,34 @@ BATTINFO_LD_FILENAME_LEGACY = "battinfo.jsonld"
 _ROCRATE_FILENAME = "ro-crate-metadata.json"
 
 # Battery Data Format (BDF) CSVW table schema. A BDF data file declares
-# conformance to this so a consumer can resolve every column name, type and unit
-# from one link instead of a per-record data dictionary. The VERSIONED IRI is
-# used deliberately: an archived deposit must keep pointing at the exact schema
-# version it was built against (the floating `.../schema` IRI tracks latest).
-BDF_TABLE_SCHEMA_IRI = "https://w3id.org/battery-data-alliance/ontology/battery-data-format/1.2.0/schema"
+# conformance to it so a consumer can resolve every column name, type and unit
+# from one link instead of a per-record data dictionary. A deposit names the
+# versioned schema of the BDF version its files follow when the caller gives it
+# (``bdf_version=``, see _bdf_table_schema_iri), and otherwise this unversioned
+# IRI, which resolves to the current schema: nothing in a data file names its
+# BDF version, and a version the files do not follow is a false statement on a
+# permanent record.
+_BDF_SCHEMA_BASE = "https://w3id.org/battery-data-alliance/ontology/battery-data-format"
+BDF_TABLE_SCHEMA_IRI = f"{_BDF_SCHEMA_BASE}/schema"
+_BDF_VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+
+
+def _bdf_version(value: object) -> str | None:
+    """*value*, a BDF version such as ``"1.3.0"``, stripped; ``None`` for none given.
+
+    Raises ``ValueError`` for anything else, before a deposit is made.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if not isinstance(value, str) or not _BDF_VERSION_RE.match(value.strip()):
+        raise ValueError(f"bdf_version={value!r} is not a BDF version such as '1.3.0'.")
+    return value.strip()
+
+
+def _bdf_table_schema_iri(version: str | None) -> str:
+    """The BDF table schema of *version* (``.../battery-data-format/1.3.0/schema``), else :data:`BDF_TABLE_SCHEMA_IRI`."""
+    return f"{_BDF_SCHEMA_BASE}/{version}/schema" if version else BDF_TABLE_SCHEMA_IRI
+
 
 # Loaded once at import time; used as the base for all JSON-LD context dicts.
 # The versioned hosted context is the one authority — inline embedding must
@@ -888,14 +913,39 @@ def _with_citation_doi(record: dict, doi: str | None) -> dict:
     return {**record, "provenance": provenance}
 
 
-def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
-    """Return ``(start_unix, end_unix)`` for a BDF CSV from its ``unix_time_second``
-    column (first and last data rows), or None if unavailable. The end row is read by
-    seeking the tail, so this is cheap even for multi-hundred-MB files."""
+def _implausible_unix_time(file_name: str, value: int) -> bool:
+    """Whether *value*, a ``unix_time_second`` of the data file *file_name*, lies outside 2000..2100, said in a warning.
+
+    Epochs outside that span are converter garbage (batterydf 0.1.0 emitted
+    epoch/1000 - a 1970 date on a citable record is worse than no date), so the
+    caller withholds the period rather than stamp it.
+    """
+    if 946684800 <= value <= 4102444800:
+        return False
+    print(
+        f"  warning: {file_name} unix_time_second={value} is implausible "
+        "(outside 2000-2100) - not stamping test/dataset times from it. "
+        "Known cause: batterydf<0.2 wrote epoch/1000; upgrade the converter "
+        '(pip install "battinfo[processing]") and re-run ws.convert().'
+    )
+    return True
+
+
+def _bdf_measurement_period(data_path: "str | Path") -> tuple[int, int] | None:
+    """Return ``(start_unix, end_unix)`` for a BDF data file from its ``unix_time_second``
+    column, or None if unavailable.
+
+    A CSV gives its first and last data rows; the end row is read by seeking the
+    tail, so this is cheap even for multi-hundred-MB files. A parquet file, told
+    apart by its suffix, gives the span its footer records for the column (see
+    :func:`_parquet_measurement_period`).
+    """
     try:
-        path = Path(csv_path)
+        path = Path(data_path)
         if not path.is_file():
             return None
+        if path.suffix.lower() == ".parquet":
+            return _parquet_measurement_period(path)
         with path.open(encoding="utf-8") as fh:
             header = fh.readline().rstrip("\n").split(",")
             if "unix_time_second" not in header:
@@ -911,20 +961,57 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             tail = fb.read().decode("utf-8", "ignore").splitlines()
         last = next((ln for ln in reversed(tail) if ln.strip() and "," in ln), "")
         end = int(float(last.split(",")[col])) if last else start
-        # Plausibility gate: epochs outside 2000..2100 are converter garbage
-        # (batterydf 0.1.0 emitted epoch/1000 - a 1970 date on a citable record
-        # is worse than no date). Warn and withhold rather than stamp it.
-        if not (946684800 <= start <= 4102444800):
-            print(
-                f"  warning: {path.name} unix_time_second={start} is implausible "
-                "(outside 2000-2100) - not stamping test/dataset times from it. "
-                "Known cause: batterydf<0.2 wrote epoch/1000; upgrade the converter "
-                '(pip install "battinfo[processing]") and re-run ws.convert().'
-            )
+        if _implausible_unix_time(path.name, start):
             return None
         return (start, end) if end >= start else (end, start)
     except Exception:
         return None
+
+
+def _parquet_measurement_period(path: Path) -> tuple[int, int] | None:
+    """``(start_unix, end_unix)`` of a BDF parquet file, or None (see :func:`_bdf_measurement_period`).
+
+    The span is the smallest and the largest ``unix_time_second`` the footer's
+    statistics record over all row groups, so no data page is read. When a row
+    group has no statistics, the column is read from the first and the last row
+    group only, never whole: a measurement file can hold millions of rows. Both
+    ends must pass the plausibility check. Reading parquet needs pyarrow (the
+    ``tabular`` extra); without it the period is None, and a warning says so.
+    """
+    try:
+        import pyarrow.parquet as pq  # noqa: PLC0415
+    except ImportError:
+        warnings.warn(
+            "The measured period of a parquet data file is read with pyarrow, which is not installed, so "
+            'tests and datasets of parquet files get no start, end or temporal coverage. Run: pip install "battinfo[tabular]"',
+            stacklevel=2,
+        )
+        return None
+    with pq.ParquetFile(path) as parquet:
+        columns = parquet.schema.names
+        if "unix_time_second" not in columns:
+            return None
+        column = columns.index("unix_time_second")
+        footer = parquet.metadata
+        groups = footer.num_row_groups
+        if groups == 0:
+            return None
+        stats = [footer.row_group(i).column(column).statistics for i in range(groups)]
+        if all(s is not None and s.has_min_max for s in stats):
+            first: Any = min(s.min for s in stats)
+            last: Any = max(s.max for s in stats)
+        else:
+            head = parquet.read_row_group(0, columns=["unix_time_second"]).column(0)
+            tail = parquet.read_row_group(groups - 1, columns=["unix_time_second"]).column(0)
+            if len(head) == 0 or len(tail) == 0:
+                return None
+            first, last = head[0].as_py(), tail[-1].as_py()
+    if first is None or last is None:
+        return None
+    start, end = int(float(first)), int(float(last))
+    if _implausible_unix_time(path.name, start) or _implausible_unix_time(path.name, end):
+        return None
+    return (start, end) if end >= start else (end, start)
 
 
 def _distribution_file_name(url: str) -> str:
@@ -7939,6 +8026,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, str] | None = None,
         bundle: str = "by_kind",
         archive_name: str | None = None,
+        bdf_version: str | None = None,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -8181,6 +8269,13 @@ class AuthoringWorkspace:
         archive_name:
             The archive of ``bundle="single"``, a file name ending in ``.zip``
             (default ``"data.zip"``).
+        bdf_version:
+            The Battery Data Format version the BDF data files follow, such as
+            ``"1.3.0"``. Each of them then names that version's table schema
+            (``dcterms:conformsTo``,
+            ``.../battery-data-format/1.3.0/schema``). Without it they name the
+            unversioned schema, since a data file does not record its BDF
+            version.
 
         Returns
         -------
@@ -8218,6 +8313,7 @@ class AuthoringWorkspace:
             _zenodo_date(publication_date, "publication_date")
         given_publisher = _deposit_publisher(publisher)
         single_archive_name(bundle, archive_name)
+        bdf_version = _bdf_version(bdf_version)
         # License precedence: explicit arg > workspace default > cc-by-4.0.
         if license is None:
             license = self._get_license() or "cc-by-4.0"
@@ -8310,6 +8406,7 @@ class AuthoringWorkspace:
                 previous_version=f"https://{domain}/records/{follows}" if follows else "",
                 publisher=given_publisher,
                 omissions=omissions,
+                bdf_version=bdf_version,
             )
             # The RO-Crate is checked with it, once, and only warned about: the
             # people in it do not change when an adoption rewrites the records.
@@ -8513,6 +8610,7 @@ class AuthoringWorkspace:
                 is_version_of=is_version_of,
                 previous_version=previous_version,
                 publisher=given_publisher,
+                bdf_version=bdf_version,
             )
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
@@ -8844,6 +8942,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, str] | None = None,
         bundle: str = "by_kind",
         archive_name: str | None = None,
+        bdf_version: str | None = None,
     ) -> Path:
         """Generate ``battinfo.json`` locally for review before uploading to Zenodo.
 
@@ -8851,8 +8950,8 @@ class AuthoringWorkspace:
         structure can be inspected without creating a deposit.  Pass the same
         ``title``/``creators``/``license`` you would give :meth:`zenodo` to preview
         the rights and attribution that will be embedded in the published record,
-        and the same ``version``, ``publisher``, ``bundle`` and ``archive_name``
-        (see :meth:`zenodo`). With no deposit to read them from, the version
+        and the same ``version``, ``publisher``, ``bundle``, ``archive_name``
+        and ``bdf_version`` (see :meth:`zenodo`). With no deposit to read them from, the version
         links are given here: ``is_version_of`` is the concept record, which
         groups every version (``dcterms:isVersionOf``), and
         ``previous_version`` the version this one follows
@@ -8886,6 +8985,7 @@ class AuthoringWorkspace:
             raise RuntimeError("No records found — run ws.save() first.")
         given_publisher = _deposit_publisher(publisher)
         single_archive_name(bundle, archive_name)
+        bdf_version = _bdf_version(bdf_version)
 
         # Fall back to the workspace default license (ws.license) when none is
         # passed, so the preview reflects what publishing would embed. Left empty
@@ -8920,6 +9020,7 @@ class AuthoringWorkspace:
             previous_version=previous_version or "",
             publisher=given_publisher,
             omissions=omissions,
+            bdf_version=bdf_version,
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
@@ -9423,6 +9524,7 @@ class AuthoringWorkspace:
         referenced_records: dict[str, builtins.list[dict]] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        bdf_version: str | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -9992,7 +10094,7 @@ class AuthoringWorkspace:
                     {
                         "filename": fname,
                         "content_url": url,
-                        "format": dist.get("encoding_format", ""),
+                        "format": registered_media_type(str(dist.get("encoding_format") or "")),
                         "checksum": _checksum_block,
                         "role": dist.get("role", ""),
                         "description": dist.get("description", ""),
@@ -10063,7 +10165,7 @@ class AuthoringWorkspace:
                 fname = dist["filename"]
                 dl_url = _download_url(dist, meta["kind"])
 
-                media_type = dist["format"] or "application/x-parquet"
+                media_type = dist["format"] or PARQUET_MEDIA_TYPE
                 # DCAT-AP: dcat:mediaType should be the IANA media-type IRI, not a bare
                 # string. schema:encodingFormat (below) keeps the MIME string for
                 # schema.org consumers.
@@ -10084,7 +10186,7 @@ class AuthoringWorkspace:
                 # dereference away. Raw instrument files (.ndax) are not BDF, so skip.
                 is_bdf = ".bdf." in fname and not is_raw
                 if is_bdf:
-                    dnode["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
+                    dnode["dcterms:conformsTo"] = {"@id": _bdf_table_schema_iri(bdf_version)}
                 # Conversion provenance: the processed file was derived from the raw
                 # instrument file (BDF CSV ← .ndax), so a consumer can trace the chain.
                 if not is_raw and _raw_url and _raw_url != dl_url:
@@ -10127,7 +10229,7 @@ class AuthoringWorkspace:
                 if _size.isdigit():
                     sdl["schema:contentSize"] = _size
                 if is_bdf:
-                    sdl["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
+                    sdl["dcterms:conformsTo"] = {"@id": _bdf_table_schema_iri(bdf_version)}
                 schema_dists.append(sdl)
 
             cell_name = _cell_name(meta.get("cell_id", ""))
@@ -10565,6 +10667,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, Any] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        bdf_version: str | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
@@ -10597,6 +10700,7 @@ class AuthoringWorkspace:
             is_version_of=is_version_of,
             previous_version=previous_version,
             publisher=publisher,
+            bdf_version=bdf_version,
         )
 
     def _build_rocrate(
@@ -10710,7 +10814,7 @@ class AuthoringWorkspace:
                 "@id": data_file.segment,
                 "name": fn,
                 "encodingFormat": (
-                    "application/x-parquet"
+                    PARQUET_MEDIA_TYPE
                     if fn.endswith(".parquet")
                     else "text/csv"
                     if fn.endswith(".csv")
@@ -13590,7 +13694,7 @@ def _make_record_slug(manufacturer: str, model: str, year: int | str) -> str:
 def _guess_format(path: Path) -> str | None:
     name = path.name.lower()
     if name.endswith(".parquet") or ".bdf.parquet" in name:
-        return "application/x-parquet"
+        return PARQUET_MEDIA_TYPE
     if name.endswith(".csv") or ".bdf.csv" in name:
         return "text/csv"
     if name.endswith(".ndax") or name.endswith(".nda"):

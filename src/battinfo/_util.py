@@ -4,14 +4,15 @@ Single home for the tiny helpers that were previously copy-pasted across
 modules (``api``, ``bundle``, ``publication``, ``local_workspace``,
 ``workspace_state``, ``_workspace``, ``ingest``, ``runtime``, ``ws``,
 ``interop.battdat``, ``transform.json_to_jsonld``): path coercion, file
-URIs and URL segments, UTC timestamps, file hashing, and citation/DOI
-normalization.
+URIs and URL segments, UTC timestamps, file hashing, media types, and
+citation/DOI normalization.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+import mimetypes
 import numbers
 import os
 import re
@@ -401,6 +402,47 @@ def is_dataset_series(additional_type: object) -> bool:
     if isinstance(additional_type, (list, tuple)):
         return any(item == "DatasetSeries" for item in additional_type)
     return False
+
+
+# The parquet media type, as IANA registered it in 2024. Records written before
+# battinfo used it hold ``application/x-parquet``, which IANA lists as its
+# deprecated alias.
+PARQUET_MEDIA_TYPE = "application/vnd.apache.parquet"
+_MEDIA_TYPE_ALIASES = {"application/x-parquet": PARQUET_MEDIA_TYPE}
+
+# Media types by file suffix. They come before :mod:`mimetypes`, whose answers
+# depend on the platform: on Windows it reads the registry, which can give
+# ``application/vnd.ms-excel`` for ``.csv``, and it knows no ``.parquet``.
+EXTENSION_MEDIA_TYPE_MAP = {
+    ".csv": "text/csv",
+    ".tsv": "text/tab-separated-values",
+    ".json": "application/json",
+    ".jsonld": "application/ld+json",
+    ".h5": "application/x-hdf5",
+    ".hdf5": "application/x-hdf5",
+    ".parquet": PARQUET_MEDIA_TYPE,
+}
+
+
+def file_media_type(name: str | None) -> str | None:
+    """The media type of a file by its name: :data:`EXTENSION_MEDIA_TYPE_MAP`, else :mod:`mimetypes`, else ``None``."""
+    if not name:
+        return None
+    suffix = Path(name).suffix.lower()
+    if suffix in EXTENSION_MEDIA_TYPE_MAP:
+        return EXTENSION_MEDIA_TYPE_MAP[suffix]
+    guessed, _ = mimetypes.guess_type(name)
+    return guessed
+
+
+def registered_media_type(media_type: str) -> str:
+    """*media_type* as a graph states it: a deprecated alias becomes the registered type.
+
+    A saved record keeps the media type it was saved with; every emitter writes
+    it through this, so no published graph carries ``application/x-parquet``, nor
+    an IANA IRI built from it.
+    """
+    return _MEDIA_TYPE_ALIASES.get(media_type.strip().lower(), media_type)
 
 
 def _sha256(path: Path) -> str:

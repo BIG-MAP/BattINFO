@@ -12,7 +12,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from battinfo._util import _citation_doi_from_url, is_real_number
+from battinfo._util import _citation_doi_from_url, is_real_number, registered_media_type
 from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
@@ -3458,7 +3458,7 @@ def _parameter_file_node(item: Any) -> dict[str, Any] | None:
         ("role", "dcterms:type"),
     ):
         if isinstance(item.get(key), str) and item[key]:
-            out[term] = item[key]
+            out[term] = registered_media_type(item[key]) if key == "encoding_format" else item[key]
     conforms_to = item.get("conforms_to")
     if isinstance(conforms_to, str) and conforms_to:
         out["dcterms:conformsTo"] = (

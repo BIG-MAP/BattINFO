@@ -15,7 +15,7 @@
         "name": "cell-01.bdf.parquet",
         "description": "Cycling time series in BDF column vocabulary.",
         "content_url": "https://example.org/files/nns1/cell-01.bdf.parquet",
-        "encoding_format": "application/x-parquet",
+        "encoding_format": "application/vnd.apache.parquet",
         "role": "processed",
         "checksum": {
           "algorithm": "sha256",
