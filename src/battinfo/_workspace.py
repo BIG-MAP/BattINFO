@@ -95,6 +95,8 @@ EXTENSION_MEDIA_TYPE_MAP = {
     ".tsv": "text/tab-separated-values",
     ".json": "application/json",
     ".jsonld": "application/ld+json",
+    ".md": "text/markdown",
+    ".txt": "text/plain",
     ".h5": "application/x-hdf5",
     ".hdf5": "application/x-hdf5",
     ".parquet": "application/vnd.apache.parquet",

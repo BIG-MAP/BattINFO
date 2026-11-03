@@ -68,8 +68,10 @@ continues, one file for each Zenodo: ``zenodo.json`` for zenodo.org and
 touches the record on zenodo.org. A state holds the environment, concept
 record id, record id, deposit id and DOI, whether the record is published,
 the published record a draft of a new version was made from
-(``version_of``), and the IRIs of the records the deposit holds
-(``ws.submit()`` records the DOI on those only).
+(``version_of``), the IRIs of the records the deposit holds
+(``ws.submit()`` records the DOI on those only), and the names of the extra
+files the last run deposited (``extra_files``), which the next run warns
+about when it leaves them out.
 
 The files are written atomically. One that cannot be read raises
 :class:`DepositIndexError`, naming the file, and is never written over,
@@ -543,6 +545,9 @@ def _state_shape_problem(state: object, environment_of_file: str) -> str | None:
     records = state.get("records", [])
     if not isinstance(records, list) or not all(isinstance(item, str) for item in records):
         return "its 'records' is not a list of record IRIs"
+    extra_files = state.get("extra_files", [])
+    if not isinstance(extra_files, list) or not all(isinstance(item, str) for item in extra_files):
+        return "its 'extra_files' is not a list of file names"
     return None
 
 

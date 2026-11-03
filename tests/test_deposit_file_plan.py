@@ -369,12 +369,15 @@ def test_an_unzipped_deposit_over_the_zenodo_limit_warns_before_anything_is_sent
     assert "bundle='by_kind'" in str(warning.message) and "bundle='single'" in str(warning.message)
     assert "at most 3 files in one record" in capsys.readouterr().out
 
-    # The other two packings, and a deposit within the limit, do not warn.
-    for bundle in ("by_kind", "single"):
-        ws.preview_jsonld(creators=CREATORS, bundle=bundle)
+    # by_kind leaves two files unzipped too, so it warns, and names the packing that helps.
+    with pytest.warns(UserWarning, match=r"The deposit holds 4 files \(2 data files, .*Pass bundle='single'"):
+        ws.preview_jsonld(creators=CREATORS, bundle="by_kind")
+    capsys.readouterr()
+    # One archive, and a deposit within the limit, do not warn.
+    ws.preview_jsonld(creators=CREATORS, bundle="single")
     monkeypatch.setattr("battinfo.ws._ZENODO_FILE_LIMIT", 100)
     ws.preview_jsonld(creators=CREATORS, bundle="none")
-    assert "bundle='none'" not in capsys.readouterr().out
+    assert "files in one record" not in capsys.readouterr().out
 
 
 def test_a_bundle_zenodo_cannot_take_is_refused_before_anything_is_sent(
