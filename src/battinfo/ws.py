@@ -87,6 +87,7 @@ from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import (
     PARQUET_MEDIA_TYPE,
+    PARQUET_MEDIA_TYPE_ALIAS,
     _now_iso,
     _now_unix,
     is_dataset_series,
@@ -968,25 +969,36 @@ def _bdf_measurement_period(data_path: "str | Path") -> tuple[int, int] | None:
         return None
 
 
+def _pyarrow_missing() -> bool:
+    """Whether pyarrow, which reads parquet files (the ``tabular`` extra), cannot be imported."""
+    try:
+        import pyarrow.parquet  # noqa: F401, PLC0415
+    except ImportError:
+        return True
+    return False
+
+
+def _numbers(values: Sequence[Any]) -> builtins.list[float]:
+    """The real numbers among *values*, a column's values: no null, no NaN."""
+    return [float(v) for v in values if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v]
+
+
 def _parquet_measurement_period(path: Path) -> tuple[int, int] | None:
     """``(start_unix, end_unix)`` of a BDF parquet file, or None (see :func:`_bdf_measurement_period`).
 
     The span is the smallest and the largest ``unix_time_second`` the footer's
     statistics record over all row groups, so no data page is read. When a row
     group has no statistics, the column is read from the first and the last row
-    group only, never whole: a measurement file can hold millions of rows. Both
-    ends must pass the plausibility check. Reading parquet needs pyarrow (the
-    ``tabular`` extra); without it the period is None, and a warning says so.
+    group only, never whole: a measurement file can hold millions of rows. Its
+    smallest and largest values there count, as the statistics would, so a null
+    or NaN row is passed over. Both ends must pass the plausibility check.
+    Reading parquet needs pyarrow (the ``tabular`` extra); without it the period
+    is None, and ``ws.add()`` warns (:func:`_pyarrow_missing`).
     """
-    try:
-        import pyarrow.parquet as pq  # noqa: PLC0415
-    except ImportError:
-        warnings.warn(
-            "The measured period of a parquet data file is read with pyarrow, which is not installed, so "
-            'tests and datasets of parquet files get no start, end or temporal coverage. Run: pip install "battinfo[tabular]"',
-            stacklevel=2,
-        )
+    if _pyarrow_missing():
         return None
+    import pyarrow.parquet as pq  # noqa: PLC0415
+
     with pq.ParquetFile(path) as parquet:
         columns = parquet.schema.names
         if "unix_time_second" not in columns:
@@ -1001,11 +1013,11 @@ def _parquet_measurement_period(path: Path) -> tuple[int, int] | None:
             first: Any = min(s.min for s in stats)
             last: Any = max(s.max for s in stats)
         else:
-            head = parquet.read_row_group(0, columns=["unix_time_second"]).column(0)
-            tail = parquet.read_row_group(groups - 1, columns=["unix_time_second"]).column(0)
-            if len(head) == 0 or len(tail) == 0:
+            head = _numbers(parquet.read_row_group(0, columns=["unix_time_second"]).column(0).to_pylist())
+            tail = _numbers(parquet.read_row_group(groups - 1, columns=["unix_time_second"]).column(0).to_pylist())
+            if not head or not tail:
                 return None
-            first, last = head[0].as_py(), tail[-1].as_py()
+            first, last = min(head), max(tail)
     if first is None or last is None:
         return None
     start, end = int(float(first)), int(float(last))
@@ -13117,6 +13129,21 @@ class AuthoringWorkspace:
             _spans = [p for p in periods if p]
             run_start = given_start if given_start is not None else (min(s for s, _ in _spans) if _spans else None)
             run_end = given_end if given_end is not None else (max(e for _, e in _spans) if _spans else None)
+            _parquet = [_guess_format(f) == PARQUET_MEDIA_TYPE for f in files]
+            if any(_parquet) and _pyarrow_missing():
+                warnings.warn(
+                    "The measured period of a parquet data file is read with pyarrow, which is not installed, so "
+                    "this test and its parquet datasets get no start, end or temporal coverage. "
+                    'Run: pip install "battinfo[tabular]"',
+                    stacklevel=3,
+                )
+            # A parquet file used to give no period and the media type
+            # application/x-parquet. The seed a colliding record is re-minted
+            # from reads the whole record, so it takes those values, and no IRI
+            # moves (_workspace._with_seed_fields).
+            _then = [p for p, is_parquet in zip(periods, _parquet, strict=True) if p and not is_parquet]
+            seed_start = given_start if given_start is not None else (min(s for s, _ in _then) if _then else None)
+            seed_end = given_end if given_end is not None else (max(e for _, e in _then) if _then else None)
             test = self._ws.test(
                 resolved,
                 kind=test_type,
@@ -13131,6 +13158,8 @@ class AuthoringWorkspace:
                 started_at=run_start,
                 ended_at=run_end,
             )
+            if (seed_start, seed_end) != (run_start, run_end):
+                test._seed_fields = {"started_at": seed_start, "ended_at": seed_end}
             if pinned_test_id is not None:
                 test.id = pinned_test_id
             if handle is not None:
@@ -13163,6 +13192,8 @@ class AuthoringWorkspace:
                     format=_guess_format(f),
                     temporal_coverage=_tc,
                 )
+                if _parquet[i]:
+                    dataset_obj._seed_fields = {"data_format": PARQUET_MEDIA_TYPE_ALIAS, "temporal_coverage": None}
                 if pinned_dataset_ids is not None:
                     dataset_obj.id = pinned_dataset_ids[i]
                 if member_series_id is not None:
@@ -13570,6 +13601,11 @@ class AuthoringWorkspace:
                 format=_guess_format(f),
                 source_path=self._resolve_raw_source(f),
             )
+            if _guess_format(f) == PARQUET_MEDIA_TYPE:
+                # As in the explicit mode: the seed reads the media type a parquet file used to get.
+                for made in self._ws.datasets:
+                    if made.test is test:
+                        made._seed_fields = {"data_format": PARQUET_MEDIA_TYPE_ALIAS}
             print(f"  matched   {f.name}  ->  {cell.name or cell.serial_number}  (by {how})")
             tests.append(test)
 

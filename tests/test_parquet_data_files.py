@@ -118,11 +118,25 @@ def test_period_with_an_implausible_end_is_withheld(tmp_path: Path, capsys: pyte
     assert "implausible" in capsys.readouterr().out
 
 
-def test_period_of_a_parquet_file_without_pyarrow_warns(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    path = _parquet(tmp_path / "a.bdf.parquet", [T0, T0 + 10])
+def test_without_statistics_a_null_first_or_last_row_is_passed_over(tmp_path: Path) -> None:
+    times: list[float | None] = [None, T0 + 10, T0 + 20, T0 + 30, T0 + 40, None]
+    path = tmp_path / "a.bdf.parquet"
+    table = pa.table({"voltage_volt": [3.0] * 6, "unix_time_second": pa.array(times, type=pa.float64())})
+    pq.write_table(table, path, row_group_size=2, write_statistics=False)
+    assert _bdf_measurement_period(path) == (T0 + 10, T0 + 40)
+
+
+def test_ws_add_warns_without_pyarrow(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    _parquet(tmp_path / "data" / "a.bdf.parquet", [T0, T0 + 10])
+    ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
+    ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
     monkeypatch.setitem(sys.modules, "pyarrow.parquet", None)
-    with pytest.warns(UserWarning, match=r"battinfo\[tabular\]"):
-        assert _bdf_measurement_period(path) is None
+    with pytest.warns(UserWarning, match=r"battinfo\[tabular\]") as caught:
+        ws.add("test", type="cycling", cell="C01", data="data/a.bdf.parquet")
+    # The warning names the caller's ws.add() line, not battinfo's own code.
+    assert Path(caught[0].filename).name == Path(__file__).name
+    (test,) = ws._ws.tests
+    assert test.started_at is None and test.ended_at is None
 
 
 def test_a_parquet_test_takes_its_period_and_media_type(tmp_path: Path) -> None:
@@ -162,6 +176,78 @@ def test_parquet_tests_and_datasets_keep_the_iris_they_had(tmp_path: Path) -> No
         f"{base}dataset/shea-49d0-jr9v-66jt",
     ]
     assert all(d.temporal_coverage for d in ws._ws.datasets)
+
+
+# Tests that collide: two whose first data file is the same file, and two on one
+# file told apart by their description. Each is re-minted from its content.
+COLLIDING: dict[str, list[dict[str, Any]]] = {
+    "shared first file": [
+        {"data": ["data/a.bdf.parquet", "data/b.bdf.parquet"]},
+        {"data": ["data/a.bdf.parquet", "data/c.bdf.parquet"]},
+    ],
+    "one file, two descriptions": [
+        {"data": "data/a.bdf.parquet", "description": "first run"},
+        {"data": "data/a.bdf.parquet", "description": "second run"},
+    ],
+}
+
+
+def _earlier_release(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make ws.add() treat parquet files as it did before: no period, the deprecated media type."""
+    import battinfo.ws as ws_module
+
+    guess = ws_module._guess_format
+    monkeypatch.setattr(ws_module, "_parquet_measurement_period", lambda path: None)
+    monkeypatch.setattr(
+        ws_module, "_guess_format", lambda path: "application/x-parquet" if path.suffix == ".parquet" else guess(path)
+    )
+
+
+def _mint_colliding(root: Path, calls: list[dict[str, Any]]) -> dict[str, list[str]]:
+    for offset, name in enumerate(("a.bdf.parquet", "b.bdf.parquet", "c.bdf.parquet")):
+        if not (root / "data" / name).exists():
+            _parquet(root / "data" / name, [T0 + offset, T0 + 10, T0 + 20, T0 + 30])
+    ws = battinfo.workspace(str(root), registry_url=None)
+    ws.add("cell", spec=CellSpec(**SPEC), serial_numbers=["C01"])
+    for call in calls:
+        ws.add("test", type="cycling", cell="C01", **call)
+    ws.save()
+    return {
+        "test": sorted(str(t.id) for t in ws._ws.tests),
+        "dataset": sorted(str(d.id) for d in ws._ws.datasets),
+        "coverage": sorted(str(d.temporal_coverage) for d in ws._ws.datasets),
+    }
+
+
+@pytest.mark.parametrize("case", sorted(COLLIDING))
+def test_colliding_parquet_tests_keep_their_iris(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str) -> None:
+    # The seed a colliding record is re-minted from reads the whole record. It
+    # takes the period and media type a parquet file used to give, so the IRIs
+    # are the ones minted before parquet files gave either.
+    with monkeypatch.context() as earlier:
+        _earlier_release(earlier)
+        before = _mint_colliding(tmp_path / "before", COLLIDING[case])
+    now = _mint_colliding(tmp_path / "now", COLLIDING[case])
+    assert set(before["coverage"]) == {"None"} and "None" not in now["coverage"]
+    assert (now["test"], now["dataset"]) == (before["test"], before["dataset"])
+
+
+@pytest.mark.parametrize("case", sorted(COLLIDING))
+def test_records_saved_before_are_updated_in_place(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, case: str) -> None:
+    def files() -> list[str]:
+        records = tmp_path / ".battinfo" / "records"
+        return sorted(p.name for kind in ("test", "dataset") for p in (records / kind).glob("*.json"))
+
+    with monkeypatch.context() as earlier:
+        _earlier_release(earlier)
+        _mint_colliding(tmp_path, COLLIDING[case])
+    saved = files()
+    # The same script run again, now: the records it saved are updated, not added again.
+    _mint_colliding(tmp_path, COLLIDING[case])
+    assert files() == saved
+    for _path, record in _dataset_records(tmp_path):
+        assert record["dataset"]["temporal_coverage"]
+        assert record["dataset"]["distributions"][0]["encoding_format"] == PARQUET_MEDIA_TYPE
 
 
 # ── The media type ───────────────────────────────────────────────────────────
@@ -217,6 +303,7 @@ def test_the_ro_crate_names_parquet_by_the_registered_type(tmp_path: Path) -> No
 
 
 def test_other_emitters_write_the_registered_type() -> None:
+    from battinfo.api._resolver import _resolver_jsonld, _schema_distribution_value
     from battinfo.publication import _schema_distribution_node
     from battinfo.transform.json_to_jsonld import _parameter_file_node
 
@@ -224,6 +311,16 @@ def test_other_emitters_write_the_registered_type() -> None:
     assert _schema_distribution_node(item, part_of_id="#d")["schema:encodingFormat"] == PARQUET_MEDIA_TYPE
     node = _parameter_file_node(item)
     assert node is not None and node["schema:encodingFormat"] == PARQUET_MEDIA_TYPE
+    value = _schema_distribution_value(item, part_of_id="#d")
+    assert value is not None and value["schema:encodingFormat"] == PARQUET_MEDIA_TYPE
+
+    # The resolver's JSON-LD of a saved record that holds the alias (publish_record, the CLI).
+    record = json.loads(
+        (ROOT / "examples" / "dataset" / "dataset-nns1-gh5p-v5n1-td17.json").read_text(encoding="utf-8")
+    )
+    record["dataset"]["distributions"][0]["encoding_format"] = "application/x-parquet"
+    text = json.dumps(_resolver_jsonld(record))
+    assert "x-parquet" not in text and PARQUET_MEDIA_TYPE in text
 
 
 # ── The BDF table schema ─────────────────────────────────────────────────────

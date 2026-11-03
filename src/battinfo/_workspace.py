@@ -288,6 +288,23 @@ _DERIVED_BACK_LINKS = ("dataset_ids",)
 _DERIVED_DOCUMENT_LINKS = ("datasets",)
 
 
+def _with_seed_fields(entity: Any, data: dict[str, Any]) -> dict[str, Any]:
+    """*data*, a dump of *entity*, with the fields its seed reads as an earlier release gave them.
+
+    ``ws.add()`` now fills fields that release left empty or wrote otherwise,
+    such as the measured period and media type of a parquet file, and records
+    the values that release gave in the entity's ``_seed_fields`` (``None``
+    for a field it left out), so the seeds below, and the IRIs minted from
+    them, stay as they were.
+    """
+    for key, value in (getattr(entity, "_seed_fields", None) or {}).items():
+        if value is None:
+            data.pop(key, None)
+        else:
+            data[key] = value
+    return data
+
+
 def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     """A stable, order-independent seed from an entity's distinguishing content
     (its canonical record minus its own IRI and the volatile timestamps, with
@@ -295,9 +312,11 @@ def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
 
     A derived back-link (``dataset_ids``, which each finalize pass sets from the
     datasets that name the record) enters empty, as it is before any pass, so a
-    content seed never depends on an earlier pass.
+    content seed never depends on an earlier pass. A field ``ws.add()`` fills
+    where an earlier release did not enters as that release gave it
+    (:func:`_with_seed_fields`).
     """
-    data = entity.model_dump(mode="json", exclude_none=True)
+    data = _with_seed_fields(entity, entity.model_dump(mode="json", exclude_none=True))
     for key in _DERIVED_BACK_LINKS:
         if key in data:
             data[key] = []
@@ -483,7 +502,7 @@ def _legacy_content_seed(entity: Any, *, workspace_root: Path | None = None) -> 
     Only for finding a record saved under an IRI minted from it
     (:func:`_legacy_disambiguated_ids`).
     """
-    data = entity.model_dump(mode="json", exclude_none=True)
+    data = _with_seed_fields(entity, entity.model_dump(mode="json", exclude_none=True))
     return json.dumps(_seed_view(data, workspace_root, every_id=True), sort_keys=True, ensure_ascii=False)
 
 
@@ -2837,7 +2856,19 @@ class Workspace:
             return data
 
         mine = view(doc)
-        return mine is not None and mine == view(saved)
+        theirs = view(saved)
+        if mine is not None and mine == theirs:
+            return True
+        # A record saved by an earlier release lacks the fields ws.add() now
+        # fills (see _with_seed_fields); it is still this record.
+        earlier = getattr(item, "_seed_fields", None)
+        if not earlier or theirs is None:
+            return False
+        try:
+            then = view(builder(item.model_copy(update=dict(earlier))))
+        except (ValueError, TypeError):
+            return False
+        return then is not None and then == theirs
 
     def _legacy_cell_spec_ids(self, finalized: Sequence[CellSpec], assigned: Sequence[bool]) -> list[tuple[str, ...]]:
         """The IRIs the finalize pass of before 0.8.0 can have given each cell spec of *finalized*.

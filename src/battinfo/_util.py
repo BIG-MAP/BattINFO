@@ -408,11 +408,13 @@ def is_dataset_series(additional_type: object) -> bool:
 # battinfo used it hold ``application/x-parquet``, which IANA lists as its
 # deprecated alias.
 PARQUET_MEDIA_TYPE = "application/vnd.apache.parquet"
-_MEDIA_TYPE_ALIASES = {"application/x-parquet": PARQUET_MEDIA_TYPE}
+PARQUET_MEDIA_TYPE_ALIAS = "application/x-parquet"
+_MEDIA_TYPE_ALIASES = {PARQUET_MEDIA_TYPE_ALIAS: PARQUET_MEDIA_TYPE}
 
-# Media types by file suffix. They come before :mod:`mimetypes`, whose answers
-# depend on the platform: on Windows it reads the registry, which can give
-# ``application/vnd.ms-excel`` for ``.csv``, and it knows no ``.parquet``.
+# Media types by file suffix, ahead of the table Python ships. The module-level
+# :func:`mimetypes.guess_type` also reads the platform's own table (on Windows the
+# registry, which can give ``application/vnd.ms-excel`` for ``.csv``), so its
+# answers differ between computers; :data:`_PYTHON_MEDIA_TYPES` holds Python's alone.
 EXTENSION_MEDIA_TYPE_MAP = {
     ".csv": "text/csv",
     ".tsv": "text/tab-separated-values",
@@ -422,16 +424,17 @@ EXTENSION_MEDIA_TYPE_MAP = {
     ".hdf5": "application/x-hdf5",
     ".parquet": PARQUET_MEDIA_TYPE,
 }
+_PYTHON_MEDIA_TYPES = mimetypes.MimeTypes()
 
 
 def file_media_type(name: str | None) -> str | None:
-    """The media type of a file by its name: :data:`EXTENSION_MEDIA_TYPE_MAP`, else :mod:`mimetypes`, else ``None``."""
+    """The media type of a file by its name: :data:`EXTENSION_MEDIA_TYPE_MAP`, else Python's table, else ``None``."""
     if not name:
         return None
     suffix = Path(name).suffix.lower()
     if suffix in EXTENSION_MEDIA_TYPE_MAP:
         return EXTENSION_MEDIA_TYPE_MAP[suffix]
-    guessed, _ = mimetypes.guess_type(name)
+    guessed, _ = _PYTHON_MEDIA_TYPES.guess_type(name)
     return guessed
 
 
