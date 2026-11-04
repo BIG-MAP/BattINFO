@@ -728,9 +728,9 @@ def test_tier3_richness_structured_conditions_versioning_keywords_ror() -> None:
     assert term["hasNumericalPart"]["hasNumberValue"] == 0.9
     assert term["hasMeasurementUnit"] == {"@id": "emmo:Volt"}
     prop = plan["hasProperty"][0]
-    assert prop["@type"] == "ConventionalProperty"
+    assert prop["@type"] == "CelsiusTemperature"
     assert prop["hasNumericalPart"]["hasNumberValue"] == 25
-    assert prop["rdfs:label"] == "temperature"
+    assert prop["skos:prefLabel"] == "temperature"
     assert "schema:additionalProperty" not in plan  # all names mapped → no fallback
     assert {"battery", "capacity_check", "cylindrical", "nmc", "SINTEF"} <= set(cat["schema:keywords"])
     assert cat["schema:version"] == "2"

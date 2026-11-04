@@ -319,12 +319,92 @@ def test_protocol_conditions_emit_typed_quantities(graph: dict) -> None:
     assert "schema:additionalProperty" not in howto
     report = _test_condition_issues(graph, get_validation_policy("publisher"))
     assert not [i for i in report.issues if i.code == "publication.test_condition_unmapped"]
+    # The key tells apart the conditions that share a class.
+    assert {prop["skos:prefLabel"]: prop["@type"] for prop in _as_list(howto["hasProperty"])} == {
+        "applied_pressure": "Pressure",
+        "state_of_charge": "StateOfCharge",
+        "initial_state_of_charge": "StateOfCharge",
+    }
 
 
 @pytest.mark.parametrize(
     ("name", "unit", "cls"),
     [
+        ("temperature", "degC", "CelsiusTemperature"),
         ("ambient_temperature", "degC", "AmbientCelsiusTemperature"),
+        ("room_temperature", "°C", "AmbientCelsiusTemperature"),
+        ("temperature", "", "CelsiusTemperature"),
+        ("temperature", "K", "ThermodynamicTemperature"),
+        ("ambient_temperature", "kelvin", "ThermodynamicTemperature"),
+        ("charging_current", "A", "ElectricCurrent"),
+    ],
+)
+def test_a_protocol_condition_takes_the_as_run_class_and_names_its_key(name: str, unit: str, cls: str) -> None:
+    from battinfo.jsonld import condition_quantity_node
+
+    node = condition_quantity_node(name, 25, unit)
+    assert node is not None
+    assert node["@type"] == cls
+    assert node["skos:prefLabel"] == name
+    assert "rdfs:label" not in node
+
+
+def test_a_steps_temperatures_take_the_condition_classes() -> None:
+    from battinfo.jsonld import method_step_node
+
+    node = method_step_node(
+        {
+            "mode": "rest",
+            "temperature": {"value": 25, "unit": "degC"},
+            "setpoints": {"temperature": {"value": 298.15, "unit": "K"}},
+        }
+    )
+    [held] = node["hasProperty"]
+    assert (held["@type"], held["skos:prefLabel"]) == ("CelsiusTemperature", "temperature")
+    [setpoint] = node["hasControlParameter"]
+    assert setpoint["@type"] == "ThermodynamicTemperature"
+
+
+def test_a_measured_quantitys_temperature_in_kelvin_is_a_thermodynamic_temperature() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_property_nodes
+
+    (node,) = _descriptor_property_nodes(
+        {
+            "porosity": {
+                "value": 0.4,
+                "unit": "1",
+                "value_basis": "Measured",
+                "conditions": {"temperature": {"value": 298.15, "unit": "K"}},
+            }
+        }
+    )
+    parameter = node["isOutputOf"]["hasMeasurementParameter"]
+    assert parameter["@type"][0] == "ThermodynamicTemperature"
+    assert parameter["skos:prefLabel"] == "temperature"
+
+
+def test_a_deposit_resolves_the_classes_of_protocol_temperatures() -> None:
+    record_sets = _record_sets()
+    record_sets["test-protocol"][0]["conditions"].update(
+        {"ambient_temperature": _q(25, "degC"), "temperature": _q(298.15, "K")}
+    )
+    doc = _graph(record_sets)
+    howto = _nodes(doc)[PROTOCOL]
+    types = {prop["skos:prefLabel"]: prop["@type"] for prop in _as_list(howto["hasProperty"])}
+    assert types["ambient_temperature"] == "AmbientCelsiusTemperature"
+    assert types["temperature"] == "ThermodynamicTemperature"
+    for term in ("AmbientCelsiusTemperature", "ThermodynamicTemperature"):
+        assert term in doc["@context"], term
+    report = validate_publication_report(copy.deepcopy(doc), policy="publisher")
+    assert report.ok, [(i.code, i.message) for i in report.errors]
+
+
+@pytest.mark.parametrize(
+    ("name", "unit", "cls"),
+    [
+        ("temperature", "degC", "CelsiusTemperature"),
+        ("ambient_temperature", "degC", "AmbientCelsiusTemperature"),
+        ("ambient_temperature", "K", "ThermodynamicTemperature"),
         ("state_of_charge", "%", "StateOfCharge"),
         ("state_of_charge", "1", "StateOfCharge"),
         ("initial_state_of_charge", "1", "StateOfCharge"),

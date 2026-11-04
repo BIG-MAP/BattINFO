@@ -284,8 +284,9 @@ TEST_CONDITION_GROUP_RELATION: dict[str, str] = {
 }
 TEST_CONDITION_GROUPS = tuple(TEST_CONDITION_GROUP_RELATION)
 # Authoring condition key → EMMO quantity-class prefLabel (resolved by the context).
-# Temperature has no dedicated quantity class, so it is a generic ConventionalProperty
-# (an assigned-by-convention value, e.g. "room temperature" = 20 degC) carrying a label.
+# A temperature takes the class an as-run condition of the same key takes
+# (transform.json_to_jsonld._MEASUREMENT_PARAMETER_TERMS), or ThermodynamicTemperature
+# when it is given in kelvin (:func:`temperature_class`).
 TEST_CONDITION_CLASS: dict[str, str] = {
     "c_rate": "CRate",
     "crate": "CRate",
@@ -300,15 +301,15 @@ TEST_CONDITION_CLASS: dict[str, str] = {
     "duration": "Duration",
     "number_of_iterations": "NumberOfIterations",
     "cycles": "NumberOfIterations",
-    "temperature": "ConventionalProperty",
-    "ambient_temperature": "ConventionalProperty",
-    "room_temperature": "ConventionalProperty",
+    "temperature": "CelsiusTemperature",
+    "ambient_temperature": "AmbientCelsiusTemperature",
+    "room_temperature": "AmbientCelsiusTemperature",
     "state_of_charge": "StateOfCharge",
     "initial_state_of_charge": "StateOfCharge",
     "applied_pressure": "Pressure",
 }
-# Quantity classes whose @type is generic and so should carry a human rdfs:label.
-TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
+# The temperature classes whose unit is the degree Celsius.
+_CELSIUS_TEMPERATURE_CLASSES = frozenset({"CelsiusTemperature", "AmbientCelsiusTemperature"})
 # Unit symbol -> EMMO unit IRI: the unit terms the records context defines (V, Ah,
 # MWh, ...). scripts/assemble_context.py writes them into the context, and the
 # JSON-LD validator reads them so a unit is never accepted as a node's @type.
@@ -546,20 +547,29 @@ def _value_part(value: Any) -> dict:
     return {}
 
 
+def temperature_class(cls: str, unit_symbol: Any) -> str:
+    """*cls*, or ``ThermodynamicTemperature`` when *cls* is a Celsius
+    temperature class and the value is given in kelvin."""
+    if cls not in _CELSIUS_TEMPERATURE_CLASSES or not unit_symbol:
+        return cls
+    unit = str(unit_symbol).strip()
+    if unit.lower() == "kelvin" or resolve_unit_iri(unit) == CONTEXT_UNIT_SYMBOLS["K"]:
+        return "ThermodynamicTemperature"
+    return cls
+
+
 def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
     """A test condition -> EMMO quantity node (the ``@type`` comes from the
     controlled vocabulary), or ``None`` if the key is unmapped or the value is
     neither a number nor text — the caller then falls back to
-    ``schema:PropertyValue``."""
+    ``schema:PropertyValue``. The key rides ``skos:prefLabel``, as on an
+    as-run condition, since keys share a class: charging and discharging
+    current, state of charge and initial state of charge."""
     cls = TEST_CONDITION_CLASS.get(str(key).lower())
     part = _value_part(value)
     if not cls or not part:
         return None
-    node: dict = {"@type": cls, **part}
-    # A generic class (e.g. ConventionalProperty for temperature) needs a human
-    # label to say *which* property it is.
-    if cls in TEST_CONDITION_GENERIC_CLASSES:
-        node["rdfs:label"] = str(key).replace("_", " ")
+    node: dict = {"@type": temperature_class(cls, unit_symbol), "skos:prefLabel": str(key), **part}
     if unit_symbol:
         _attach_unit(node, unit_symbol)
     elif cls == "CRate":
@@ -581,7 +591,7 @@ def _setpoint_class(key: str, unit: Any) -> str | None:
     qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(key.lower())
     if qcls == "ElectricCurrent" and _is_current_density_unit(unit):
         return setpoint_emmo_class("current_density")
-    return qcls
+    return temperature_class(qcls, unit) if qcls else None
 
 
 def _termination_class(term: Mapping[str, Any]) -> str | None:
@@ -1342,7 +1352,8 @@ def as_run_condition_terms(conditions: Any) -> dict:
             quantity = {"value": value}
         else:
             continue
-        pnode = _descriptor_quantity_node(name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name))
+        term = _MEASUREMENT_PARAMETER_TERMS.get(name)
+        pnode = _descriptor_quantity_node(name, quantity, term=term and temperature_class(term, quantity.get("unit")))
         if pnode is not None:
             pnode["skos:prefLabel"] = name
             params.append(pnode)

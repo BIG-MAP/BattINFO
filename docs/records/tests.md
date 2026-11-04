@@ -275,11 +275,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -543,11 +543,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "CelsiusTemperature",
+      "skos:prefLabel": "temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -686,11 +686,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -1472,11 +1472,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -1682,11 +1682,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -2786,11 +2786,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -2947,17 +2947,18 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
     },
     {
       "@type": "StateOfCharge",
+      "skos:prefLabel": "state_of_charge",
       "hasNumericalPart": {
         "hasNumberValue": 50.0
       },
@@ -3148,17 +3149,18 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
     },
     {
       "@type": "StateOfCharge",
+      "skos:prefLabel": "initial_state_of_charge",
       "hasNumericalPart": {
         "hasNumberValue": 100.0
       },
@@ -3281,17 +3283,18 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
     },
     {
       "@type": "LowerVoltageLimit",
+      "skos:prefLabel": "lower_voltage_limit",
       "hasNumericalPart": {
         "hasNumberValue": 3.0
       },
@@ -3301,6 +3304,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     },
     {
       "@type": "UpperVoltageLimit",
+      "skos:prefLabel": "upper_voltage_limit",
       "hasNumericalPart": {
         "hasNumberValue": 4.2
       },
@@ -3376,17 +3380,18 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
     },
     {
       "@type": "StateOfCharge",
+      "skos:prefLabel": "state_of_charge",
       "hasNumericalPart": {
         "hasNumberValue": 50.0
       },
@@ -3512,11 +3517,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
@@ -3629,11 +3634,11 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   ],
   "hasProperty": [
     {
-      "@type": "ConventionalProperty",
+      "@type": "AmbientCelsiusTemperature",
+      "skos:prefLabel": "ambient_temperature",
       "hasNumericalPart": {
         "hasNumberValue": 25.0
       },
-      "rdfs:label": "ambient temperature",
       "hasMeasurementUnit": {
         "@id": "emmo:DegreeCelsius"
       }
