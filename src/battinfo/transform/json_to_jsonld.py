@@ -1238,8 +1238,10 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
             if not isinstance(cqty, dict):
                 continue
             if measured:
+                from battinfo.jsonld import temperature_class  # noqa: PLC0415
+
                 cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
-                cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
+                cnode = _descriptor_quantity_node(ckey, cqty, term=cterm and temperature_class(cterm, cqty.get("unit")))
                 if cnode is not None:
                     cnode["skos:prefLabel"] = ckey
                     params.append(cnode)
