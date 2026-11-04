@@ -220,6 +220,7 @@ result = ws.zenodo(
     publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
     bundle="single",
     archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
 )
 ```
 
@@ -229,6 +230,7 @@ result = ws.zenodo(
 - Zenodo shows the description as HTML, so a description of several paragraphs, separated by blank lines, goes to the form as HTML paragraphs. The deposit graph keeps the text as you wrote it.
 - The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces, hyphens, underscores or slashes is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
 - `publisher` is the organisation the deposit graph names as its publisher, by name, by ROR (`"ror"`) or by registry organization IRI (`"id"`). Without it the graph takes the first affiliation among the creators and contributors. Zenodo's form does not get it.
+- `bdf_version` is the Battery Data Format version your BDF data files follow, such as `"1.3.0"`. Each of them then names that version's table schema (`dcterms:conformsTo`). Without it they name the unversioned schema, because a data file does not record the version it was written in.
 - The deposit joins the `battery-knowledge-base` community unless you pass another one as `community`, or `None`.
 
 Zenodo takes at most 100 files in one record by default. A deposit of more than 90 data files is therefore zipped one archive per test kind, which is `bundle="by_kind"`, the default. `bundle="single"` zips every data file into one archive, named by `archive_name` (`data.zip` when not given), however few there are. `bundle="none"` deposits each file as itself, and `ws.zenodo()` warns before it sends anything when the deposit would then hold more than 100 files. A dataset whose file is in an archive links to the archive and names its own file. `ws.publish(zenodo=True)` has no `bundle` option, and without R2 storage it refuses a deposit of more than 90 data files, since the registry cannot yet point a record at a file inside an archive.
@@ -245,6 +247,7 @@ preview = ws.preview_jsonld(
     publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
     bundle="single",
     archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
 )
 catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
                if "dcat:Catalog" in node["@type"])

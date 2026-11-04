@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import mimetypes
 import os
 import shutil
 import tempfile
@@ -14,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validat
 from battinfo._fs_guard import check_relative_path, is_within, remove_temp_tree, remove_tree, require_within
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _now_iso, _sha256, file_uri_to_path, is_file_uri
+from battinfo._util import _as_path, _now_iso, _sha256, file_media_type, file_uri_to_path, is_file_uri
 from battinfo._workspace import Workspace
 from battinfo.bundle import Cell, CellSpec, Dataset, Test
 from battinfo.local_workspace import (
@@ -121,11 +120,7 @@ def _swap_dir(staging: Path, target: Path) -> None:
         remove_temp_tree(backup)
 
 
-def _guess_media_type(path: str | None) -> str | None:
-    if not path:
-        return None
-    guessed, _ = mimetypes.guess_type(path)
-    return guessed
+_guess_media_type = file_media_type
 
 
 def _path_from_file_uri(uri: str) -> Path | None:

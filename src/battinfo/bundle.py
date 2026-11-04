@@ -2940,6 +2940,11 @@ class Test(BundleJsonModel):
     ended_at: int | str | None = Field(
         default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date."
     )
+    # Fields as an earlier release gave them, for the seed a colliding record is
+    # re-minted from (_workspace._content_seed); None leaves the field out. Set
+    # by ws.add() where it now fills a field that release left empty. Never
+    # written to a record.
+    _seed_fields: dict[str, Any] = PrivateAttr(default_factory=dict)
     dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets produced by this test.")
     conformance: TestConformance | None = Field(
         default=None, description="Conformance of the execution against its test spec (status plus deviations)."
@@ -3314,6 +3319,8 @@ class Dataset(BundleJsonModel):
     # as validated (None without one). Not a publication time and never written to a
     # record; only the content seed reads it (_workspace._content_seed).
     _seed_published_at: int | str | None = PrivateAttr(default=None)
+    # Fields as an earlier release gave them, for the content seed (see Test._seed_fields).
+    _seed_fields: dict[str, Any] = PrivateAttr(default_factory=dict)
     temporal_coverage: str | None = Field(
         default=None,
         validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"),

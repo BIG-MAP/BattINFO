@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import mimetypes
 import shutil
 import tempfile
 from datetime import date
@@ -29,7 +28,7 @@ from battinfo._fs_guard import (
 )
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _now_iso, _sha256
+from battinfo._util import _as_path, _now_iso, _sha256, file_media_type
 from battinfo._workspace import Workspace
 from battinfo.bundle import (
     BattinfoBundle,
@@ -60,11 +59,7 @@ DEFAULT_LEGACY_REGISTRY_INTAKE_FILENAME = "registry-intake.json"
 DEFAULT_SCAFFOLD_WORKSPACE_ID = "digibatt-cr2032-release"
 
 
-def _guess_media_type(path: str | None) -> str | None:
-    if not path:
-        return None
-    guessed, _ = mimetypes.guess_type(path)
-    return guessed
+_guess_media_type = file_media_type
 
 
 def _citation_url_from_doi(doi: str | None) -> str | None:
