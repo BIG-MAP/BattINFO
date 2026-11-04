@@ -254,4 +254,35 @@ catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))[
 print(catalog["dcterms:isVersionOf"], catalog["dcat:previousVersion"])
 ```
 
-`ws.preview_rocrate()` takes `bundle` and `archive_name` as well.
+`ws.preview_rocrate()` takes `bundle`, `archive_name` and `extra_files` as well.
+
+## What the deposit holds
+
+A deposit made with `ws.zenodo()` holds the files below and no others.
+
+- The data files the dataset records name, with the test and protocol files the records point at, each under its own name. When the deposit is zipped (more than 90 such files under `bundle="by_kind"`, or `bundle="single"`), the zip archives take their place.
+- `battinfo.json`, the deposit graph, which describes every record of the deposit. `ws.import_()` rebuilds a workspace from it.
+- `ro-crate-metadata.json`, an RO-Crate that lists `battinfo.json` and every other file, the data files and extra files with their size and sha256.
+- Any extra files you pass in `extra_files`.
+
+`battinfo.bundle.json` is never part of a workspace deposit. Only `build_zenodo_package()`, which `battinfo batch package` runs, writes that file.
+
+Extra files, such as a README or a list of checksums, document the deposit as a whole. They belong to no dataset and are not distributions. Each goes up as itself, never zipped. The RO-Crate lists it as a `File`, and the catalog of the deposit graph lists it under `schema:hasPart`, after the member datasets, as a `schema:DigitalDocument` with its media type, size and sha256. `dcat:dataset` still names the datasets alone.
+
+```python
+Path("ocv-study", "README.md").write_text(
+    "# Graphite half-cell pOCV\n\nOne dataset per cell, one file per dataset.\n", encoding="utf-8"
+)
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    extra_files=["README.md"],
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print([part["schema:name"] for part in catalog["schema:hasPart"] if "schema:name" in part])  # ['README.md']
+```
+
+A relative path is read from the workspace folder, and each file keeps its own name. To give one another name in the deposit, pass a mapping of path to name instead of a list, such as `{"notes/readme-v2.md": "README.md"}`. Before anything is sent, `ws.zenodo()` refuses a path that is not a file, and a name the deposit already gives a data file, an archive, `battinfo.json`, `ro-crate-metadata.json` (or the names `battinfo.jsonld` and `ro-crate-metadata.jsonld`, which readers also look for) or another extra file, whatever its case. Extra files count toward the 100 files Zenodo takes in one record.
+
+`.battinfo/zenodo.json` (`.battinfo/zenodo-sandbox.json` on the sandbox) records the names of the extra files. Each run describes the whole deposit, so pass the same `extra_files` every time. A file that has not changed stays on the draft as it is and a changed one is replaced. One that a draft run leaves out is removed from the draft, and the run warns, naming it. A publish that would leave one out of the published record is refused before anything is sent, unless you pass `extra_files=[]`. `ws.publish(zenodo=True)` passes no extra files, so publish a draft that holds them with `ws.zenodo(publish=True, extra_files=[...])`.
