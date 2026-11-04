@@ -15,7 +15,7 @@ from typing import Any, Mapping, Sequence
 from battinfo._emmo_instruments import _instrument_node
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, is_dataset_series
+from battinfo._util import _as_path, is_dataset_series, registered_media_type
 from battinfo.api._shared import (
     CELL_IRI_RE,
     DEFAULT_PUBLISH_SOURCES,
@@ -163,7 +163,7 @@ def _schema_distribution_value(value: Any, *, part_of_id: str) -> dict[str, Any]
     if isinstance(content_url, str):
         out["schema:contentUrl"] = content_url
     if isinstance(encoding_format, str):
-        out["schema:encodingFormat"] = encoding_format
+        out["schema:encodingFormat"] = registered_media_type(encoding_format)
     if isinstance(value.get("contentSize"), str):
         out["schema:contentSize"] = value["contentSize"]
     if isinstance(value.get("accessLevel"), str):
@@ -480,7 +480,9 @@ def _resolver_jsonld(doc: dict[str, Any]) -> dict[str, Any]:
             "schema:name": dataset.get("name") or dataset.get("title"),
             "schema:description": dataset.get("description"),
             "schema:license": dataset.get("license"),
-            "schema:encodingFormat": encoding_format or dataset.get("format"),
+            "schema:encodingFormat": (
+                registered_media_type(fmt) if isinstance(fmt := encoding_format or dataset.get("format"), str) else fmt
+            ),
         }
         if dataset.get("access_url"):
             out["schema:url"] = dataset.get("access_url")

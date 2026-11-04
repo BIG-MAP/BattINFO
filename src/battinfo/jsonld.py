@@ -26,7 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
-from battinfo._util import is_dataset_series, is_real_number
+from battinfo._util import is_dataset_series, is_real_number, registered_media_type
 from battinfo.entities import kind_for_doc
 from battinfo.testmethod import _is_current_density_unit, _other_quantity_of_unit
 
@@ -868,7 +868,7 @@ def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[
         else:
             node["dcat:downloadURL"] = {"@id": str(loc)} if str(loc).startswith(("http://", "https://")) else str(loc)
     if art.get("media_type"):
-        node["dcat:mediaType"] = art["media_type"]
+        node["dcat:mediaType"] = registered_media_type(str(art["media_type"]))
     ct = art.get("conforms_to")
     if ct:
         node["dcterms:conformsTo"] = {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
@@ -1526,7 +1526,7 @@ def dataset_to_jsonld(record: dict) -> dict:
             if d.get("content_url"):
                 dist["dcat:downloadURL"] = {"@id": d["content_url"]}
             if d.get("encoding_format"):
-                dist["dcat:mediaType"] = d["encoding_format"]
+                dist["dcat:mediaType"] = registered_media_type(str(d["encoding_format"]))
             # File size: dcat:byteSize is an integer, schema:contentSize is text;
             # the record stores the string form, so only a digit string casts.
             size = str(d.get("content_size") or "")

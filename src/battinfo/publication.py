@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import html
 import json
-import mimetypes
 import re
 import shutil
 import warnings
@@ -21,10 +20,12 @@ from battinfo._util import (
     _now_iso,
     _now_unix,
     _sha256,
+    file_media_type,
     file_uri_to_path,
     is_dataset_series,
     is_file_uri,
     is_real_number,
+    registered_media_type,
     url_segment,
 )
 from battinfo.api._shared import PACKAGED_LIBRARY_CELL_SPEC_DIR
@@ -432,7 +433,7 @@ def _discover_dataset_files(dataset_dir: Path, dataset_glob: str, publish_filena
 def _distribution_entries(dataset_dir: Path, files: list[Path]) -> list[dict[str, Any]]:
     entries: list[dict[str, Any]] = []
     for path in files:
-        guessed_format, _ = mimetypes.guess_type(path.name)
+        guessed_format = file_media_type(path.name)
         entries.append(
             {
                 "@type": "schema:DataDownload",
@@ -462,7 +463,7 @@ def _schema_distribution_node(value: Mapping[str, Any], *, part_of_id: str) -> d
     if isinstance(content_url, str):
         node["schema:contentUrl"] = content_url
     if isinstance(encoding_format, str):
-        node["schema:encodingFormat"] = encoding_format
+        node["schema:encodingFormat"] = registered_media_type(encoding_format)
     content_size = value.get("content_size") or value.get("contentSize")
     if isinstance(content_size, str):
         node["schema:contentSize"] = content_size
@@ -1017,7 +1018,7 @@ def _ro_crate_metadata(
                 "@id": relpath,
                 "@type": "File",
                 "name": path.name,
-                "encodingFormat": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+                "encodingFormat": file_media_type(path.name) or "application/octet-stream",
                 "contentSize": path.stat().st_size,
                 "sha256": _sha256(path),
             }
@@ -1061,7 +1062,7 @@ def _dcat_export(dataset: Dataset, *, dataset_dir: Path, dataset_files: list[Pat
                 "dct:title": path.name,
                 "dcat:accessURL": {"@id": path.resolve().as_uri()},
                 "dcat:downloadURL": {"@id": path.resolve().as_uri()},
-                "dcat:mediaType": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+                "dcat:mediaType": file_media_type(path.name) or "application/octet-stream",
                 "dcat:byteSize": path.stat().st_size,
             }
         )
@@ -1337,7 +1338,6 @@ def _publication_graph(
     single spec node represents both.
     """
     import hashlib
-    import mimetypes
 
     from battinfo.ws import AuthoringWorkspace  # local import avoids an import cycle
 
@@ -1361,9 +1361,7 @@ def _publication_graph(
     for f in dataset_files:
         if f.name in declared_names:
             continue  # already declared explicitly
-        fmt = mimetypes.guess_type(f.name)[0] or (
-            "application/x-parquet" if f.suffix == ".parquet" else "application/octet-stream"
-        )
+        fmt = file_media_type(f.name) or "application/octet-stream"
         try:
             checksum = hashlib.sha256(f.read_bytes()).hexdigest()
         except OSError:
@@ -2330,7 +2328,7 @@ def load_publication_package(path: PathLike) -> BattinfoBundle:
 
 
 def _zenodo_distribution_entry(path: Path, files_base_url: str) -> dict[str, Any]:
-    guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    guessed_format = file_media_type(path.name) or "application/octet-stream"
     return {
         "@type": "schema:DataDownload",
         "schema:name": path.name,
@@ -2358,7 +2356,6 @@ def _record_sets_from_zenodo_record(
     record's ``specs`` so the builder emits one BatteryCellSpecification node.
     """
     import hashlib
-    import mimetypes
 
     ct_record = record.cell_spec.to_record()
     if record.cell_specification is not None:
@@ -2395,9 +2392,7 @@ def _record_sets_from_zenodo_record(
         dataset_record = dataset.to_record()
         dists: list[dict] = []
         for f in entry_files[i]:
-            fmt = mimetypes.guess_type(f.name)[0] or (
-                "application/x-parquet" if f.suffix == ".parquet" else "application/octet-stream"
-            )
+            fmt = file_media_type(f.name) or "application/octet-stream"
             dists.append(
                 {
                     "content_url": f.name,
@@ -2480,7 +2475,7 @@ def _zenodo_ro_crate(
     ]
 
     for path in all_data_files:
-        guessed_format = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+        guessed_format = file_media_type(path.name) or "application/octet-stream"
         graph.append(
             {
                 "@id": url_segment(path.name),
