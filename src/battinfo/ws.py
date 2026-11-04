@@ -54,6 +54,8 @@ from battinfo._deposit_files import (
     build_deposit_file_plan,
     dataset_distributions,
     deposit_file_problems,
+    extra_deposit_files,
+    extra_file_conflicts,
     kept_copy_problems,
     location_key,
     location_path,
@@ -90,6 +92,7 @@ from battinfo._util import (
     PARQUET_MEDIA_TYPE_ALIAS,
     _now_iso,
     _now_unix,
+    file_media_type,
     is_dataset_series,
     is_local_location,
     is_real_number,
@@ -1419,6 +1422,57 @@ def _planned_deposit_files(plan: DepositFilePlan) -> list[DepositFile]:
     return [*archives, *plan.kept_files()]
 
 
+def _extra_file_media_type(name: str) -> str:
+    """The media type of the extra file *name*, from its extension.
+
+    :func:`battinfo._util.file_media_type`, never the table the system keeps
+    (the Windows registry reads ``.csv`` as ``application/vnd.ms-excel``), so
+    a deposit states the same type on every computer;
+    ``application/octet-stream`` when it does not know the extension.
+    """
+    return file_media_type(name) or "application/octet-stream"
+
+
+def _rocrate_extra_file_entities(extra_files: Sequence[DepositFile]) -> list[dict]:
+    """The RO-Crate ``File`` entity of each extra file, as the data files have theirs."""
+    entities: list[dict] = []
+    for extra in extra_files:
+        entity: dict = {
+            "@type": "File",
+            "@id": extra.segment,
+            "name": extra.name,
+            "encodingFormat": _extra_file_media_type(extra.name),
+        }
+        if extra.sha256:
+            entity["contentSize"] = str(extra.size)
+            entity["sha256"] = extra.sha256
+        entities.append(entity)
+    return entities
+
+
+def _extra_file_document_node(extra: DepositFile, files_base: str) -> dict:
+    """An extra file of the deposit as the ``schema:DigitalDocument`` the catalog lists under ``schema:hasPart``.
+
+    Its checksum and size are written as
+    :func:`battinfo.jsonld.artifact_distribution_node` writes an
+    artifact's, so the two kinds of documentation file read alike.
+    """
+    from battinfo.jsonld import checksum_node  # noqa: PLC0415
+
+    url = extra.url(files_base)
+    node: dict = {
+        "@type": "schema:DigitalDocument",
+        "@id": url,
+        "schema:name": extra.name,
+        "schema:encodingFormat": _extra_file_media_type(extra.name),
+        "schema:contentUrl": url,
+    }
+    if extra.sha256:
+        node["spdx:checksum"] = checksum_node({"algorithm": "sha256", "value": extra.sha256})
+        node["dcat:byteSize"] = extra.size
+    return node
+
+
 # ── Funding / project provenance ─────────────────────────────────────────────
 # A workspace may be tagged with one funding project (e.g. an EU grant agreement
 # number such as 101103997).  The grant *identifier* is authoritative and stored
@@ -1937,22 +1991,96 @@ def _unique_keywords(keywords: Iterable[str]) -> list[str]:
     return out
 
 
-def _warn_unbundled_deposit(plan: DepositFilePlan, bundle: str) -> None:
-    """Warn when a ``bundle="none"`` deposit would hold more files than Zenodo takes in one record."""
-    if bundle != "none":
-        return
+def _warn_zenodo_file_limit(plan: DepositFilePlan, bundle: str, extra_files: Sequence[DepositFile] = ()) -> None:
+    """Warn when the deposit would hold more files than Zenodo takes in one record by default.
+
+    Every file counts: the data files or their archives, the extra files,
+    ``battinfo.json`` and ``ro-crate-metadata.json``. The message names the
+    extra files apart from the data files, and says which packing would help.
+    """
     data = len(plan.deposited_names())
-    total = data + 2  # with battinfo.json and ro-crate-metadata.json
+    total = data + len(extra_files) + 2  # with battinfo.json and ro-crate-metadata.json
     if total <= _ZENODO_FILE_LIMIT:
         return
+
+    def count(number: int, noun: str) -> str:
+        return f"{number} {noun}" + ("" if number == 1 else "s")
+
+    if plan.zipped:
+        kept = len(plan.kept_files())
+        held = count(data - kept, "archive") + " of data files" + (f", {count(kept, 'data file')}" if kept else "")
+    else:
+        held = count(data, "data file")
+    if extra_files:
+        held += f", {count(len(extra_files), 'extra file')} ({_shown_list([f.name for f in extra_files])})"
+    if bundle == "none":
+        advice = (
+            "Pass bundle='by_kind' to zip the data files one archive per test kind, or "
+            "bundle='single' to zip them in one archive"
+        )
+    elif not plan.zipped:
+        advice = "Pass bundle='single' to zip the data files in one archive"
+    else:
+        advice = ""
+    if extra_files:
+        advice = f"{advice}, or deposit fewer extra files" if advice else "Deposit fewer extra files"
+    lead = "With bundle='none' the deposit" if bundle == "none" else "The deposit"
     message = (
-        f"With bundle='none' the deposit holds {total} files ({data} data files, battinfo.json and "
-        f"ro-crate-metadata.json), and Zenodo takes at most {_ZENODO_FILE_LIMIT} files in one record "
-        "by default. Pass bundle='by_kind' to zip the data files one archive per test kind, or "
-        "bundle='single' to zip them in one archive."
+        f"{lead} holds {total} files ({held}, battinfo.json and ro-crate-metadata.json), and Zenodo "
+        f"takes at most {_ZENODO_FILE_LIMIT} files in one record by default." + (f" {advice}." if advice else "")
     )
     warnings.warn(message, stacklevel=3)
     print(f"  WARNING: {message}")
+
+
+def _refuse_extra_file_conflicts(extra_files: Sequence[DepositFile], plan: DepositFilePlan) -> None:
+    """Refuse extra files the deposit cannot carry under their names (see :func:`extra_file_conflicts`).
+
+    Raises ``ValueError`` naming each one, before anything is sent.
+    """
+    problems = extra_file_conflicts(extra_files, plan, reserved=_DEPOSIT_OWN_FILES)
+    if problems:
+        raise ValueError(
+            "extra_files= cannot go into the deposit: "
+            + "; ".join(problems)
+            + ". Pass a mapping of path to deposit name, {path: name}, to give a file a name of its own."
+        )
+
+
+def _dropped_extra_files(state: Mapping[str, Any], extra_files: Sequence[DepositFile]) -> list[str]:
+    """The extra files the state file records for the deposit that *extra_files* leaves out, by name."""
+    recorded = state.get("extra_files")
+    kept = {f.name for f in extra_files}
+    return [name for name in recorded or [] if isinstance(name, str) and name not in kept]
+
+
+def _warn_dropped_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
+    """Warn that this run will remove the extra files *dropped*, which *recorded_in* lists for the deposit."""
+    if not dropped:
+        return
+    message = (
+        f"This run does not name the extra files {recorded_in} records for the deposit: "
+        f"{_shown_list(list(dropped))}. A deposit holds the extra files the call names, so the run will "
+        "remove them from the draft. Pass them in extra_files= to keep them."
+    )
+    warnings.warn(message, stacklevel=3)
+    print(f"  WARNING: {message}")
+
+
+def _refuse_publish_dropping_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
+    """Refuse a publish whose call names none of the extra files *dropped*, which *recorded_in* lists for the deposit.
+
+    A published record keeps its files for good, so the extra files of a
+    reviewed draft are not left out of it unless the call says so with
+    ``extra_files=[]``.
+    """
+    raise ValueError(
+        f"Refusing to publish: {recorded_in} records the extra files {_shown_list(list(dropped))} for this "
+        "deposit, and this call does not name them, so the published record would hold none of them. "
+        "Pass them again in extra_files=, or extra_files=[] to publish without them. Nothing was sent. "
+        "ws.publish(zenodo=True) passes no extra files; publish such a deposit with "
+        "ws.zenodo(publish=True, extra_files=[...])."
+    )
 
 
 # Record-type subdirectories under a workspace's records source folder
@@ -2822,6 +2950,15 @@ def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, A
 _REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
 # Zenodo takes at most this many files in one record by default.
 _ZENODO_FILE_LIMIT = 100
+# The files a workspace deposit writes itself, which no extra file may be
+# named as, each with what it holds. ws.import_() takes the graph from the
+# first file of a record under either of its names.
+_DEPOSIT_OWN_FILES = {
+    BATTINFO_LD_FILENAME: "deposit graph",
+    _ROCRATE_FILENAME: "RO-Crate metadata",
+    BATTINFO_LD_FILENAME_LEGACY: "deposit graph's former name, which ws.import_() reads",
+    "ro-crate-metadata.jsonld": "RO-Crate 1.0 metadata file name, which crate readers look for",
+}
 # A Zenodo deposit of more than this many data files is zipped, one archive per
 # test kind (bundle="by_kind", the default; see AuthoringWorkspace._bundle_data_files),
 # so that with battinfo.json and ro-crate-metadata.json it stays under
@@ -8038,6 +8175,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, str] | None = None,
         bundle: str = "by_kind",
         archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
         bdf_version: str | None = None,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
@@ -8163,6 +8301,19 @@ class AuthoringWorkspace:
         kind, since Zenodo takes at most 100 files in one record by default;
         ``bundle`` chooses another packing.
 
+        Files that document the deposit as a whole, such as a README or a
+        list of checksums, go in ``extra_files``. They are not distributions
+        of a dataset. Each goes up as itself, never zipped, and the RO-Crate
+        lists it as a ``File`` and the deposit graph's catalog as a
+        ``schema:DigitalDocument`` under ``schema:hasPart``, each with its
+        media type, size and sha256. The state file records their names. A
+        run describes the whole deposit, so an extra file the last run
+        deposited and this one does not name is removed from the draft, with
+        a warning that names it, and one that has not changed since is not
+        uploaded again. A publish (``publish=True``) that would leave such a
+        file out of the record is refused before anything is sent, unless
+        the call passes ``extra_files=[]``.
+
         Each data file location in the records is screened from its text before
         anything asks the file system about it. A file on this computer is read
         wherever it lies. A file on another computer (``file://server/share/...``
@@ -8281,6 +8432,19 @@ class AuthoringWorkspace:
         archive_name:
             The archive of ``bundle="single"``, a file name ending in ``.zip``
             (default ``"data.zip"``).
+        extra_files:
+            Files that document the deposit, as a list of paths, each
+            deposited under its own file name, or as a mapping of path to
+            deposit name. A relative path is read from the workspace folder.
+            The call is refused before anything is sent when a path is not a
+            file, or when a name is one the deposit gives a data file, an
+            archive, ``battinfo.json``, ``ro-crate-metadata.json``,
+            ``battinfo.jsonld`` or another extra file, ignoring case and
+            Unicode normalisation. They count toward the 100 files Zenodo
+            takes in one record, which the call warns about before anything is
+            sent. :meth:`publish` passes none, so it refuses to publish a draft
+            that holds extra files; publish one with
+            ``zenodo(publish=True, extra_files=...)``.
         bdf_version:
             The Battery Data Format version the BDF data files follow, such as
             ``"1.3.0"``. Each of them then names that version's table schema
@@ -8326,6 +8490,9 @@ class AuthoringWorkspace:
         given_publisher = _deposit_publisher(publisher)
         single_archive_name(bundle, archive_name)
         bdf_version = _bdf_version(bdf_version)
+        # The extra files, each read now: a path that is no file, a name that
+        # is no file name and a name given twice stop the call here.
+        extras = extra_deposit_files(extra_files, root=self._root)
         # License precedence: explicit arg > workspace default > cc-by-4.0.
         if license is None:
             license = self._get_license() or "cc-by-4.0"
@@ -8380,8 +8547,10 @@ class AuthoringWorkspace:
             plan = self._deposit_file_plan(
                 records_dir, report=first, context=context, bundle=bundle, archive_name=archive_name
             )
+            # An extra file cannot take a name the deposit gives a file already.
+            _refuse_extra_file_conflicts(extras, plan)
             if first:
-                _warn_unbundled_deposit(plan, bundle)
+                _warn_zenodo_file_limit(plan, bundle, extras)
             kept_files = plan.kept_files()
             # A file ws.upload() put in R2 storage goes into the deposit only when
             # the call asks for it, and one from the private bucket with a warning.
@@ -8418,6 +8587,7 @@ class AuthoringWorkspace:
                 previous_version=f"https://{domain}/records/{follows}" if follows else "",
                 publisher=given_publisher,
                 omissions=omissions,
+                extra_files=extras,
                 bdf_version=bdf_version,
             )
             # The RO-Crate is checked with it, once, and only warned about: the
@@ -8433,6 +8603,7 @@ class AuthoringWorkspace:
                     zenodo_record_id=0,
                     prereserved_doi="10.5281/zenodo.RECORD_ID",
                     sandbox=sandbox,
+                    extra_files=extras,
                 )
                 if first
                 else None
@@ -8448,6 +8619,19 @@ class AuthoringWorkspace:
             return deposit_records, plan, kept_files, omissions, placeholder_graph
 
         deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=True)
+        # Extra files an earlier run deposited and this one does not name go
+        # from the draft, with a warning that names them; a publish that would
+        # leave them out of the record for good is refused unless the call
+        # passed extra_files=[] itself. They belong to the record the state
+        # file continues, not to another one record_id= names.
+        dropped = (
+            _dropped_extra_files(state, extras)
+            if record_id is None or record_id == str(state.get("record_id") or "")
+            else []
+        )
+        if dropped and publish and extra_files is None:
+            _refuse_publish_dropping_extra_files(dropped, recorded_in)
+        _warn_dropped_extra_files(dropped, recorded_in)
         # One record, one IRI: once the records pass the checks above, a record
         # minted here under /id/1001/ that the registry already holds in the old
         # form takes that IRI (IRI ruling, decision 5), and the deposit is
@@ -8554,6 +8738,8 @@ class AuthoringWorkspace:
                 "published": False,
                 **({"version_of": str(made_from)} if made_from else {}),
                 "records": held_records,
+                # The extra files this run deposits, which the next run warns about leaving out.
+                **({"extra_files": [f.name for f in extras]} if extras else {}),
             }
             self._save_zenodo_state(state)
             # The records may point at files under this version, under the one it
@@ -8622,6 +8808,7 @@ class AuthoringWorkspace:
                 is_version_of=is_version_of,
                 previous_version=previous_version,
                 publisher=given_publisher,
+                extra_files=extras,
                 bdf_version=bdf_version,
             )
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
@@ -8641,6 +8828,7 @@ class AuthoringWorkspace:
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 sandbox=sandbox,
+                extra_files=extras,
             )
 
             # Each file under its deposit name, the data files from where they
@@ -8650,6 +8838,13 @@ class AuthoringWorkspace:
             upload_map = {f.path: f.name for f in sorted(data_files, key=lambda f: f.name)}
             # The md5 of each file as sent, for the check in step 10.
             sent = {f.name: f.md5 for f in data_files}
+            # The extra files go up as themselves, from where they are. They
+            # are in the map, never in keep: one unchanged since the last run
+            # stays on the deposit, a changed one is replaced, and one this
+            # run does not name is removed.
+            for extra in extras:
+                upload_map[extra.path] = extra.name
+                sent[extra.name] = extra.md5
             for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME):
                 upload_map[tmpdir / name] = name
                 sent[name] = measured_file(tmpdir / name, name).md5
@@ -8873,6 +9068,7 @@ class AuthoringWorkspace:
         *,
         bundle: str = "by_kind",
         archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
     ) -> Path:
         """Generate ``ro-crate-metadata.json`` locally for review.
 
@@ -8882,9 +9078,10 @@ class AuthoringWorkspace:
         or ROR, else by a ``#person-`` or ``#org-`` identifier made from the
         name. The preview then prints what the RO-Crate check
         (:meth:`validate_rocrate`) finds, which :meth:`zenodo` warns about
-        and does not refuse. Pass the *bundle* and *archive_name* you will
-        give :meth:`zenodo`: a zipped deposit's archives are built here, to
-        measure them.
+        and does not refuse. Pass the *bundle*, *archive_name* and
+        *extra_files* you will give :meth:`zenodo`: a zipped deposit's
+        archives are built here, to measure them, and each extra file is a
+        ``File`` entity of the crate, refused as :meth:`zenodo` refuses it.
 
         Example::
 
@@ -8895,6 +9092,7 @@ class AuthoringWorkspace:
         import tempfile
 
         single_archive_name(bundle, archive_name)
+        extras = extra_deposit_files(extra_files, root=self._root)
         creators = self._deposit_creators(creators, required=False)
         contributors = _deposit_agents(contributors or [], "contributor")
         records_dir = self._ws.source_root
@@ -8902,7 +9100,8 @@ class AuthoringWorkspace:
             raise RuntimeError("No records found — run ws.save() first.")
 
         plan = self._deposit_file_plan(records_dir, bundle=bundle, archive_name=archive_name)
-        _warn_unbundled_deposit(plan, bundle)
+        _refuse_extra_file_conflicts(extras, plan)
+        _warn_zenodo_file_limit(plan, bundle, extras)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-rocrate-"))
         try:
             data_files = [*self._bundle_data_files(tmpdir, plan), *plan.kept_files()]
@@ -8919,6 +9118,7 @@ class AuthoringWorkspace:
                 license=license,
                 zenodo_record_id=0,
                 prereserved_doi="10.5281/zenodo.RECORD_ID",
+                extra_files=extras,
             )
             src = tmpdir / _ROCRATE_FILENAME
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
@@ -8954,6 +9154,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, str] | None = None,
         bundle: str = "by_kind",
         archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
         bdf_version: str | None = None,
     ) -> Path:
         """Generate ``battinfo.json`` locally for review before uploading to Zenodo.
@@ -8963,10 +9164,13 @@ class AuthoringWorkspace:
         ``title``/``creators``/``license`` you would give :meth:`zenodo` to preview
         the rights and attribution that will be embedded in the published record,
         and the same ``version``, ``publisher``, ``bundle``, ``archive_name``
-        and ``bdf_version`` (see :meth:`zenodo`). With no deposit to read them from, the version
-        links are given here: ``is_version_of`` is the concept record, which
-        groups every version (``dcterms:isVersionOf``), and
-        ``previous_version`` the version this one follows
+        and the same ``version``, ``publisher``, ``bundle``, ``archive_name``,
+        ``extra_files`` and ``bdf_version`` (see :meth:`zenodo`); the extra
+        files are read here, to state their sha256 and size. With no deposit to
+        read them from, the version links are given here: ``is_version_of`` is
+        the concept record, which groups every version
+        (``dcterms:isVersionOf``), and ``previous_version`` the version this
+        one follows
         (``dcat:previousVersion``), each as a Zenodo record URL.
         Without a ``title`` the preview carries the automatic title
         :meth:`zenodo` would give the deposit, and without ``creators`` the
@@ -8998,6 +9202,7 @@ class AuthoringWorkspace:
         given_publisher = _deposit_publisher(publisher)
         single_archive_name(bundle, archive_name)
         bdf_version = _bdf_version(bdf_version)
+        extras = extra_deposit_files(extra_files, root=self._root)
 
         # Fall back to the workspace default license (ws.license) when none is
         # passed, so the preview reflects what publishing would embed. Left empty
@@ -9011,7 +9216,8 @@ class AuthoringWorkspace:
         # The data files and their deposit names, planned as ws.zenodo() plans
         # them. The graph needs only the names, so the files are not read.
         plan = self._deposit_file_plan(records_dir, measure=False, bundle=bundle, archive_name=archive_name)
-        _warn_unbundled_deposit(plan, bundle)
+        _refuse_extra_file_conflicts(extras, plan)
+        _warn_zenodo_file_limit(plan, bundle, extras)
 
         # What the plan and the graph leave out is listed below as errors, since
         # ws.zenodo() refuses a deposit over any of it.
@@ -9032,6 +9238,7 @@ class AuthoringWorkspace:
             previous_version=previous_version or "",
             publisher=given_publisher,
             omissions=omissions,
+            extra_files=extras,
             bdf_version=bdf_version,
         )
 
@@ -9088,6 +9295,8 @@ class AuthoringWorkspace:
         not_carried = "" if fidelity_count is None else f" ({fidelity_count} record field(s) not carried)"
         print(f"  Graph nodes: {len(jsonld.get('@graph', []))}{not_carried}")
         print(f"  Data files:  {len(plan.deposited_names())}")
+        if extras:
+            print(f"  Extra files: {len(extras)}")
         return out
 
     def _assert_publishable(
@@ -9536,6 +9745,7 @@ class AuthoringWorkspace:
         referenced_records: dict[str, builtins.list[dict]] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        extra_files: Sequence[DepositFile] = (),
         bdf_version: str | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
@@ -9581,6 +9791,13 @@ class AuthoringWorkspace:
         ``dcat:previousVersion``, each when given. Its publisher is
         ``publisher`` when given (see :func:`_deposit_publisher`), else the
         first affiliation among the creators and contributors.
+
+        ``extra_files`` are files that document the deposit as a whole, such
+        as a README (``extra_files=`` of :meth:`zenodo`). They are not
+        distributions of a dataset: the catalog lists each under
+        ``schema:hasPart`` as a ``schema:DigitalDocument``
+        (:func:`_extra_file_document_node`), after the member datasets, and
+        ``dcat:dataset`` keeps the datasets alone.
 
         Cell specs use domain-battery OWL classes (``CylindricalBattery`` etc.)
         and EMMO's ``hasProperty`` / ``hasNumericalPart`` / ``hasMeasurementUnit``
@@ -10437,7 +10654,9 @@ class AuthoringWorkspace:
             "@id": record_url,
             "schema:url": record_url,
             "dcat:dataset": member_refs,  # DCAT: catalog → member datasets
-            "schema:hasPart": member_refs,  # schema.org equivalent
+            # schema.org equivalent, followed by the files that document the
+            # deposit (extra_files=), which are parts of it but no dataset.
+            "schema:hasPart": member_refs + [_extra_file_document_node(f, files_base) for f in extra_files],
             "rdfs:seeAlso": {"@id": "https://www.battery-genome.org/registry"},
         }
         if prereserved_doi:  # local publication packages have no DOI
@@ -10679,6 +10898,7 @@ class AuthoringWorkspace:
         publisher: str | Mapping[str, Any] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        extra_files: Sequence[DepositFile] = (),
         bdf_version: str | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
@@ -10688,9 +10908,10 @@ class AuthoringWorkspace:
         and the copies of published records it references from
         ``.battinfo/references/`` (read for stub nodes, never deposited).
         :meth:`zenodo` and :meth:`preview_jsonld` pass the deposit's ``file_plan``
-        (:meth:`_deposit_file_plan`), which names every local file, and an
-        ``omissions`` list that collects the records the graph leaves out;
-        without one a record left out raises a ``ValueError``.
+        (:meth:`_deposit_file_plan`), which names every local file, the extra
+        files that document the deposit, and an ``omissions`` list that
+        collects the records the graph leaves out; without one a record left
+        out raises a ``ValueError``.
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
@@ -10702,6 +10923,7 @@ class AuthoringWorkspace:
             data_filenames=data_filenames,
             file_plan=file_plan,
             omissions=omissions,
+            extra_files=extra_files,
             title=title,
             description=description,
             creators=creators,
@@ -10728,6 +10950,7 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         sandbox: bool = False,
+        extra_files: Sequence[DepositFile] = (),
     ) -> dict:
         """Write a conforming ``ro-crate-metadata.json`` to *tmpdir*, and return what it holds.
 
@@ -10746,6 +10969,7 @@ class AuthoringWorkspace:
             prereserved_doi=prereserved_doi,
             sandbox=sandbox,
             jsonld_size=jsonld_path.stat().st_size if jsonld_path.exists() else None,
+            extra_files=extra_files,
         )
         (tmpdir / _ROCRATE_FILENAME).write_text(
             json.dumps(crate, indent=2, ensure_ascii=False),
@@ -10766,11 +10990,12 @@ class AuthoringWorkspace:
         prereserved_doi: str,
         sandbox: bool = False,
         jsonld_size: int | None = None,
+        extra_files: Sequence[DepositFile] = (),
     ) -> dict:
         """The ``ro-crate-metadata.json`` of a deposit.
 
         A minimal RO-Crate 1.1 that:
-        - Lists ``battinfo.json`` and all data files as ``hasPart``
+        - Lists ``battinfo.json``, all data files and the extra files as ``hasPart``
         - References the Zenodo record URL and DOI
         - Describes the creators and contributors, and their organisations, as
           contextual entities the root references by ``@id`` (:func:`_rocrate_agents`)
@@ -10780,7 +11005,11 @@ class AuthoringWorkspace:
         :meth:`_bundle_data_files` uploads and those it keeps. A file's ``@id``
         is its deposit name percent-encoded, a relative URL, and its ``name``
         the name itself; size and sha256 come from the plan. *jsonld_size* is
-        the size of ``battinfo.json`` in bytes, when known.
+        the size of ``battinfo.json`` in bytes, when known. *extra_files* are
+        the files that document the deposit (``extra_files=`` of
+        :meth:`zenodo`), each a ``File`` entity after the data files, with its
+        media type from its extension (:func:`_extra_file_media_type`), size
+        and sha256.
         """
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
@@ -10789,6 +11018,7 @@ class AuthoringWorkspace:
 
         # Root Dataset
         parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
+        parts += [{"@id": f.segment} for f in extra_files]
         root: dict = {
             "@type": "Dataset",
             "@id": "./",
@@ -10851,6 +11081,7 @@ class AuthoringWorkspace:
             root,
             jsonld_entity,
             *file_entities,
+            *_rocrate_extra_file_entities(extra_files),
             *agent_entities,
         ]
 
