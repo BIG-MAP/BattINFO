@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 import { controlFor, type Field } from "./schema";
-import { INPUT } from "./ui";
+import { INPUT, INPUT_FLAGGED } from "./ui";
 import { SUGGESTS } from "./vocab";
 
 // A schema `format` names a closed shape the browser already knows how to
@@ -67,7 +67,7 @@ export function Leaf({
   flagged?: boolean;
 }) {
   const control = controlFor(field.loc);
-  const cls = `${INPUT} ${flagged ? "border-warning/60" : "border-border"}`;
+  const cls = `${INPUT} ${flagged ? INPUT_FLAGGED : ""}`;
 
   switch (control.kind) {
     case "select":

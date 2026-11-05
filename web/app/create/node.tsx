@@ -14,10 +14,10 @@
 // How a row looks is ui.tsx; which input a value gets is controls.tsx.
 
 import { useState } from "react";
-import { blankFor, controlFor, fieldsOf, isDeprecated, join, requiredGroups, type Field, type Located } from "./schema";
+import { blankFor, controlFor, fieldsOf, isDeprecated, join, labelFor, requiredGroups, type Field, type Located } from "./schema";
 import { Leaf } from "./controls";
-import { AddField, Branch, LABEL, LEAF_ROW, Label, TITLE, ValueRow } from "./ui";
-import { PROPERTY_LIST } from "./vocab";
+import { AddItem, AddMenu, Branch, CHOICE, HINT, ValueRow } from "./ui";
+import { PROPERTY_KEYS } from "./vocab";
 
 type Obj = Record<string, unknown>;
 
@@ -42,6 +42,13 @@ function withoutKey(obj: Obj, key: string): Obj {
 function isEmpty(value: unknown): boolean {
   return value === undefined || value === "";
 }
+
+// A list's items have no names, so each gets an id that stays with it: removing
+// one takes its own row, and what that row holds (a section opened, a number
+// half typed), with it. Keyed by index, the rows below a removed item took on
+// the state of the item above them.
+let lastId = 0;
+const newId = () => ++lastId;
 
 /** Whether anything is wrong at this path or beneath it, so a collapsed branch
  *  can say it is hiding something.
@@ -76,6 +83,7 @@ function ArrayBranch({
   onChange,
   onRemove,
   startOpen,
+  fresh,
   path,
   depth,
   issues,
@@ -87,15 +95,27 @@ function ArrayBranch({
   onChange: (next: unknown[]) => void;
   onRemove?: () => void;
   startOpen?: boolean;
+  fresh?: boolean;
 }) {
-  // Indexes added on this screen, which are the only ones that open by
-  // themselves.
-  const [added, setAdded] = useState<number[]>([]);
+  // Each item's id, in step with the items; renewed when they change from
+  // outside. The item added last is the only one that opens by itself.
+  const [ids, setIds] = useState(() => value.map(newId));
+  if (ids.length !== value.length) setIds(value.map(newId));
+  const [arrived, setArrived] = useState<number>();
   const control = controlFor(field.loc);
   if (control.kind !== "array") return null;
   const itemIsObject = controlFor(control.items).kind === "object";
   const replace = (index: number, next: unknown) => onChange(value.map((item, i) => (i === index ? next : item)));
-  const drop = (index: number) => onChange(value.filter((_, i) => i !== index));
+  const drop = (index: number) => {
+    setIds(ids.filter((_, i) => i !== index));
+    onChange(value.filter((_, i) => i !== index));
+  };
+  const add = () => {
+    const id = newId();
+    setIds([...ids, id]);
+    setArrived(id);
+    onChange([...value, blankFor(control.items)]);
+  };
 
   return (
     <Branch
@@ -104,25 +124,31 @@ function ArrayBranch({
       note={value.length ? `${value.length} item${value.length === 1 ? "" : "s"}` : undefined}
       problems={anythingUnder(issues, path)}
       startOpen={startOpen}
+      fresh={fresh}
       level={depth}
       onRemove={onRemove}
     >
       {value.map((item, index) => {
         const itemPath = join(path, index);
         const problem = issues.get(itemPath)?.[0];
+        const id = ids[index];
+        // An item with a name is headed by it rather than by its place.
+        const name = itemIsObject ? (item as Obj | null)?.name : undefined;
+        const named = typeof name === "string" && name ? name : undefined;
         return itemIsObject ? (
           // An item added here was asked for, so it opens. One that arrived
           // with the record was not, and opening every one of them is how a
           // loaded record became a wall.
           <Branch
-            key={index}
-            title={index + 1}
+            key={id}
+            title={named ?? index + 1}
             problems={anythingUnder(issues, itemPath)}
-            startOpen={added.includes(index)}
+            fresh={arrived === id}
             level={depth + 1}
             onRemove={() => drop(index)}
           >
             <ObjectNode
+              owner={named ?? `${field.label} ${index + 1}`}
               loc={control.items}
               value={(item ?? {}) as Obj}
               onChange={(next) => replace(index, next)}
@@ -135,10 +161,11 @@ function ArrayBranch({
           </Branch>
         ) : (
           <ValueRow
-            key={index}
-            label={<span className={`${LABEL} tabular-nums`}>{index + 1}</span>}
+            key={id}
+            label={index + 1}
             onRemove={() => drop(index)}
             problem={problem}
+            fresh={arrived === id}
           >
             <Leaf
               field={{ ...field, label: `${field.label} ${index + 1}`, loc: control.items }}
@@ -149,17 +176,7 @@ function ArrayBranch({
           </ValueRow>
         );
       })}
-      <button
-        type="button"
-        onClick={() => {
-          setAdded((indexes) => [...indexes, value.length]);
-          onChange([...value, blankFor(control.items)]);
-        }}
-        className="flex items-center gap-1.5 py-1.5 text-sm text-brandtext"
-      >
-        <span className="w-3 shrink-0 text-center">+</span>
-        add item
-      </button>
+      <AddItem to={typeof title === "string" ? title : field.label} onClick={add} />
     </Branch>
   );
 }
@@ -175,6 +192,7 @@ function MapBranch({
   onChange,
   onRemove,
   startOpen,
+  fresh,
   path,
   depth,
   issues,
@@ -186,9 +204,9 @@ function MapBranch({
   onChange: (next: Obj) => void;
   onRemove?: () => void;
   startOpen?: boolean;
+  fresh?: boolean;
 }) {
-  const [name, setName] = useState("");
-  const [added, setAdded] = useState<string[]>([]);
+  const [arrived, setArrived] = useState<string>(); // the entry added last
   const control = controlFor(field.loc);
   if (control.kind !== "map") return null;
   const values = control.values;
@@ -199,13 +217,11 @@ function MapBranch({
   // gets a row.
   const entryKind = controlFor(values).kind;
   const nested = entryKind === "object" || entryKind === "map";
-  const legal = name !== "" && !(name in value) && new RegExp(pattern).test(name);
+  const fits = (name: string) => !(name in value) && new RegExp(pattern).test(name);
 
-  function add() {
-    if (!legal) return;
-    setAdded((keys) => [...keys, name]);
+  function add(name: string) {
+    setArrived(name);
     onChange({ ...value, [name]: blankFor(values) as Obj });
-    setName("");
   }
 
   function drop(key: string) {
@@ -219,6 +235,7 @@ function MapBranch({
       note={entries.length ? `${entries.length} entr${entries.length === 1 ? "y" : "ies"}` : undefined}
       problems={anythingUnder(issues, path)}
       startOpen={startOpen}
+      fresh={fresh}
       level={depth}
       onRemove={onRemove}
     >
@@ -229,11 +246,12 @@ function MapBranch({
             key={key}
             title={key}
             problems={anythingUnder(issues, here)}
-            startOpen={added.includes(key)}
+            fresh={arrived === key}
             level={depth + 1}
             onRemove={() => drop(key)}
           >
             <ObjectNode
+              owner={key}
               loc={values}
               value={(item ?? {}) as Obj}
               onChange={(next) => onChange({ ...value, [key]: next })}
@@ -247,9 +265,10 @@ function MapBranch({
         ) : (
           <ValueRow
             key={key}
-            label={<span className={LABEL}>{key}</span>}
+            label={key}
             onRemove={() => drop(key)}
             problem={issues.get(here)?.[0]}
+            fresh={arrived === key}
           >
             <Leaf
               field={{ ...field, label: key, loc: values }}
@@ -261,27 +280,14 @@ function MapBranch({
         );
       })}
 
-      <div className={LEAF_ROW}>
-        <span className="w-3 shrink-0 text-center text-sm text-brandtext">+</span>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && add()}
-          placeholder="name"
-          aria-label={`Name of a new ${field.label} entry`}
-          list={PROPERTY_LIST}
-          className={`${LABEL} rounded border border-border bg-surface/60 px-2 py-0.5 text-ink focus:border-brand-500 focus:outline-none`}
-        />
-        <button
-          type="button"
-          onClick={add}
-          disabled={!legal}
-          className={`text-sm ${legal ? "text-brandtext" : "cursor-not-allowed text-ink-faint/40"}`}
-        >
-          add
-        </button>
-        <span className="flex-1" />
-      </div>
+      {/* The names BattINFO's vocabulary knows are offered; any other that
+          fits the schema's pattern can be typed. */}
+      <AddMenu
+        to={typeof title === "string" ? title : field.label}
+        options={PROPERTY_KEYS.filter(fits).map((key) => ({ key, label: labelFor(key) }))}
+        onAdd={add}
+        fits={fits}
+      />
     </Branch>
   );
 }
@@ -296,6 +302,7 @@ export function ObjectNode({
   loc,
   value,
   onChange,
+  owner,
   path = "",
   depth = 0,
   issues,
@@ -304,15 +311,16 @@ export function ObjectNode({
   loc: Located;
   value: Obj;
   onChange: (next: Obj) => void;
+  /** What this object is, as its heading names it: what a field is added to. */
+  owner: string;
   issues: Issues;
   /** Dotted paths the page settles itself -- what it stamps in, and the
    *  identity the library derives on save. Matched against the row's full
    *  path, so it reaches into the record body and not merely the top level. */
   omit?: string[];
 }) {
-  // Branches a reader has just asked for start open even when they sit deeper
-  // than the one level shown by default.
-  const [opened, setOpened] = useState<string[]>([]);
+  // The field asked for last: brought into view, and open if it is a section.
+  const [arrived, setArrived] = useState<string>();
 
   // One control lookup per field, reused by every decision below. A value the
   // schema fixes (`const`) is already set and not worth a row.
@@ -356,7 +364,7 @@ export function ObjectNode({
 
   function add(row: Row) {
     onChange(withKey(value, row.field.key, blankFor(row.field.loc)));
-    if (isContainer(row.kind)) setOpened((keys) => [...keys, row.field.key]);
+    setArrived(row.field.key);
   }
 
   /** Switching the selector moves the row to another member of its group. */
@@ -385,7 +393,7 @@ export function ObjectNode({
         onChange={(e) => choose(group.keys, e.target.value)}
         title="Which of these the record states"
         aria-label="Which of these the record states"
-        className={`${group.collapsible ? TITLE : LABEL} rounded border border-transparent bg-transparent py-0.5 hover:border-border focus:border-brand-500 focus:outline-none`}
+        className={CHOICE}
       >
         <option value="">choose…</option>
         {group.keys.map((key) => (
@@ -418,7 +426,7 @@ export function ObjectNode({
           level={depth}
           onRemove={shared.onRemove}
         >
-          <ObjectNode loc={field.loc} value={(current ?? {}) as Obj} onChange={set} {...nested} depth={depth + 1} />
+          <ObjectNode owner={field.label} loc={field.loc} value={(current ?? {}) as Obj} onChange={set} {...nested} depth={depth + 1} />
         </Branch>
       );
     }
@@ -435,7 +443,7 @@ export function ObjectNode({
         {field ? (
           <Leaf field={field} value={current} onChange={set} flagged={awaited} />
         ) : (
-          <p className="px-2 py-1 text-xs text-ink-faint/60">choose one on the left</p>
+          <p className={HINT}>choose one on the left</p>
         )}
       </ValueRow>
     );
@@ -450,7 +458,7 @@ export function ObjectNode({
     // form; the section headings say what is inside and what still needs
     // filling, so the shape of the record is readable without any of it open.
     // A section asked for by name is the exception -- see `add`.
-    const startOpen = opened.includes(field.key);
+    const fresh = arrived === field.key;
     const nested: TreeProps = { path: here, depth, issues, omit };
 
     if (kind === "object") {
@@ -460,11 +468,12 @@ export function ObjectNode({
           title={field.label}
           help={field.help}
           problems={anythingUnder(issues, here)}
-          startOpen={startOpen}
+          fresh={fresh}
           level={depth}
           onRemove={remove}
         >
           <ObjectNode
+            owner={field.label}
             loc={field.loc}
             value={(value[field.key] ?? {}) as Obj}
             onChange={set}
@@ -483,7 +492,7 @@ export function ObjectNode({
           value={(value[field.key] ?? {}) as Obj}
           onChange={set as (next: Obj) => void}
           onRemove={remove}
-          startOpen={startOpen}
+          fresh={fresh}
           {...nested}
         />
       );
@@ -497,7 +506,7 @@ export function ObjectNode({
           value={(value[field.key] ?? []) as unknown[]}
           onChange={set}
           onRemove={remove}
-          startOpen={startOpen}
+          fresh={fresh}
           {...nested}
         />
       );
@@ -512,11 +521,12 @@ export function ObjectNode({
     return (
       <ValueRow
         key={field.key}
-        label={<Label text={field.label} />}
+        label={field.label}
         help={field.help}
         onRemove={remove}
         wanted={awaited}
         problem={awaited ? undefined : problem}
+        fresh={fresh}
       >
         <Leaf field={field} value={current} onChange={set} flagged={awaited || !!problem} />
       </ValueRow>
@@ -529,7 +539,7 @@ export function ObjectNode({
       {groups.filter((group) => !group.collapsible).map(renderGroup)}
       {groups.filter((group) => group.collapsible).map(renderGroup)}
       {branches.map(renderField)}
-      <AddField options={addable.map((row) => row.field)} onAdd={(field) => add(byKey(field.key)!)} />
+      <AddMenu to={owner} options={addable.map((row) => row.field)} onAdd={(key) => add(byKey(key)!)} />
     </div>
   );
 }

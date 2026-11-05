@@ -1,9 +1,182 @@
-/* State that depends on a node's OWN <details>, which Tailwind cannot express:
-   its group-open variant matches any open ancestor, so nested chevrons and
-   tags followed their parent instead of themselves. The child combinator
-   binds each rule to the summary's own details and no other. */
+/* The form's look. Plain CSS rather than Tailwind: each depth's colours are
+   mixed over that depth's own ground, which utilities cannot compute. */
+
+/* Every colour mixed over the ground it is drawn on, a section's the darker
+   the deeper it is, so rules, outlines and hovers stand out alike at every
+   depth. */
+.tree,
+.branch {
+  --ink: rgb(var(--c-ink));
+  --border: color-mix(in srgb, var(--ink) 15%, var(--ground));
+  --border-strong: color-mix(in srgb, var(--ink) 28%, var(--ground));
+  --bg-hover: color-mix(in srgb, var(--ink) 6%, var(--ground));
+  --text-faint: color-mix(in srgb, var(--ink) 42%, var(--ground));
+  --text-muted: color-mix(in srgb, var(--ink) 65%, var(--ground));
+}
+
+.tree {
+  --ground: rgb(var(--c-paper));
+  --head: 2.375rem;
+  container: record / inline-size;
+}
+
+/* A value: name | its control, removable; what is wrong under the control. */
+.row {
+  display: grid;
+  grid-template-columns: min(13rem, 35%) minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 12px;
+  min-height: var(--head);
+  padding: 4px 4px 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--ink) 2.5%, transparent);
+}
+
+.label {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.flagged .label {
+  color: rgb(var(--c-warning));
+}
+
+/* The control as wide as a value needs, its remove right after it. */
+.control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 30rem;
+}
+
+.problem {
+  grid-column: 2;
+  color: rgb(var(--c-warning));
+  font-size: 0.75rem;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 1.75rem;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.875rem;
+}
+
+.input:hover {
+  border-color: var(--border-strong);
+}
+
+.input:focus {
+  border-color: rgb(var(--c-brand-text));
+  background: rgb(var(--c-surface));
+  box-shadow: 0 0 0 3px rgb(var(--c-brand-text) / 0.28);
+  outline: none;
+}
+
+.inputFlagged {
+  border-color: rgb(var(--c-warning));
+}
+
+.remove {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  color: var(--text-faint);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.remove:hover {
+  background: rgb(var(--c-error-tint));
+  color: rgb(var(--c-error));
+}
+
+/* A "one of these" choice, where a name would be. */
+.choice {
+  max-width: 100%;
+  padding: 1px 2px;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+}
+
+.choice:hover {
+  border-color: var(--border-strong);
+}
+
+.hint {
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+/* A section: a box round its heading and rows, as a table is. */
+.branch {
+  --ground: color-mix(in srgb, var(--ink) calc((var(--depth) + 1) * 2.5%), rgb(var(--c-paper)));
+  border: 1px solid var(--border);
+  transition: border-color 120ms ease;
+}
+
+/* One inside another set in a little from the right, too. */
+.nested > .branch {
+  margin-right: 8px;
+}
+
+.branch:not(:first-child) {
+  margin-top: 12px;
+}
+
+/* The sections around what is hovered, their left edge a step stronger. */
+.branch:hover {
+  border-left-color: var(--border-strong);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: var(--head);
+  padding: 0 4px 0 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--ground); /* solid: it may pin over the rows */
+  color: var(--ink);
+  font-size: 0.875rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.head::-webkit-details-marker {
+  display: none;
+}
+
+.head:hover {
+  background: var(--bg-hover);
+}
+
+/* Shut, its heading's own rule would double the section's. */
+.branch:not([open]) > .head {
+  border-bottom: 0;
+}
 
 .chevron {
+  flex: none;
+  width: 0.75rem;
+  color: var(--text-faint);
   transition: transform 150ms ease;
 }
 
@@ -11,35 +184,211 @@ details[open] > summary .chevron {
   transform: rotate(90deg);
 }
 
-details[open] > summary .hideWhenOpen {
+.title {
+  min-width: 0;
+  font-weight: 600;
+}
+
+.note {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.toFix {
+  color: rgb(var(--c-warning));
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+details[open] > summary .toFix {
   display: none;
 }
 
-/* currentColor is the summary's own text colour, so the tint tracks the theme
-   without naming a palette value here. */
-details[open] > summary.tintWhenOpen {
-  background-color: color-mix(in srgb, currentColor 10%, transparent);
-}
-
-/* A section reads as a heading over its contents only while it has contents on
-   show; closed, it is a row like any other and needs the divider that
-   separates rows. Open, the tint already separates it, so the rule steps back
-   rather than disappearing -- the height stays the same either way. */
-details[open] > summary.headWhenOpen {
-  /* Opaque, not a wash over whatever is behind: an open heading parks while
-     its own rows scroll under it, and a translucent one let them through. The
-     tint is the same either way -- paper is what was behind it before. */
-  background-color: color-mix(in srgb, currentColor 7%, rgb(var(--c-paper)));
-  border-bottom-color: transparent;
-}
-
-/* Parks under the toolbar while its contents scroll, and only while it is
-   open -- a shut section is a row like any other. Its `top` and stacking
-   order say which level it belongs to; Branch works those out, because CSS
-   cannot count the sections enclosing this one. The outermost sits highest,
-   so an inner heading slides under its parent rather than over it. */
-details[open] > summary.pinWhenOpen {
+/* Open, a heading pins under the site header (4rem) and the toolbar (3.3rem),
+   below the headings above it, while its rows scroll. The outermost sits
+   highest, so an inner heading slides under its parent. */
+details[open] > .head.pinned {
   position: sticky;
-  top: var(--pin-top);
-  z-index: var(--pin-z);
+  top: calc(7.3rem + var(--level) * var(--head));
+  z-index: calc(3 - var(--level));
+}
+
+/* A section's rows, on its ground; their names in line with the heading's
+   title (19px + a row's 8px = the heading's 8px + 12px arrow + 6px gap). */
+.nested {
+  padding: 0 0 8px 19px;
+  background: var(--ground);
+}
+
+/* Something just added, marked for a moment. A section's own background is
+   hidden under its heading's and rows', so those are what glow. */
+.row.fresh,
+.fresh > .head,
+.fresh > .nested {
+  animation: fresh 2s ease-out;
+}
+
+@keyframes fresh {
+  from {
+    background: rgb(var(--c-brand-fill) / 0.3);
+  }
+}
+
+/* Another item of a list: a plain button, where adding a field is a dashed
+   one with a list. */
+.addItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 1.75rem;
+  margin: 6px 0 6px 4px;
+  padding: 0 10px 0 8px;
+  border-radius: 0.375rem;
+  color: rgb(var(--c-brand-text));
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.addItem:hover {
+  background: rgb(var(--c-tint));
+}
+
+/* What may be added here: a button, the choices over the form below it. */
+.add {
+  position: relative;
+  margin: 6px 0 6px 8px;
+}
+
+.addHead {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 1.75rem;
+  padding: 0 10px 0 8px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 0.375rem;
+  color: rgb(var(--c-brand-text));
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.addHead:hover,
+.addHead[aria-expanded="true"] {
+  border-color: rgb(var(--c-brand-text));
+  background: rgb(var(--c-tint));
+}
+
+/* Over the toolbar (z-30), under the site header (z-40). */
+.addPanel {
+  position: absolute;
+  z-index: 35;
+  top: calc(100% + 4px);
+  left: 0;
+  width: min(26rem, 80vw);
+  overflow: hidden;
+  border: 1px solid rgb(var(--c-border));
+  border-radius: 0.5rem;
+  background: rgb(var(--c-raised));
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.16);
+}
+
+.above {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.addFilter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 2.375rem;
+  padding: 0 6px 0 12px;
+  border-bottom: 1px solid rgb(var(--c-border));
+}
+
+.addFilter input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  color: rgb(var(--c-ink));
+  font-size: 0.875rem;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  color: rgb(var(--c-ink-faint));
+  font-size: 1rem;
+}
+
+.close:hover {
+  background: rgb(var(--c-ink) / 0.06);
+  color: rgb(var(--c-ink));
+}
+
+.options {
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 0.375rem;
+  color: rgb(var(--c-ink));
+  text-align: left;
+}
+
+.option[aria-selected="true"] {
+  background: rgb(var(--c-tint));
+}
+
+.optionLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.optionHelp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: rgb(var(--c-ink-faint));
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.noOption {
+  padding: 8px;
+  color: rgb(var(--c-ink-faint));
+  font-size: 0.875rem;
+}
+
+/* Little room: a row's name on a line of its own, its value under it, the
+   whole width. */
+@container record (max-width: 620px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .control {
+    max-width: none;
+  }
+
+  .problem {
+    grid-column: 1;
+  }
 }
