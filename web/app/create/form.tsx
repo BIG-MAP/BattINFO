@@ -25,13 +25,12 @@ import {
   NEGATIVE_LIST,
   POSITIVE_BASES,
   POSITIVE_LIST,
-  PROPERTY_KEYS,
-  PROPERTY_LIST,
   UNIT_LIST,
   UNIT_SYMBOLS,
 } from "./vocab";
 import { HowToStart } from "./start";
 import { BackLink } from "./pick-file";
+import { TREE } from "./ui";
 import { asDraft, findingsFor, readFragment, type Loaded } from "./load";
 import { notAuthored, slugOf, typeForSlug, type RecordType } from "./types";
 import { validateRecordAs } from "@/lib/validate";
@@ -258,8 +257,11 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
       </div>
 
       <div className="mt-6 grid gap-8 xl:grid-cols-12">
-        <section className="xl:col-span-7">
+        {/* min-w-0 on both: a grid item is otherwise as wide as its widest
+            line, and the JSON's widened the form past a phone's screen. */}
+        <section className={`min-w-0 xl:col-span-7 ${TREE}`}>
           <ObjectNode
+            owner="record"
             loc={type.root}
             value={draft}
             onChange={setDraft}
@@ -272,7 +274,7 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
             toolbar (3.4rem) -- and is as tall as what is left beneath them.
             Capped at 75vh it ended well short of the fold while the page kept
             scrolling past it. */}
-        <section className="xl:col-span-5 xl:sticky xl:top-[7.8rem] xl:self-start">
+        <section className="min-w-0 xl:col-span-5 xl:sticky xl:top-[7.8rem] xl:self-start">
           <div className="flex flex-col overflow-hidden rounded border border-border xl:max-h-[calc(100vh-8.6rem)]">
             <h2 className="shrink-0 border-b border-border bg-ink/[0.04] px-3 py-2 text-xs font-medium text-ink-faint">
               BattINFO JSON
@@ -287,11 +289,6 @@ function Record({ type, begun }: { type: RecordType; begun: Loaded }) {
       <datalist id={UNIT_LIST}>
         {UNIT_SYMBOLS.map((unit) => (
           <option key={unit} value={unit} />
-        ))}
-      </datalist>
-      <datalist id={PROPERTY_LIST}>
-        {PROPERTY_KEYS.map((key) => (
-          <option key={key} value={key} />
         ))}
       </datalist>
       <datalist id={POSITIVE_LIST}>

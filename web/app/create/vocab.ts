@@ -14,7 +14,6 @@ export { NEGATIVE_BASES, POSITIVE_BASES, PROPERTY_KEYS, UNIT_SYMBOLS } from "@/l
 export const UNIT_LIST = "vocab-units";
 export const POSITIVE_LIST = "vocab-positive-bases";
 export const NEGATIVE_LIST = "vocab-negative-bases";
-export const PROPERTY_LIST = "vocab-properties";
 
 // The one place a field name is bound to a vocabulary. The schemas offer no
 // structural marker for "this holds a unit", so the binding has to be written
