@@ -23,7 +23,7 @@ from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value, jsonld_literal, jsonld_text
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
-from battinfo.namespace import record_iri_forms
+from battinfo.namespace import record_iri_forms, record_iri_pattern
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
@@ -766,6 +766,26 @@ def _copy_identifier(value: Any) -> Any:
     return None
 
 
+# What the schemas call OrganizationRefIri: an organization record in either IRI form, or a maker as a shared thing.
+_ORGANIZATION_REF_IRI = record_iri_pattern("organization", both_shapes=True, things=True)
+
+
+def _organization_ref_iri(value: Mapping[str, Any], name: str) -> str | None:
+    """The ``id`` of the organization object *value*, its BattINFO organization IRI, or ``None`` when it gives none.
+
+    Raises ``ValueError`` for an ``id`` the schemas would refuse, naming the accepted forms.
+    """
+    iri = value.get("id")
+    if iri is None or iri == "":
+        return None
+    if not isinstance(iri, str) or _ORGANIZATION_REF_IRI.fullmatch(iri) is None:
+        raise ValueError(
+            f"The id of the organization {name!r} must match {record_iri_forms('organization', things=True)}, "
+            f"and {iri!r} does not. An identifier from elsewhere, such as a ROR, goes in same_as."
+        )
+    return iri
+
+
 def _canonical_agent(value: Any) -> dict[str, Any] | None:
     if not isinstance(value, Mapping):
         return None
@@ -797,6 +817,10 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
         out["type"] = "Person"
     else:
         out["type"] = "Organization"
+    if out["type"] == "Organization":
+        organization_id = _organization_ref_iri(value, name)
+        if organization_id is not None:
+            out["id"] = organization_id
     orcid = value.get("orcid")
     if isinstance(orcid, str) and orcid.strip():
         out["orcid"] = orcid
@@ -3241,15 +3265,16 @@ class Dataset(BundleJsonModel):
     creators: list[dict[str, Any]] = Field(
         default_factory=list,
         validation_alias=AliasChoices("creators", "creator"),
-        description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation.",
+        description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation. An organization, an affiliation included, also takes id, its BattINFO organization IRI.",
     )
     publisher: dict[str, Any] | None = Field(
-        default=None, description="Publishing agent (name plus optional url/ROR sameAs)."
+        default=None,
+        description="Publishing organization (name plus optional id, its BattINFO organization IRI, url and ROR same_as).",
     )
     funders: list[dict[str, Any]] = Field(
         default_factory=list,
         validation_alias=AliasChoices("funders", "funder"),
-        description="Funding agents (name plus optional ROR sameAs).",
+        description="Funding agents (name plus optional ROR same_as; an organization also takes id, its BattINFO organization IRI).",
     )
     citations: list[dict[str, Any]] = Field(
         default_factory=list,

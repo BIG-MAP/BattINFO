@@ -1615,6 +1615,9 @@ def dataset_to_jsonld(record: dict) -> dict:
     publisher = _agent_to_jsonld(ds.get("publisher"))
     if publisher:
         node["dcterms:publisher"] = publisher
+    funders = [agent for f in (ds.get("funders") or []) if (agent := _agent_to_jsonld(f))]
+    if funders:
+        node["schema:funder"] = funders
     same_as = [{"@id": iri} for iri in (ds.get("same_as") or []) if isinstance(iri, str) and iri]
     if same_as:
         node["schema:sameAs"] = same_as

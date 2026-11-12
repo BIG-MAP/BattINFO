@@ -1493,6 +1493,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           }
         },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+        },
         "Organization": {
           "type": "object",
           "additionalProperties": false,
@@ -1503,6 +1508,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": {
               "const": "Organization",
               "description": "JSON-LD type discriminator."
+            },
+            "id": {
+              "$ref": "#/$defs/OrganizationRefIri",
+              "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
               "type": "string",
@@ -3681,6 +3690,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           },
           "description": "A person, in schema.org Person terms; an ORCID may be given in same_as."
         },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+        },
         "Organization": {
           "type": "object",
           "additionalProperties": false,
@@ -3691,6 +3705,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": {
               "const": "Organization",
               "description": "JSON-LD type discriminator."
+            },
+            "id": {
+              "$ref": "#/$defs/OrganizationRefIri",
+              "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
               "type": "string",
@@ -11840,6 +11858,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           }
         },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+        },
         "Organization": {
           "type": "object",
           "additionalProperties": false,
@@ -11850,6 +11873,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": {
               "const": "Organization",
               "description": "JSON-LD type discriminator."
+            },
+            "id": {
+              "$ref": "#/$defs/OrganizationRefIri",
+              "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
               "type": "string",
@@ -12452,6 +12479,11 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             }
           }
         },
+        "OrganizationRefIri": {
+          "type": "string",
+          "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+          "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+        },
         "Organization": {
           "type": "object",
           "additionalProperties": false,
@@ -12462,6 +12494,10 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "type": {
               "const": "Organization",
               "description": "JSON-LD type discriminator."
+            },
+            "id": {
+              "$ref": "#/$defs/OrganizationRefIri",
+              "description": "Canonical BattINFO organization IRI linking this party to its organization record."
             },
             "name": {
               "type": "string",
