@@ -292,7 +292,7 @@
     "OrganizationIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?organization/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the organization/ namespace (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "OrganizationRefIri": {
       "type": "string",

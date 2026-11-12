@@ -72,6 +72,25 @@ def test_the_schemas_carry_the_patterns_of_the_erratum() -> None:
     assert sum(SYNC._takes_things(where) for _, where, _ in PATTERNS) == 35
 
 
+def test_a_description_that_shows_a_record_iri_names_both_forms() -> None:
+    """Beside a record IRI pattern, a description that spells an IRI out names the form under id/{prefix}/ too."""
+    one_form = []
+    own_iris = 0
+    for tree in SYNC.TREES:
+        for path in sorted(tree.rglob("*.json")):
+            document = json.loads(path.read_text(encoding="utf-8"))
+            for where, node in SYNC._patterns(document):
+                description = node.get("description")
+                if not isinstance(description, str) or "https://w3id.org/battinfo/" not in description:
+                    continue
+                own_iris += tree == SCHEMAS and description.startswith("Canonical BattINFO IRI in the ")
+                if "https://w3id.org/battinfo/id/{prefix}/" not in description:
+                    one_form.append(f"{path.relative_to(ROOT).as_posix()}#/{'/'.join(where)}")
+    assert not one_form, "These descriptions show the old form alone:\n" + "\n".join(one_form)
+    # The 22 descriptions of a record's own IRI, in 10 schemas, that showed one form until 0.8.0.
+    assert own_iris == 22
+
+
 def test_every_schema_that_defines_an_organization_gives_it_the_same_id() -> None:
     """21 schemas define an Organization, and in each its id is an OrganizationRefIri of one pattern."""
     reference = schema_for_rel_path("cell-spec.schema.json")["$defs"]["OrganizationRefIri"]

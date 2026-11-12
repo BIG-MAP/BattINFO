@@ -258,7 +258,7 @@
     "MaterialIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the material/ namespace (https://w3id.org/battinfo/material/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the material/ namespace (https://w3id.org/battinfo/material/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "MaterialSpecRefIri": {
       "type": "string",
@@ -268,7 +268,7 @@
     "DatasetIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "DatasetLink": {
       "type": "object",
