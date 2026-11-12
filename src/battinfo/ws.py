@@ -373,7 +373,11 @@ def _describe_session_cell(cell: Any) -> str:
     """One line naming a session cell: serial, name, spec and IRI."""
     serial = getattr(cell, "serial_number", None)
     name = getattr(cell, "name", None)
-    spec = getattr(cell, "cell_spec_id", None) or getattr(getattr(cell, "cell_spec", None), "id", None)
+    held_spec = getattr(cell, "cell_spec", None)
+    spec = getattr(cell, "cell_spec_id", None) or getattr(held_spec, "id", None)
+    if not spec and held_spec is not None:
+        # A spec not saved yet has no IRI; its name tells two cells that share a label apart.
+        spec = held_spec.name or f"{held_spec.manufacturer} {held_spec.model}"
     parts = [f"serial {serial!r}" if serial else "no serial"]
     if name and name != serial:
         parts.append(f"name {name!r}")
@@ -4955,8 +4959,10 @@ class AuthoringWorkspace:
             # ...or from a JSON map {serial: iri}:
             ws.add("cell", spec=spec, from_file="cell_iris.json")
 
-        It returns the cells it names, in the order given; a serial (or name)
-        the workspace already holds returns that cell, so a re-run adds nothing.
+        It returns the cells it names, in the order given. When the workspace
+        already holds a cell of this spec under a serial (or name), that cell
+        is returned, so a re-run adds nothing. A label names a cell within its
+        spec, so ``"C01"`` of another spec is another cell and is added.
 
         **Tests** (``"test"``) — link a cell and its data explicitly::
 
@@ -12213,9 +12219,11 @@ class AuthoringWorkspace:
         """Create cell instances, and return the cells the call names.
 
         The cells come back in the order given. A serial number (or, for a
-        cell without one, a name) the workspace already holds a cell under
-        returns that cell instead of adding another, so running the same call
-        again returns the same cells and adds nothing.
+        cell without one, a name) the workspace already holds a cell of
+        *spec* under returns that cell instead of adding another, so running
+        the same call again returns the same cells and adds nothing. A cell of
+        another spec under the same label is another cell
+        (:meth:`_is_cell_of_spec`), so the label does not hold it back.
 
         * ``names`` — human labels (e.g. lab batch IDs); display text, which
           several cells of one batch may share.
@@ -12277,7 +12285,9 @@ class AuthoringWorkspace:
 
         # Drop cells already in this session, keyed on IDENTITY, so the same call
         # run twice (a notebook cell re-run) adds nothing. A from_file= map is
-        # keyed on its labels, the names its cells are indexed under.
+        # keyed on its labels, the names its cells are indexed under. The key
+        # counts within the spec the call adds for. A cell's IRI is seeded from
+        # its spec too, so another spec's cell under the same label is not held.
         #
         # A cell instance is identified by its serial number. The name is
         # display text: a batch may legitimately share one public label
@@ -12294,6 +12304,7 @@ class AuthoringWorkspace:
         # What the call returns, in input order: a cell the workspace already
         # holds, or the place of a cell about to be made in `deduped`.
         returned: list[Any] = []
+        coming_spec_iris: dict[int, str | None] = {}  # see _is_cell_of_spec
         for n, s, iri, h in entries:
             key = s or n or ""
             if key and key in seen:
@@ -12302,7 +12313,14 @@ class AuthoringWorkspace:
                 # merely indistinguishable (warn and keep the first).
                 (repeated_serials if s else repeated_names).append(key)
                 continue
-            held = next((cell for cell, labels in self._indexed_cells if key and key in labels), None)
+            held = next(
+                (
+                    cell
+                    for cell, labels in self._indexed_cells
+                    if key and key in labels and self._is_cell_of_spec(cell, spec, coming_spec_iris)
+                ),
+                None,
+            )
             if held is not None:
                 already.append(key)
                 returned.append(held)
@@ -12397,6 +12415,53 @@ class AuthoringWorkspace:
             cells.append(cell)
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
         return [cells[item] if isinstance(item, int) else item for item in returned]
+
+    def _is_cell_of_spec(self, cell: Any, spec: Any, coming: dict[int, str | None]) -> bool:
+        """Whether *cell*, which the workspace holds, is a cell of *spec*, the spec ``ws.add("cell")`` adds for.
+
+        A cell's IRI is seeded from its spec and its serial number (or its
+        name), so a label names a cell within one spec, and ``C01`` of another
+        spec is another cell. A cell holds its spec as the object until a save
+        and as its IRI afterwards, as does a cell read back from the saved
+        records. The same object is the same spec, and two IRIs are compared
+        in either form (``namespace.same_record``). Two spec objects that have
+        no IRI yet are two specs of this session. When only one side has an
+        IRI, the other is compared by the IRI the next save gives it (*coming*,
+        which holds those for the length of one call). When either side names
+        no spec, the label alone decides.
+        """
+        from battinfo.bundle import CellSpec  # noqa: PLC0415
+
+        held_spec = getattr(cell, "cell_spec", None)
+        held_iri = getattr(cell, "cell_spec_id", None) or getattr(held_spec, "id", None)
+        if not isinstance(spec, CellSpec) or (held_spec is None and held_iri is None):
+            return True
+        if held_spec is spec:
+            return True
+        if held_iri is None and spec.id is None:
+            return False
+        held_iri = held_iri or self._coming_cell_spec_iri(held_spec, coming)
+        iri = spec.id or self._coming_cell_spec_iri(spec, coming)
+        return held_iri == iri or same_record(held_iri, iri)
+
+    def _coming_cell_spec_iri(self, spec: Any, coming: dict[int, str | None]) -> str | None:
+        """The IRI the next save gives *spec*, a cell spec that has none yet (kept in *coming*).
+
+        Read off the save's own finalize pass, run on copies, as
+        :meth:`_unsaved_cell_iris` does. When that pass refuses the session as
+        it stands, or the session does not hold *spec*, it is the IRI of the
+        spec's natural key.
+        """
+        if id(spec) not in coming:
+            engine = self._ws
+            try:
+                finalized = engine._finalized_records()["cell_specs"]
+            except (TypeError, ValueError):
+                finalized = []
+            coming.update({id(original): item.id for original, item in zip(engine.cell_specs, finalized)})
+            if id(spec) not in coming:
+                coming[id(spec)] = engine._finalize_cell_spec(spec, record_roots=[engine.source_root]).id
+        return coming[id(spec)]
 
     def _refuse_shared_cell_iris(
         self, entries: builtins.list[tuple[str | None, str | None, str | None, str | None]]
