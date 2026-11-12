@@ -9875,10 +9875,12 @@ class AuthoringWorkspace:
         a file inside an archive downloads from the archive's URL and has that
         URL with the file's name there as the fragment for its ``@id``
         (``.../files/data.zip#C01.csv``), so each file of an archive is a
-        node of its own. A
-        distribution of a file the plan measured states the plan's sha256 and
-        size, not the ones its record gives, which date from when the file was
-        added.
+        node of its own. A distribution of a file the plan measured states the
+        plan's sha256 and size, not the ones its record gives, which date from
+        when the file was added. A dataset whose ``access_url`` names a copy
+        of a planned file, such as the one the version before holds, gets the
+        URL under which this deposit holds the file as its ``schema:url``; a
+        copy hosted elsewhere (``file_plan.hosted``) stays.
         ``data_filenames`` serves the package builders, whose staged files have
         unique names: a local file whose name is among them is deposited under
         that name, and otherwise its ``<kind>.zip`` when that is among them.
@@ -10625,7 +10627,17 @@ class AuthoringWorkspace:
             if isinstance(_ds.get("access_url"), str) and _ds["access_url"].startswith(("http://", "https://")):
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
-                member["schema:url"] = _ds["access_url"]
+                # The record of a new version still names the copy the version
+                # before holds, since the records move only once the deposit is
+                # made. The graph names the file this deposit holds, as the
+                # download URLs do. A copy hosted elsewhere stays, as in the record.
+                _access_url = _ds["access_url"]
+                _held = (
+                    file_plan.entry_for(_access_url)
+                    if file_plan is not None and _access_url not in file_plan.hosted
+                    else None
+                )
+                member["schema:url"] = _held.url(files_base) if _held is not None else _access_url
             # Rights and attribution on each member: RDF has no inheritance, so a
             # dataset lifted out of the catalog would otherwise lose its licence and
             # creators. The dataset's own licence wins over the catalog's, and either
