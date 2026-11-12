@@ -380,6 +380,60 @@ def test_the_tag_must_name_the_built_version_and_a_pre_release_tag_is_marked(
         assert "does not match package version" in proc.stdout
 
 
+def _git(cwd: Path, *args: str) -> str:
+    """Run git in a throwaway repository, with no user or system configuration."""
+    proc = subprocess.run(
+        ["git", "-c", "user.name=Test", "-c", "user.email=test@example.org", "-c", "commit.gpgsign=false", *args],
+        cwd=cwd,
+        env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return proc.stdout.strip()
+
+
+@pytest.mark.parametrize(("commit", "on_main"), [("main", True), ("main~1", True), ("side", False)])
+def test_a_final_tag_must_name_a_commit_that_main_contains(commit: str, on_main: bool, tmp_path: Path) -> None:
+    """The freeze checks look for release tags in main's history, so a final tag off main would hide from them."""
+    job = _release()["jobs"]["build"]
+    # The step reads main's history, which a shallow checkout does not hold.
+    assert _step(job, uses="actions/checkout")["with"]["fetch-depth"] == 0
+    step = _step(job, name="Verify a final tag is on main")
+    # Only a final tag: the step before it marks 0.8.0rc1 or 0.8.0.dev1 as a pre-release.
+    assert step["if"] == "startsWith(github.ref, 'refs/tags/') && steps.tag.outputs.prerelease == 'false'"
+    names = [s.get("name") for s in job["steps"]]
+    assert (
+        names.index("Verify tag matches built version")
+        < names.index(step["name"])
+        < names.index("Upload dist artifact")
+    )
+    if shutil.which("git") is None:
+        pytest.skip("needs git")
+
+    origin = tmp_path / "origin"
+    origin.mkdir()
+    _git(origin, "init", "-q", "-b", "main")
+    for name in ("one", "two"):
+        (origin / name).write_text(name, encoding="utf-8")
+        _git(origin, "add", name)
+        _git(origin, "commit", "-q", "-m", name)
+    # A release branch that left main one commit back and went its own way.
+    _git(origin, "switch", "-q", "-c", "side", "main~1")
+    (origin / "three").write_text("three", encoding="utf-8")
+    _git(origin, "add", "three")
+    _git(origin, "commit", "-q", "-m", "three")
+    _git(tmp_path, "clone", "-q", origin.as_posix(), "work")
+
+    env = {"GITHUB_SHA": _git(origin, "rev-parse", commit), "GITHUB_REF_NAME": "v0.8.0"}
+    env |= {"GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull}
+    proc = _run_step(step["run"], tmp_path / "work", env)
+
+    assert (proc.returncode == 0) is on_main, proc.stdout + proc.stderr
+    if not on_main:
+        assert "::error::v0.8.0 is not on main" in proc.stdout
+
+
 # ── install-smoke.yml, the install gate ───────────────────────────────────────
 
 

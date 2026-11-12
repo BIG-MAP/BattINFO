@@ -58,7 +58,7 @@ Keep the Zenodo integration switched on for the repository. Its webhook archives
    Only the battinfo wheel comes from TestPyPI. An install with `--extra-index-url` would also let a package on TestPyPI stand in for a PyPI dependency of the same name. Pin the exact version, such as `0.8.0rc1` or `0.8.0.dev1`: TestPyPI already holds a 0.8.0, built from an older commit, and it sorts above every 0.8.0 pre-release. An index never takes the same version twice, so each version can be rehearsed once.
 
 6. Open the pull request and merge it into `main`.
-7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first (`python scripts/set_version.py X.Y.Z --date <tag day>`). Check where the ontology IRIs lead, as [The ontology at its w3id IRIs](#the-ontology-at-its-w3id-iris) describes. Then tag `main` and push the tag:
+7. If the tag day differs from the date in `CITATION.cff` and the changelog heading, correct both on `main` first (`python scripts/set_version.py X.Y.Z --date <tag day>`). Check where the ontology IRIs lead, as [The ontology at its w3id IRIs](#the-ontology-at-its-w3id-iris) describes. For 0.8.0, also run the release-build check of step 4 the way the tag will run it, since CI skips it on `main` (`GITHUB_REF=refs/tags/v0.8.0 uv run pytest tests/test_context_v1_freeze.py -k release_build`). Then tag `main` and push the tag. The release workflow stops a final tag that names a commit `main` does not contain, because the freeze checks of later pull requests look for the release tags in `main`'s history.
 
    ```bash
    git switch main

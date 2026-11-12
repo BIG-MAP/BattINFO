@@ -479,6 +479,7 @@ These changes can make a record that validated before fail now:
 - The provenance block of electrode-spec and electrode records lost `comment`, `curated_by`, `file_hash` and `workflow_version` (8 September, PR #388), which it had accepted from 14 August.
 - `modules/components/specification.schema.json` requires `name` and `cell_format` instead of `format`, `positive_electrode_basis` and `negative_electrode_basis`, and its `id` must be a `spec/` IRI, no longer a `cell/` one (8 September, PR #388). `cell-spec.schema.json` uses only its `separator`, so cell-spec records are not affected; a document validated against the module as a whole may be.
 - Parameter sets lost `members` and `set_id` (11 October, PRs #421 and #436), which were served from 4 October. A parameter set is now either a claim batch (`claims` and exactly one target, as in August) or one parameter file (`parts`, `parameters_sha256` and exactly one cell link).
+- The `manufacturer` and `supplier` of an inline component no longer take an empty string (25 October, PR #471). Each was any string and is now a name of at least one character or an organization object (`modules/common/organization-ref.schema.json`).
 
 These changes only accept more, so a record that validated before still does:
 
