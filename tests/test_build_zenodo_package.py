@@ -234,9 +234,9 @@ def test_publish_jsonld_contains_dataset_distribution(tmp_path: Path) -> None:
 
 
 def test_publish_jsonld_bdf_distribution_conforms_to_table_schema(tmp_path: Path) -> None:
-    """A BDF data file (.bdf.*) declares conformance to the versioned BDF table
-    schema so a consumer can resolve column/unit semantics from one link; the raw
-    instrument file is NOT BDF and carries no such claim."""
+    """A BDF data file (.bdf.*) declares conformance to the BDF table schema so a
+    consumer can resolve column/unit semantics from one link; the raw instrument
+    file is NOT BDF and carries no such claim."""
     from battinfo.ws import BDF_TABLE_SCHEMA_IRI
 
     record = _make_record(1)
@@ -252,8 +252,9 @@ def test_publish_jsonld_bdf_distribution_conforms_to_table_schema(tmp_path: Path
     assert all("dcterms:conformsTo" not in d for d in raw), (
         "raw instrument files must not claim BDF table-schema conformance"
     )
-    # The link must be the VERSIONED IRI (archival reproducibility), not floating.
-    assert "/1.2.0/schema" in BDF_TABLE_SCHEMA_IRI
+    # A publication package is not told which BDF version its files follow, so
+    # it names the unversioned schema rather than a version they may not follow.
+    assert BDF_TABLE_SCHEMA_IRI.endswith("/battery-data-format/schema")
 
 
 def test_publish_jsonld_multi_dataset_cell_instance_nodes(tmp_path: Path) -> None:

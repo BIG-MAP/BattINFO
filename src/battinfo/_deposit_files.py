@@ -13,6 +13,11 @@ A record, or a distribution entry, that cannot be read is an
 :class:`Omission`, never a silent skip, and :func:`deposit_file_problems`
 checks the deposit's files against the deposit graph before it is published.
 
+Extra files, such as a README, document the deposit as a whole and belong to
+no dataset. The caller names them (:func:`extra_deposit_files`), they are
+measured as data files are, and :func:`extra_file_conflicts` says which of
+them would take a name the deposit already gives a file.
+
 A record a deposit has pointed at its copy of a file no longer names the
 local file. The deposit index (``.battinfo/deposit-files.json``, see
 :mod:`battinfo._deposit_index`) does, and :class:`DepositContext` reads it:
@@ -202,7 +207,8 @@ class DepositFile:
     size: int = 0
     md5: str = ""
     sha256: str = ""
-    #: The test kind of the dataset that first named the file (``protocol`` for an artifact).
+    #: The test kind of the dataset that first named the file (``protocol`` for
+    #: an artifact, ``extra`` for an extra file, see :func:`extra_deposit_files`).
     kind: str = "other"
     #: The archive that carries the file in a zipped deposit; empty when the file is deposited as itself.
     archive: str = ""
@@ -519,7 +525,8 @@ class DepositFilePlan:
     #: file could be planned for them, and data file locations the screen
     #: refused (see :func:`location_path`).
     omissions: list[Omission] = field(default_factory=list)
-    #: True when the files travel in one zip archive per test kind.
+    #: True when the local files travel in zip archives: one per test kind, or
+    #: one for all of them (``bundle="single"``).
     zipped: bool = False
     #: False when the files were located and named but not read (no sizes or digests).
     measured: bool = True
@@ -592,6 +599,41 @@ def _archive_name(kind: str) -> str:
     return f"{safe or 'other'}.zip"
 
 
+#: How a deposit packs its data files: ``by_kind`` zips them one archive per
+#: test kind when there are more than the zip threshold, ``single`` puts them
+#: all in one archive, and ``none`` deposits each file as itself.
+BUNDLE_MODES = ("by_kind", "single", "none")
+#: The archive of a ``single`` deposit when the caller names none.
+DEFAULT_SINGLE_ARCHIVE = "data.zip"
+# Characters a file name cannot hold on Windows, besides the path separators.
+_UNSAFE_NAME = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
+
+
+def single_archive_name(bundle: object, archive_name: object = None) -> str | None:
+    """The archive that carries every data file of a *bundle* ``"single"`` deposit, else ``None``.
+
+    Raises ``ValueError`` for a *bundle* outside :data:`BUNDLE_MODES`, for an
+    *archive_name* given with another mode, and for one that is not a plain
+    file name ending in ``.zip``. Without *archive_name* a single archive is
+    :data:`DEFAULT_SINGLE_ARCHIVE`.
+    """
+    if bundle not in BUNDLE_MODES:
+        raise ValueError(f"bundle={bundle!r} is not one of {', '.join(repr(mode) for mode in BUNDLE_MODES)}.")
+    if bundle != "single":
+        if archive_name is not None:
+            raise ValueError(f"archive_name= names the archive of bundle='single', not of bundle={bundle!r}.")
+        return None
+    if archive_name is None:
+        return DEFAULT_SINGLE_ARCHIVE
+    name = unicodedata.normalize("NFC", archive_name.strip()) if isinstance(archive_name, str) else ""
+    if not name.lower().endswith(".zip") or name.lower() == ".zip" or _UNSAFE_NAME.search(name):
+        raise ValueError(
+            f"archive_name={archive_name!r} is not a file name ending in .zip, such as 'data.zip'. "
+            'It cannot hold a folder or any of \\ / : * ? " < > |.'
+        )
+    return name
+
+
 def _path_label(path: Path, root: Path) -> str:
     """What a colliding name is told apart by: the file's path inside *root*, else its folder and name."""
     try:
@@ -630,6 +672,8 @@ def build_deposit_file_plan(
     remote: Iterable[tuple[RemoteSource, str]] = (),
     unplaced: Mapping[str, Iterable[tuple[str, str]]] | None = None,
     held: Mapping[str, IndexedFile] | None = None,
+    bundle: str = "by_kind",
+    archive_name: str | None = None,
 ) -> DepositFilePlan:
     """Plan the files of one deposit.
 
@@ -676,11 +720,16 @@ def build_deposit_file_plan(
     ``3f2a9c1d-Data.csv``. The first file keeps its name, so a deposit without
     such clashes has the URLs it always had.
 
-    With more than *zip_threshold* local files, each is assigned to the
-    archive ``<kind>.zip``; a kept file stays as it is. Without *measure* the
-    files are located and named but not read, which is enough to count them
-    or to build the graph.
+    *bundle* says how the local files travel (see :data:`BUNDLE_MODES`). With
+    ``"by_kind"``, the default, and more than *zip_threshold* local files,
+    each is assigned to the archive :func:`_archive_name` gives its test kind,
+    ``<kind>.zip``. With ``"single"`` every local file is assigned to one
+    archive, *archive_name* (``data.zip`` when not given), however many there
+    are. With ``"none"`` no file is zipped. A kept file stays as it is in
+    each mode. Without *measure* the files are located and named but not
+    read, which is enough to count them or to build the graph.
     """
+    single = single_archive_name(bundle, archive_name)
     found: list[tuple[str, Path, str]] = []  # (path key, resolved path, kind)
     seen: set[str] = set()
     key_of_location: dict[str, str] = {}
@@ -789,12 +838,18 @@ def build_deposit_file_plan(
         names[key] = name
         taken.add(name_key(name))
 
-    zipped = zip_threshold is not None and len(found) > zip_threshold
+    if single is not None:
+        zipped = bool(found)
+    else:
+        zipped = bundle == "by_kind" and zip_threshold is not None and len(found) > zip_threshold
     by_key: dict[str, DepositFile] = {}
     by_location: dict[str, DepositFile | None] = {}
     for key, path, kind in found:
         size, md5, sha256 = _measure(path) if measure else (0, "", "")
         name = names[key]
+        # _archive_name is looked up in this module on each call, so a caller
+        # that replaces it still names the archives of a by_kind deposit.
+        archive = (single or _archive_name(kind)) if zipped else ""
         by_key[key] = DepositFile(
             path=path,
             name=name,
@@ -803,7 +858,7 @@ def build_deposit_file_plan(
             md5=md5,
             sha256=sha256,
             kind=kind,
-            archive=_archive_name(kind) if zipped else "",
+            archive=archive,
         )
     for location, key in key_of_location.items():
         by_location[location] = by_key[key]
@@ -826,6 +881,117 @@ def build_deposit_file_plan(
         _by_location=by_location,
         _located=frozenset(located),
     )
+
+
+def extra_deposit_files(extra_files: object, *, root: Path) -> list[DepositFile]:
+    """The extra files a deposit carries, each measured, in the order given.
+
+    Extra files document the deposit as a whole, such as a README or a list
+    of checksums. They are not distributions of a dataset, and each is
+    deposited as itself, never zipped. *extra_files* maps each local path to
+    its deposit name, or lists the paths, each deposited under its own file
+    name; ``None`` and an empty list are none. A relative path is read from
+    *root*, the workspace folder. Names are compared as :func:`name_key`
+    compares them.
+
+    Raises ``TypeError`` for any other shape, one path on its own included,
+    and ``ValueError`` naming each path that is not a file, each deposit name
+    that is not a plain file name, each name given twice and each file given
+    twice. Nothing is read before the shape is checked.
+    """
+    if extra_files is None:
+        return []
+    if isinstance(extra_files, (str, bytes, os.PathLike)):
+        raise TypeError(
+            "extra_files= takes a list of paths, or a mapping of path to deposit name, not one path: "
+            f"pass [{str(extra_files)!r}]."
+        )
+    if isinstance(extra_files, Mapping):
+        given: list[tuple[object, object]] = list(extra_files.items())
+    elif isinstance(extra_files, Iterable):
+        given = [(item, None) for item in extra_files]
+    else:
+        raise TypeError(
+            "extra_files= takes a list of paths, or a mapping of path to deposit name, "
+            f"not {type(extra_files).__name__}."
+        )
+    checked: list[tuple[str, str | None]] = []
+    for location, wanted in given:
+        if not isinstance(location, (str, os.PathLike)):
+            raise TypeError(f"extra_files= takes each path as text or a Path, not {location!r}.")
+        if wanted is not None and not isinstance(wanted, str):
+            raise TypeError(f"extra_files= maps each path to its deposit name as text; {location} maps to {wanted!r}.")
+        checked.append((str(os.fspath(location)), wanted))
+
+    problems: list[str] = []
+    renaming_helps = False
+    files: list[DepositFile] = []
+    by_name: dict[str, str] = {}  # name key -> the path given for it
+    by_path: dict[str, str] = {}  # path key -> the path given for it
+    for label, wanted in checked:
+        path = Path(label)
+        if not path.is_absolute():
+            path = root / path
+        if not path.is_file():
+            problems.append(f"{label} is not a file" + ("" if path == Path(label) else f" ({path})"))
+            continue
+        name = unicodedata.normalize("NFC", wanted.strip() if wanted is not None else path.name)
+        if not name or name in (".", "..") or _UNSAFE_NAME.search(name):
+            problems.append(
+                f"{name!r}, the name given for {label}, is not a plain file name, which cannot be empty or "
+                'hold a folder or any of \\ / : * ? " < > |'
+            )
+            continue
+        key = path_key(path)
+        if key in by_path:
+            problems.append(f"{label} is the file {by_path[key]} already names")
+            continue
+        if name_key(name) in by_name:
+            problems.append(f"{label} and {by_name[name_key(name)]} would both be deposited as {name}")
+            renaming_helps = True
+            continue
+        by_path[key] = label
+        by_name[name_key(name)] = label
+        files.append(measured_file(_resolved(path), name, kind="extra"))
+    if problems:
+        hint = " Pass a mapping of path to deposit name, {path: name}, to give a file another name."
+        raise ValueError(
+            "extra_files= cannot go into the deposit: " + "; ".join(problems) + "." + (hint if renaming_helps else "")
+        )
+    return files
+
+
+def extra_file_conflicts(
+    extras: Iterable[DepositFile],
+    plan: DepositFilePlan,
+    *,
+    reserved: Mapping[str, str] | None = None,
+) -> list[str]:
+    """Why each extra file cannot go into the deposit *plan* describes, one line each; empty when all can.
+
+    An extra file (see :func:`extra_deposit_files`) cannot take the name of
+    a file the deposit writes itself, *reserved* (each name with what it
+    holds), of a data file of the plan, zipped, sent or kept, or of an
+    archive, compared as :func:`name_key` compares names. Nor can it be one
+    of the plan's data files: the deposit carries that file already.
+    """
+    own = {name_key(name): f"{name}, the {what}" for name, what in (reserved or {}).items()}
+    taken: dict[str, str] = {}
+    for archive in plan.archives():
+        taken.setdefault(name_key(archive), f"{archive}, an archive of the data files")
+    for entry in plan.files:
+        taken.setdefault(name_key(entry.name), f"{entry.name}, a data file of the deposit")
+    local = {path_key(entry.path): entry.name for entry in plan.local_files()}
+    problems: list[str] = []
+    for extra in extras:
+        key = name_key(extra.name)
+        clash = own.get(key) or taken.get(key)
+        if clash:
+            problems.append(f"{extra.name} is the name of {clash}")
+        carried = local.get(path_key(extra.path))
+        if carried is not None:
+            problems.append(f"{extra.path} is the data file {carried} of the deposit already")
+    return problems
 
 
 def listed_files(listing: object) -> dict[str, str]:

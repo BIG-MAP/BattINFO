@@ -12,7 +12,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, NamedTuple
 
-from battinfo._util import _citation_doi_from_url, is_real_number
+from battinfo._util import _citation_doi_from_url, is_real_number, registered_media_type
 from battinfo.entities import COMPONENT_FAMILIES, EntityKind, kind_for_doc
 from battinfo.validate.jsonld import validate_jsonld
 
@@ -955,9 +955,14 @@ _MEASUREMENT_PARAMETER_TERMS: dict[str, str] = {
     "current": "ElectricCurrent",
     "current_density": "ElectricCurrentDensity",
     "temperature": "CelsiusTemperature",
+    # The class the records context already gives the ambient_temperature key.
+    "ambient_temperature": "AmbientCelsiusTemperature",
     "lower_voltage_limit": "LowerVoltageLimit",
     "upper_voltage_limit": "UpperVoltageLimit",
     "voltage": "Voltage",
+    "state_of_charge": "StateOfCharge",
+    "initial_state_of_charge": "StateOfCharge",
+    "applied_pressure": "Pressure",
 }
 
 # Recognized reference-electrode couples: notation -> electrochemistry classes.
@@ -1233,8 +1238,10 @@ def _descriptor_quantity_node(name: str, quantity: dict[str, Any], *, term: str 
             if not isinstance(cqty, dict):
                 continue
             if measured:
+                from battinfo.jsonld import temperature_class  # noqa: PLC0415
+
                 cterm = _MEASUREMENT_PARAMETER_TERMS.get(ckey)
-                cnode = _descriptor_quantity_node(ckey, cqty, term=cterm)
+                cnode = _descriptor_quantity_node(ckey, cqty, term=cterm and temperature_class(cterm, cqty.get("unit")))
                 if cnode is not None:
                     cnode["skos:prefLabel"] = ckey
                     params.append(cnode)
@@ -3453,7 +3460,7 @@ def _parameter_file_node(item: Any) -> dict[str, Any] | None:
         ("role", "dcterms:type"),
     ):
         if isinstance(item.get(key), str) and item[key]:
-            out[term] = item[key]
+            out[term] = registered_media_type(item[key]) if key == "encoding_format" else item[key]
     conforms_to = item.get("conforms_to")
     if isinstance(conforms_to, str) and conforms_to:
         out["dcterms:conformsTo"] = (

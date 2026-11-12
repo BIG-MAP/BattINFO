@@ -1,6 +1,6 @@
 {
-  "$comment": "Controlled vocabulary for setpoint and condition quantities. Each entry maps an authoring key to an EMMO quantity class (prefLabel; resolved by the remote EMMO battery @context) and the relation predicate it is attached under (hasControlParameter for setpoints, hasProperty for ambient conditions). IRIs that are already pinned in jsonld.py are recorded here as compact IRIs; the rest resolve via the remote context. Every emmo_class resolves in the v1 records context and in the bundled EMMO context (tests/test_mapping_governance.py). Quantities flagged generic carry an rdfs:label because the EMMO class is non-specific.",
-  "version": "1.1.0",
+  "$comment": "Controlled vocabulary for setpoint and condition quantities. Each entry maps an authoring key to an EMMO quantity class (prefLabel; resolved by the remote EMMO battery @context) and the relation predicate it is attached under (hasControlParameter for setpoints, hasProperty for ambient conditions). IRIs that are already pinned in jsonld.py are recorded here as compact IRIs; the rest resolve via the remote context. Every emmo_class resolves in the v1 records context and in the bundled EMMO context (tests/test_mapping_governance.py). Every condition node carries its authoring key as skos:prefLabel; a temperature given in kelvin is a ThermodynamicTemperature instead.",
+  "version": "1.2.0",
   "setpoints": {
     "current":    {"emmo_class": "ElectricCurrent", "iri": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88"},
     "voltage":    {"emmo_class": "Voltage",          "iri": "emmo:EMMO_17b031fb_4695_49b6_bb69_189ec63df3ee"},
@@ -10,7 +10,7 @@
     "resistance": {"emmo_class": "ElectricResistance", "iri": "emmo:EMMO_e88f75d6_9a17_4cfc_bdf7_43d7cea5a9a1"}
   },
   "conditions": {
-    "temperature": {"emmo_class": "ConventionalProperty", "iri": "emmo:EMMO_d8aa8e1f_b650_416d_88a0_5118de945456", "generic": true},
+    "temperature": {"emmo_class": "CelsiusTemperature", "iri": "emmo:EMMO_66bc9029_f473_45ff_bab9_c3509ff37a22"},
     "duration":    {"emmo_class": "Duration", "iri": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3"}
   }
 }

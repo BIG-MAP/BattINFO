@@ -54,7 +54,7 @@ dataset = Dataset(
             "name": "run.bdf.parquet",
             "description": "Cycling time series in BDF column vocabulary.",
             "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
-            "encoding_format": "application/x-parquet",
+            "encoding_format": "application/vnd.apache.parquet",
             "role": "processed",
             "checksum": {"algorithm": "md5", "value": "9e107d9d372bb6826bd81d3542a419d6"},
         },
@@ -145,7 +145,7 @@ record = dataset.to_record()
         "name": "run.bdf.parquet",
         "description": "Cycling time series in BDF column vocabulary.",
         "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
-        "encoding_format": "application/x-parquet",
+        "encoding_format": "application/vnd.apache.parquet",
         "role": "processed",
         "checksum": {
           "algorithm": "md5",
@@ -213,7 +213,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "dcat:downloadURL": {
         "@id": "https://zenodo.org/records/1234567/files/run.bdf.parquet"
       },
-      "dcat:mediaType": "application/x-parquet",
+      "dcat:mediaType": "application/vnd.apache.parquet",
       "spdx:checksum": {
         "@type": "spdx:Checksum",
         "spdx:checksumAlgorithm": {
@@ -435,8 +435,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T08:54:36Z",
   "dcterms:modified": "2026-06-18T08:54:36Z",
-  "dcterms:issued": "2026-06-18T08:54:36Z",
-  "schema:datePublished": "2026-06-18T08:54:36Z",
   "schema:measurementTechnique": [
     "cycling"
   ],
@@ -476,7 +474,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "dcat:downloadURL": {
         "@id": "https://example.org/files/nns1/cell-01.bdf.parquet"
       },
-      "dcat:mediaType": "application/x-parquet",
+      "dcat:mediaType": "application/vnd.apache.parquet",
       "spdx:checksum": {
         "@type": "spdx:Checksum",
         "spdx:checksumAlgorithm": {
@@ -593,8 +591,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T08:54:36Z",
   "dcterms:modified": "2026-06-18T08:54:36Z",
-  "dcterms:issued": "2026-06-18T08:54:36Z",
-  "schema:datePublished": "2026-06-18T08:54:36Z",
   "dcterms:source": {
     "@type": "prov:Entity",
     "dcterms:type": "catalog",
@@ -650,8 +646,6 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   },
   "dcterms:created": "2026-06-18T10:27:48Z",
   "dcterms:modified": "2026-06-18T10:27:48Z",
-  "dcterms:issued": "2026-06-18T10:27:48Z",
-  "schema:datePublished": "2026-06-18T10:27:48Z",
   "schema:measurementTechnique": [
     "X-ray diffraction"
   ],

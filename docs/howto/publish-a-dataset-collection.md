@@ -115,7 +115,7 @@ for issue in report.issues:
 assert not report.issues
 ```
 
-A clean run prints `Gold-standard: PASS (no validation issues)`. The checks that matter for a collection:
+A clean run prints `Gold-standard: PASS (no validation issues)`. Errors make `ws.zenodo()` refuse the deposit; warnings do not. The preview also compares each test, cell and dataset node with the record it came from and warns, as `publication.record_field_not_emitted`, about a field the record fills and the node does not carry; the count is printed next to the node count. `battinfo.validate.record_fidelity_report(graph, record_sets)` runs that comparison on its own. The checks that matter for a collection:
 
 - every member needs a non-empty `schema:about` and at least one distribution; the collection is exempt from both;
 - a member's `dcat:inSeries` must point at a node typed `dcat:DatasetSeries` when that node is in the graph (`publication.series_target_not_series` otherwise);
@@ -200,3 +200,89 @@ ws.save()
 ```
 
 `series_id` takes the collection's IRI and nothing else. A value that is not a `https://w3id.org/battinfo/dataset/...` IRI is refused before any record is created, and so is `series_id` without `data=`. Membership is not part of a record's identity, so adding or dropping `series_id` never moves the IRI of the test or its datasets. The collection itself is still saved with `Dataset` and `save_dataset`, before its members, as in step 2. `ws.zenodo()` uploads the data file with the deposit and points the dataset's distribution at its copy there.
+
+## Deposit options
+
+`ws.zenodo()` fills in the Zenodo form from the workspace, and a few keywords change what it sends. Without them the deposit is the one described above.
+
+<!-- doc-snippet: skip -->
+```python
+result = ws.zenodo(
+    title="Graphite half-cell pOCV",
+    description="Pseudo-OCV curves of four graphite coin half cells.\n\nOne dataset per cell.",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    keywords=["graphite", "pseudo-OCV"],
+    auto_keywords=False,
+    access_right="embargoed",
+    embargo_date="2027-06-30",
+    related_identifiers=[{"identifier": "10.1234/example", "relation": "isSupplementTo"}],
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
+)
+```
+
+- `access_right` is `"open"` unless you pass `"embargoed"`, `"restricted"` or `"closed"`. An embargo needs `embargo_date`, the day the files open, which has to be after today, and restricted access needs `access_conditions`.
+- `version` goes on the form and into the deposit graph as `schema:version`. Without `publication_date`, Zenodo dates the record the day it is published.
+- Zenodo's related identifiers go in `related_identifiers`; the page of a funding project set with `ws.project()` is added after them.
+- Zenodo shows the description as HTML, so a description of several paragraphs, separated by blank lines, goes to the form as HTML paragraphs. The deposit graph keeps the text as you wrote it.
+- The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces, hyphens, underscores or slashes is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
+- `publisher` is the organisation the deposit graph names as its publisher, by name, by ROR (`"ror"`) or by registry organization IRI (`"id"`). Without it the graph takes the first affiliation among the creators and contributors. Zenodo's form does not get it.
+- `bdf_version` is the Battery Data Format version your BDF data files follow, such as `"1.3.0"`. Each of them then names that version's table schema (`dcterms:conformsTo`). Without it they name the unversioned schema, because a data file does not record the version it was written in.
+- The deposit joins the `battery-knowledge-base` community unless you pass another one as `community`, or `None`.
+
+Zenodo takes at most 100 files in one record by default. A deposit of more than 90 data files is therefore zipped one archive per test kind, which is `bundle="by_kind"`, the default. `bundle="single"` zips every data file into one archive, named by `archive_name` (`data.zip` when not given), however few there are. `bundle="none"` deposits each file as itself, and `ws.zenodo()` warns before it sends anything when the deposit would then hold more than 100 files. A dataset whose file is in an archive links to the archive and names its own file. `ws.publish(zenodo=True)` has no `bundle` option, and without R2 storage it refuses a deposit of more than 90 data files, since the registry cannot yet point a record at a file inside an archive.
+
+The deposit graph names the concept record, the Zenodo record that groups every version, as `dcterms:isVersionOf`, and the version a new version follows as `dcat:previousVersion`. `ws.zenodo()` takes both from Zenodo. `ws.preview_jsonld()` has no deposit to ask, so give them there as `is_version_of` and `previous_version`, with the other options that reach the graph:
+
+```python
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    is_version_of="https://zenodo.org/records/1234566",
+    previous_version="https://zenodo.org/records/1234567",
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print(catalog["dcterms:isVersionOf"], catalog["dcat:previousVersion"])
+```
+
+`ws.preview_rocrate()` takes `bundle`, `archive_name` and `extra_files` as well.
+
+## What the deposit holds
+
+A deposit made with `ws.zenodo()` holds the files below and no others.
+
+- The data files the dataset records name, with the test and protocol files the records point at, each under its own name. When the deposit is zipped (more than 90 such files under `bundle="by_kind"`, or `bundle="single"`), the zip archives take their place.
+- `battinfo.json`, the deposit graph, which describes every record of the deposit. `ws.import_()` rebuilds a workspace from it.
+- `ro-crate-metadata.json`, an RO-Crate that lists `battinfo.json` and every other file, the data files and extra files with their size and sha256.
+- Any extra files you pass in `extra_files`.
+
+`battinfo.bundle.json` is never part of a workspace deposit. Only `build_zenodo_package()`, which `battinfo batch package` runs, writes that file.
+
+Extra files, such as a README or a list of checksums, document the deposit as a whole. They belong to no dataset and are not distributions. Each goes up as itself, never zipped. The RO-Crate lists it as a `File`, and the catalog of the deposit graph lists it under `schema:hasPart`, after the member datasets, as a `schema:DigitalDocument` with its media type, size and sha256. `dcat:dataset` still names the datasets alone.
+
+```python
+Path("ocv-study", "README.md").write_text(
+    "# Graphite half-cell pOCV\n\nOne dataset per cell, one file per dataset.\n", encoding="utf-8"
+)
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    extra_files=["README.md"],
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print([part["schema:name"] for part in catalog["schema:hasPart"] if "schema:name" in part])  # ['README.md']
+```
+
+A relative path is read from the workspace folder, and each file keeps its own name. To give one another name in the deposit, pass a mapping of path to name instead of a list, such as `{"notes/readme-v2.md": "README.md"}`. Before anything is sent, `ws.zenodo()` refuses a path that is not a file, and a name the deposit already gives a data file, an archive, `battinfo.json`, `ro-crate-metadata.json` (or the names `battinfo.jsonld` and `ro-crate-metadata.jsonld`, which readers also look for) or another extra file, whatever its case. Extra files count toward the 100 files Zenodo takes in one record.
+
+`.battinfo/zenodo.json` (`.battinfo/zenodo-sandbox.json` on the sandbox) records the names of the extra files. Each run describes the whole deposit, so pass the same `extra_files` every time. A file that has not changed stays on the draft as it is and a changed one is replaced. One that a draft run leaves out is removed from the draft, and the run warns, naming it. A publish that would leave one out of the published record is refused before anything is sent, unless you pass `extra_files=[]`. `ws.publish(zenodo=True)` passes no extra files, so publish a draft that holds them with `ws.zenodo(publish=True, extra_files=[...])`.

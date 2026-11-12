@@ -222,6 +222,179 @@ def test_two_files_with_one_name_stay_apart_in_a_zipped_deposit(
     assert entity["sha256"] == _sha256(zenodo.uploaded["cycling.zip"])
 
 
+# ── How the files are packed (bundle=) ───────────────────────────────────────
+
+
+def _two_kinds(root: Path) -> list[tuple[str, str]]:
+    """Three data files under *root*, two of one test kind and one of another, as plan locations."""
+    locations = []
+    for relative, kind in (("C01/cycling.csv", "cycling"), ("C02/cycling.csv", "cycling"), ("C03/pulse.csv", "hppc")):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"{CSV}# {relative}\n", encoding="utf-8")
+        locations.append((path.as_uri(), kind))
+    return locations
+
+
+@pytest.mark.parametrize(
+    ("bundle", "archive_name", "threshold", "archives"),
+    [
+        ("by_kind", None, 1, ["cycling.zip", "hppc.zip"]),
+        ("by_kind", None, 3, []),  # at the threshold nothing is zipped
+        ("single", None, 1, ["data.zip"]),
+        ("single", "study__data.zip", 1, ["study__data.zip"]),
+        ("single", "study__data.zip", 3, ["study__data.zip"]),  # one archive however few the files
+        ("none", None, 1, []),
+    ],
+)
+def test_the_plan_packs_the_files_as_bundle_says(
+    tmp_path: Path, bundle: str, archive_name: str | None, threshold: int, archives: list[str]
+) -> None:
+    from battinfo._deposit_files import build_deposit_file_plan
+
+    plan = build_deposit_file_plan(
+        _two_kinds(tmp_path),
+        root=tmp_path,
+        measure=False,
+        zip_threshold=threshold,
+        bundle=bundle,
+        archive_name=archive_name,
+    )
+    assert plan.zipped is bool(archives)
+    assert sorted(plan.archives()) == archives
+    if archives:
+        assert plan.deposited_names() == archives
+        assert sum(len(members) for members in plan.archives().values()) == 3
+    else:
+        assert plan.deposited_names() == [entry.name for entry in plan.files]
+        assert len(set(plan.deposited_names())) == 3
+        assert all(entry.archive == "" for entry in plan.files)
+
+
+@pytest.mark.parametrize(
+    ("bundle", "archive_name", "message"),
+    [
+        ("tar", None, "is not one of 'by_kind', 'single', 'none'"),
+        ("by_kind", "data.zip", "names the archive of bundle='single'"),
+        ("none", "data.zip", "names the archive of bundle='single'"),
+        ("single", "data.tar", "is not a file name ending in .zip"),
+        ("single", "data/all.zip", "is not a file name ending in .zip"),
+        ("single", ".zip", "is not a file name ending in .zip"),
+        ("single", 7, "is not a file name ending in .zip"),
+    ],
+)
+def test_a_bundle_the_plan_cannot_take_is_refused(
+    tmp_path: Path, bundle: str, archive_name: object, message: str
+) -> None:
+    from battinfo._deposit_files import build_deposit_file_plan
+
+    with pytest.raises(ValueError, match=re.escape(message)):
+        build_deposit_file_plan(
+            _two_kinds(tmp_path),
+            root=tmp_path,
+            measure=False,
+            bundle=bundle,
+            archive_name=archive_name,  # type: ignore[arg-type]
+        )
+
+
+def test_a_replaced_archive_name_still_names_the_archives_of_a_by_kind_deposit(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A caller that replaced battinfo._deposit_files._archive_name keeps its archive names."""
+    import battinfo._deposit_files as deposit_files
+
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)
+    monkeypatch.setattr(deposit_files, "_archive_name", lambda kind: "everything.zip")
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS)
+
+    assert zenodo.data_names() == ["everything.zip"]
+    for dists in _distributions(zenodo.graph()).values():
+        assert [dist["dcat:downloadURL"] for dist in dists] == [f"{RECORD_URL}/files/everything.zip"]
+
+
+def test_a_single_archive_deposit_holds_one_zip_of_every_file(tmp_path: Path, zenodo: _FakeZenodo) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv"})
+    local = _local_files(ws)
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle="single", archive_name="cells__data.zip")
+
+    assert zenodo.data_names() == ["cells__data.zip"]
+    with zipfile.ZipFile(io.BytesIO(zenodo.uploaded["cells__data.zip"])) as archive:
+        members = {info.filename: archive.read(info) for info in archive.infolist()}
+    assert sorted(members.values()) == sorted(p.read_bytes() for p in local.values())
+    for iri, path in local.items():
+        [dist] = _distributions(zenodo.graph())[iri]
+        assert dist["dcat:downloadURL"] == f"{RECORD_URL}/files/cells__data.zip"
+        assert members[dist["schema:name"]] == path.read_bytes()
+    [entity] = zenodo.crate_files()
+    assert entity["@id"] == "cells__data.zip"
+    assert entity["sha256"] == _sha256(zenodo.uploaded["cells__data.zip"])
+
+
+def test_the_preview_names_the_single_archive_the_deposit_holds(tmp_path: Path) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cell 02.csv"})
+    preview = json.loads(
+        ws.preview_jsonld(creators=CREATORS, bundle="single", archive_name="all data.zip").read_text(encoding="utf-8")
+    )
+    placeholder = "https://zenodo.org/records/RECORD_ID"
+    urls = {dist["dcat:downloadURL"] for dists in _distributions(preview).values() for dist in dists}
+    assert urls == {f"{placeholder}/files/all%20data.zip"}
+
+
+def test_an_unzipped_deposit_over_the_threshold_keeps_each_file(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # by_kind would zip the two files
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv", "C02": "C02/b.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle="none")
+    assert zenodo.data_names() == ["a.csv", "b.csv"]
+
+
+def test_an_unzipped_deposit_over_the_zenodo_limit_warns_before_anything_is_sent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_client(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Zenodo was contacted")
+
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", no_client)
+    monkeypatch.setattr("battinfo.ws._ZENODO_FILE_LIMIT", 3)  # two data files and the two metadata files
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv", "C02": "C02/b.csv"})
+    with (
+        pytest.warns(UserWarning, match=r"bundle='none' the deposit holds 4 files \(2 data files") as caught,
+        pytest.raises(AssertionError, match="Zenodo was contacted"),
+    ):
+        ws.zenodo(token="placeholder", creators=CREATORS, bundle="none")
+    [warning] = [w for w in caught if "bundle='none'" in str(w.message)]
+    assert "bundle='by_kind'" in str(warning.message) and "bundle='single'" in str(warning.message)
+    assert "at most 3 files in one record" in capsys.readouterr().out
+
+    # by_kind leaves two files unzipped too, so it warns, and names the packing that helps.
+    with pytest.warns(UserWarning, match=r"The deposit holds 4 files \(2 data files, .*Pass bundle='single'"):
+        ws.preview_jsonld(creators=CREATORS, bundle="by_kind")
+    capsys.readouterr()
+    # One archive, and a deposit within the limit, do not warn.
+    ws.preview_jsonld(creators=CREATORS, bundle="single")
+    monkeypatch.setattr("battinfo.ws._ZENODO_FILE_LIMIT", 100)
+    ws.preview_jsonld(creators=CREATORS, bundle="none")
+    assert "files in one record" not in capsys.readouterr().out
+
+
+def test_a_bundle_zenodo_cannot_take_is_refused_before_anything_is_sent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", lambda *a, **k: pytest.fail("Zenodo was contacted"))
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv"})
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.zenodo(token="placeholder", creators=CREATORS, bundle="zip")
+    with pytest.raises(ValueError, match="archive_name="):
+        ws.zenodo(token="placeholder", creators=CREATORS, archive_name="data.zip")
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.preview_jsonld(creators=CREATORS, bundle="zip")
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.preview_rocrate(creators=CREATORS, bundle="zip")
+
+
 @pytest.mark.parametrize(
     ("first", "second"),
     [("Data.csv", "data.csv"), (NFC_CAFE, NFD_CAFE)],
