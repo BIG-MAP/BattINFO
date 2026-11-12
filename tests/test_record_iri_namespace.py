@@ -762,3 +762,80 @@ def test_a_query_by_id_finds_the_record_under_either_form(tmp_path: Path, base: 
     assert found(saved[name]) == [saved[name]]
     assert found(_other_form(saved[name])) == [saved[name]]
     assert found(_under(saved[name], "1002")) == []
+
+
+# ── A deposit graph holds one node for a spec that cells name in both forms ──
+
+SPEC_LINKS = ("dcterms:conformsTo", "hasDescription", "schema:isVariantOf")
+
+
+def _lab_with_cells(root: Path, base: str, serial_numbers: list[str]) -> tuple[Any, str, dict[str, str]]:
+    """A saved workspace with one spec and its cells, with the spec's IRI and each cell's IRI by serial number."""
+    import battinfo
+
+    ws = battinfo.workspace(root, registry_url=None, base=base)
+    ws.add("cell", spec=_lab_spec(), serial_numbers=serial_numbers)
+    ws.save()
+    return ws, ws._ws.cell_specs[0].id, {cell.serial_number: cell.id for cell in ws._ws.cells}
+
+
+def _name_the_spec_as(ws: Any, cell_iri: str, spec_ref: str) -> None:
+    """Rewrite the saved cell *cell_iri* so that it names its spec as *spec_ref*, as a record written elsewhere may."""
+    for path in (ws._ws.source_root / "cell-instance").glob("*.json"):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if doc["cell_instance"]["id"] == cell_iri:
+            doc["cell_instance"]["cell_spec_id"] = spec_ref
+            path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+            return
+    raise AssertionError(f"no saved cell {cell_iri}")
+
+
+def _preview_graph(ws: Any) -> list[dict[str, Any]]:
+    """The graph ``ws.preview_jsonld()`` writes, which is the one a Zenodo deposit would carry."""
+    path = ws.preview_jsonld(title="Example cells", creators=[{"name": "Doe, Jane"}], license="cc-by-4.0")
+    return json.loads(Path(path).read_text(encoding="utf-8"))["@graph"]
+
+
+@BASES
+def test_a_cell_that_names_its_spec_in_the_other_form_links_to_the_spec_node(tmp_path: Path, base: str) -> None:
+    ws, spec_iri, cells = _lab_with_cells(tmp_path / "lab", base, ["C01", "C02", "C03"])
+    _name_the_spec_as(ws, cells["C02"], _other_form(spec_iri))
+    _name_the_spec_as(ws, cells["C03"], _under(spec_iri, "1002"))
+
+    nodes = {node["@id"]: node for node in _preview_graph(ws) if "@id" in node}
+
+    # One node for the spec, the one the deposit carries, and no stub under its other form.
+    assert [iri for iri in nodes if same_record(iri, spec_iri)] == [spec_iri]
+    assert "rdfs:isDefinedBy" not in nodes[spec_iri]
+    for serial in ("C01", "C02"):
+        assert {term: nodes[cells[serial]][term] for term in SPEC_LINKS} == dict.fromkeys(SPEC_LINKS, {"@id": spec_iri})
+    # The cell takes the kind of battery its spec describes, as the cell that names the spec as saved does.
+    assert nodes[cells["C02"]]["@type"] == nodes[cells["C01"]]["@type"] != "BatteryCell"
+    # Under another prefix the same uid is another record, which this deposit points at and does not carry.
+    elsewhere = _under(spec_iri, "1002")
+    assert nodes[elsewhere] == {
+        "@id": elsewhere,
+        "@type": "BatteryCellSpecification",
+        "rdfs:isDefinedBy": {"@id": elsewhere},
+    }
+    assert {term: nodes[cells["C03"]][term] for term in SPEC_LINKS} == dict.fromkeys(SPEC_LINKS, {"@id": elsewhere})
+
+
+def test_cells_that_name_an_outside_spec_in_both_forms_share_one_stub(tmp_path: Path) -> None:
+    """The deposit does not carry the spec, so its cells point at one stub, under the form the first cell wrote."""
+    ws, spec_iri, cells = _lab_with_cells(tmp_path / "lab", DEFAULT_RECORD_BASE, ["C01", "C02"])
+    for path in (ws._ws.source_root / "cell-spec").glob("*.json"):
+        path.unlink()
+    first, second = sorted(cells.values())
+    _name_the_spec_as(ws, second, _other_form(spec_iri))
+
+    nodes = {node["@id"]: node for node in _preview_graph(ws) if "@id" in node}
+
+    assert [iri for iri in nodes if same_record(iri, spec_iri)] == [spec_iri]
+    assert nodes[spec_iri] == {
+        "@id": spec_iri,
+        "@type": "BatteryCellSpecification",
+        "rdfs:isDefinedBy": {"@id": spec_iri},
+    }
+    for cell_iri in (first, second):
+        assert {term: nodes[cell_iri][term] for term in SPEC_LINKS} == dict.fromkeys(SPEC_LINKS, {"@id": spec_iri})

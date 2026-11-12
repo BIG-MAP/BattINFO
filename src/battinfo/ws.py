@@ -10586,9 +10586,23 @@ class AuthoringWorkspace:
 
         # ── Build cell instance nodes ──────────────────────────────────────────
         # Each instance is a physical battery whose type is described by its spec.
+        # A cell may name its spec by the other form of the spec's IRI, and the
+        # two forms are one record (namespace.same_record). Each cell links to
+        # the IRI this graph holds the spec under. That is the spec node's own
+        # when the deposit carries the spec, else the one the first cell to name
+        # it wrote.
+        _spec_iri_in_graph: dict[str, str] = {iri: iri for iri in spec_nodes}
+
+        def _graph_spec_iri(iri: str) -> str:
+            if iri not in _spec_iri_in_graph:
+                _spec_iri_in_graph[iri] = next(
+                    (held for held in _spec_iri_in_graph.values() if same_record(held, iri)), iri
+                )
+            return _spec_iri_in_graph[iri]
+
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
-            cell_spec_id = inst.get("cell_spec_id", "")
+            cell_spec_id = _graph_spec_iri(inst.get("cell_spec_id", ""))
             try:
                 spec_node = spec_nodes.get(cell_spec_id, {})
                 # Inherit the physical type from the spec's isDescriptionFor
@@ -10636,11 +10650,12 @@ class AuthoringWorkspace:
         # — copying its body here would risk drift against the authoritative source.
         # But a bare @id leaves a consumer stranded, so emit a minimal, non-drifting
         # stub: the stable @type plus an explicit "defined elsewhere" pointer. Only
-        # specs not already inlined locally (in spec_nodes) get a stub.
+        # specs not already inlined locally (in spec_nodes) get a stub, and a spec
+        # that cells name in both forms of its IRI gets one.
         external_spec_stubs: list[dict] = []
         _stub_iris = set(spec_nodes)
         for inst in instances.values():
-            tid = inst.get("cell_spec_id", "")
+            tid = _graph_spec_iri(inst.get("cell_spec_id", ""))
             if tid and tid not in _stub_iris:
                 _stub_iris.add(tid)
                 external_spec_stubs.append(_defined_elsewhere_stub(tid, "BatteryCellSpecification"))
