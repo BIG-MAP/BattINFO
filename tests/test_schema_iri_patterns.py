@@ -65,10 +65,48 @@ def test_every_pattern_is_the_one_the_namespace_module_builds() -> None:
 
 
 def test_the_schemas_carry_the_patterns_of_the_erratum() -> None:
-    """84 record IRI patterns in 32 files, plus the three reference $defs split from an own-id one."""
-    assert len(PATTERNS) == 87
+    """84 record IRI patterns in 32 files, the three reference $defs split from an own-id one, and the OrganizationRefIri of the four schemas whose Organization gained an id."""
+    assert len(PATTERNS) == 91
     assert len({rel for rel, _, _ in PATTERNS}) == 32
-    assert sum(SYNC._takes_things(where) for _, where, _ in PATTERNS) == 31
+    assert sum(SYNC._takes_things(where) for _, where, _ in PATTERNS) == 35
+
+
+def test_a_description_that_shows_a_record_iri_names_both_forms() -> None:
+    """Beside a record IRI pattern, a description that spells an IRI out names the form under id/{prefix}/ too."""
+    one_form = []
+    own_iris = 0
+    for tree in SYNC.TREES:
+        for path in sorted(tree.rglob("*.json")):
+            document = json.loads(path.read_text(encoding="utf-8"))
+            for where, node in SYNC._patterns(document):
+                description = node.get("description")
+                if not isinstance(description, str) or "https://w3id.org/battinfo/" not in description:
+                    continue
+                own_iris += tree == SCHEMAS and description.startswith("Canonical BattINFO IRI in the ")
+                if "https://w3id.org/battinfo/id/{prefix}/" not in description:
+                    one_form.append(f"{path.relative_to(ROOT).as_posix()}#/{'/'.join(where)}")
+    assert not one_form, "These descriptions show the old form alone:\n" + "\n".join(one_form)
+    # The 22 descriptions of a record's own IRI, in 10 schemas, that showed one form until 0.8.0.
+    assert own_iris == 22
+
+
+def test_every_schema_that_defines_an_organization_gives_it_the_same_id() -> None:
+    """21 schemas define an Organization, and in each its id is an OrganizationRefIri of one pattern."""
+    reference = schema_for_rel_path("cell-spec.schema.json")["$defs"]["OrganizationRefIri"]
+    defining = []
+    for path in sorted(SCHEMAS.rglob("*.json")):
+        defs = json.loads(path.read_text(encoding="utf-8")).get("$defs", {})
+        if "Organization" not in defs:
+            continue
+        rel = path.relative_to(SCHEMAS).as_posix()
+        defining.append(rel)
+        assert defs["Organization"]["properties"]["id"]["$ref"] == "#/$defs/OrganizationRefIri", rel
+        assert defs["Organization"]["additionalProperties"] is False, rel
+        assert defs["OrganizationRefIri"] == reference, rel
+    assert len(defining) == 21
+    assert {"dataset.schema.json", "cell-instance.schema.json", "test.schema.json", "test-protocol.schema.json"} <= set(
+        defining
+    )
 
 
 @pytest.mark.parametrize(("rel", "where", "pattern"), PATTERNS, ids=[f"{r}#/{'/'.join(w)}" for r, w, _ in PATTERNS])
@@ -152,3 +190,62 @@ def test_a_material_lot_may_point_at_a_shared_material() -> None:
     assert _errors(_with(record, "material", "material_spec_id", THING), "material.schema.json") == []
     assert _errors(_with(record, "material", "supplier", "id", THING), "material.schema.json") == []
     assert _errors(_with(record, "material", "id", THING), "material.schema.json")
+
+
+# ── An organization's record IRI in dataset, cell, test and test-protocol records ──
+
+ORGANIZATION_IRIS = (
+    f"https://w3id.org/battinfo/organization/{UID}",
+    f"https://w3id.org/battinfo/id/1001/organization/{UID}",
+    f"https://w3id.org/battinfo/id/1002/organization/{UID}",
+    THING,
+)
+NOT_ORGANIZATION_IRIS = (
+    f"https://w3id.org/battinfo/cell/{UID}",
+    f"https://w3id.org/battinfo/id/1/organization/{UID}",
+    f"https://w3id.org/battinfo/organization/{UID}/",
+    "https://ror.org/01f677e56",
+    "",
+)
+ENVELOPE_RECORDS = (
+    ("dataset/dataset-1f8r-6v2k-9p4m-3t7x.json", "dataset.schema.json"),
+    ("cell-instance/cell-3m6k-9t2p-7x4h-9nq8.json", "cell-instance.schema.json"),
+    ("test/test-5p7v-2n8k-4m3t-6q9r.json", "test.schema.json"),
+    ("test-protocol/test-protocol-2k9p-7t4r-3m6x-5n1v.json", "test-protocol.schema.json"),
+)
+
+
+def _organization(iri: str) -> dict[str, Any]:
+    return {"type": "Organization", "name": "Example Lab", "id": iri}
+
+
+def _person(affiliation: Any) -> dict[str, Any]:
+    return {"type": "Person", "name": "Doe, Jane", "affiliation": affiliation}
+
+
+@pytest.mark.parametrize(("relative", "schema"), ENVELOPE_RECORDS)
+def test_a_contributors_affiliation_may_carry_its_organization_iri(relative: str, schema: str) -> None:
+    record = _example(relative)
+    assert _errors(record, schema) == []
+    for iri in ORGANIZATION_IRIS:
+        for affiliation in (_organization(iri), [_organization(iri), {"name": "Second Lab"}]):
+            assert _errors(_with(record, "contributor", [_person(affiliation)]), schema) == [], iri
+    for iri in NOT_ORGANIZATION_IRIS:
+        assert _errors(_with(record, "contributor", [_person(_organization(iri))]), schema), iri
+
+
+def test_a_datasets_publisher_creators_and_funders_may_carry_their_organization_iris() -> None:
+    record = _example("dataset/dataset-1f8r-6v2k-9p4m-3t7x.json")
+    for iri in ORGANIZATION_IRIS:
+        agents = [_organization(iri), _person(_organization(iri))]
+        for key, value in (("publisher", _organization(iri)), ("creators", agents), ("funders", agents)):
+            assert _errors(_with(record, "dataset", key, value), "dataset.schema.json") == [], (key, iri)
+    for iri in NOT_ORGANIZATION_IRIS:
+        agents = [_organization(iri)]
+        for key, value in (("publisher", _organization(iri)), ("creators", agents), ("funders", agents)):
+            assert _errors(_with(record, "dataset", key, value), "dataset.schema.json"), (key, iri)
+    # A person has no id, and a funding block's funder is not an Organization of $defs.
+    person = {"type": "Person", "name": "Doe, Jane", "id": ORGANIZATION_IRIS[0]}
+    assert _errors(_with(record, "dataset", "creators", [person]), "dataset.schema.json")
+    funding = {"identifier": "101069765", "funder": {"name": "European Commission", "id": ORGANIZATION_IRIS[0]}}
+    assert _errors(_with(record, "funding", funding), "dataset.schema.json")

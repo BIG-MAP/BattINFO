@@ -488,6 +488,19 @@ def orcid_id(value: object) -> str | None:
     return match[0] if match is not None else None
 
 
+def require_orcid_id(value: object) -> str:
+    """The ORCID iD that the text of *value* names (:func:`orcid_id`); ``ValueError`` when it names none.
+
+    ``ws.contributor()``, a deposit's ``creators=`` and the ``orcid`` of a dataset's person all refuse a value through this function, so the error reads the same wherever an ORCID is given.
+    """
+    orcid = orcid_id(str(value))
+    if orcid is None:
+        raise ValueError(
+            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
+        )
+    return orcid
+
+
 def _citation_doi_from_url(value: object) -> str | None:
     if not isinstance(value, str):
         return None

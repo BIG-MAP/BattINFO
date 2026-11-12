@@ -426,22 +426,22 @@
     "DatasetIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "CellTypeIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "CellIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the cell/ namespace (https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "TestIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the test/ namespace (https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the test/ namespace (https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "AboutRef": {
       "anyOf": [
@@ -568,6 +568,11 @@
       },
       "description": "A person, in schema.org Person terms; an ORCID may be given in same_as."
     },
+    "OrganizationRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+    },
     "Organization": {
       "type": "object",
       "additionalProperties": false,
@@ -578,6 +583,10 @@
         "type": {
           "const": "Organization",
           "description": "JSON-LD type discriminator."
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationRefIri",
+          "description": "Canonical BattINFO organization IRI linking this party to its organization record."
         },
         "name": {
           "type": "string",
@@ -828,7 +837,7 @@
       "additionalProperties": false,
       "required": [
         "type",
-        "table"
+        "tables"
       ],
       "properties": {
         "type": {
@@ -853,7 +862,7 @@
           "type": "string",
           "description": "What the table group contains."
         },
-        "table": {
+        "tables": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/CsvwTable"

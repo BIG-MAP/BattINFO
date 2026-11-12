@@ -138,7 +138,7 @@
     "ComponentIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?electrode/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the electrode/ namespace (https://w3id.org/battinfo/electrode/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the electrode/ namespace (https://w3id.org/battinfo/electrode/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "ComponentSpecIri": {
       "type": "string",
@@ -176,7 +176,7 @@
     "DatasetIri": {
       "type": "string",
       "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
-      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx)."
+      "description": "Canonical BattINFO IRI in the dataset/ namespace (https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/)."
     },
     "DatasetLink": {
       "type": "object",

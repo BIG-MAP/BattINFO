@@ -103,6 +103,7 @@ from battinfo._util import (
     orcid_id,
     path_name,
     registered_media_type,
+    require_orcid_id,
     url_segment,
 )
 from battinfo._util import file_uri_to_path as _file_uri_to_path
@@ -1572,12 +1573,7 @@ class ProjectRef:
 
 def _normalize_orcid(value: str) -> str:
     """Return the bare ORCID id (``0000-0002-1825-0097``) from an id or full URL."""
-    orcid = orcid_id(str(value))
-    if orcid is None:
-        raise ValueError(
-            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
-        )
-    return orcid
+    return require_orcid_id(value)
 
 
 # How to give a Zenodo deposit its creators: the refusal and the preview say it.
