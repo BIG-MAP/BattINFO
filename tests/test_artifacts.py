@@ -4,8 +4,11 @@ dcat:Distribution nodes in the published JSON-LD."""
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -188,6 +191,38 @@ def test_artifacts_emit_dcat_distributions_in_jsonld() -> None:
     assert not any(k.startswith("battinfo:") for k in dist)
     # The descriptive method still emits alongside the actionable link.
     assert plan["hasTask"][0]["@type"] == "ConstantCurrentDischarging"
+
+
+@pytest.mark.parametrize(
+    "locator",
+    [
+        "/home/jdoe/protocols/cc.unicycler.json",
+        "C:\\Users\\jdoe\\protocols\\cc.unicycler.json",
+        "file:///C:/Users/jdoe/protocols/cc.unicycler.json",
+        "\\\\labshare\\jdoe\\protocols\\cc.unicycler.json",
+        "../jdoe/protocols/cc.unicycler.json",
+    ],
+    ids=["from the root", "on a drive", "file URI", "on a share", "up a folder"],
+)
+def test_an_artifact_the_deposit_does_not_carry_is_named_without_its_local_folders(locator: str) -> None:
+    """A path on the depositor's computer does not reach the published graph, only the file's name."""
+    record = {
+        "test_spec": {"id": SPEC_ID, "name": "CC", "kind": "capacity_check"},
+        "artifacts": [{"role": "source_protocol", "format": "aurora-unicycler-json", "locator": locator}],
+    }
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        {"cell-spec": [], "cell-instance": [], "test": [], "test-protocol": [record], "dataset": []},
+        zenodo_record_id=42,
+        prereserved_doi="",
+        record_url="https://zenodo.org/records/42",
+        data_filenames=[],  # the file is not uploaded
+        title="t",
+        description="d",
+    )
+    plan = next(n for n in doc["@graph"] if "prov:Plan" in (n.get("@type") or []))
+    [dist] = plan["dcat:distribution"]
+    assert dist["dcat:downloadURL"] == "cc.unicycler.json"
+    assert "jdoe" not in json.dumps(doc)
 
 
 def test_artifact_download_url_resolves_to_hosted_when_uploaded() -> None:

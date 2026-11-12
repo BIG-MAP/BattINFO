@@ -94,6 +94,8 @@ from battinfo._util import (
     _now_iso,
     _now_unix,
     file_media_type,
+    has_parent_reference,
+    is_absolute_local_path,
     is_dataset_series,
     is_local_location,
     is_real_number,
@@ -9950,16 +9952,22 @@ class AuthoringWorkspace:
             already hosted; a workspace file that is being uploaded resolves to its
             hosted URL (like data files, the archive holding it in a zipped deposit);
             an un-uploaded local locator is kept as the relative literal (no hosted
-            copy exists)."""
+            copy exists). One that gives an absolute path, a ``file:`` URI or a path
+            that goes up a folder is written as its file name only, so that no path
+            on the depositor's computer reaches the published graph."""
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 return {"@id": text}
             if file_plan is not None:
                 entry = file_plan.entry_for(text)
-                return {"@id": entry.url(files_base)} if entry is not None else text
-            fname = path_name(_file_uri_to_path(text))
-            if fname in named_files:
-                return {"@id": f"{files_base}/{url_segment(fname)}"}
+                if entry is not None:
+                    return {"@id": entry.url(files_base)}
+            else:
+                fname = path_name(_file_uri_to_path(text))
+                if fname in named_files:
+                    return {"@id": f"{files_base}/{url_segment(fname)}"}
+            if is_local_location(text) and (is_absolute_local_path(text) or has_parent_reference(text)):
+                return path_name(_file_uri_to_path(text))
             return text
 
         def _artifact_distribution(art: dict) -> dict:

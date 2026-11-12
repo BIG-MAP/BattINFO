@@ -47,6 +47,9 @@
   would put there, is refused before any request unless
   ``archive_hosted_files=True``, which archives them from their local files and
   names each one from the private bucket in a warning.
+- A protocol file outside the workspace, which the deposit does not carry, is
+  named in the graph by its file name alone, so nothing sent to Zenodo holds a
+  path on this computer, and the registry refuses the record that names it.
 
 All offline: Zenodo's HTTP API (production and sandbox) and the registry are
 answered in memory, so the real ZenodoClient runs.
@@ -1966,6 +1969,62 @@ def test_a_pending_draft_of_a_new_version_publishes_after_the_index_is_deleted(t
     # The published record the draft was made from is known from the state: no question about it.
     assert f"GET /deposit/depositions/{first.record_id}" not in zenodo.sent()
     assert set(_locations(ws)) == {f"{HOSTS['production']}/records/{draft.record_id}/files/cycling.csv"}
+
+
+# ── A protocol file the deposit does not carry ────────────────────────────────
+
+
+def test_an_artifact_outside_the_workspace_puts_no_local_path_in_the_deposit(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "jdoe-home"
+    root, elsewhere = home / "campaign", home / "protocols-elsewhere"
+    elsewhere.mkdir(parents=True)
+    protocol = elsewhere / "cycle.json"
+    protocol.write_text("{}", encoding="utf-8")
+    ws = _workspace(root)
+    # A test record that names the protocol file it ran by its path on this computer.
+    [test_file] = (ws._ws.source_root / "test").glob("*.json")
+    record = json.loads(test_file.read_text(encoding="utf-8"))
+    record["artifacts"] = [{"role": "source_protocol", "format": "aurora-unicycler-json", "locator": str(protocol)}]
+    test_file.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    sent: list[bytes] = []  # every body sent to Zenodo, the form and each file of the deposit among them
+
+    def recording(request, timeout: float | None = None):  # noqa: ANN001, ANN202
+        if request.data is not None:
+            sent.append(bytes(request.data))
+        return zenodo.urlopen(request, timeout)
+
+    monkeypatch.setattr(zmod.urllib.request, "urlopen", recording)
+
+    result = _deposit(ws, publish=True)
+
+    # The deposit does not carry the file, and its graph names it by its file name alone.
+    assert result.published
+    deposit = zenodo.deposit(int(result.record_id))
+    assert set(deposit.files) == {"cycling.csv", "battinfo.json", "ro-crate-metadata.json"}
+    [node] = [node for node in zenodo.graph(int(result.record_id))["@graph"] if node.get("@id") == record["test"]["id"]]
+    assert node["dcat:distribution"] == [
+        {
+            "@type": "dcat:Distribution",
+            "dcterms:title": "source protocol (aurora-unicycler-json)",
+            "dcat:downloadURL": "cycle.json",
+            "dcterms:type": "source_protocol",
+            "dcterms:format": "aurora-unicycler-json",
+        }
+    ]
+    # Neither the form, the graph, the RO-Crate nor a data file names a folder
+    # outside the workspace, or the folder the workspace itself lies in.
+    assert any(body.startswith(b'{"metadata"') for body in sent) and set(deposit.files.values()) <= set(sent)
+    for body in sent:
+        text = body.decode("utf-8")
+        assert "protocols-elsewhere" not in text and "jdoe-home" not in text
+
+    # The registry gets no such path either, since it refuses the record that names one.
+    with pytest.raises(SubmitError, match="files on this computer") as excinfo:
+        ws.submit(**REGISTRY)
+    assert f"artifacts[0].locator: {protocol}" in str(excinfo.value)
+    assert registry.payloads == []
 
 
 # ── The client ────────────────────────────────────────────────────────────────
