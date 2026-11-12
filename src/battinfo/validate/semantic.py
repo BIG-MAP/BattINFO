@@ -1472,6 +1472,33 @@ def _validate_method_step_classes(
     walk(doc.get("method"), "method")
 
 
+def _validate_c_rate_units(
+    doc: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+) -> None:
+    """Warn where a test protocol states the unit ``C`` on a quantity that is not a C-rate.
+
+    ``C`` is a unit on a C-rate only. On a temperature, a duration or any
+    other quantity of a protocol's conditions and steps, the JSON-LD export
+    keeps it as text, as it does a unit with no IRI in the unit map, and this
+    is the same ``semantic.unit_unmapped`` warning, under every policy.
+    """
+    if not isinstance(doc.get("test_spec"), Mapping):
+        return
+    from battinfo.jsonld import misplaced_c_rate_units
+
+    for path, reason in misplaced_c_rate_units(doc):
+        _append_issue(
+            issues,
+            code="semantic.unit_unmapped",
+            severity="warning",
+            path=path,
+            message=reason,
+            resource_type=resource_type,
+        )
+
+
 _EPOCH_MIN = 946684800  # 2000-01-01
 _EPOCH_MAX = 4102444800  # 2100-01-01
 # The Unix times a date can be made of: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z.
@@ -2016,6 +2043,7 @@ def validate_semantic_report(
         _validate_test_semantics(test, issues, resource_type, hard_issue_severity)
     _validate_ambient_temperature_unit(doc, issues, resource_type)
     _validate_method_step_classes(doc, issues, resource_type)
+    _validate_c_rate_units(doc, issues, resource_type)
 
     return ValidationReport(issues=tuple(issues), policy=resolved_policy)
 

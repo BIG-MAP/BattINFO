@@ -3075,8 +3075,7 @@ class AuthoringWorkspace:
         self._records_root = self._root / ".battinfo" / "records"
         self._legacy_layout_announced = False
         # The base this workspace's records mint under: the one it recorded when
-        # it was created. Read before the engine is made, because making it
-        # creates .battinfo/, which marks the workspace as existing.
+        # it was created. Read before the engine is made, which mints under it.
         self._record_base = self._open_record_base(base)
         self._ws = self._make_engine()
         self._records_repo = Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
@@ -3197,26 +3196,27 @@ class AuthoringWorkspace:
     def _open_record_base(self, base: str | None) -> str:
         """The base this workspace mints under, recorded in ``.battinfo/workspace.json`` when it is created.
 
-        A folder without ``.battinfo/`` is a new workspace: it records *base*,
-        by default :data:`battinfo.namespace.DEFAULT_RECORD_BASE`
+        A folder that holds no workspace yet (:meth:`_holds_a_workspace`) is a
+        new workspace and records *base*, by default
+        :data:`battinfo.namespace.DEFAULT_RECORD_BASE`
         (``https://w3id.org/battinfo/id/1001/``). A workspace that exists keeps
         the base it recorded, and one that recorded none was created before
         the switch and keeps the old form, ``https://w3id.org/battinfo/``, for
         good (IRI ruling of 22 October 2026, decision 5). Opening an existing
         workspace never records a base in it. The old form is recorded by
-        recording nothing. A *base* that is not the one an existing workspace
-        mints under raises ``ValueError``.
+        recording no base, so a new workspace that takes it writes a
+        ``workspace.json`` without one. A *base* that is not the one an
+        existing workspace mints under raises ``ValueError``.
         """
         if base is not None:
             base_prefix(base)
-        state_dir = self._root / ".battinfo"
-        if not state_dir.exists():
+        if not self._holds_a_workspace():
             chosen = DEFAULT_RECORD_BASE if base is None else base
+            state = self._load_workspace_state()
+            state.setdefault("schema_version", "0.1.0")
             if chosen != OLD_FORM_BASE:
-                state = self._load_workspace_state()
-                state.setdefault("schema_version", "0.1.0")
                 state["record_base"] = chosen
-                self._save_workspace_state(state)
+            self._save_workspace_state(state)
             return chosen
         recorded = self._recorded_record_base()
         if base is not None and base != recorded:
@@ -3226,6 +3226,26 @@ class AuthoringWorkspace:
                 "Open it without base=, or create a new workspace in another folder."
             )
         return recorded
+
+    def _holds_a_workspace(self) -> bool:
+        """True when this folder's ``.battinfo/`` holds a workspace, seen by its ``workspace.json`` or a saved record.
+
+        ``.battinfo/`` alone does not make one. ``publish(destination="local")``
+        and several CLI commands write their output there, a ``config.yaml``
+        or a ``credentials`` file written by hand may lie there, and 0.8.0rc2
+        left it empty when it opened a folder. A workspace has written its
+        settings (``workspace.json``, which holds the base, the project, the
+        contributors and the licence) or has saved a record under
+        ``.battinfo/records/`` (``.battinfo/records/examples/`` in a pre-0.8
+        workspace).
+        """
+        if self._workspace_state_path().is_file():
+            return True
+        return any(
+            any((source_root / name).glob("*.json"))
+            for source_root in (self._records_root, self._records_root / "examples")
+            for name in _RECORD_SET_DIRS
+        )
 
     def _recorded_record_base(self) -> str:
         """The base ``.battinfo/workspace.json`` records, else the old form (a workspace from before the switch)."""
@@ -10566,9 +10586,23 @@ class AuthoringWorkspace:
 
         # ── Build cell instance nodes ──────────────────────────────────────────
         # Each instance is a physical battery whose type is described by its spec.
+        # A cell may name its spec by the other form of the spec's IRI, and the
+        # two forms are one record (namespace.same_record). Each cell links to
+        # the IRI this graph holds the spec under. That is the spec node's own
+        # when the deposit carries the spec, else the one the first cell to name
+        # it wrote.
+        _spec_iri_in_graph: dict[str, str] = {iri: iri for iri in spec_nodes}
+
+        def _graph_spec_iri(iri: str) -> str:
+            if iri not in _spec_iri_in_graph:
+                _spec_iri_in_graph[iri] = next(
+                    (held for held in _spec_iri_in_graph.values() if same_record(held, iri)), iri
+                )
+            return _spec_iri_in_graph[iri]
+
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
-            cell_spec_id = inst.get("cell_spec_id", "")
+            cell_spec_id = _graph_spec_iri(inst.get("cell_spec_id", ""))
             try:
                 spec_node = spec_nodes.get(cell_spec_id, {})
                 # Inherit the physical type from the spec's isDescriptionFor
@@ -10616,11 +10650,12 @@ class AuthoringWorkspace:
         # — copying its body here would risk drift against the authoritative source.
         # But a bare @id leaves a consumer stranded, so emit a minimal, non-drifting
         # stub: the stable @type plus an explicit "defined elsewhere" pointer. Only
-        # specs not already inlined locally (in spec_nodes) get a stub.
+        # specs not already inlined locally (in spec_nodes) get a stub, and a spec
+        # that cells name in both forms of its IRI gets one.
         external_spec_stubs: list[dict] = []
         _stub_iris = set(spec_nodes)
         for inst in instances.values():
-            tid = inst.get("cell_spec_id", "")
+            tid = _graph_spec_iri(inst.get("cell_spec_id", ""))
             if tid and tid not in _stub_iris:
                 _stub_iris.add(tid)
                 external_spec_stubs.append(_defined_elsewhere_stub(tid, "BatteryCellSpecification"))

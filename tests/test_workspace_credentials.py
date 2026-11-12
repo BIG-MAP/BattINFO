@@ -37,6 +37,11 @@ from battinfo.ws import _DEFAULT_REGISTRY_URL, AuthoringWorkspace  # noqa: E402
 
 CREATORS = [{"name": "Lovelace, Ada"}]
 REGISTRY = "https://registry.example"
+# A new workspace mints under /id/1001/, and a submit or deposit first asks the
+# registry about each such IRI (#483). No registry answers in these tests, so
+# the calls that send records go on without that check. A credentials file
+# written before the workspace is opened does not make it an old workspace.
+UNCHECKED = {"allow_unchecked_iris": True}
 # Every name the workspace reads, in the order ws.credentials_status() lists them.
 NAMES = (
     "BATTINFO_API_KEY",
@@ -235,7 +240,7 @@ def test_zenodo_finds_a_token_that_is_only_in_the_credentials_file(
     _write_credentials(tmp_path, **{name: "token-from-the-file"})
     ws = _deposit_ready_workspace(tmp_path)
 
-    result = ws.zenodo(sandbox=sandbox, creators=CREATORS)
+    result = ws.zenodo(sandbox=sandbox, creators=CREATORS, **UNCHECKED)
 
     assert fake_zenodo.clients == [("token-from-the-file", sandbox)]
     assert result.record_id == "7" and not result.published
@@ -249,7 +254,7 @@ def test_an_exported_variable_overrides_the_credentials_file(
     monkeypatch.setenv("ZENODO_API_TOKEN", "token-from-the-environment")
     ws = _deposit_ready_workspace(tmp_path)
 
-    ws.zenodo(creators=CREATORS)
+    ws.zenodo(creators=CREATORS, **UNCHECKED)
 
     assert fake_zenodo.clients == [("token-from-the-environment", False)]
     assert ws.credentials_status()["ZENODO_API_TOKEN"] == {"set": True, "source": "environment"}
@@ -262,7 +267,7 @@ def test_an_explicit_argument_overrides_the_environment_and_the_file(
     monkeypatch.setenv("ZENODO_API_TOKEN", "token-from-the-environment")
     ws = _deposit_ready_workspace(tmp_path)
 
-    ws.zenodo(token="token-passed-in", creators=CREATORS)
+    ws.zenodo(token="token-passed-in", creators=CREATORS, **UNCHECKED)
 
     assert fake_zenodo.clients == [("token-passed-in", False)]
 
@@ -306,13 +311,19 @@ def test_submit_resolves_each_credential_in_the_documented_order(
 
     monkeypatch.setattr("battinfo.api.submit_publication_package", fake_submit)
 
-    ws.submit()
+    ws.submit(**UNCHECKED)
     assert {(s["url"], s["key"], s["workspace"], s["publisher"]) for s in sent} == {
         ("https://file.example", "key-from-the-environment", "ws-from-the-file", "pub-from-the-file")
     }
 
     sent.clear()
-    ws.submit(registry_url="https://passed.example", api_key="key-passed-in", workspace_id="ws-passed-in", resume=False)
+    ws.submit(
+        registry_url="https://passed.example",
+        api_key="key-passed-in",
+        workspace_id="ws-passed-in",
+        resume=False,
+        **UNCHECKED,
+    )
     assert {(s["url"], s["key"], s["workspace"], s["publisher"]) for s in sent} == {
         ("https://passed.example", "key-passed-in", "ws-passed-in", "pub-from-the-file")
     }
@@ -567,7 +578,7 @@ def test_login_without_the_registry_saves_the_default_ids_a_hand_made_file_lacks
         return {"status": "ok", "response": {"status": "validated", "resources": [{"canonical_iri": "x"}]}}
 
     monkeypatch.setattr("battinfo.api.submit_publication_package", fake_submit)
-    reopened.submit()
+    reopened.submit(**UNCHECKED)
     assert set(sent) == {("bk_test_key", "battinfo-records", "battinfo-authoring")}
 
 

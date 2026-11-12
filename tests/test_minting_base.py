@@ -28,7 +28,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import battinfo  # noqa: E402
 from battinfo import api  # noqa: E402
 from battinfo.bundle import CellSpec  # noqa: E402
-from battinfo.entities import seed_iri  # noqa: E402
+from battinfo.entities import entity_id_from_doc, seed_iri  # noqa: E402
 from battinfo.namespace import (  # noqa: E402
     DEFAULT_RECORD_BASE,
     OLD_FORM_BASE,
@@ -107,35 +107,165 @@ def test_a_new_workspace_records_1001_and_mints_under_it(tmp_path: Path) -> None
     assert again.record_base == DEFAULT_RECORD_BASE
 
 
-def test_a_workspace_created_before_the_switch_keeps_the_old_form(tmp_path: Path) -> None:
-    """A ``.battinfo/`` folder that records no base: opening it never writes one, and it mints the old form."""
-    root = tmp_path / "lab"
+def _saved_ids(root: Path) -> dict[str, str]:
+    """The IRI of every record file under the workspace's records folder, by its path in that folder."""
+    records = root / ".battinfo" / "records"
+    ids = {}
+    for path in sorted(records.rglob("*.json")):
+        iri = entity_id_from_doc(json.loads(path.read_text(encoding="utf-8")))
+        if iri is not None:  # the pre-0.8 layout keeps its index.json there too
+            ids[path.relative_to(records).as_posix()] = iri
+    return ids
+
+
+def _save_a_spec_as_rc2_did(root: Path, *, layout: str = "records") -> str:
+    """Save :data:`SPEC_FIELDS` where a workspace of 0.8.0rc2 saved it, in the old form, and return its IRI.
+
+    That release wrote a record to ``.battinfo/records/<folder>/``
+    (``.battinfo/records/examples/<folder>/`` in a workspace older than 0.8)
+    and recorded no base anywhere.
+    """
+    source_root = root / ".battinfo" / layout
+    saved = api.save_cell_spec(dict(SPEC_FIELDS), source_root=source_root, base=OLD_FORM_BASE)
+    assert _prefix(saved["id"]) is None
+    assert _state(root) is None
+    return str(saved["id"])
+
+
+def _records_only(root: Path) -> None:
+    _save_a_spec_as_rc2_did(root)
+
+
+def _records_in_the_pre_08_layout(root: Path) -> None:
+    _save_a_spec_as_rc2_did(root, layout="records/examples")
+
+
+def _records_beside_local_publish_output(root: Path) -> None:
+    """A folder main opened as a workspace after the QUICKSTART had published into ``.battinfo/quickstart``."""
+    battinfo.publish(CellSpec(**SPEC_FIELDS), destination="local", root=root / ".battinfo" / "quickstart")
+    _save_a_spec_as_rc2_did(root)
+
+
+def _settings_only(root: Path) -> None:
+    """A workspace that set a licence and has saved no record yet, so its ``workspace.json`` records no base."""
     (root / ".battinfo").mkdir(parents=True)
+    (root / ".battinfo" / "workspace.json").write_text(
+        json.dumps({"schema_version": "0.1.0", "license": "CC-BY-4.0"}), encoding="utf-8"
+    )
+
+
+@pytest.mark.parametrize(
+    "written_before",
+    [_records_only, _records_in_the_pre_08_layout, _records_beside_local_publish_output, _settings_only],
+)
+def test_a_workspace_created_before_the_switch_keeps_the_old_form(tmp_path: Path, written_before: Any) -> None:
+    """A folder with records or settings and no base recorded mints the old form, and opening it writes no base."""
+    root = tmp_path / "lab"
+    written_before(root)
+    held = _saved_ids(root)
+    state = _state(root)
 
     ws = battinfo.workspace(root, registry_url=None)
     assert ws.record_base == OLD_FORM_BASE
-    assert _state(root) is None
+    assert _state(root) == state
     ws.add("cell", spec=CellSpec(**SPEC_FIELDS), serial_numbers=["C01"])
     ws.license("cc-by-4.0")
     ws.save()
     assert [_prefix(item.id) for item in [*ws._ws.cell_specs, *ws._ws.cells]] == [None, None]
+    saved = _saved_ids(root)
+    assert held.items() <= saved.items()  # the spec saved before the switch is the one the cell links to
+    assert len(saved) == 2
+    ws.save()
+    assert _saved_ids(root) == saved
 
     reopened = battinfo.workspace(root, registry_url=None)
     assert reopened.record_base == OLD_FORM_BASE
     assert "record_base" not in (_state(root) or {})
+    reopened.add("cell", spec=CellSpec(**SPEC_FIELDS), serial_numbers=["C02"])
+    reopened.save()
+    later = _saved_ids(root)
+    assert saved.items() <= later.items() and len(later) == 3
+    assert {_prefix(iri) for iri in later.values()} == {None}
+    with pytest.raises(ValueError, match="keeps its base"):
+        battinfo.workspace(root, registry_url=None, base=DEFAULT_RECORD_BASE)
 
 
-def test_a_new_workspace_can_keep_the_old_form(tmp_path: Path) -> None:
+def _nothing(root: Path) -> None:
+    """The empty ``.battinfo/`` that 0.8.0rc2 left when it opened a folder and saved nothing."""
+    (root / ".battinfo").mkdir(parents=True)
+
+
+def _local_publish_output(root: Path) -> None:
+    """QUICKSTART step 1 and the README, which publish into ``.battinfo/quickstart`` and ``.battinfo/my-library``."""
+    for name in ("quickstart", "my-library"):
+        battinfo.publish(CellSpec(**SPEC_FIELDS), destination="local", root=root / ".battinfo" / name)
+
+
+def _config_and_credentials(root: Path) -> None:
+    (root / ".battinfo").mkdir(parents=True)
+    (root / ".battinfo" / "config.yaml").write_text("creator: Doe, Jane\n", encoding="utf-8")
+    (root / ".battinfo" / "credentials").write_text("BATTINFO_WORKSPACE_ID=example-lab\n", encoding="utf-8")
+
+
+def _command_line_output(root: Path) -> None:
+    """Where ``battinfo index`` and the cell-spec library commands write by default."""
+    library = root / ".battinfo" / "library" / "cell-spec"
+    library.mkdir(parents=True)
+    spec = {"specification": {"id": record_iri("spec", UID), **SPEC_FIELDS}}
+    (library / "example-lab-r2032.json").write_text(json.dumps(spec), encoding="utf-8")
+    (root / ".battinfo" / "index.json").write_text("{}", encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    "written_before", [_nothing, _local_publish_output, _config_and_credentials, _command_line_output]
+)
+def test_a_battinfo_folder_that_holds_no_workspace_is_a_new_workspace(tmp_path: Path, written_before: Any) -> None:
+    """``.battinfo/`` with no workspace settings and no saved record does not make a workspace of before the switch."""
     root = tmp_path / "lab"
+    written_before(root)
+
+    ws = battinfo.workspace(root, registry_url=None)
+    assert ws.record_base == DEFAULT_RECORD_BASE
+    assert _state(root) == {"schema_version": "0.1.0", "record_base": DEFAULT_RECORD_BASE}
+    ws.add("cell", spec=CellSpec(**SPEC_FIELDS), serial_numbers=["C01"])
+    ws.save()
+    assert [_prefix(item.id) for item in [*ws._ws.cell_specs, *ws._ws.cells]] == ["1001", "1001"]
+
+    assert battinfo.workspace(root, registry_url=None).record_base == DEFAULT_RECORD_BASE
+    assert battinfo.workspace(root, registry_url=None, base=DEFAULT_RECORD_BASE).record_base == DEFAULT_RECORD_BASE
+    with pytest.raises(ValueError, match="keeps its base"):
+        battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)
+
+
+def test_the_default_local_publish_folder_does_not_make_a_workspace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """``publish(spec, destination="local")`` writes to ``.battinfo/publish/``, and the folder stays a new workspace."""
+    monkeypatch.chdir(tmp_path)
+    battinfo.publish(CellSpec(**SPEC_FIELDS), destination="local")
+    assert (tmp_path / ".battinfo" / "publish").is_dir()
+
+    ws = battinfo.workspace(".", registry_url=None)
+    assert ws.record_base == DEFAULT_RECORD_BASE
+    assert _state(tmp_path) == {"schema_version": "0.1.0", "record_base": DEFAULT_RECORD_BASE}
+
+
+@pytest.mark.parametrize("written_before", [None, _nothing, _local_publish_output])
+def test_a_new_workspace_can_keep_the_old_form(tmp_path: Path, written_before: Any) -> None:
+    root = tmp_path / "lab"
+    if written_before is not None:
+        written_before(root)
     ws = battinfo.workspace(root, registry_url=None, base=OLD_FORM_BASE)
     assert ws.record_base == OLD_FORM_BASE
-    assert "record_base" not in (_state(root) or {})
+    assert _state(root) == {"schema_version": "0.1.0"}  # the old form is recorded by recording no base
     assert battinfo.workspace(root, registry_url=None).record_base == OLD_FORM_BASE
+    with pytest.raises(ValueError, match="keeps its base"):
+        battinfo.workspace(root, registry_url=None, base=DEFAULT_RECORD_BASE)
 
 
 def test_a_workspace_keeps_its_base(tmp_path: Path) -> None:
     old = tmp_path / "old"
-    (old / ".battinfo").mkdir(parents=True)
+    _save_a_spec_as_rc2_did(old)
     with pytest.raises(ValueError, match="keeps its base"):
         battinfo.workspace(old, registry_url=None, base=DEFAULT_RECORD_BASE)
     assert battinfo.workspace(old, registry_url=None, base=OLD_FORM_BASE).record_base == OLD_FORM_BASE

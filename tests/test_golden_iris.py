@@ -546,14 +546,16 @@ def _batch_library(root: Path, spec_iri: str) -> Iterator[None]:
 def _workspace(root: Path, base: str | None) -> Any:
     """A ``battinfo.workspace()`` in *root*: a new one with no base, else one created before the switch.
 
-    With the old base, *root* already holds a ``.battinfo/`` folder that records
-    no base, as a workspace created before 0.8.0 does, and the workspace is
-    opened without ``base=``, so it takes the old form from its folder.
+    With the old base, *root* already holds a ``.battinfo/workspace.json`` that
+    records no base, as a workspace created before 0.8.0 has, and the
+    workspace is opened without ``base=``, so it takes the old form from its
+    folder.
     """
     root.mkdir(parents=True, exist_ok=True)
     if base is not None:
         assert base == OLD_FORM_BASE, "a workspace that exists keeps its base; only the old form is pinned"
         (root / ".battinfo").mkdir()
+        (root / ".battinfo" / "workspace.json").write_text(json.dumps({"schema_version": "0.1.0"}), encoding="utf-8")
     return battinfo.workspace(root, registry_url=None)
 
 

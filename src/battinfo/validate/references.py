@@ -11,7 +11,7 @@ from battinfo.entities import (
     entity_types_for_namespace,
     kind_for_doc,
 )
-from battinfo.namespace import parse_thing_iri, record_iri_pattern
+from battinfo.namespace import parse_thing_iri, record_iri_pattern, same_record
 from battinfo.validate.core import (
     DEFAULT_POLICY,
     ValidationIssue,
@@ -82,21 +82,33 @@ def _find_record(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
 
 
 def _find_record_under(entity_id: str, source_root: Path) -> tuple[Path, str] | None:
+    """Locate the record *entity_id* names under *source_root*, whichever form of its IRI it is saved under.
+
+    The old form and the ``/id/1001/`` form of one segment and uid are one
+    record (``namespace.same_record``), so a reference written in one form
+    resolves to a record saved in the other. A record saved under
+    *entity_id* as written comes first. Under any other prefix the same uid
+    is another record and does not resolve.
+    """
     from battinfo._record_index import active_record_cache  # noqa: PLC0415 — avoid import cycle
 
     namespace, uid = _iri_tail(entity_id)
     cache = active_record_cache(source_root)
     if cache is not None:
-        return cache.lookup(entity_id, _candidate_types(namespace))
+        return cache.lookup(entity_id, _candidate_types(namespace), either_form=True)
+    in_other_form: tuple[Path, str] | None = None
     for entity_type in _candidate_types(namespace):
         for path in entity_files_for_uid(entity_type, uid, source_root):
             try:
                 doc = _load_json(path)
-                if _entity_id(doc) == entity_id:
+                saved_id = _entity_id(doc)
+                if saved_id == entity_id:
                     return path, _entity_type_from_doc(doc)
+                if in_other_form is None and same_record(saved_id, entity_id):
+                    in_other_form = path, _entity_type_from_doc(doc)
             except Exception:  # noqa: BLE001
                 continue
-    return None
+    return in_other_form
 
 
 def _check_reference(

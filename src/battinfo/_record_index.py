@@ -21,6 +21,7 @@ from typing import Iterator
 
 from battinfo._jsonio import read_record_json
 from battinfo.entities import entity_id_from_doc, iter_entity_files, kind_for_doc
+from battinfo.namespace import BATTERY_GENOME_PREFIX, parse_record_iri, record_iri
 
 
 def _root_key(source_root: Path | str) -> str:
@@ -29,6 +30,20 @@ def _root_key(source_root: Path | str) -> str:
     runs several times per save). Symlink aliases of the same root therefore
     compare unequal — the caller just misses the cache and takes the slow path."""
     return os.path.normcase(os.path.abspath(str(source_root)))
+
+
+def _other_form(entity_id: str) -> str | None:
+    """The other IRI of the record *entity_id* names, or ``None`` when it has no other.
+
+    The old form and the ``/id/1001/`` form of one segment and uid are one
+    record (``namespace.same_record``), so each is the other form of the
+    other. An IRI under any other prefix, and anything that is not a record
+    IRI, names its record in one way only.
+    """
+    parsed = parse_record_iri(entity_id)
+    if parsed is None or parsed.prefix not in (None, BATTERY_GENOME_PREFIX):
+        return None
+    return record_iri(parsed.segment, parsed.uid, BATTERY_GENOME_PREFIX if parsed.prefix is None else None)
 
 
 class RecordLocationCache:
@@ -56,11 +71,24 @@ class RecordLocationCache:
             # First hit wins, matching the scan order of the uncached lookup.
             self._by_id.setdefault(entity_id, (path, kind.entity_type))
 
-    def lookup(self, entity_id: str, candidate_types: list[str]) -> tuple[Path, str] | None:
-        """Return (path, entity_type) for *entity_id*, scanning candidate types once."""
+    def lookup(
+        self, entity_id: str, candidate_types: list[str], *, either_form: bool = False
+    ) -> tuple[Path, str] | None:
+        """Return (path, entity_type) for *entity_id*, scanning candidate types once.
+
+        With *either_form*, as a reference lookup asks, a record saved under
+        the other form of *entity_id* is returned when none is saved under
+        *entity_id* itself (:func:`_other_form`). A save looks its own record
+        up without it, by the IRI as written.
+        """
         for entity_type in candidate_types:
             self._scan(entity_type)
-        return self._by_id.get(entity_id)
+        found = self._by_id.get(entity_id)
+        if found is None and either_form:
+            other = _other_form(entity_id)
+            if other is not None:
+                found = self._by_id.get(other)
+        return found
 
     def record_saved(self, entity_id: str, path: Path | str, entity_type: str) -> None:
         """Keep the map current after a write, so later saves resolve references to it."""

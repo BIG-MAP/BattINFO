@@ -310,6 +310,8 @@ TEST_CONDITION_CLASS: dict[str, str] = {
 }
 # The temperature classes whose unit is the degree Celsius.
 _CELSIUS_TEMPERATURE_CLASSES = frozenset({"CelsiusTemperature", "AmbientCelsiusTemperature"})
+# The class of a C-rate, the one quantity the unit "C" belongs to.
+_C_RATE_CLASS = "CRate"
 # Unit symbol -> EMMO unit IRI: the unit terms the records context defines (V, Ah,
 # MWh, ...). scripts/assemble_context.py writes them into the context, and the
 # JSON-LD validator reads them so a unit is never accepted as a node's @type.
@@ -370,6 +372,11 @@ TEST_CONDITION_UNIT_IRI: dict[str, str] = {
     "Ah/Ah": "electrochemistry:AmperePerAmpereHour",
     "C": "electrochemistry:AmperePerAmpereHour",
 }
+# The symbols of that table that are a unit on a C-rate only. "C" is how a
+# C-rate is written (0.5 C). On any other quantity it is no unit the tables
+# map, so it is kept as text, and never read as the coulomb or the degree
+# Celsius.
+_C_RATE_ONLY_UNIT_SYMBOLS = frozenset({"C"})
 # Context terms the test-protocol model needs that the records context lacks.
 # Relations are @id-typed; classes/units map a prefLabel to a compact IRI.
 TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
@@ -417,7 +424,7 @@ def _unit_pref_labels() -> dict[str, tuple[str, str]]:
 _UNIT_PREF_LABELS = _unit_pref_labels()
 
 
-def _resolve_unit_symbol(unit_symbol: str) -> str | None:
+def _resolve_unit_symbol(unit_symbol: str, c_rate: bool) -> str | None:
     labelled = _UNIT_PREF_LABELS.get(unit_symbol)
     if labelled:
         return _compact_iri(labelled[0])
@@ -426,25 +433,47 @@ def _resolve_unit_symbol(unit_symbol: str) -> str | None:
     ctx_val = _CONTEXT_INLINE.get(unit_symbol)
     if isinstance(ctx_val, str) and (":" in ctx_val or ctx_val.startswith("http")):
         return ctx_val
+    if unit_symbol in _C_RATE_ONLY_UNIT_SYMBOLS and not c_rate:
+        return None
     return TEST_CONDITION_UNIT_IRI.get(unit_symbol)
 
 
-def resolve_unit_iri(unit_symbol: str) -> str | None:
+def resolve_unit_iri(unit_symbol: str, *, c_rate: bool = False) -> str | None:
     """Unit symbol -> compact unit IRI, across the curated maps, the records
     context (V, mA, degC, ...) and the test-condition extras (A/Ah for C-rate).
     The symbol as written is tried first, then its normalised spelling, so
-    ``mA/cm^2`` and ``mA cm-2`` resolve like ``mA/cm2``."""
+    ``mA/cm^2`` and ``mA cm-2`` resolve like ``mA/cm2``. ``C`` is a unit on a
+    C-rate only, so it resolves, to the C-rate unit, when *c_rate* says the
+    quantity is a C-rate, and to nothing on any other quantity."""
     if not unit_symbol:
         return None
     from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
 
-    iri = _resolve_unit_symbol(unit_symbol)
+    iri = _resolve_unit_symbol(unit_symbol, c_rate)
     if iri:
         return iri
     normalized = normalize_unit_symbol(unit_symbol)
     if normalized and normalized != unit_symbol:
-        return _resolve_unit_symbol(normalized)
+        return _resolve_unit_symbol(normalized, c_rate)
     return None
+
+
+def c_rate_unit_reason(unit_symbol: Any, *, c_rate: bool) -> str | None:
+    """Why *unit_symbol* gets no unit IRI on a quantity that is not a C-rate, or ``None`` when it does or has none to get.
+
+    The reason is given for a unit that resolves on a C-rate only (``C``)
+    when *c_rate* is false. The export then keeps the unit as text, as it
+    does any unit the tables do not map, and the emitter and the validator
+    both warn ``semantic.unit_unmapped`` with this reason.
+    """
+    if c_rate or not isinstance(unit_symbol, str):
+        return None
+    if resolve_unit_iri(unit_symbol) is not None or resolve_unit_iri(unit_symbol, c_rate=True) is None:
+        return None
+    return (
+        f"'{unit_symbol.strip()}' is a unit on a C-rate only. On this quantity it gets no EMMO unit IRI, "
+        "so the JSON-LD export keeps it as text (schema:unitText) only."
+    )
 
 
 # Where the unit tables give an IRI more than one symbol, the one it reads back
@@ -521,18 +550,23 @@ def unit_symbol_for_iri(unit: Any) -> str | None:
     return _unit_symbols_by_iri().get(_expand_unit_iri(unit.strip()))
 
 
-def _attach_unit(node: dict, unit_symbol: Any) -> None:
+def _attach_unit(node: dict, unit_symbol: Any, *, c_rate: bool = False) -> None:
     """Put the unit on a quantity node: its IRI when one is mapped, otherwise
     the symbol as ``schema:unitText``. A value never loses its unit.
     (``hasMeasurementUnit`` is @id-typed, so a bare symbol there would become a
-    relative IRI.)"""
+    relative IRI.) *c_rate* says the quantity is a C-rate, the one quantity
+    ``C`` is a unit on (:func:`resolve_unit_iri`). On any other it is kept
+    as text, with a ``semantic.unit_unmapped`` warning."""
     if not unit_symbol:
         return
-    unit_iri = resolve_unit_iri(str(unit_symbol))
+    unit_iri = resolve_unit_iri(str(unit_symbol), c_rate=c_rate)
     if unit_iri:
         node["hasMeasurementUnit"] = {"@id": unit_iri}
-    else:
-        node["schema:unitText"] = str(unit_symbol)
+        return
+    node["schema:unitText"] = str(unit_symbol)
+    reason = c_rate_unit_reason(unit_symbol, c_rate=c_rate)
+    if reason:
+        warnings.warn(f"semantic.unit_unmapped: {reason}", UserWarning, stacklevel=2)
 
 
 def _value_part(value: Any) -> dict:
@@ -571,17 +605,21 @@ def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | No
         return None
     node: dict = {"@type": temperature_class(cls, unit_symbol), "skos:prefLabel": str(key), **part}
     if unit_symbol:
-        _attach_unit(node, unit_symbol)
-    elif cls == "CRate":
+        _attach_unit(node, unit_symbol, c_rate=cls == _C_RATE_CLASS)
+    elif cls == _C_RATE_CLASS:
         # C-rate is dimensionless-by-symbol; default to AmperePerAmpereHour.
         node["hasMeasurementUnit"] = {"@id": TEST_CONDITION_UNIT_IRI["A/Ah"]}
     return node
 
 
-def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
-    """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
+def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str, *, c_rate: bool = False) -> dict:
+    """An EMMO quantity node with an explicit ``@type`` (used for method steps).
+
+    The quantity is a C-rate, which the unit ``C`` belongs to, when
+    *emmo_class* is ``CRate`` or *c_rate* says so, as it does for a C-rate
+    cutoff, whose class is the generic termination quantity."""
     node: dict = {"@type": emmo_class, **_value_part(value)}
-    _attach_unit(node, unit_symbol)
+    _attach_unit(node, unit_symbol, c_rate=c_rate or emmo_class == _C_RATE_CLASS)
     return node
 
 
@@ -608,6 +646,69 @@ def _termination_class(term: Mapping[str, Any]) -> str | None:
         elif isinstance(unit, str) and _other_quantity_of_unit(unit) is not None:
             return _METHOD_VOCAB["termination_generic"]["emmo_class"]
     return termination_emmo_class(quantity, term.get("direction"))
+
+
+def _is_c_rate_cutoff(term: Mapping[str, Any]) -> bool:
+    """True when a step cutoff is on a C-rate. One named ``c_rate`` is, and so
+    is a ``current`` cutoff written in a C-rate unit, which the step model reads
+    as a C-rate and :func:`_termination_class` gives the generic class."""
+    quantity = term.get("quantity")
+    if quantity == "c_rate":
+        return True
+    unit = term.get("unit")
+    other = _other_quantity_of_unit(unit) if quantity == "current" and isinstance(unit, str) else None
+    return other is not None and other[1] == "c_rate"
+
+
+def misplaced_c_rate_units(record: Mapping[str, Any]) -> list[tuple[str, str]]:
+    """Where a test protocol states a C-rate unit on a quantity that is not a C-rate.
+
+    Returns ``(path, reason)`` for each (:func:`c_rate_unit_reason`). It
+    reads the quantities :func:`test_protocol_node` gives a unit, which are
+    the conditions the vocabulary types and each step's setpoints, cutoffs,
+    duration and temperature, the steps of a group included. The validator
+    warns ``semantic.unit_unmapped`` at each path.
+    """
+    found: list[tuple[str, str]] = []
+
+    def check(path: str, quantity: Any, c_rate: bool, *, condition: bool = False) -> None:
+        # A condition is a node only with a value the export can carry.
+        value = quantity.get("value") if isinstance(quantity, Mapping) else None
+        if value is None or (condition and not _value_part(value)):
+            return
+        reason = c_rate_unit_reason(quantity.get("unit"), c_rate=c_rate)
+        if reason:
+            found.append((path, reason))
+
+    def walk(steps: Any, prefix: str) -> None:
+        if not isinstance(steps, list):
+            return
+        for idx, step in enumerate(steps):
+            if not isinstance(step, Mapping):
+                continue
+            path = f"{prefix}[{idx}]"
+            if step.get("mode") == "group":
+                walk(step.get("steps"), f"{path}.steps")
+                continue
+            setpoints = step.get("setpoints")
+            for key, qty in setpoints.items() if isinstance(setpoints, Mapping) else ():
+                qcls = _setpoint_class(str(key), qty.get("unit")) if isinstance(qty, Mapping) else None
+                if qcls:
+                    check(f"{path}.setpoints.{key}", qty, qcls == _C_RATE_CLASS)
+            termination = step.get("termination")
+            for tidx, term in enumerate(termination if isinstance(termination, list) else ()):
+                if isinstance(term, Mapping) and _termination_class(term):
+                    check(f"{path}.termination[{tidx}]", term, _is_c_rate_cutoff(term))
+            check(f"{path}.duration", step.get("duration"), False)
+            check(f"{path}.temperature", step.get("temperature"), False, condition=True)
+
+    conditions = record.get("conditions")
+    for key, qty in conditions.items() if isinstance(conditions, Mapping) else ():
+        cls = TEST_CONDITION_CLASS.get(str(key).lower())
+        if cls:
+            check(f"conditions.{key}", qty, cls == _C_RATE_CLASS, condition=True)
+    walk(record.get("method"), "method")
+    return found
 
 
 def method_step_node(step: Mapping[str, Any]) -> dict:
@@ -652,7 +753,9 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
             continue
         tcls = _termination_class(term)
         if tcls and term.get("value") is not None:
-            terminations.append(typed_quantity_node(tcls, term["value"], term.get("unit", "")))
+            terminations.append(
+                typed_quantity_node(tcls, term["value"], term.get("unit", ""), c_rate=_is_c_rate_cutoff(term))
+            )
     duration = step.get("duration")
     if isinstance(duration, Mapping) and duration.get("value") is not None:
         dcls = termination_emmo_class("duration", "elapsed") or "Duration"
