@@ -9,7 +9,9 @@ and one exported standalone are the same graph.
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
+from typing import Any
 
 import pytest
 from rdflib import Graph
@@ -21,6 +23,7 @@ import battinfo
 # collect them as test functions.
 from battinfo import jsonld as bi_jsonld
 from battinfo.jsonld import record_to_jsonld
+from battinfo.validate import validate_record_report
 
 EXAMPLES = Path(__file__).resolve().parents[1] / "src" / "battinfo" / "data" / "examples" / "test-protocol"
 
@@ -160,3 +163,151 @@ def test_export_writes_a_protocol_document(tmp_path: Path) -> None:
     (records / "test-protocol-3p7k-2m9r-6t4n-1v8x.json").write_text(json.dumps(record), encoding="utf-8")
     written = ws.export()
     assert any(p.name.endswith(".jsonld") and "test-protocol" in p.parent.name for p in written)
+
+
+# ── The unit "C" is the C-rate unit on a C-rate only ─────────────────────────
+
+C_RATE_UNIT = {"@id": "electrochemistry:AmperePerAmpereHour"}
+IN_C = {"value": 25, "unit": "C"}
+
+
+def _with(path: str, quantity: dict) -> dict:
+    """The Empa half-cell protocol with *quantity* written at *path*, a dotted path with ``[i]`` list steps."""
+    record = _example("xj15-1cpp-amcv-kyxz")
+    parts = path.replace("]", "").replace("[", ".").split(".")
+    holder: Any = record
+    for part, following in zip(parts, parts[1:]):
+        key: Any = int(part) if part.isdigit() else part
+        if isinstance(holder, list):
+            while len(holder) <= key:
+                holder.append({})
+        elif key not in holder:
+            holder[key] = [] if following.isdigit() else {}
+        holder = holder[key]
+    last: Any = int(parts[-1]) if parts[-1].isdigit() else parts[-1]
+    if isinstance(holder, list):
+        holder.insert(last, quantity)
+    else:
+        holder[last] = quantity
+    return record
+
+
+def _quantity_nodes(node: Any) -> list[dict]:
+    """Every node of an emitted document that carries a unit, as an IRI or as text."""
+    found = []
+    if isinstance(node, dict):
+        if "hasMeasurementUnit" in node or "schema:unitText" in node:
+            found.append(node)
+        for value in node.values():
+            found += _quantity_nodes(value)
+    elif isinstance(node, list):
+        for item in node:
+            found += _quantity_nodes(item)
+    return found
+
+
+def _emit(record: dict) -> tuple[list[dict], list[str]]:
+    """The unit-carrying nodes of the protocol's JSON-LD, and the ``semantic.unit_unmapped`` warnings it gave."""
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        doc = record_to_jsonld(record, "test-protocol")
+    said = [str(w.message) for w in caught if str(w.message).startswith("semantic.unit_unmapped")]
+    return _quantity_nodes(doc), said
+
+
+def _unit_issues(record: dict, policy: str) -> list[tuple[str, str]]:
+    report = validate_record_report(record, policy=policy)
+    assert report.ok
+    return [(issue.severity, issue.path) for issue in report.issues if issue.code == "semantic.unit_unmapped"]
+
+
+NOT_A_C_RATE = [
+    ("conditions.temperature", IN_C, "CelsiusTemperature"),
+    ("conditions.ambient_temperature", IN_C, "AmbientCelsiusTemperature"),
+    ("conditions.duration", {"value": 2, "unit": "C"}, "Duration"),
+    ("conditions.current", {"value": 0.5, "unit": "C"}, "ElectricCurrent"),
+    ("method[0].temperature", IN_C, "CelsiusTemperature"),
+    ("method[0].setpoints.temperature", IN_C, "CelsiusTemperature"),
+    ("method[0].duration", {"value": 2, "unit": "C"}, "Duration"),
+    (
+        "method[0].termination[0]",
+        {"quantity": "capacity", "value": 3600, "unit": "C", "direction": "above"},
+        "TerminationQuantity",
+    ),
+    ("method[1].setpoints.voltage", {"value": 4.2, "unit": " C "}, "Voltage"),
+]
+
+
+@pytest.mark.parametrize(("path", "quantity", "cls"), NOT_A_C_RATE, ids=[case[0] for case in NOT_A_C_RATE])
+def test_the_unit_c_on_a_quantity_that_is_not_a_c_rate_is_kept_as_text(path: str, quantity: dict, cls: str) -> None:
+    """A temperature, a duration or a current in ``C`` no longer takes the C-rate unit, and both sides say so."""
+    record = _with(path, quantity)
+
+    nodes, said = _emit(record)
+    (as_text,) = [node for node in nodes if "schema:unitText" in node]
+    assert as_text["@type"] == cls
+    assert as_text["schema:unitText"] == quantity["unit"]
+    assert "hasMeasurementUnit" not in as_text
+    assert [node for node in nodes if node.get("hasMeasurementUnit") == C_RATE_UNIT] == []
+    assert len(said) == 1 and "'C' is a unit on a C-rate only" in said[0]
+
+    for policy in ("default", "strict", "publisher"):
+        assert _unit_issues(record, policy) == [("warning", path)]
+
+
+def test_the_unit_c_inside_a_group_is_found_at_its_step() -> None:
+    record = _example("xj15-1cpp-amcv-kyxz")
+    record["method"] = [{"mode": "group", "count": 2, "steps": [{**record["method"][0], "temperature": IN_C}]}]
+
+    nodes, said = _emit(record)
+    assert [node["@type"] for node in nodes if node.get("schema:unitText") == "C"] == ["CelsiusTemperature"]
+    assert len(said) == 1
+    assert _unit_issues(record, "strict") == [("warning", "method[0].steps[0].temperature")]
+
+
+A_C_RATE = [
+    ("conditions.c_rate", {"value": 0.5, "unit": "C"}, "CRate"),
+    ("method[0].setpoints.c_rate", {"value": 0.5, "unit": "C"}, "CRate"),
+    (
+        "method[0].termination[0]",
+        {"quantity": "c_rate", "value": 0.05, "unit": "C", "direction": "below"},
+        "TerminationQuantity",
+    ),
+    # A current cutoff written in C is a C-rate cutoff under the wrong name. The step
+    # model says so when it loads one, and the emitter gives it the generic class.
+    (
+        "method[0].termination[0]",
+        {"quantity": "current", "value": 0.05, "unit": "C", "direction": "below"},
+        "TerminationQuantity",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("path", "quantity", "cls"), A_C_RATE, ids=[f"{case[0]}-{case[1].get('quantity', '')}" for case in A_C_RATE]
+)
+def test_the_unit_c_on_a_c_rate_is_the_c_rate_unit(path: str, quantity: dict, cls: str) -> None:
+    record = _with(path, quantity)
+
+    nodes, said = _emit(record)
+    (c_rate,) = [node for node in nodes if node.get("hasMeasurementUnit") == C_RATE_UNIT]
+    assert c_rate["@type"] == cls
+    assert [node for node in nodes if "schema:unitText" in node] == []
+    assert said == []
+    for policy in ("default", "strict", "publisher"):
+        assert _unit_issues(record, policy) == []
+
+
+def test_resolve_unit_iri_reads_c_on_a_c_rate_only() -> None:
+    assert bi_jsonld.resolve_unit_iri("C") is None
+    assert bi_jsonld.resolve_unit_iri("C", c_rate=True) == C_RATE_UNIT["@id"]
+    # The spelled-out C-rate units name one quantity, so they resolve wherever they stand.
+    for symbol in ("A/Ah", "Ah/Ah"):
+        assert (
+            bi_jsonld.resolve_unit_iri(symbol) == bi_jsonld.resolve_unit_iri(symbol, c_rate=True) == C_RATE_UNIT["@id"]
+        )
+    # C is never read as another unit, and degC is the degree Celsius as before.
+    assert bi_jsonld.resolve_unit_iri("degC") == "emmo:DegreeCelsius"
+    assert bi_jsonld.c_rate_unit_reason("degC", c_rate=False) is None
+    assert bi_jsonld.c_rate_unit_reason("C", c_rate=True) is None
+    assert bi_jsonld.c_rate_unit_reason("banana", c_rate=False) is None
