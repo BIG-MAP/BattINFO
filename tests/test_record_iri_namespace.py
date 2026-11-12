@@ -603,3 +603,162 @@ def test_the_saved_record_lookup_finds_either_form_of_one_record_and_no_other(tm
         assert (saved is not None) is found
         if found:
             assert saved["cell_spec"]["id"] == _as_prefixed(old_iri, prefix)
+
+
+# ── A reference and a query find a record under either form of its IRI ──────
+
+LOOSE_SPEC = {"manufacturer": "Example Lab", "model": "R2032", "format": "coin", "chemistry": "li-ion"}
+BASES = pytest.mark.parametrize("base", [OLD_FORM_BASE, DEFAULT_RECORD_BASE], ids=["old-form", "id-1001"])
+SESSIONS = pytest.mark.parametrize("in_session", [False, True], ids=["plain", "bulk-session"])
+
+
+def _other_form(iri: str, prefix: str = "1001") -> str:
+    """The old form of an ``/id/1001/`` IRI, and the *prefix* form of an old-form one."""
+    parsed = parse_record_iri(iri)
+    assert parsed is not None and parsed.prefix in (None, "1001")
+    return record_iri(parsed.segment, parsed.uid, prefix if parsed.prefix is None else None)
+
+
+def _under(iri: str, prefix: str) -> str:
+    parsed = parse_record_iri(iri)
+    assert parsed is not None
+    return record_iri(parsed.segment, parsed.uid, prefix)
+
+
+def _saved_chain(records: Path, base: str) -> dict[str, str]:
+    """A cell spec, a cell of it, a test of the cell and a test protocol, saved under *records* with *base*."""
+    from battinfo import api
+    from battinfo.bundle import Test, TestSpec
+
+    spec = api.save_cell_spec(dict(LOOSE_SPEC), source_root=records, base=base)["id"]
+    cell = api.save_cell_instance({"cell_spec_id": spec, "serial_number": "C01"}, source_root=records, base=base)["id"]
+    test = api.save_test(
+        Test(cell_instance_id=cell, test_kind="cycling", name="run 1"), source_root=records, base=base
+    )["id"]
+    protocol = api.save_test_spec(TestSpec(name="CCCV 1C", test_kind="cycling"), source_root=records, base=base)["id"]
+    return {"spec": spec, "cell": cell, "test": test, "protocol": protocol}
+
+
+def _session(records: Path, in_session: bool) -> Any:
+    """A bulk save session over *records*, whose lookups read its cache, or nothing."""
+    import contextlib
+
+    from battinfo._record_index import bulk_save_session
+
+    return bulk_save_session(records) if in_session else contextlib.nullcontext()
+
+
+def _saved_body(result: dict[str, Any], key: str) -> dict[str, Any]:
+    return json.loads(Path(result["path"]).read_text(encoding="utf-8"))[key]
+
+
+@BASES
+@SESSIONS
+def test_a_save_resolves_a_reference_written_in_the_other_form(tmp_path: Path, base: str, in_session: bool) -> None:
+    """A cell, a test and a dataset saved beside their parents, each parent named by the form the folder lacks."""
+    from battinfo import api
+    from battinfo.bundle import Dataset, Test
+
+    records = tmp_path / "records"
+    saved = _saved_chain(records, base)
+    spec_ref, cell_ref, test_ref = (_other_form(saved[name]) for name in ("spec", "cell", "test"))
+
+    with _session(records, in_session):
+        cell = api.save_cell_instance(
+            {"cell_spec_id": spec_ref, "serial_number": "C02"}, source_root=records, base=base
+        )
+        test = api.save_test(
+            Test(cell_instance_id=cell_ref, test_kind="eis", name="run 2"), source_root=records, base=base
+        )
+        dataset = api.save_dataset(
+            Dataset(
+                name="run 1 data", cell_instance_id=cell_ref, test_id=test_ref, access_url="https://example.org/a.csv"
+            ),
+            source_root=records,
+            base=base,
+        )
+
+    stored = {
+        "spec": _saved_body(cell, "cell_instance")["cell_spec_id"],
+        "cell": _saved_body(test, "test")["cell_id"],
+        "about": _saved_body(dataset, "dataset")["about"],
+    }
+    if base == DEFAULT_RECORD_BASE:
+        # The reference is stored as it was written; only the lookup reads both forms.
+        assert stored == {"spec": spec_ref, "cell": cell_ref, "about": [cell_ref, test_ref]}
+    else:
+        # A folder that holds the old form adopts it in what a save names (#483), as before.
+        assert stored == {"spec": saved["spec"], "cell": saved["cell"], "about": [saved["cell"], saved["test"]]}
+    assert {parse_record_iri(result["id"]).prefix for result in (cell, test, dataset)} == {
+        parse_record_iri(saved["spec"]).prefix
+    }
+
+
+@BASES
+@SESSIONS
+def test_reference_validation_reads_either_form_and_no_other_prefix(
+    tmp_path: Path, base: str, in_session: bool
+) -> None:
+    from battinfo.validate.references import validate_references_report
+
+    records = tmp_path / "records"
+    saved = _saved_chain(records, base)
+
+    def codes(spec_ref: str) -> list[str]:
+        doc = {"schema_version": "0.2.0", "cell_instance": {"id": saved["cell"], "cell_spec_id": spec_ref}}
+        return [issue.code for issue in validate_references_report(doc, records).issues]
+
+    with _session(records, in_session):
+        assert codes(saved["spec"]) == []
+        assert codes(_other_form(saved["spec"])) == []
+        # Under another prefix the same uid is another record, which this folder does not hold.
+        assert codes(_under(saved["spec"], "1002")) == ["reference.missing"]
+        # A record found under its other form is still checked for its kind.
+        assert codes(saved["protocol"]) == ["reference.type_mismatch"]
+        assert codes(_other_form(saved["protocol"])) == ["reference.type_mismatch"]
+
+
+@SESSIONS
+def test_a_reference_takes_the_record_saved_under_the_iri_as_written_first(tmp_path: Path, in_session: bool) -> None:
+    """Two files hold the two forms of one IRI, as a copy made by hand can leave, and each form finds its own file."""
+    from battinfo import api
+    from battinfo.validate.references import _find_record
+
+    records = tmp_path / "records"
+    saved = api.save_cell_spec(dict(LOOSE_SPEC), source_root=records)
+    path = Path(saved["path"])
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    doc["cell_spec"]["id"] = _other_form(saved["id"])
+    copy = path.with_name("copied-by-hand.json")
+    copy.write_text(json.dumps(doc), encoding="utf-8")
+
+    with _session(records, in_session):
+        assert _find_record(saved["id"], records) == (path, "cell-spec")
+        assert _find_record(_other_form(saved["id"]), records) == (copy, "cell-spec")
+        assert _find_record(_under(saved["id"], "1002"), records) is None
+
+
+def test_the_cache_pairs_an_iri_with_the_form_same_record_pairs_it_with() -> None:
+    from battinfo._record_index import _other_form as cached_other_form
+
+    assert cached_other_form(OLD) == GENOME
+    assert cached_other_form(GENOME) == OLD
+    assert same_record(OLD, cached_other_form(OLD))
+    for alone in (SECOND_HUB, THING, f"https://example.org/cell/{UID}", "C01", ""):
+        assert cached_other_form(alone) is None
+
+
+@BASES
+@pytest.mark.parametrize("kind, name", [("cell_specs", "spec"), ("cells", "cell"), ("tests", "test")])
+def test_a_query_by_id_finds_the_record_under_either_form(tmp_path: Path, base: str, kind: str, name: str) -> None:
+    from battinfo import api
+
+    records = tmp_path / "records"
+    saved = _saved_chain(records, base)
+
+    def found(iri: str) -> list[str]:
+        return [row["id"] for row in api.query(kind, id=iri, source_root=records)]
+
+    assert found(saved[name]) == [saved[name]]
+    assert found(_other_form(saved[name])) == [saved[name]]
+    assert found(_under(saved[name], "1002")) == []

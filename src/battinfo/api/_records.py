@@ -300,6 +300,17 @@ def _library_record_from_input(draft: Mapping[str, Any], *, base: str = DEFAULT_
     return record
 
 
+def _names_record(iri: str, saved_id: object) -> bool:
+    """True when *iri*, the ``id=`` a query asks for, names the record saved as *saved_id*.
+
+    It does when the two are equal, and when they are the two forms of one
+    record, the old form and the ``/id/1001/`` form of one segment and uid
+    (``namespace.same_record``). Under any other prefix the same uid is
+    another record.
+    """
+    return saved_id == iri or same_record(saved_id, iri)
+
+
 def query_library_cell_specs(
     *,
     id: str | None = None,
@@ -361,7 +372,7 @@ def query_library_cell_specs(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if not _str_fuzzy_match(rec.get("manufacturer"), manufacturer):
             continue
@@ -490,7 +501,7 @@ def query_cell_specs(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if not _str_fuzzy_match(rec.get("manufacturer"), manufacturer):
             continue
@@ -584,7 +595,7 @@ def query_cell_instances(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if cell_spec_id is not None and rec.get("cell_spec_id") != cell_spec_id:
             continue
@@ -679,7 +690,7 @@ def query_datasets(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if not _str_contains(rec.get("title"), title_contains):
             continue
@@ -752,7 +763,7 @@ def query_tests(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if cell_id is not None and rec.get("cell_id") != cell_id:
             continue
@@ -827,7 +838,7 @@ def query_test_specs(
 
     filtered: list[dict[str, Any]] = []
     for rec in records:
-        if id is not None and rec.get("id") != id:
+        if id is not None and not _names_record(id, rec.get("id")):
             continue
         if not _str_eq(rec.get("kind"), kind):
             continue
