@@ -28,7 +28,7 @@
     owl:versionIRI <https://w3id.org/battinfo/def/1002/1.0.1> ;
     owl:versionInfo "1.0.1" ;
     owl:priorVersion <https://w3id.org/battinfo/def/1002/1.0.0> ;
-    dcterms:issued "2026-10-30"^^xsd:date ;
+    dcterms:issued "2026-11-12"^^xsd:date ;
     dcterms:title "Battery Data Commons vocabulary"@en ;
     dcterms:description "Terms defined by Battery Data Commons under its publisher prefix 1002. It holds one concept scheme, the kinds of dataset the catalogue records."@en ;
     dcterms:publisher [ a foaf:Organization ;
