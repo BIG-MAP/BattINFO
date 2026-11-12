@@ -559,11 +559,7 @@
                   
   <section id="workspace-authoring">
 <h1>Workspace authoring<a class="headerlink" href="#workspace-authoring" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(&quot;.&quot;)</span></code> is the blessed authoring surface for the lab-log
-workflow — describe the cells you tested, attach tests and data, and publish,
-without touching the lower layers. It covers cells, tests, datasets, and
-equipment; materials and component specs are authored through <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code>
-(see the <a class="reference internal" href="#what-each-surface-can-author-today"><span class="std std-ref">coverage table</span></a> below).</p>
+<p><code class="docutils literal notranslate"><span class="pre">battinfo.workspace(&quot;.&quot;)</span></code> is the blessed authoring surface for the lab-log workflow — describe the cells you tested, attach tests and data, and publish, without touching the lower layers. It covers cells, tests, datasets, equipment, materials and electrodes. Separators, current collectors, electrolytes and housings are authored through <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> (see the <a class="reference internal" href="#what-each-surface-can-author-today"><span class="std std-ref">coverage table</span></a> below).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battinfo</span>
 
 <span class="n">ws</span> <span class="o">=</span> <span class="n">battinfo</span><span class="o">.</span><span class="n">workspace</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -649,7 +645,7 @@ equipment; materials and component specs are authored through <code class="docut
 <td><p><strong>Models + functions</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">CellSpec(...)</span></code> + <code class="docutils literal notranslate"><span class="pre">battinfo.publish(...)</span></code> for a cell spec; the other models with their <code class="docutils literal notranslate"><span class="pre">save_*</span></code> function. See the <a class="reference internal" href="pages/api-reference.html"><span class="std std-doc">Python API</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p>Register materials and component specs (electrodes, electrolytes, …)</p></td>
+<tr class="row-even"><td><p>Register separators, current collectors, electrolytes and housings, or materials and electrodes outside a workspace</p></td>
 <td><p><strong><code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> functions</strong></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">create_*</span></code> / <code class="docutils literal notranslate"><span class="pre">save_*</span></code> — see the <a class="reference internal" href="pages/howto.html"><span class="std std-doc">how-to guides</span></a></p></td>
 </tr>
@@ -705,11 +701,16 @@ roadmap item, not an omission in your usage:</p>
 <td><p>no</p></td>
 </tr>
 <tr class="row-even"><td><p>Material spec / lot</p></td>
-<td><p>no</p></td>
-<td><p><strong>yes — the path</strong>: <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save_material_spec</span></code> (<a class="reference internal" href="howto/register-materials.html"><span class="std std-doc">how-to</span></a>)</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">add(&quot;material_spec&quot;,</span> <span class="pre">name=...,</span> <span class="pre">kind=...)</span></code>, <code class="docutils literal notranslate"><span class="pre">add(&quot;material&quot;,</span> <span class="pre">spec=...,</span> <span class="pre">lot=...)</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save_material_spec</span></code> (<a class="reference internal" href="howto/register-materials.html"><span class="std std-doc">how-to</span></a>)</p></td>
 <td><p>partial — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">record</span> <span class="pre">--input</span> <span class="pre">file.json</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Component specs (electrode, electrolyte, separator, current-collector, housing)</p></td>
+<tr class="row-odd"><td><p>Electrode spec / electrode</p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">add(&quot;electrode_spec&quot;,</span> <span class="pre">name=...,</span> <span class="pre">kind=...)</span></code>, <code class="docutils literal notranslate"><span class="pre">add(&quot;electrode&quot;,</span> <span class="pre">spec=...,</span> <span class="pre">batch=...)</span></code></p></td>
+<td><p>yes — <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save_electrode_spec</span></code> (<a class="reference internal" href="howto/build-a-cell-from-components.html"><span class="std std-doc">how-to</span></a>)</p></td>
+<td><p>partial — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">record</span> <span class="pre">--input</span> <span class="pre">file.json</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Other component specs (electrolyte, separator, current-collector, housing)</p></td>
 <td><p>no</p></td>
 <td><p><strong>yes — the path</strong>: <code class="docutils literal notranslate"><span class="pre">battinfo.api</span></code> per-family <code class="docutils literal notranslate"><span class="pre">create</span></code>/<code class="docutils literal notranslate"><span class="pre">save</span></code> (<a class="reference internal" href="howto/build-a-cell-from-components.html"><span class="std std-doc">how-to</span></a>)</p></td>
 <td><p>partial — <code class="docutils literal notranslate"><span class="pre">save</span> <span class="pre">record</span> <span class="pre">--input</span> <span class="pre">file.json</span></code></p></td>

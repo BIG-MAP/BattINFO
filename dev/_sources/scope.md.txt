@@ -100,6 +100,8 @@ These gaps were known when 0.8.0 was released. Each is planned for a 0.8.x relea
 - `ws.save()` prints "ERROR: ... failed validation" for some records it does write, such as a parameter set still minted under `spec/`.
 - Display papercuts: `ws.search()` shows manufacturer and model in lower case, `ws.list(verbose=True)` shows cells by file name, the `ws.save()` summary cuts titles at about 36 characters and collapses after 20 records, and `battinfo.naming.title_for()` writes an all-lowercase method in capitals ("CYCLING test").
 - Submission reporting: outcomes and journal entries carry an empty `iri`, a deduplicated re-submission is reported as live, and `ws.status()` lists every submission in the shared registry workspace.
+- Without R2 storage, `ws.publish(zenodo=True)` refuses a workspace of more than 90 data files. A Zenodo deposit of that size is zipped, and the registry cannot yet point a record at a file inside an archive ([#475](https://github.com/BIG-MAP/BattINFO/issues/475)). Publish to Zenodo alone with `ws.zenodo(publish=True)`, or split the workspace into parts of at most 90 data files.
+- The registry's check of a record against its Zenodo deposit reads a file named `battinfo.bundle.json`, and `ws.zenodo()` names the deposit's linked data `battinfo.json`, so that check does not pass for a workspace deposit yet ([#474](https://github.com/BIG-MAP/BattINFO/issues/474)). A registry reviewer approves each submission in the meantime.
 
 ### Identifiers
 
@@ -115,7 +117,6 @@ These paths mint IRIs that no other path reproduces. The [identifier policy](htt
 ### Linked data at record IRIs
 
 - A record's `https://w3id.org/battinfo/` IRI serves the record body expanded with the v1 records context, not the EMMO model that `battinfo.record_to_jsonld`, `ws.export` and the Zenodo deposit graph write. In that body a quantity key such as `nominal_capacity` is a property named by its EMMO class IRI, with `schema:value` and `schema:unitText`, and the record's own id is a `schema:identifier` literal. For the EMMO model, run `record_to_jsonld` on the record or read the deposit's `battinfo.json`. The record body is not normative, and a future v2 context drops it. Serving the EMMO model at record IRIs is planned for 0.9, since it changes what the registry returns for every published record.
-- The registry serves a record as it was stored. Several hundred cell specs and `organization` records published in April 2026 were stored with camelCase keys, such as `cellFormat` and `sameAs`, and keep serving them until they are published again in snake_case under the same IRIs, after the registry update for 0.8.0.
 
 ### Command line
 
@@ -147,7 +148,7 @@ These paths mint IRIs that no other path reproduces. The [identifier policy](htt
 - `typical_energy` is typed `StoredEnergy`, because the ontologies have no class for a typical energy, and an LNMO positive electrode is typed `MetalOxideElectrode`, because its own class is deprecated upstream with no replacement. The electrode's `@type` can move to a new class term once domain-electrochemistry publishes the class. `typical_energy` keeps `StoredEnergy`, because the v1 records context is frozen, until a v2 context.
 - No property key holds a maximum C-rate. Give a current in A, or state a C-rate as `charging_c_rate` or `discharging_c_rate` in the conditions of the value it applies to.
 - In the JSON-LD of materials and components, which uses the EMMO domain-battery context, numbers carry no datatype, so JSON-LD processors disagree on whether 76.0 is an integer or a double. Records under the v1 records context type them `xsd:double`.
-- Not every quantity in a test protocol or a parameter set follows the full EMMO quantity pattern. `ambient_temperature` in a parameter set is typed only `ConventionalProperty`, with no quantity class, and voltage limits in a test protocol can lack `ConventionalProperty`. The values and units are there. Cell specs, cells, tests, datasets, materials and components follow the full pattern. Planned for 0.8.1.
+- Not every quantity in a test protocol or a parameter set follows the full EMMO quantity pattern. `ambient_temperature` in a parameter set is typed only `ConventionalProperty`, with no quantity class, which is planned for 0.8.1. In a test protocol, the conditions and the voltage limits carry their quantity class without `ConventionalProperty`. The values and units are there. In cell specs, cells, tests, datasets, materials and components a specified value follows the full pattern, and a value stated as measured takes `MeasuredProperty` in place of `ConventionalProperty`.
 
 ### Schemas
 
