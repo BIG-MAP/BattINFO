@@ -4939,10 +4939,10 @@ class AuthoringWorkspace:
             # ...or from a JSON map {serial: iri}:
             ws.add("cell", spec=spec, from_file="cell_iris.json")
 
-        It returns the cells it names, in the order given; a serial (or name)
-        the workspace already holds a cell of this spec under returns that
-        cell, so a re-run adds nothing. A label names a cell within its spec,
-        so ``"C01"`` of another spec is another cell and is added.
+        It returns the cells it names, in the order given. When the workspace
+        already holds a cell of this spec under a serial (or name), that cell
+        is returned, so a re-run adds nothing. A label names a cell within its
+        spec, so ``"C01"`` of another spec is another cell and is added.
 
         **Tests** (``"test"``) — link a cell and its data explicitly::
 
