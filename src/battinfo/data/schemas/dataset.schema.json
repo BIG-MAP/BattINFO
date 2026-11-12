@@ -837,7 +837,7 @@
       "additionalProperties": false,
       "required": [
         "type",
-        "table"
+        "tables"
       ],
       "properties": {
         "type": {
@@ -862,7 +862,7 @@
           "type": "string",
           "description": "What the table group contains."
         },
-        "table": {
+        "tables": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/CsvwTable"

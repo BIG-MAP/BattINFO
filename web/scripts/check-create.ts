@@ -294,7 +294,7 @@ for (const template of TEMPLATES) {
   // The choice is made per item in a list too: a dataset's main entity is a
   // list of Tables or TableGroups, and a group keeps its tables.
   const dataset = RECORD_TYPES.find((type) => type.key === "dataset")!;
-  const group = { type: "TableGroup", name: "cycles", table: [{ type: "Table", name: "t1", url: "https://example.org/t1.csv" }] };
+  const group = { type: "TableGroup", name: "cycles", tables: [{ type: "Table", name: "t1", url: "https://example.org/t1.csv" }] };
   for (const entities of [[group], [{ type: "Table", name: "t0", url: "https://example.org/t0.csv" }, group]]) {
     const removed: string[] = [];
     sanitize({ dataset: { main_entity: entities } }, dataset.root, "", removed);

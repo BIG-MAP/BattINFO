@@ -3959,7 +3959,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
           "additionalProperties": false,
           "required": [
             "type",
-            "table"
+            "tables"
           ],
           "properties": {
             "type": {
@@ -3984,7 +3984,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
               "type": "string",
               "description": "What the table group contains."
             },
-            "table": {
+            "tables": {
               "type": "array",
               "items": {
                 "$ref": "#/$defs/CsvwTable"
