@@ -295,13 +295,20 @@ def _with_seed_fields(entity: Any, data: dict[str, Any]) -> dict[str, Any]:
     such as the measured period and media type of a parquet file, and records
     the values that release gave in the entity's ``_seed_fields`` (``None``
     for a field it left out), so the seeds below, and the IRIs minted from
-    them, stay as they were.
+    them, stay as they were. What the ``Dataset`` model of that release did
+    not carry is left out for the same reason.
     """
     for key, value in (getattr(entity, "_seed_fields", None) or {}).items():
         if value is None:
             data.pop(key, None)
         else:
             data[key] = value
+    if isinstance(entity, Dataset):
+        # Seed rules are frozen with 0.8.0, whose model dropped the conditions of a
+        # distribution. A dataset given them keeps the seed that release gave it.
+        for distribution in data.get("distributions") or []:
+            if isinstance(distribution, dict):
+                distribution.pop("conditions", None)
     return data
 
 

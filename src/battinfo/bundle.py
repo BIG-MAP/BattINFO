@@ -986,6 +986,11 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
             out["checksum"] = {"algorithm": algorithm, "value": checksum_value}
     elif isinstance(value.get("schema:sha256"), str):
         out["checksum"] = {"algorithm": "sha256", "value": value["schema:sha256"]}
+    # Per-file measurement conditions (the SOC of one EIS file) are carried as they
+    # are given. Validation judges the keys.
+    conditions = value.get("conditions")
+    if isinstance(conditions, Mapping):
+        out["conditions"] = copy.deepcopy(dict(conditions))
     return out if ("content_url" in out or "encoding_format" in out or "checksum" in out) else None
 
 
