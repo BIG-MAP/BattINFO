@@ -20,7 +20,9 @@ each step what the deposit holds and what the records say:
 5. Draft then submit. After a sandbox draft, ws.submit() refuses the
    records' local paths before anything is sent, and with
    allow_local_files=True it sends neither a sandbox URL nor a DOI. No
-   registry is contacted: this script takes the submissions instead.
+   registry is contacted. This script takes the submissions instead, and
+   answers what ws.submit() first asks a registry, whether it holds any of
+   the records, as a registry that holds none.
 6. Sandbox then production. The sandbox runs leave the dataset records and
    the zenodo.org state file (.battinfo/zenodo.json) alone. A deposit to
    zenodo.org then begins by creating a record of its own: this script stops
@@ -34,6 +36,11 @@ is stopped before it is sent, and fails the step that made it unless that
 step checks how a deposit to zenodo.org begins. It drops ZENODO_API_TOKEN and
 ZENODO_TOKEN from its environment, and it will not run in CI or under pytest,
 because it needs a real sandbox token and makes real sandbox records.
+
+A deposit first asks the workspace's registry whether it already holds one of
+the records in the old IRI form. The workspace of this run has no registry, and
+BATTINFO_REGISTRY_URL is dropped from the environment too, so each deposit is
+made with allow_unchecked_iris=True and warns that its IRIs were not checked.
 
 Usage::
 
@@ -67,12 +74,17 @@ SANDBOX_HOST = "sandbox.zenodo.org"
 PRODUCTION_HOST = "zenodo.org"
 # Tokens this script must never use, removed from its environment at start.
 PRODUCTION_TOKENS = ("ZENODO_API_TOKEN", "ZENODO_TOKEN")
+# Removed with them, so no deposit of the run asks a registry about its IRIs.
+REGISTRY_SETTING = "BATTINFO_REGISTRY_URL"
 CREATORS = [{"name": "Check, BattINFO Release", "affiliation": "BattINFO release checklist"}]
+# What every ws.zenodo() of the run is called with.
 METADATA = {
     "title": "BattINFO release check: Zenodo sandbox run",
     "description": "Made by scripts/zenodo_sandbox_check.py from the BattINFO repository. Safe to delete.",
     "keywords": ["BattINFO release check"],
     "community": None,
+    # The workspace has no registry to look its new IRIs up in, which a deposit refuses without this.
+    "allow_unchecked_iris": True,
 }
 # Three tests' data files: two named cycling.csv, and one whose name differs from those only in case.
 DATA_FILES = {"C01": "cycling.csv", "C02": "cycling.csv", "C03": "CYCLING.csv"}
@@ -478,8 +490,14 @@ class Run:
 
 @contextmanager
 def submissions(battinfo: Any) -> Iterator[list[dict]]:
-    """Take the submissions ws.submit() makes instead of sending them to a registry."""
+    """Take the submissions ws.submit() makes instead of sending them to a registry.
+
+    Before it sends anything, ws.submit() asks the registry whether it holds
+    a record under one of the new IRIs. That question is answered here too,
+    as a registry that holds none of them answers it.
+    """
     import battinfo.api as api
+    from battinfo.registry import Registry
 
     sent: list[dict] = []
 
@@ -487,12 +505,18 @@ def submissions(battinfo: Any) -> Iterator[list[dict]]:
         sent.append(json.loads(json.dumps(payload)))
         return {"status": "ok", "status_code": 200, "response": {"status": "validated", "resources": []}}
 
-    original = api.submit_publication_package
+    def not_held(self: Any, record: Any, **_kwargs: Any) -> dict:
+        body = io.BytesIO(b'{"detail": "Resource not found."}')
+        raise urllib.error.HTTPError(str(record), 404, "Not Found", None, body)  # type: ignore[arg-type]
+
+    original, original_get = api.submit_publication_package, Registry.get
     api.submit_publication_package = take  # type: ignore[assignment]
+    Registry.get = not_held  # type: ignore[method-assign]
     try:
         yield sent
     finally:
         api.submit_publication_package = original
+        Registry.get = original_get  # type: ignore[method-assign]
 
 
 STEPS = (
@@ -516,6 +540,12 @@ def refuse_to_run_here() -> str | None:
             "set ZENODO_SANDBOX_TOKEN to a token made on sandbox.zenodo.org (scopes deposit:write and deposit:actions)."
         )
     return None
+
+
+def drop_settings() -> None:
+    """Remove the production tokens and the registry URL from the environment, so a run cannot use them."""
+    for name in (*PRODUCTION_TOKENS, REGISTRY_SETTING):
+        os.environ.pop(name, None)
 
 
 def guard_network() -> Network:
@@ -544,8 +574,7 @@ def main(argv: list[str] | None = None) -> int:
     if reason:
         print(f"zenodo_sandbox_check: {reason}", file=sys.stderr)
         return 2
-    for name in PRODUCTION_TOKENS:
-        os.environ.pop(name, None)
+    drop_settings()
     token = os.environ["ZENODO_SANDBOX_TOKEN"]
     if args.workdir:
         root = args.workdir.resolve()

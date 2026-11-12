@@ -74,6 +74,7 @@ from battinfo._deposit_index import (
     note_deposit,
     note_hosted,
     note_published,
+    parse_zenodo_file_url,
     register_sources,
     registered_keys,
     save_deposit_index,
@@ -93,6 +94,8 @@ from battinfo._util import (
     _now_iso,
     _now_unix,
     file_media_type,
+    has_parent_reference,
+    is_absolute_local_path,
     is_dataset_series,
     is_local_location,
     is_real_number,
@@ -912,6 +915,17 @@ def _zenodo_publication_time(deposit: object, called_at: int) -> int:
     if day >= _dt.datetime.fromtimestamp(called_at, tz=_dt.timezone.utc).date():
         return called_at
     return int(_dt.datetime(day.year, day.month, day.day, tzinfo=_dt.timezone.utc).timestamp())
+
+
+def _saved_published_at(path: Path) -> int | None:
+    """The ``published_at`` the dataset record saved at *path* states; ``None`` without one, or when it cannot be read."""
+    try:
+        record = _read_json(path)
+    except (OSError, ValueError):
+        return None
+    body = record.get("dataset") if isinstance(record, dict) else None
+    when = body.get("published_at") if isinstance(body, dict) else None
+    return when if isinstance(when, int) and not isinstance(when, bool) else None
 
 
 def _with_citation_doi(record: dict, doi: str | None) -> dict:
@@ -6740,7 +6754,8 @@ class AuthoringWorkspace:
             on zenodo.org: never a sandbox DOI, nor the DOI a draft has
             reserved. A recorded draft is first checked with Zenodo (when
             ``ZENODO_API_TOKEN`` is set), in case it was published on the
-            website since.
+            website since. Its dataset records then get their
+            ``published_at`` (see :meth:`zenodo`), which is sent with the DOI.
         allow_local_files:
             Records whose download or source locations (``access_url``,
             ``content_url``, ``download_url``, ``provenance.source_url``,
@@ -7041,6 +7056,15 @@ class AuthoringWorkspace:
         # archived dataset: the DOI passed for every record, or else the
         # deposit's DOI for the records it holds, once it is published.
         doi_for = self._submission_doi(doi)
+        # A draft found to be published since has just had its dataset records
+        # dated, after they were read above. Each takes the time its file now
+        # states, so the registry gets it with the DOI.
+        for path, rec in parsed.items():
+            body = rec.get("dataset")
+            if isinstance(body, dict) and body.get("published_at") is None and doi_for(body.get("id")):
+                when = _saved_published_at(path)
+                if when is not None:
+                    body["published_at"] = when
 
         def _selected(subdir: str) -> list[Path]:
             return [f for f in selected.get(subdir, []) if f in parsed]
@@ -7753,27 +7777,42 @@ class AuthoringWorkspace:
         URL works, until the draft is published. A record already on this
         deposit's copy is brought up to date either way.
 
+        A record on a Zenodo copy of a file this deposit carries inside a zip
+        archive goes back to the local file, with the checksum and size the
+        plan measured. An earlier deposit held the file as itself and this
+        one does not, and no record can point into an archive. :meth:`submit`
+        then refuses the record as it does after any zipped deposit. These
+        records are counted in a printed line of their own.
+
         The datasets in memory get the same locations, so a later
-        :meth:`save` keeps them. Returns the number of records updated.
+        :meth:`save` keeps them. Returns the number of records updated,
+        without those that went back to a local file.
         """
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
         own_files = f"{record_url}/files/"
 
-        def _deposited(location: object) -> DepositFile | None:
+        def _deposited(location: object) -> tuple[DepositFile, str] | None:
+            """The planned file *location* names, and the location its record gives after this deposit."""
             if isinstance(location, str) and location in plan.hosted:
                 return None  # the records keep pointing at a hosted copy
             if local_only and not is_local_location(location) and not str(location).startswith(own_files):
                 return None  # a copy in another record moves when the draft is published
             entry = plan.entry_for(location)
-            return None if entry is None or entry.archive else entry
+            if entry is None:
+                return None
+            if not entry.archive:
+                return entry, f"{record_url}/files/{entry.segment}"
+            if parse_zenodo_file_url(location) is None:
+                return None  # a local file stays the record's location
+            return entry, entry.path.as_uri()  # the deposit holds no such copy any more
 
         def _public_url(location: object) -> str | None:
-            entry = _deposited(location)
-            return f"{record_url}/files/{entry.segment}" if entry is not None else None
+            found = _deposited(location)
+            return found[1] if found is not None else None
 
-        patched = 0
+        patched = returned = 0
         rewritten: dict[str, dict] = {}
         for record_path in sorted(ds_dir.glob("*.json")):
             # Read as the deposit read it (a BOM is allowed), and leave alone what
@@ -7787,18 +7826,19 @@ class AuthoringWorkspace:
                 continue
             new_dists: list[dict] = []
             primary_url: str | None = None
-            changed = deposited = False
+            changed = deposited = went_back = False
             for dist in dists:
                 if not isinstance(dist, dict):
                     new_dists.append(dist)
                     continue
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                entry = _deposited(local_url)
-                if entry is None:
+                found = _deposited(local_url)
+                if found is None:
                     new_dists.append(dist)
                     continue
                 deposited = True
-                public_url = f"{record_url}/files/{entry.segment}"
+                entry, public_url = found
+                went_back = went_back or bool(entry.archive)
                 if public_url != dist.get("content_url"):
                     dist = {**dist, "content_url": public_url}
                     changed = True
@@ -7826,8 +7866,17 @@ class AuthoringWorkspace:
                 continue
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
             self._session_paths.add(record_path)
-            patched += 1
+            if went_back:
+                returned += 1
+            else:
+                patched += 1
         self._point_datasets_in_memory_at(rewritten)
+        if returned:
+            print(
+                f"  Dataset records pointed back at their local data files: {returned}. The deposit holds these "
+                "files inside a zip archive, which no record can point into, and ws.submit() refuses a record "
+                "whose data file is on this computer."
+            )
         return patched
 
     def _point_datasets_in_memory_at(self, records: Mapping[str, dict]) -> None:
@@ -7859,7 +7908,9 @@ class AuthoringWorkspace:
         publish call, for a dataset created after *reported*, as its record or
         the dataset in memory says: that dataset was published by this call,
         and strict validation refuses a ``published_at`` before
-        ``created_at``. A record that already states when it was published
+        ``created_at``. For a deposit found to be published afterwards
+        (:meth:`_reconcile_zenodo_draft`), *called_at* is the time of the
+        check that found it. A record that already states when it was published
         keeps that time, so the datasets of a new version keep the date they
         were first published. The datasets in memory get the same time, so a
         later :meth:`save` keeps it. Returns the number of records dated.
@@ -8239,8 +8290,12 @@ class AuthoringWorkspace:
         there after a draft too, so :meth:`submit` sends https URLs, which work
         once the draft is published. A record on the copy an earlier published
         version holds keeps that working URL until the new version is
-        published. The datasets in memory are pointed there too, so a later
-        :meth:`save` keeps the URLs. Each distribution then states the sha256 of
+        published. When the deposit carries a file inside a zip archive
+        (``bundle``) and a record sits on a copy an earlier deposit held as
+        itself, the record goes back to its local file at that point, since
+        no record can point into an archive, and :meth:`submit` refuses it as
+        after any zipped deposit. The datasets in memory follow, so a later
+        :meth:`save` keeps the locations. Each distribution then states the sha256 of
         the file the deposit holds (and its size, when it gives one), as the
         deposit graph does, so a file that changed since it was added is
         described as it is now. A publish also gives each dataset record the
@@ -8249,6 +8304,12 @@ class AuthoringWorkspace:
         earlier day and the record was created by then. A record that already
         states one keeps it, so the datasets of a new version keep the date
         they were first published. A draft and a sandbox deposit date nothing.
+        A draft found to have been published since, on the Zenodo website or
+        by a run that stopped before it dated them, dates its datasets when
+        that is found, by this call or by :meth:`submit`, and the time of
+        that check stands in for the time of the publish call. A dataset that
+        a later session adds again, without a ``published_at``, keeps the one
+        its saved record holds at the next :meth:`save`.
 
         A record pointed at its deposited copy keeps its data in later deposits.
         ``.battinfo/deposit-files.json`` records the local file behind each
@@ -8265,6 +8326,13 @@ class AuthoringWorkspace:
         record to start from, a file with no local copy refuses the deposit
         before anything is sent. Each file keeps its name, and so its URL, from
         one version to the next.
+
+        The index names a file that lies in the workspace folder by its path
+        inside the folder, and reads it from the folder as it is now, so a
+        workspace that was renamed, moved or copied to another computer finds
+        the files behind its deposited copies. Each file the deposit keeps for
+        want of a local one is named in a printed line, with the path that was
+        looked for.
 
         A deposit whose records point at files :meth:`upload` put in R2 storage
         is refused before anything is sent, and the refusal names the files,
@@ -9665,6 +9733,19 @@ class AuthoringWorkspace:
             # file that was never uploaded). Warn now; block publish later (R-7).
             for path in plan.missing:
                 print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            # A copy the deposit keeps is not read from this computer, so a local
+            # file that changed, or lies elsewhere now, would go unnoticed. Name
+            # each one, with the path that was looked for.
+            for entry in plan.kept_files():
+                sought = (
+                    f"no local file was found at {entry.path}"
+                    if entry.path.parts
+                    else "this workspace has no record of its local file"
+                )
+                print(
+                    f"  NOTE: {entry.name} is kept as the Zenodo record already holds it, not uploaded "
+                    f"again, because {sought}."
+                )
             for omission in plan.omissions:
                 print(f"  WARNING: left out of the deposit: {omission}")
             # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
@@ -9892,16 +9973,22 @@ class AuthoringWorkspace:
             already hosted; a workspace file that is being uploaded resolves to its
             hosted URL (like data files, the archive holding it in a zipped deposit);
             an un-uploaded local locator is kept as the relative literal (no hosted
-            copy exists)."""
+            copy exists). One that gives an absolute path, a ``file:`` URI or a path
+            that goes up a folder is written as its file name only, so that no path
+            on the depositor's computer reaches the published graph."""
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 return {"@id": text}
             if file_plan is not None:
                 entry = file_plan.entry_for(text)
-                return {"@id": entry.url(files_base)} if entry is not None else text
-            fname = path_name(_file_uri_to_path(text))
-            if fname in named_files:
-                return {"@id": f"{files_base}/{url_segment(fname)}"}
+                if entry is not None:
+                    return {"@id": entry.url(files_base)}
+            else:
+                fname = path_name(_file_uri_to_path(text))
+                if fname in named_files:
+                    return {"@id": f"{files_base}/{url_segment(fname)}"}
+            if is_local_location(text) and (is_absolute_local_path(text) or has_parent_reference(text)):
+                return path_name(_file_uri_to_path(text))
             return text
 
         def _artifact_distribution(art: dict) -> dict:
@@ -11284,6 +11371,16 @@ class AuthoringWorkspace:
         files the draft holds count among those of the published versions in
         the deposit index (*index*, else the one on disk, when it can be
         read), and ``None`` is returned.
+
+        The dataset records the deposit holds get their ``published_at``
+        then, as after a publish by :meth:`zenodo`, and before the state is
+        saved, so a check that stops part-way dates them the next time.
+        Zenodo's answer carries a publication date, not a time
+        (:func:`_zenodo_publication_time`). A date before the day of the
+        check counts from midnight UTC, for a dataset created by then; the
+        day of the check, no date, or a dataset created later gives the time
+        of the check. A record that states one keeps it, and a sandbox
+        record dates nothing.
         """
         from battinfo.zenodo import deposit_is_published  # noqa: PLC0415
 
@@ -11293,6 +11390,12 @@ class AuthoringWorkspace:
             return deposit
         metadata = deposit.get("metadata") if isinstance(deposit.get("metadata"), dict) else {}
         doi = deposit.get("doi") or metadata.get("doi") or state.get("doi")
+        dated = 0
+        if str(state.get("environment") or "production") == "production":
+            checked_at = _now_unix()
+            dated = self._date_published_datasets(
+                state.get("records") or [], _zenodo_publication_time(deposit, checked_at), checked_at
+            )
         state.update(
             published=True,
             doi=str(doi or ""),
@@ -11313,6 +11416,8 @@ class AuthoringWorkspace:
             f"  The Zenodo draft {state['record_id']} has been published since this workspace "
             f"recorded it; {state_file(environment)} now says so."
         )
+        if dated:
+            print(f"  Dataset records given their publication time: {dated}")
         return None
 
     def _note_draft_published(
