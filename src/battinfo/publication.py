@@ -25,6 +25,7 @@ from battinfo._util import (
     is_dataset_series,
     is_file_uri,
     is_real_number,
+    orcid_id,
     registered_media_type,
     url_segment,
 )
@@ -887,7 +888,7 @@ def _datacite_creators(dataset: Dataset) -> list[dict[str, Any]]:
             continue
         creator: dict[str, Any] = {"name": name}
         same_as = _agent_same_as(agent)
-        if isinstance(same_as, str) and "orcid.org/" in same_as:
+        if orcid_id(same_as) is not None:
             creator["nameIdentifiers"] = [
                 {
                     "nameIdentifier": same_as,

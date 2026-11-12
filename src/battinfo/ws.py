@@ -97,6 +97,7 @@ from battinfo._util import (
     is_local_location,
     is_real_number,
     local_file_references,
+    orcid_id,
     path_name,
     registered_media_type,
     url_segment,
@@ -1169,9 +1170,7 @@ def _agent_from_record_contributor(c: dict) -> dict:
     nested ``Organization`` or a list of them; the publication emitter's agent
     builder wants the bare ORCID and a plain affiliation name, or a list of names.
     """
-    same_as = str(c.get("same_as") or "")
-    tail = same_as.rstrip("/").rsplit("/", 1)[-1]
-    orcid = tail if _ORCID_RE.match(tail) else None
+    orcid = orcid_id(c.get("same_as"))
     affiliations = _affiliation_names(c.get("affiliation"))
     out: dict = {"name": c.get("name", "")}
     if orcid:
@@ -1553,19 +1552,14 @@ class ProjectRef:
         return f"{label} ({self.identifier})" if label else self.identifier
 
 
-_ORCID_RE = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
-
-
 def _normalize_orcid(value: str) -> str:
     """Return the bare ORCID id (``0000-0002-1825-0097``) from an id or full URL."""
-    token = str(value).strip()
-    token = re.sub(r"^https?://orcid\.org/", "", token, flags=re.IGNORECASE).rstrip("/")
-    token = token.upper()
-    if not _ORCID_RE.match(token):
+    orcid = orcid_id(str(value))
+    if orcid is None:
         raise ValueError(
             f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
         )
-    return token
+    return orcid
 
 
 # How to give a Zenodo deposit its creators: the refusal and the preview say it.
