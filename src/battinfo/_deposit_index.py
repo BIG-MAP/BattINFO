@@ -32,7 +32,8 @@ The index is a JSON object::
             "records": ["7001", "7002"],
             "files": {
               "cycling.csv": {"path": "C:/lab/C01/cycling.csv", "size": 70,
-                              "md5": "...", "sha256": "..."}
+                              "md5": "...", "sha256": "...",
+                              "path_in_workspace": "C01/cycling.csv"}
             },
             "drafts": {
               "7002": {"cycling.csv": {"path": "C:/lab/C01/cycling.csv", "size": 74,
@@ -62,6 +63,14 @@ and a published one joins them. ``hosted`` maps each URL ``ws.upload()``
 gave a record to the local file behind it, marked ``"private": true`` when
 the copy went to the private bucket (``ws.upload(public=False)``).
 
+A file entry whose file lies in the workspace folder (here ``C:/lab``) also
+gives its path inside that folder, ``path_in_workspace``, with ``/`` between
+the parts. When it is there it is the path that is read, against the folder
+the workspace is in now, so a workspace that was renamed, moved or copied to
+another computer finds its files. ``path`` is the absolute path the file had
+when the index was last written. An entry of a file outside the folder, and
+one an earlier version wrote, has ``path`` alone and is read as it is.
+
 The deposit state names the Zenodo record the next ``ws.zenodo()``
 continues, one file for each Zenodo: ``zenodo.json`` for zenodo.org and
 ``zenodo-sandbox.json`` for the sandbox, so a dry run on the sandbox never
@@ -81,6 +90,7 @@ these are kept as they are when it is written.
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 from collections.abc import Iterable, Mapping
@@ -89,11 +99,15 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
+from battinfo._fs_guard import check_relative_path
 from battinfo._jsonio import write_json
 from battinfo._util import lexical_key
 
 #: Where a workspace keeps the index, relative to its root folder.
 INDEX_PATH = Path(".battinfo") / "deposit-files.json"
+
+#: The key under which a file entry in the index file gives the file's path inside the workspace folder.
+PATH_IN_WORKSPACE = "path_in_workspace"
 
 #: Where a workspace keeps the state of its record on each Zenodo, relative to its root folder.
 STATE_PATHS: dict[str, Path] = {
@@ -125,6 +139,11 @@ def index_path(root: Path) -> Path:
 def load_deposit_index(root: Path) -> dict[str, Any]:
     """The index of the workspace in *root*, or ``{"sources": {}}`` when it has none yet.
 
+    A file entry that gives its path inside the workspace folder
+    (``path_in_workspace``) is read against *root*, so its ``path`` is that
+    file in the folder as it is now, wherever the folder was when the entry
+    was written. The index in memory holds ``path`` alone.
+
     Raises :class:`DepositIndexError`, naming the file, when the file cannot
     be read, is not JSON, or is not an object of the shape the module
     docstring shows.
@@ -145,12 +164,55 @@ def load_deposit_index(root: Path) -> dict[str, Any]:
     problem = _index_shape_problem(index)
     if problem:
         raise DepositIndexError(_unreadable(path, problem))
+    for entry in _indexed_file_entries(index):
+        inside = entry.pop(PATH_IN_WORKSPACE, "")
+        if inside:
+            entry["path"] = str(root / inside)
     return index
 
 
 def save_deposit_index(root: Path, index: Mapping[str, Any]) -> None:
-    """Write *index* as the index of the workspace in *root*, atomically."""
-    write_json(index_path(root), index)
+    """Write *index* as the index of the workspace in *root*, atomically.
+
+    Each file entry whose ``path`` lies in *root* is written with its path
+    inside that folder as well (``path_in_workspace``, with ``/`` between
+    the parts), which :func:`load_deposit_index` reads against the folder
+    the workspace is in then. *index* itself is left as it is.
+    """
+    written = copy.deepcopy(dict(index))
+    for entry in _indexed_file_entries(written):
+        entry.pop(PATH_IN_WORKSPACE, None)
+        inside = _path_in_workspace(entry.get("path"), root)
+        if inside:
+            entry[PATH_IN_WORKSPACE] = inside
+    write_json(index_path(root), written)
+
+
+def _indexed_file_entries(index: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Every file entry of *index*, those of each deposit (published and draft) and the hosted ones."""
+    held: list[object] = [index.get("hosted")]
+    deposits = index.get("deposits")
+    for concepts in deposits.values() if isinstance(deposits, Mapping) else []:
+        for concept in concepts.values() if isinstance(concepts, Mapping) else []:
+            if not isinstance(concept, Mapping):
+                continue
+            held.append(concept.get("files"))
+            drafts = concept.get("drafts")
+            held.extend(drafts.values() if isinstance(drafts, Mapping) else [])
+    return [
+        entry for files in held if isinstance(files, Mapping) for entry in files.values() if isinstance(entry, dict)
+    ]
+
+
+def _path_in_workspace(path: object, root: Path) -> str:
+    """The path of the file *path* inside the folder *root*, with ``/`` between the parts; ``""`` for a file outside it."""
+    if not isinstance(path, str) or not path:
+        return ""
+    try:
+        inside = Path(path).relative_to(root).as_posix()
+    except ValueError:
+        return ""
+    return "" if inside == "." else inside
 
 
 def register_sources(root: Path, paths: Iterable[Path], *, by: str) -> None:
@@ -459,6 +521,14 @@ def _file_entry_problem(entry: object) -> str | None:
         return "is not an object"
     if not isinstance(entry.get("path", ""), str):
         return "has a path that is not text"
+    inside = entry.get(PATH_IN_WORKSPACE, "")
+    if not isinstance(inside, str):
+        return f"has a {PATH_IN_WORKSPACE} that is not text"
+    if inside:
+        try:
+            check_relative_path(inside, field=PATH_IN_WORKSPACE)
+        except ValueError:
+            return f"has a {PATH_IN_WORKSPACE} ({inside!r}) that is not a path inside the workspace folder"
     for key in ("md5", "sha256"):
         if not isinstance(entry.get(key, ""), str):
             return f"has an {key} that is not text"

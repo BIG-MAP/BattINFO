@@ -8275,6 +8275,13 @@ class AuthoringWorkspace:
         before anything is sent. Each file keeps its name, and so its URL, from
         one version to the next.
 
+        The index names a file that lies in the workspace folder by its path
+        inside the folder, and reads it from the folder as it is now, so a
+        workspace that was renamed, moved or copied to another computer finds
+        the files behind its deposited copies. Each file the deposit keeps for
+        want of a local one is named in a printed line, with the path that was
+        looked for.
+
         A deposit whose records point at files :meth:`upload` put in R2 storage
         is refused before anything is sent, and the refusal names the files,
         unless ``archive_hosted_files=True``: the deposit then archives each from
@@ -9674,6 +9681,19 @@ class AuthoringWorkspace:
             # file that was never uploaded). Warn now; block publish later (R-7).
             for path in plan.missing:
                 print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            # A copy the deposit keeps is not read from this computer, so a local
+            # file that changed, or lies elsewhere now, would go unnoticed. Name
+            # each one, with the path that was looked for.
+            for entry in plan.kept_files():
+                sought = (
+                    f"no local file was found at {entry.path}"
+                    if entry.path.parts
+                    else "this workspace has no record of its local file"
+                )
+                print(
+                    f"  NOTE: {entry.name} is kept as the Zenodo record already holds it, not uploaded "
+                    f"again, because {sought}."
+                )
             for omission in plan.omissions:
                 print(f"  WARNING: left out of the deposit: {omission}")
             # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.

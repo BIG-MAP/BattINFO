@@ -12,6 +12,11 @@
   comes before a draft is made, and names each dataset and how to go on. A
   draft's files count in the index only once it is published, so a draft
   deleted on the website leaves the published copy its checksums.
+- The index names a file in the workspace folder by its path inside the
+  folder, so a workspace that was renamed or moved finds its files, and an
+  index an earlier version wrote, with absolute paths alone, still reads. A
+  copy kept for want of a local file is named in a printed line, with the
+  path that was looked for.
 - The dataset records, and the datasets in memory, point at the deposited
   files: a record that names a local file after a draft as after a publish,
   so ``ws.submit()`` sends https URLs and a later ``ws.save()`` does not undo
@@ -934,6 +939,105 @@ def test_a_later_version_keeps_the_name_an_earlier_one_gave_a_file(tmp_path: Pat
     assert other.endswith("-cycling.csv")
     assert files["cycling.csv"] == (tmp_path / "C01" / "cycling.csv").read_bytes()
     assert files[other] == (tmp_path / "C11" / "cycling.csv").read_bytes()
+
+
+# ── A workspace folder that was renamed or moved ──────────────────────────────
+
+KEPT = "is kept as the Zenodo record already holds it, not uploaded again, because"
+
+
+def _index(root: Path) -> dict:
+    return json.loads((root / ".battinfo" / "deposit-files.json").read_text(encoding="utf-8"))
+
+
+def test_a_renamed_workspace_folder_finds_its_data_files(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str]
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    first = _deposit(_workspace(old, ("C01", "C02")), publish=True)
+    names = {data: name for name, data in zenodo.deposit(int(first.record_id)).files.items()}
+    as_deposited, unchanged = (old / "C01" / "cycling.csv").read_bytes(), (old / "C02" / "cycling.csv").read_bytes()
+    old.rename(new)  # as a folder copied to another computer is, too
+    changed = new / "C01" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=new, registry_url=None)  # a new session, in the folder as it is named now
+    zenodo.requests.clear()
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    # The changed file goes up from where it is now, and no copy of the version before is kept in its place.
+    files = zenodo.deposit(int(second.record_id)).files
+    assert files[names[as_deposited]] == changed.read_bytes() and files[names[unchanged]] == unchanged
+    assert f"PUT /files/bucket-{second.record_id}/{names[as_deposited]}" in zenodo.sent()
+    assert KEPT not in capsys.readouterr().out
+    # The index names each file by its path inside the workspace folder, and by where that is now.
+    [entry] = _index(new)["deposits"]["production"].values()
+    assert {name: item["path_in_workspace"] for name, item in entry["files"].items()} == {
+        names[as_deposited]: "C01/cycling.csv",
+        names[unchanged]: "C02/cycling.csv",
+    }
+    assert entry["files"][names[as_deposited]]["path"] == str(changed.resolve())
+    assert entry["files"][names[as_deposited]]["md5"] == _md5(changed.read_bytes())
+
+
+def test_a_copy_kept_for_want_of_a_local_file_is_named_with_the_path_looked_for(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str]
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    _deposit(_workspace(old), publish=True)
+    data = (old / "C01" / "cycling.csv").read_bytes()
+    old.rename(new)
+    gone = (new / "C01" / "cycling.csv").resolve()
+    gone.unlink()
+    ws = AuthoringWorkspace(root=new, registry_url=None)
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    # The file was looked for in the folder as it is named now.
+    assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == data
+    assert f"  NOTE: cycling.csv {KEPT} no local file was found at {gone}.\n" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("renamed", [False, True], ids=["in-place", "renamed"])
+def test_an_index_an_earlier_version_wrote_is_read_by_its_absolute_paths(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str], renamed: bool
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    _deposit(_workspace(old), publish=True)
+    recorded = (old / "C01" / "cycling.csv").resolve()
+    as_deposited = recorded.read_bytes()
+    # The index as an earlier version wrote it, with each file's absolute path alone.
+    index = _index(old)
+    [entry] = index["deposits"]["production"].values()
+    del entry["files"]["cycling.csv"]["path_in_workspace"]
+    (old / ".battinfo" / "deposit-files.json").write_text(json.dumps(index), encoding="utf-8")
+    root = old
+    if renamed:
+        old.rename(new)
+        root = new
+    changed = root / "C01" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    held = zenodo.deposit(int(second.record_id)).files["cycling.csv"]
+    out = capsys.readouterr().out
+    if renamed:
+        # Nothing says where the file is now, and no file is taken for it by its name.
+        # The copy of the version before is kept, and the run names it and the path it looked for.
+        assert held == as_deposited
+        assert f"  NOTE: cycling.csv {KEPT} no local file was found at {recorded}.\n" in out
+    else:
+        assert held == changed.read_bytes() and KEPT not in out
+        [entry] = _index(root)["deposits"]["production"].values()
+        assert entry["files"]["cycling.csv"]["path_in_workspace"] == "C01/cycling.csv"
 
 
 # ── Sandbox and production ────────────────────────────────────────────────────
@@ -1887,8 +1991,9 @@ def test_a_sandbox_state_file_that_names_a_production_record_is_refused(tmp_path
         {"production": {"7000": {"records": [7001]}}},
         {"production": {"7000": {"files": {"a.csv": {"path": 3}}}}},
         {"production": {"7000": {"drafts": {"7001": {"a.csv": {"md5": 5}}}}}},
+        {"production": {"7000": {"files": {"a.csv": {"path_in_workspace": "../elsewhere/a.csv"}}}}},
     ],
-    ids=["list", "environment", "record-ids", "path", "draft-md5"],
+    ids=["list", "environment", "record-ids", "path", "draft-md5", "path-out-of-the-workspace"],
 )
 def test_an_index_whose_deposits_cannot_be_read_stops_the_deposit(
     tmp_path: Path, zenodo: _Zenodo, deposits: object
@@ -1923,6 +2028,7 @@ def test_the_index_records_each_deposited_file_by_environment_and_concept(tmp_pa
             "size": len(data),
             "md5": _md5(data),
             "sha256": hashlib.sha256(data).hexdigest(),
+            "path_in_workspace": "C01/cycling.csv",
         }
     }
     state = _state(tmp_path)
