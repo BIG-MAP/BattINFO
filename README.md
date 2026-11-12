@@ -186,7 +186,7 @@ needs the `processing` extra).
 
 The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write uses:
 
-- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for cell specs, cells, tests, datasets, materials and components; some test-protocol and parameter-set values do not follow it yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
+- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for the specified values of cell specs, cells, tests, datasets, materials and components. A value stated as measured takes `MeasuredProperty` in place of `ConventionalProperty`, and its conditions describe the measurement it is the output of (`isOutputOf`). Test-protocol values carry their quantity class without `ConventionalProperty`, and one parameter-set value has no quantity class yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
 - `@type` stacking: the cell that a cylindrical LFP cell spec describes is a `BatteryCell`, a `CylindricalBattery`, a `LithiumIonBattery` and a `LithiumIonIronPhosphateBattery`, taken from its format, chemistry and `positive_electrode_basis`. `LithiumIonGraphiteBattery` is added only when `negative_electrode_basis` is graphite.
 
@@ -224,7 +224,7 @@ The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph wr
 - **Domain-battery is the normative ontology** (semantics and terms). BattINFO is non-normative and operational (schemas, mappings, tooling).
 - **The JSON Schema is the save-time contract**, and the pydantic models in `bundle.py` are the hand-written authoring surface. `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps, and [AGENTS.md](https://github.com/BIG-MAP/BattINFO/blob/main/AGENTS.md#sources-of-truth-and-generated-files) lists which files are generated and how.
 - **JSON-LD-first publication**: `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write valid RDF aligned to domain-battery.
-- **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
+- **Stable, opaque identifiers**: every published record carries a `https://w3id.org/battinfo/id/{prefix}/{type}/{uid}` IRI, or `https://w3id.org/battinfo/{type}/{uid}` when it was minted before the prefixed form, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
 - BattINFO does not host or modify the domain-battery ontology.
 
 ## Contributing
