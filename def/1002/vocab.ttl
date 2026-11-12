@@ -1,13 +1,12 @@
-# Battery Data Commons vocabulary, release 1.0.0
+# Battery Data Commons vocabulary, release 1.0.1
 #
 # Publisher: Battery Data Commons, prefix 1002 in src/battinfo/data/namespace/prefixes.json.
 # A released folder is never edited; a change is a new release in a new folder.
 #
-# Ported from the vocabulary Battery Data Commons used before it took prefix 1002. The six
-# concepts, their labels, definitions, scope notes and matches are unchanged; their IRIs moved
-# from https://w3id.org/battery-data-commons/vocab/ to https://w3id.org/battinfo/def/1002/,
-# and the scheme is now def/1002/DatasetKind, titled "Dataset kinds". Added: the ontology header
-# and rdfs:isDefinedBy.
+# Release 1.0.1 names the creators of the vocabulary, the people the Battery Data Commons
+# site lists, by their ORCID iDs, and their organizations by their ROR IDs. Its terms are
+# those of release 1.0.0, unchanged.
+#
 # The labels of the EMMO classes named in skos:relatedMatch are comments here, not statements
 # about those classes.
 #
@@ -20,20 +19,80 @@
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
 @prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix schema:  <https://schema.org/> .
 @prefix emmo:    <https://w3id.org/emmo#> .
 @prefix echem:   <https://w3id.org/emmo/domain/electrochemistry#> .
 @prefix battery: <https://w3id.org/emmo/domain/battery#> .
 
 <https://w3id.org/battinfo/def/1002> a owl:Ontology ;
-    owl:versionIRI <https://w3id.org/battinfo/def/1002/1.0.0> ;
-    owl:versionInfo "1.0.0" ;
-    dcterms:issued "2026-10-28"^^xsd:date ;
+    owl:versionIRI <https://w3id.org/battinfo/def/1002/1.0.1> ;
+    owl:versionInfo "1.0.1" ;
+    owl:priorVersion <https://w3id.org/battinfo/def/1002/1.0.0> ;
+    dcterms:issued "2026-11-12"^^xsd:date ;
     dcterms:title "Battery Data Commons vocabulary"@en ;
-    dcterms:description "Terms defined by Battery Data Commons under its publisher prefix 1002. Release 1.0.0 holds one concept scheme: the kinds of dataset the catalogue records."@en ;
+    dcterms:description "Terms defined by Battery Data Commons under its publisher prefix 1002. It holds one concept scheme, the kinds of dataset the catalogue records."@en ;
     dcterms:publisher [ a foaf:Organization ;
         foaf:name "Battery Data Commons" ;
         foaf:homepage <https://batterydatacommons.org/> ] ;
+    dcterms:creator
+        <https://orcid.org/0000-0003-4713-5220>,
+        <https://orcid.org/0000-0003-3041-1436>,
+        <https://orcid.org/0000-0002-5900-1409>,
+        <https://orcid.org/0000-0003-4447-9319>,
+        <https://orcid.org/0000-0002-8758-6109>,
+        <https://orcid.org/0000-0001-8834-9458>,
+        <https://orcid.org/0000-0002-4993-2672> ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+# The creators, by their ORCID iDs.
+
+<https://orcid.org/0000-0003-4713-5220> a foaf:Person ;
+    foaf:name "Marwan Hassini" ;
+    schema:affiliation <https://ror.org/03x42jk29> .
+
+<https://orcid.org/0000-0003-3041-1436> a foaf:Person ;
+    foaf:name "Philipp Dechent" ;
+    schema:affiliation <https://ror.org/035vnjr65> .
+
+<https://orcid.org/0000-0002-5900-1409> a foaf:Person ;
+    foaf:name "Sara Luciani" ;
+    schema:affiliation <https://ror.org/035vnjr65> .
+
+<https://orcid.org/0000-0003-4447-9319> a foaf:Person ;
+    foaf:name "Shiyun Liu" ;
+    schema:affiliation <https://ror.org/024mrxd33> .
+
+<https://orcid.org/0000-0002-8758-6109> a foaf:Person ;
+    foaf:name "Simon Clark" ;
+    schema:affiliation <https://ror.org/01f677e56> .
+
+<https://orcid.org/0000-0001-8834-9458> a foaf:Person ;
+    foaf:name "Paul Gasper" ;
+    schema:affiliation <https://ror.org/036266993> .
+
+<https://orcid.org/0000-0002-4993-2672> a foaf:Person ;
+    foaf:name "Gonçalo dos Reis" ;
+    schema:affiliation <https://ror.org/01nrxwf90> .
+
+# Their organizations, by their ROR IDs.
+
+<https://ror.org/03x42jk29> a foaf:Organization ;
+    foaf:name "Université Gustave Eiffel" .
+
+<https://ror.org/035vnjr65> a foaf:Organization ;
+    foaf:name "Toshiba Europe GmbH" .
+
+<https://ror.org/024mrxd33> a foaf:Organization ;
+    foaf:name "University of Leeds" .
+
+<https://ror.org/01f677e56> a foaf:Organization ;
+    foaf:name "SINTEF AS" .
+
+<https://ror.org/036266993> a foaf:Organization ;
+    foaf:name "National Lab of the Rockies" .
+
+<https://ror.org/01nrxwf90> a foaf:Organization ;
+    foaf:name "University of Edinburgh" .
 
 bdcv:DatasetKind a skos:ConceptScheme ;
     rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
