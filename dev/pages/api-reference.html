@@ -990,6 +990,7 @@ checksum). A collection of datasets is a <code class="docutils literal notransla
 members name it in <code class="docutils literal notranslate"><span class="pre">series_id</span></code>. Save it with <code class="docutils literal notranslate"><span class="pre">battinfo.save_dataset</span></code>.
 A misspelled argument raises <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> with a did-you-mean; the
 fields below say what each holds.</p>
+<p>Further cells and tests go in <code class="docutils literal notranslate"><span class="pre">related_cell_ids</span></code> and <code class="docutils literal notranslate"><span class="pre">related_test_ids</span></code>, and whatever else the data is about, such as a cell spec, a material or an external URL, in <code class="docutils literal notranslate"><span class="pre">related_ids</span></code>. A save writes them all to the record’s <code class="docutils literal notranslate"><span class="pre">about</span></code> list, cells first, then tests, then the rest.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Fields<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1027,6 +1028,7 @@ fields below say what each holds.</p>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">published_at</span> <span class="pre">(int</span> <span class="pre">|</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">publisher</span> <span class="pre">(dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">related_cell_ids</span> <span class="pre">(list[str])</span></code></p></li>
+<li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">related_ids</span> <span class="pre">(list[str])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">related_test_ids</span> <span class="pre">(list[str])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">same_as</span> <span class="pre">(list[str])</span></code></p></li>
 <li><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">series_id</span> <span class="pre">(str</span> <span class="pre">|</span> <span class="pre">None)</span></code></p></li>
