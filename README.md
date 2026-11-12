@@ -186,7 +186,7 @@ needs the `processing` extra).
 
 The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write uses:
 
-- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for cell specs, cells, tests, datasets, materials and components; some test-protocol and parameter-set values do not follow it yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
+- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for the specified values of cell specs, cells, tests, datasets, materials and components. A value stated as measured takes `MeasuredProperty` in place of `ConventionalProperty`, and its conditions describe the measurement it is the output of (`isOutputOf`). Test-protocol values carry their quantity class without `ConventionalProperty`, and one parameter-set value has no quantity class yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
 - `@type` stacking: the cell that a cylindrical LFP cell spec describes is a `BatteryCell`, a `CylindricalBattery`, a `LithiumIonBattery` and a `LithiumIonIronPhosphateBattery`, taken from its format, chemistry and `positive_electrode_basis`. `LithiumIonGraphiteBattery` is added only when `negative_electrode_basis` is graphite.
 

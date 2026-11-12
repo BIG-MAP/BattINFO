@@ -8,13 +8,9 @@ BattINFO turns battery metadata into machine-readable Linked Data. In five minut
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` then `ws.quickstart()` |
 | Create a single cell-spec record in code and save or publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` (this page) |
-| Register materials, electrodes, and other components | **`battinfo.api` functions** | `create_material_spec(...)` + `save_material_spec(...)` — see the [how-to guides](docs/pages/howto.md) |
+| Register separators, current collectors, electrolytes and housings, or materials and electrodes outside a workspace | **`battinfo.api` functions** | `create_material_spec(...)` + `save_material_spec(...)` — see the [how-to guides](docs/pages/howto.md) |
 
-If in doubt, start with `battinfo.workspace(".")` for cells, tests, datasets,
-and equipment. The workspace does **not** cover materials or component specs —
-those are authored through `battinfo.api`. The full per-record-type coverage
-map is in [Workspace authoring](docs/workspace-authoring.md#what-each-surface-can-author-today);
-the guided tour is on the same page.
+If in doubt, start with `battinfo.workspace(".")` for cells, tests, datasets, equipment, materials and electrodes. Separators, current collectors, electrolytes and housings are authored through `battinfo.api`. The full per-record-type coverage map is in [Workspace authoring](docs/workspace-authoring.md#what-each-surface-can-author-today), and the guided tour is on the same page.
 
 ---
 
