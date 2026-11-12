@@ -1170,6 +1170,12 @@ record (<code class="docutils literal notranslate"><span class="pre">{&quot;sche
 file holding either. A draft without an <code class="docutils literal notranslate"><span class="pre">id</span></code> gets an IRI minted from its
 identity (see <a class="reference internal" href="#battinfo.save_record" title="battinfo.save_record"><code class="xref py py-func docutils literal notranslate"><span class="pre">save_record()</span></code></a>), so saving the same dataset again lands
 on the same IRI.</p>
+<p>A <a class="reference internal" href="#battinfo.Dataset" title="battinfo.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">battinfo.Dataset</span></code></a>, or a dict of its fields, that states no
+<code class="docutils literal notranslate"><span class="pre">published_at</span></code> keeps the one the record already saved under its IRI
+holds, the time the dataset was first published, with a <code class="docutils literal notranslate"><span class="pre">created_at</span></code>
+that is not later. A saved <code class="docutils literal notranslate"><span class="pre">published_at</span></code> equal to the saved
+<code class="docutils literal notranslate"><span class="pre">created_at</span></code>, which 0.8.0 wrote at every save, is not kept. A
+canonical record is saved as it is given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

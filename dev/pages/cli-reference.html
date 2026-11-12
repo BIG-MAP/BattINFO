@@ -693,7 +693,7 @@ battinfo config set zenodo_sandbox_token &lt;token&gt;</p>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/…) or its manufacturer and model, e.g. ‘Energizer CR2032’. Required for unstructured folders.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/{uid} or https://w3id.org/battinfo/id/{prefix}/spec/{uid}) or its manufacturer and model, e.g. ‘Energizer CR2032’. Required for unstructured folders.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--cells</span> <span class="pre">&lt;int&gt;</span></code>: Number of cells (auto-detected from filenames if omitted).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--batch-id</span> <span class="pre">&lt;str&gt;</span></code>: Batch / lot identifier.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--lab</span> <span class="pre">&lt;str&gt;</span></code>: Lab name.</p></li>
@@ -2406,7 +2406,7 @@ cell its IRI again.</p>
 </ul>
 <p><strong>Options</strong>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/…) or its manufacturer and model, e.g. “Energizer CR2032”.  [required]</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t,</span> <span class="pre">--cell-spec</span> <span class="pre">&lt;str&gt;</span></code>: Cell spec: its IRI (https://w3id.org/battinfo/spec/{uid} or https://w3id.org/battinfo/id/{prefix}/spec/{uid}) or its manufacturer and model, e.g. “Energizer CR2032”.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-n,</span> <span class="pre">--count</span> <span class="pre">&lt;int&gt;</span></code>: Number of cells received.  [required]</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--batch-id</span> <span class="pre">&lt;str&gt;</span></code>: Batch / lot identifier.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--lab</span> <span class="pre">&lt;str&gt;</span></code>: Institution or lab name.</p></li>
