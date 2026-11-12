@@ -909,6 +909,17 @@ def _zenodo_publication_time(deposit: object, called_at: int) -> int:
     return int(_dt.datetime(day.year, day.month, day.day, tzinfo=_dt.timezone.utc).timestamp())
 
 
+def _saved_published_at(path: Path) -> int | None:
+    """The ``published_at`` the dataset record saved at *path* states; ``None`` without one, or when it cannot be read."""
+    try:
+        record = _read_json(path)
+    except (OSError, ValueError):
+        return None
+    body = record.get("dataset") if isinstance(record, dict) else None
+    when = body.get("published_at") if isinstance(body, dict) else None
+    return when if isinstance(when, int) and not isinstance(when, bool) else None
+
+
 def _with_citation_doi(record: dict, doi: str | None) -> dict:
     """*record* with ``provenance.citation_doi`` set to *doi* when it has none; *record* itself without a DOI."""
     if not doi:
@@ -6720,7 +6731,8 @@ class AuthoringWorkspace:
             on zenodo.org: never a sandbox DOI, nor the DOI a draft has
             reserved. A recorded draft is first checked with Zenodo (when
             ``ZENODO_API_TOKEN`` is set), in case it was published on the
-            website since.
+            website since. Its dataset records then get their
+            ``published_at`` (see :meth:`zenodo`), which is sent with the DOI.
         allow_local_files:
             Records whose download or source locations (``access_url``,
             ``content_url``, ``download_url``, ``provenance.source_url``,
@@ -7021,6 +7033,15 @@ class AuthoringWorkspace:
         # archived dataset: the DOI passed for every record, or else the
         # deposit's DOI for the records it holds, once it is published.
         doi_for = self._submission_doi(doi)
+        # A draft found to be published since has just had its dataset records
+        # dated, after they were read above. Each takes the time its file now
+        # states, so the registry gets it with the DOI.
+        for path, rec in parsed.items():
+            body = rec.get("dataset")
+            if isinstance(body, dict) and body.get("published_at") is None and doi_for(body.get("id")):
+                when = _saved_published_at(path)
+                if when is not None:
+                    body["published_at"] = when
 
         def _selected(subdir: str) -> list[Path]:
             return [f for f in selected.get(subdir, []) if f in parsed]
@@ -7864,7 +7885,9 @@ class AuthoringWorkspace:
         publish call, for a dataset created after *reported*, as its record or
         the dataset in memory says: that dataset was published by this call,
         and strict validation refuses a ``published_at`` before
-        ``created_at``. A record that already states when it was published
+        ``created_at``. For a deposit found to be published afterwards
+        (:meth:`_reconcile_zenodo_draft`), *called_at* is the time of the
+        check that found it. A record that already states when it was published
         keeps that time, so the datasets of a new version keep the date they
         were first published. The datasets in memory get the same time, so a
         later :meth:`save` keeps it. Returns the number of records dated.
@@ -8258,6 +8281,12 @@ class AuthoringWorkspace:
         earlier day and the record was created by then. A record that already
         states one keeps it, so the datasets of a new version keep the date
         they were first published. A draft and a sandbox deposit date nothing.
+        A draft found to have been published since, on the Zenodo website or
+        by a run that stopped before it dated them, dates its datasets when
+        that is found, by this call or by :meth:`submit`, and the time of
+        that check stands in for the time of the publish call. A dataset that
+        a later session adds again, without a ``published_at``, keeps the one
+        its saved record holds at the next :meth:`save`.
 
         A record pointed at its deposited copy keeps its data in later deposits.
         ``.battinfo/deposit-files.json`` records the local file behind each
@@ -11298,6 +11327,16 @@ class AuthoringWorkspace:
         files the draft holds count among those of the published versions in
         the deposit index (*index*, else the one on disk, when it can be
         read), and ``None`` is returned.
+
+        The dataset records the deposit holds get their ``published_at``
+        then, as after a publish by :meth:`zenodo`, and before the state is
+        saved, so a check that stops part-way dates them the next time.
+        Zenodo's answer carries a publication date, not a time
+        (:func:`_zenodo_publication_time`). A date before the day of the
+        check counts from midnight UTC, for a dataset created by then; the
+        day of the check, no date, or a dataset created later gives the time
+        of the check. A record that states one keeps it, and a sandbox
+        record dates nothing.
         """
         from battinfo.zenodo import deposit_is_published  # noqa: PLC0415
 
@@ -11307,6 +11346,12 @@ class AuthoringWorkspace:
             return deposit
         metadata = deposit.get("metadata") if isinstance(deposit.get("metadata"), dict) else {}
         doi = deposit.get("doi") or metadata.get("doi") or state.get("doi")
+        dated = 0
+        if str(state.get("environment") or "production") == "production":
+            checked_at = _now_unix()
+            dated = self._date_published_datasets(
+                state.get("records") or [], _zenodo_publication_time(deposit, checked_at), checked_at
+            )
         state.update(
             published=True,
             doi=str(doi or ""),
@@ -11327,6 +11372,8 @@ class AuthoringWorkspace:
             f"  The Zenodo draft {state['record_id']} has been published since this workspace "
             f"recorded it; {state_file(environment)} now says so."
         )
+        if dated:
+            print(f"  Dataset records given their publication time: {dated}")
         return None
 
     def _note_draft_published(

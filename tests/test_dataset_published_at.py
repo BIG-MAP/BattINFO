@@ -5,6 +5,9 @@ saved record, and its JSON-LD (``schema:datePublished``, ``dcterms:issued``),
 said it was published when it was saved. A save now leaves ``published_at``
 empty unless the dataset states one, and a stated one is kept. ``ws.zenodo()``
 sets it when it publishes a deposit (tests/test_zenodo_deposit_versions.py).
+A dataset described again without one, by a later session, keeps the time its
+saved record holds, with a ``created_at`` that is not later, unless that time
+is the save-time value 0.8.0 wrote (the saved ``created_at``).
 """
 
 from __future__ import annotations
@@ -120,6 +123,73 @@ def test_a_stated_publication_time_survives_a_resave(tmp_path: Path) -> None:
 def test_a_stated_iso_publication_time_is_kept_as_unix_seconds(tmp_path: Path) -> None:
     record = _record(_save(_dataset(published_at="2025-06-16T00:00:00Z"), tmp_path))
     assert record["dataset"]["published_at"] == PUBLISHED
+
+
+# ── A published dataset keeps the time it was first published ─────────────────
+
+CREATED = PUBLISHED - 86400  # the day before
+
+
+def _published(result: dict, **dates: object) -> None:
+    """Date the saved record as ``ws.zenodo()`` does when it publishes the deposit that holds it."""
+    record = _record(result)
+    record["dataset"].update(published_at=PUBLISHED, **dates)
+    for key in [key for key, value in dates.items() if value is None]:
+        del record["dataset"][key]
+    Path(result["path"]).write_text(json.dumps(record, indent=2), encoding="utf-8")
+
+
+def test_a_dataset_described_again_keeps_the_publication_time_its_saved_record_holds(tmp_path: Path) -> None:
+    _published(_save(_dataset(created_at=CREATED), tmp_path))
+
+    # A later session describes the dataset again. It states no publication
+    # time, and no creation time, which the save then takes to be now.
+    unchanged = _save(_dataset(), tmp_path)
+    assert unchanged["status"] == "updated" and unchanged["content_changed"] is False
+    assert _record(unchanged)["dataset"]["published_at"] == PUBLISHED
+
+    changed = _save(_dataset(description="Cycled at 25 degC."), tmp_path)
+    assert changed["content_changed"] is True
+    body = _record(changed)["dataset"]
+    assert body["description"] == "Cycled at 25 degC."
+    # Published then, the dataset was not created at this save, which modified it.
+    assert (body["published_at"], body["created_at"]) == (PUBLISHED, CREATED)
+    assert body["modified_at"] > PUBLISHED
+
+
+def test_a_saved_record_with_no_earlier_creation_time_gives_the_publication_time(tmp_path: Path) -> None:
+    _published(_save(_dataset(), tmp_path), created_at=None)
+
+    body = _record(_save(_dataset(description="Cycled at 25 degC."), tmp_path))["dataset"]
+
+    assert (body["published_at"], body["created_at"]) == (PUBLISHED, PUBLISHED)
+
+
+def test_the_save_time_value_an_earlier_release_wrote_is_not_kept(tmp_path: Path) -> None:
+    """0.8.0 gave a saved dataset its ``created_at`` as ``published_at``, which no publication set."""
+    _published(_save(_dataset(), tmp_path), created_at=PUBLISHED)
+
+    again = _save(_dataset(), tmp_path)
+
+    assert again["content_changed"] is True and "published_at" not in _record(again)["dataset"]
+
+
+def test_a_dataset_that_states_a_publication_time_replaces_the_saved_one(tmp_path: Path) -> None:
+    _published(_save(_dataset(created_at=CREATED), tmp_path))
+
+    body = _record(_save(_dataset(created_at=CREATED, published_at=PUBLISHED + 3600), tmp_path))["dataset"]
+
+    assert body["published_at"] == PUBLISHED + 3600
+
+
+def test_a_canonical_record_is_saved_as_it_is_given(tmp_path: Path) -> None:
+    first = _save(_dataset(created_at=CREATED), tmp_path)
+    undated = _record(first)
+    _published(first)
+
+    again = _save(copy.deepcopy(undated), tmp_path)
+
+    assert again["content_changed"] is True and "published_at" not in _record(again)["dataset"]
 
 
 # ── The time a Zenodo publish reports ─────────────────────────────────────────

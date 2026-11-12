@@ -83,6 +83,7 @@ from battinfo.entities import (
     iter_entity_files,
     kind_for_doc,
     save_entity_path,
+    saved_record_body,
     seed_iri,
 )
 from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, parse_record_iri, record_base, record_iri, same_record
@@ -1710,6 +1711,44 @@ def _record_from_dataset(
     return finalized.to_record()
 
 
+def _with_saved_published_at(record: dict[str, Any], source_root: PathLike) -> dict[str, Any]:
+    """*record*, a dataset record that states no ``published_at``, with the one its saved record holds.
+
+    A dataset is published once, and its ``published_at`` is the time of
+    that first publication. ``ws.zenodo()`` writes it to the saved record,
+    so a session that describes the dataset again, such as an authoring
+    script run a second time, does not state it. The record saved under the
+    same IRI in *source_root* does, and the save keeps it. A dataset
+    published then existed by then, so a ``created_at`` after that time,
+    which such a session stamps at its save, gives way to the saved
+    ``created_at``, or to the publication time when the saved record states
+    no earlier one.
+
+    A saved ``published_at`` equal to the saved ``created_at`` is not kept.
+    That is the value 0.8.0 gave every dataset at its save, which dated a
+    publication that had not happened, and such a record sheds it when it
+    is saved again. Without a saved record, or one that states no
+    ``published_at``, *record* is returned as it is.
+    """
+    body = record.get("dataset")
+    parsed = parse_record_iri(body.get("id")) if isinstance(body, Mapping) else None
+    if not isinstance(body, Mapping) or parsed is None or body.get("published_at") is not None:
+        return record
+    saved = saved_record_body("dataset", parsed.uid, [_as_path(source_root)])
+    published = saved.get("published_at") if saved is not None else None
+    if saved is None or not isinstance(published, int) or isinstance(published, bool):
+        return record
+    if published == saved.get("created_at"):
+        return record
+    kept = {**body, "published_at": published}
+    created = kept.get("created_at")
+    if isinstance(created, int) and created > published:
+        earlier = saved.get("created_at")
+        known = isinstance(earlier, int) and not isinstance(earlier, bool) and earlier <= published
+        kept["created_at"] = earlier if known else published
+    return {**record, "dataset": kept}
+
+
 def _record_from_test(
     test: Test, *, source_root: PathLike | None = None, base: str = DEFAULT_RECORD_BASE
 ) -> dict[str, Any]:
@@ -2199,6 +2238,13 @@ def save_dataset(
     identity (see :func:`save_record`), so saving the same dataset again lands
     on the same IRI.
 
+    A :class:`battinfo.Dataset`, or a dict of its fields, that states no
+    ``published_at`` keeps the one the record already saved under its IRI
+    holds, the time the dataset was first published, with a ``created_at``
+    that is not later. A saved ``published_at`` equal to the saved
+    ``created_at``, which 0.8.0 wrote at every save, is not kept. A
+    canonical record is saved as it is given.
+
     Parameters
     ----------
     source_root:
@@ -2298,6 +2344,8 @@ def save_dataset(
     record = _record_from_dataset(dataset, workspace_root=workspace_layout_root(source_root), base=base)
     if dataset.id is None:
         record = _with_held_iri(record, source_root)
+    if dataset.published_at is None:
+        record = _with_saved_published_at(record, source_root)
     return save_record(
         record,
         source_root=source_root,

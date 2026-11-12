@@ -28,10 +28,12 @@
   does not hold, and ``ws.submit()`` refuses them as after any zipped deposit.
 - A publish gives each dataset record the deposit holds its ``published_at``,
   in memory too, and a record that has one keeps it, in a new version as
-  well. A draft and a sandbox deposit date nothing.
+  well, also after a new session ran the authoring script again. A draft and
+  a sandbox deposit date nothing.
 - A recorded draft is checked with Zenodo, so one published on the website
-  gets a new version, and ``ws.submit()`` records its DOI. One deleted there
-  stops the run, which names the way on that keeps the record's lineage.
+  gets a new version, and ``ws.submit()`` records its DOI. Its datasets are
+  dated when that is found, by ``ws.submit()`` or ``ws.zenodo()``. One deleted
+  there stops the run, which names the way on that keeps the record's lineage.
 - Each Zenodo has its own state file: ``.battinfo/zenodo.json`` and
   ``.battinfo/zenodo-sandbox.json``. A sandbox deposit never touches the
   records or the production record, and ``ws.submit()`` never records a
@@ -1322,6 +1324,100 @@ def test_a_sandbox_publish_dates_nothing(tmp_path: Path, zenodo: _Zenodo) -> Non
     ws = _workspace(tmp_path)
     result = _deposit(ws, sandbox=True, publish=True)
     assert result.published
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
+
+
+def test_a_script_run_again_in_a_new_session_keeps_the_date_of_the_first_publication(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    ws = _workspace(tmp_path)
+    [iri] = _publication_times(ws)
+    _created_in_2023(ws)
+    zenodo.publication_date = "2024-03-01"
+    _deposit(ws, publish=True)
+    assert _publication_times(ws) == {iri: MARCH_2024}
+
+    # The authoring script runs again, in a new session, with nothing changed. Its
+    # dataset states no publication time and is created now, as far as it knows.
+    again = _workspace(tmp_path)
+
+    assert all(dataset.published_at is None for dataset in again._ws.datasets)
+    [(_path, record)] = _datasets(again)
+    assert record["dataset"]["distributions"][0]["content_url"].startswith("file:")  # the record was written again
+    assert record["dataset"]["published_at"] == MARCH_2024
+    # A dataset published in 2024 was not created at this save.
+    assert record["dataset"]["created_at"] == CREATED_2023
+
+    # The next version is published on another day, and leaves the date as it is.
+    zenodo.publication_date = None
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(again, publish=True)
+    assert second.published and second.is_new_version
+    assert _publication_times(again) == {iri: MARCH_2024}
+
+
+@pytest.mark.parametrize("found_by", ["ws.submit()", "ws.zenodo()"])
+def test_a_draft_published_on_the_website_dates_its_datasets_when_that_is_found(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch, found_by: str
+) -> None:
+    ws = _workspace(tmp_path)
+    [iri] = _publication_times(ws)
+    _created_in_2023(ws)
+    draft = _deposit(ws)
+    # Published by a click on the Zenodo website, on a day Zenodo reports.
+    zenodo.publication_date = "2024-03-01"
+    zenodo.website_publish(int(draft.record_id))
+    assert _publication_times(ws) == {iri: None}
+    monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+
+    if found_by == "ws.submit()":
+        ws.submit(**REGISTRY)
+        # The registry gets the time with the DOI.
+        [payload] = [sent for sent in registry.payloads if sent["resource"]["resource_type"] == "dataset"]
+        assert _values(payload, "published_at") == [MARCH_2024]
+        assert _values(payload, "citation_doi") == [f"10.5281/zenodo.{draft.record_id}"]
+    else:
+        with pytest.warns(UserWarning, match="NEW VERSION"):
+            _deposit(ws)  # leaves a draft of a new version, which dates nothing itself
+    assert _publication_times(ws) == {iri: MARCH_2024}
+    assert [dataset.published_at for dataset in ws._ws.datasets] == [MARCH_2024]
+
+    # A version published on another day leaves the date of the first publication.
+    zenodo.publication_date = None
+    with pytest.warns(UserWarning, match="NEW VERSION" if found_by == "ws.submit()" else "unpublished draft"):
+        second = _deposit(ws, publish=True)
+    assert second.published and second.record_id != draft.record_id
+    assert _publication_times(ws) == {iri: MARCH_2024}
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False]
+
+
+def test_a_website_publish_zenodo_gives_no_earlier_day_for_is_dated_at_the_check(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws)
+    zenodo.website_publish(int(draft.record_id))  # its answer carries no publication date
+    monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+
+    before = int(time.time())
+    ws.submit(**REGISTRY)
+    after = int(time.time())
+
+    [published_at] = _publication_times(ws).values()
+    assert isinstance(published_at, int) and before <= published_at <= after
+
+
+def test_a_sandbox_draft_published_on_the_website_dates_nothing(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws, sandbox=True)
+    zenodo.publication_date = "2024-03-01"
+    zenodo.website_publish(int(draft.record_id), "sandbox")
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, sandbox=True, publish=True)  # finds the draft published, and makes a new version
+
+    assert second.published and second.record_id != draft.record_id
     assert set(_publication_times(ws).values()) == {None}
     assert all(dataset.published_at is None for dataset in ws._ws.datasets)
 
