@@ -43,7 +43,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import seed_text, stable_uid
-from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri, record_iri_forms
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 ORGANIZATION_IRI_RE = _component_iri_re("organization")
@@ -136,7 +136,7 @@ def _record_from_organization(
 
     if id is not None:
         if not ORGANIZATION_IRI_RE.fullmatch(id):
-            raise ValueError("organization id must match https://w3id.org/battinfo/organization/{uid}.")
+            raise ValueError(f"organization id must match {record_iri_forms('organization')}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id

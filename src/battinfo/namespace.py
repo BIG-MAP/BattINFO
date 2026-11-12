@@ -48,6 +48,8 @@ material also accepts a shared thing (``things=True``). The IRI patterns of
 the schemas are built here too: ``scripts/sync_schema_iri_patterns.py``
 writes them.
 
+A message, a help text or a field description that tells the reader what a record IRI looks like takes the wording from :func:`record_iri_forms`, so each one names both shapes.
+
 The publisher prefixes come from the register in
 ``data/namespace/prefixes.json`` (:data:`PUBLISHER_PREFIXES`), and the
 segments that are never record segments from
@@ -87,6 +89,7 @@ __all__ = [
     "publisher_prefix",
     "record_base",
     "record_iri",
+    "record_iri_forms",
     "record_iri_pattern",
     "record_iri_regex",
     "same_record",
@@ -385,3 +388,17 @@ def record_iri_regex(*segments: str, both_shapes: bool = False, things: bool = F
 def record_iri_pattern(*segments: str, both_shapes: bool = False, things: bool = False) -> re.Pattern[str]:
     """:func:`record_iri_regex` compiled, for ``fullmatch`` or ``match``."""
     return re.compile(record_iri_regex(*segments, both_shapes=both_shapes, things=things))
+
+
+def record_iri_forms(segment: str, *, things: bool = False) -> str:
+    """The shapes a record IRI under *segment* may have, worded for a message, a help text or a field description.
+
+    The wording names the old form and the prefixed form, which every recogniser accepts, with ``{uid}`` and ``{prefix}`` standing for the parts that vary. ``record_iri_forms("spec")`` is ``https://w3id.org/battinfo/spec/{uid} or https://w3id.org/battinfo/id/{prefix}/spec/{uid}``. With *things* it names a shared thing as well, ``https://w3id.org/battinfo/id/{uid}``, for a field that references a maker, a product model or a material.
+
+    Every message that tells the reader what a record IRI looks like takes its wording from here, so none names one form alone. Raises ``ValueError`` for a segment that is not a record segment.
+    """
+    name = _checked_segment(segment)
+    forms = f"{BATTINFO_ROOT}{name}/{{uid}} or {ID_BASE}{{prefix}}/{name}/{{uid}}"
+    if things:
+        forms += f", or {ID_BASE}{{uid}} for a shared thing"
+    return forms

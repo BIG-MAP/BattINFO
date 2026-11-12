@@ -46,7 +46,7 @@ from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import (
     COMPONENT_FAMILIES,
 )
-from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri, record_iri_forms
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 # A spec/ IRI the instance templates build with when no spec is given; the field is
@@ -288,7 +288,7 @@ def _record_from_material_spec(draft: MaterialSpecInput, *, base: str = DEFAULT_
     kind_key = _resolve_kind_or_raise(draft.kind, draft.name, draft.product_id)
     if draft.id is not None:
         if not MATERIAL_SPEC_IRI_RE.fullmatch(draft.id):
-            raise ValueError("material spec id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"material spec id must match {record_iri_forms('spec')}.")
         if draft.uid is not None:
             _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
@@ -355,10 +355,10 @@ def _record_from_material_spec(draft: MaterialSpecInput, *, base: str = DEFAULT_
 
 def _record_from_material(draft: MaterialInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(draft.material_spec_id):
-        raise ValueError("material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"material_spec_id must match {record_iri_forms('spec', things=True)}.")
     if draft.id is not None:
         if not MATERIAL_IRI_RE.fullmatch(draft.id):
-            raise ValueError("material id must match https://w3id.org/battinfo/material/{uid}.")
+            raise ValueError(f"material id must match {record_iri_forms('material')}.")
         if draft.uid is not None:
             _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
@@ -399,7 +399,7 @@ def _record_from_material(draft: MaterialInput, *, base: str = DEFAULT_RECORD_BA
     if draft.dataset_ids:
         for dataset_id in draft.dataset_ids:
             if not DATASET_IRI_RE.fullmatch(dataset_id):
-                raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+                raise ValueError(f"dataset_ids entries must match {record_iri_forms('dataset')}.")
         material["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in draft.dataset_ids]
     if draft.property:
         material["property"] = draft.property
@@ -590,7 +590,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput, *, base: str = DEFAUL
     kind_key = _resolve_electrode_kind_or_raise(draft.active_material_kind, draft.name, draft.product_id)
     if draft.id is not None:
         if not _spec_iri_re("electrode-spec").fullmatch(draft.id):
-            raise ValueError("electrode spec id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"electrode spec id must match {record_iri_forms('spec')}.")
         if draft.uid is not None:
             _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
@@ -606,7 +606,7 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput, *, base: str = DEFAUL
     if draft.active_material_spec_id is not None and not MATERIAL_SPEC_REF_IRI_RE.fullmatch(
         draft.active_material_spec_id
     ):
-        raise ValueError("active_material_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"active_material_spec_id must match {record_iri_forms('spec', things=True)}.")
 
     spec: dict[str, Any] = {
         "id": entity_id,
@@ -685,12 +685,12 @@ def _record_from_electrode_spec(draft: ElectrodeSpecInput, *, base: str = DEFAUL
 
 def _record_from_electrode(draft: ElectrodeInput, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if not _spec_iri_re("electrode-spec").fullmatch(draft.electrode_spec_id):
-        raise ValueError("electrode_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"electrode_spec_id must match {record_iri_forms('spec')}.")
     if draft.parent_id is not None and not _component_iri_re("electrode").fullmatch(draft.parent_id):
-        raise ValueError("parent_id must match https://w3id.org/battinfo/electrode/{uid}.")
+        raise ValueError(f"parent_id must match {record_iri_forms('electrode')}.")
     if draft.id is not None:
         if not _component_iri_re("electrode").fullmatch(draft.id):
-            raise ValueError("electrode id must match https://w3id.org/battinfo/electrode/{uid}.")
+            raise ValueError(f"electrode id must match {record_iri_forms('electrode')}.")
         if draft.uid is not None:
             _assert_id_matches_uid(draft.id, _normalized_dashed_uid(draft.uid))
         entity_id = draft.id
@@ -737,7 +737,7 @@ def _record_from_electrode(draft: ElectrodeInput, *, base: str = DEFAULT_RECORD_
     if draft.dataset_ids:
         for dataset_id in draft.dataset_ids:
             if not DATASET_IRI_RE.fullmatch(dataset_id):
-                raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+                raise ValueError(f"dataset_ids entries must match {record_iri_forms('dataset')}.")
         electrode["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in draft.dataset_ids]
     if draft.property:
         electrode["property"] = draft.property
@@ -1376,7 +1376,7 @@ def _record_from_component_spec(
         # Canonical spec/ form; the superseded per-family form is accepted so
         # pre-consolidation records keep their identity (never break an IRI).
         if not _spec_iri_re(legacy_namespace).fullmatch(id):
-            raise ValueError(f"{legacy_namespace} id must match https://w3id.org/battinfo/spec/{{uid}}.")
+            raise ValueError(f"{legacy_namespace} id must match {record_iri_forms('spec')}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -1446,10 +1446,10 @@ def _record_from_component_instance(
     base_namespace = component_family.replace("_", "-")
     spec_namespace = f"{base_namespace}-spec"
     if not _spec_iri_re(spec_namespace).fullmatch(spec_id):
-        raise ValueError(f"{component_family}_spec_id must match https://w3id.org/battinfo/spec/{{uid}}.")
+        raise ValueError(f"{component_family}_spec_id must match {record_iri_forms('spec')}.")
     if id is not None:
         if not _component_iri_re(base_namespace).fullmatch(id):
-            raise ValueError(f"{component_family} id must match https://w3id.org/battinfo/{base_namespace}/{{uid}}.")
+            raise ValueError(f"{component_family} id must match {record_iri_forms(base_namespace)}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -1476,7 +1476,7 @@ def _record_from_component_instance(
     if dataset_ids:
         for dataset_id in dataset_ids:
             if not DATASET_IRI_RE.fullmatch(dataset_id):
-                raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+                raise ValueError(f"dataset_ids entries must match {record_iri_forms('dataset')}.")
         instance["datasets"] = [{"id": dataset_id, "role": "raw"} for dataset_id in dataset_ids]
 
     record: dict[str, Any] = {

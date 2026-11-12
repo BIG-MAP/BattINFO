@@ -9,9 +9,11 @@ only (no live deposits).
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -185,6 +187,11 @@ def _staged_package(tmp_path: Path, n: int = 2) -> Path:
 # ── patch_zenodo_urls ─────────────────────────────────────────────────────────
 
 
+def _record_url_hosts(text: str, record_id: str) -> set[str | None]:
+    """The host of each Zenodo record URL for *record_id* in *text*, read by parsing the URL."""
+    return {urlsplit(url).hostname for url in re.findall(rf'https?://[^\s"]+/records/{record_id}\b', text)}
+
+
 class TestPatchZenodoUrls:
     def test_replaces_placeholder_in_all_files(self, tmp_path: Path) -> None:
         staging = _staged_package(tmp_path)
@@ -203,7 +210,7 @@ class TestPatchZenodoUrls:
         patch_zenodo_urls(staging, "99999", sandbox=True)
 
         text = (staging / DEFAULT_PUBLISH_FILENAME).read_text(encoding="utf-8")
-        assert "sandbox.zenodo.org" in text
+        assert _record_url_hosts(text, "99999") == {"sandbox.zenodo.org"}
         assert "ZENODO_RECORD_ID" not in text
 
     def test_production_domain_kept(self, tmp_path: Path) -> None:
@@ -346,11 +353,11 @@ class TestZenodoClient:
 
     def test_sandbox_base_url(self) -> None:
         c = ZenodoClient(token="tok", sandbox=True)
-        assert "sandbox.zenodo.org" in c._base
+        assert urlsplit(c._base).hostname == "sandbox.zenodo.org"
 
     def test_production_base_url(self) -> None:
         c = ZenodoClient(token="tok", sandbox=False)
-        assert "zenodo.org" in c._base
+        assert urlsplit(c._base).hostname == "zenodo.org"
         assert "sandbox" not in c._base
 
     def test_record_url_sandbox(self) -> None:

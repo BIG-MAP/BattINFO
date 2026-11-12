@@ -51,7 +51,7 @@ from battinfo._bpx_layout import (
 )
 from battinfo._jcs import _from_numpy, canonical_json_bytes
 from battinfo._jcs import loads as _loads_json
-from battinfo.namespace import parse_record_iri, parse_thing_iri
+from battinfo.namespace import parse_record_iri, parse_thing_iri, record_iri_forms
 
 PathLike = str | Path
 
@@ -2151,7 +2151,7 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
         return {"material_spec_id": value}
     raise ValueError(
         f"materials[{side!r}] is {value!r}, which is neither a curated material kind nor a "
-        "material-spec IRI (https://w3id.org/battinfo/spec/<uid>). "
+        f"material-spec IRI ({record_iri_forms('spec', things=True)}). "
         "battinfo.materials.material_kind_keys() lists the material kinds."
     )
 

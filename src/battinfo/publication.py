@@ -25,6 +25,7 @@ from battinfo._util import (
     is_dataset_series,
     is_file_uri,
     is_real_number,
+    orcid_id,
     registered_media_type,
     url_segment,
 )
@@ -873,7 +874,8 @@ def _agent_affiliations(agent: Mapping[str, Any]) -> list[dict[str, str]]:
 
 
 def _agent_same_as(agent: Mapping[str, Any]) -> str | None:
-    value = agent.get("sameAs") or agent.get("schema:sameAs")
+    # The models store same_as; the other two spellings are read for agents built by hand.
+    value = agent.get("same_as") or agent.get("sameAs") or agent.get("schema:sameAs")
     return str(value) if isinstance(value, str) and value.strip() else None
 
 
@@ -887,7 +889,7 @@ def _datacite_creators(dataset: Dataset) -> list[dict[str, Any]]:
             continue
         creator: dict[str, Any] = {"name": name}
         same_as = _agent_same_as(agent)
-        if isinstance(same_as, str) and "orcid.org/" in same_as:
+        if orcid_id(same_as) is not None:
             creator["nameIdentifiers"] = [
                 {
                     "nameIdentifier": same_as,

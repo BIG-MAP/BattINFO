@@ -23,6 +23,7 @@ from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value, jsonld_literal, jsonld_text
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
+from battinfo.namespace import record_iri_forms
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
@@ -1528,7 +1529,7 @@ class CellSpec(BundleJsonModel):
     kind: str = "CellSpec"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this cell-spec record (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this cell-spec record ({record_iri_forms('spec')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2212,7 +2213,7 @@ class Cell(BundleJsonModel):
     kind: str = "Cell"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this physical cell (https://w3id.org/battinfo/cell/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this physical cell ({record_iri_forms('cell')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2630,7 +2631,7 @@ class TestSpec(BundleJsonModel):
     __test__ = False
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this test spec (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this test spec ({record_iri_forms('spec')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2879,7 +2880,7 @@ class Test(BundleJsonModel):
     __test__ = False
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this test execution (https://w3id.org/battinfo/test/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this test execution ({record_iri_forms('test')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2928,11 +2929,11 @@ class Test(BundleJsonModel):
     )
     equipment_id: str | None = Field(
         default=None,
-        description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).",
+        description=f"IRI of the equipment unit the test ran on ({record_iri_forms('equipment')}).",
     )
     channel_id: str | None = Field(
         default=None,
-        description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).",
+        description=f"IRI of the equipment channel the test ran on ({record_iri_forms('channel')}).",
     )
     started_at: int | str | None = Field(
         default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date."
@@ -3205,7 +3206,7 @@ class Dataset(BundleJsonModel):
     kind: str = "Dataset"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this dataset (https://w3id.org/battinfo/dataset/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this dataset ({record_iri_forms('dataset')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(

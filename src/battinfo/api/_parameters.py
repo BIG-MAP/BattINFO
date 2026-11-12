@@ -62,7 +62,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import legacy_stable_uid, seed_iri, seed_text, stable_uid
-from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, parse_record_iri, record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, parse_record_iri, record_iri, record_iri_forms
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 
 _PARAMETER_KEY_RE = re.compile(r"^[a-z][a-z0-9_]*$")
@@ -154,11 +154,11 @@ def _resolved_target(
     if field == "material_spec_id":
         if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(str(value)):
             raise ValueError(
-                "material_spec_id must be a canonical material-spec IRI (https://w3id.org/battinfo/spec/{uid})."
+                f"material_spec_id must be a canonical material-spec IRI ({record_iri_forms('spec', things=True)})."
             )
         return field, str(value)
     if not CELL_SPEC_REF_IRI_RE.fullmatch(str(value)):
-        raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"cell_spec_id must match {record_iri_forms('spec', things=True)}.")
     return field, str(value)
 
 
@@ -349,7 +349,7 @@ def _checked_parts(parts: Any, default_provenance_class: str | None) -> list[dic
                 if not MATERIAL_SPEC_REF_IRI_RE.fullmatch(str(spec)):
                     raise ValueError(
                         f"parts[{index}] ({name}): material_spec_id must be a canonical "
-                        "material-spec IRI (https://w3id.org/battinfo/spec/{uid})."
+                        f"material-spec IRI ({record_iri_forms('spec', things=True)})."
                     )
                 out["material_spec_id"] = str(spec)
         claims = part.get("claims")
@@ -579,7 +579,7 @@ def _record_from_parameter_set(
         # Records minted under spec/ before 2026-10-11 still load and validate,
         # but nothing mints there any more (IDENTIFIER_POLICY 6.3).
         raise ValueError(
-            f"{id} is a spec/ IRI: parameter sets have minted under https://w3id.org/battinfo/dataset/ "
+            f"{id} is a spec/ IRI: parameter sets have minted under dataset/ "
             "since 2026-10-11 (IDENTIFIER_POLICY 6.3), and a spec/ one names a record minted before "
             "then. Publish a new version of such a record as a dataset/ record that supersedes it: "
             f"supersede_parameter_set(record), or leave id out and pass supersedes={id!r}."
@@ -656,8 +656,8 @@ def _record_from_parameter_set(
         # 2026-10-11 has a spec/ IRI (IDENTIFIER_POLICY 6.3).
         if not (DATASET_IRI_RE.fullmatch(str(supersedes)) or SPEC_IRI_RE.fullmatch(str(supersedes))):
             raise ValueError(
-                "supersedes must be a parameter-set IRI: https://w3id.org/battinfo/dataset/{uid}, "
-                "or https://w3id.org/battinfo/spec/{uid} for one minted before 2026-10-11."
+                f"supersedes must be a parameter-set IRI ({record_iri_forms('dataset')}), "
+                "or the same with spec/ in place of dataset/ for one minted before 2026-10-11."
             )
         if supersedes == body["id"]:
             raise ValueError("a parameter set cannot supersede itself: supersedes names an earlier record.")
@@ -746,7 +746,7 @@ def _claim_batch_body(
     if id is not None:
         if not DATASET_IRI_RE.fullmatch(id):
             raise ValueError(
-                "parameter-set id must match https://w3id.org/battinfo/dataset/{uid} "
+                f"parameter-set id must match {record_iri_forms('dataset')} "
                 "(parameter sets are datasets, IDENTIFIER_POLICY 6.3)."
             )
         if uid is not None:
@@ -827,9 +827,9 @@ def _parameter_file_body(
         )
     link_field = links[0]
     if link_field == "cell_spec_id" and not CELL_SPEC_REF_IRI_RE.fullmatch(str(cell_spec_id)):
-        raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"cell_spec_id must match {record_iri_forms('spec', things=True)}.")
     if link_field == "cell_instance_id" and not CELL_IRI_RE.fullmatch(str(cell_instance_id)):
-        raise ValueError("cell_instance_id must match https://w3id.org/battinfo/cell/{uid}.")
+        raise ValueError(f"cell_instance_id must match {record_iri_forms('cell')}.")
     link_value: Any = {"cell_spec_id": cell_spec_id, "cell_instance_id": cell_instance_id}.get(link_field, True)
 
     if not isinstance(parameters_sha256, str) or not _SHA256_HEX_RE.fullmatch(parameters_sha256):
@@ -942,7 +942,7 @@ def supersede_parameter_set(
     if not isinstance(old_id, str) or not SPEC_IRI_RE.fullmatch(old_id):
         raise ValueError(
             "supersede_parameter_set republishes a parameter set minted under spec/ "
-            f"(https://w3id.org/battinfo/spec/{{uid}}); this record's id is {old_id!r}."
+            f"({record_iri_forms('spec')}); this record's id is {old_id!r}."
         )
     uid = parameter_set_uid(body)
     if uid is None:
