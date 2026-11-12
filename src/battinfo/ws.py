@@ -74,6 +74,7 @@ from battinfo._deposit_index import (
     note_deposit,
     note_hosted,
     note_published,
+    parse_zenodo_file_url,
     register_sources,
     registered_keys,
     save_deposit_index,
@@ -7732,27 +7733,42 @@ class AuthoringWorkspace:
         URL works, until the draft is published. A record already on this
         deposit's copy is brought up to date either way.
 
+        A record on a Zenodo copy of a file this deposit carries inside a zip
+        archive goes back to the local file, with the checksum and size the
+        plan measured. An earlier deposit held the file as itself and this
+        one does not, and no record can point into an archive. :meth:`submit`
+        then refuses the record as it does after any zipped deposit. These
+        records are counted in a printed line of their own.
+
         The datasets in memory get the same locations, so a later
-        :meth:`save` keeps them. Returns the number of records updated.
+        :meth:`save` keeps them. Returns the number of records updated,
+        without those that went back to a local file.
         """
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
         own_files = f"{record_url}/files/"
 
-        def _deposited(location: object) -> DepositFile | None:
+        def _deposited(location: object) -> tuple[DepositFile, str] | None:
+            """The planned file *location* names, and the location its record gives after this deposit."""
             if isinstance(location, str) and location in plan.hosted:
                 return None  # the records keep pointing at a hosted copy
             if local_only and not is_local_location(location) and not str(location).startswith(own_files):
                 return None  # a copy in another record moves when the draft is published
             entry = plan.entry_for(location)
-            return None if entry is None or entry.archive else entry
+            if entry is None:
+                return None
+            if not entry.archive:
+                return entry, f"{record_url}/files/{entry.segment}"
+            if parse_zenodo_file_url(location) is None:
+                return None  # a local file stays the record's location
+            return entry, entry.path.as_uri()  # the deposit holds no such copy any more
 
         def _public_url(location: object) -> str | None:
-            entry = _deposited(location)
-            return f"{record_url}/files/{entry.segment}" if entry is not None else None
+            found = _deposited(location)
+            return found[1] if found is not None else None
 
-        patched = 0
+        patched = returned = 0
         rewritten: dict[str, dict] = {}
         for record_path in sorted(ds_dir.glob("*.json")):
             # Read as the deposit read it (a BOM is allowed), and leave alone what
@@ -7766,18 +7782,19 @@ class AuthoringWorkspace:
                 continue
             new_dists: list[dict] = []
             primary_url: str | None = None
-            changed = deposited = False
+            changed = deposited = went_back = False
             for dist in dists:
                 if not isinstance(dist, dict):
                     new_dists.append(dist)
                     continue
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                entry = _deposited(local_url)
-                if entry is None:
+                found = _deposited(local_url)
+                if found is None:
                     new_dists.append(dist)
                     continue
                 deposited = True
-                public_url = f"{record_url}/files/{entry.segment}"
+                entry, public_url = found
+                went_back = went_back or bool(entry.archive)
                 if public_url != dist.get("content_url"):
                     dist = {**dist, "content_url": public_url}
                     changed = True
@@ -7805,8 +7822,17 @@ class AuthoringWorkspace:
                 continue
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
             self._session_paths.add(record_path)
-            patched += 1
+            if went_back:
+                returned += 1
+            else:
+                patched += 1
         self._point_datasets_in_memory_at(rewritten)
+        if returned:
+            print(
+                f"  Dataset records pointed back at their local data files: {returned}. The deposit holds these "
+                "files inside a zip archive, which no record can point into, and ws.submit() refuses a record "
+                "whose data file is on this computer."
+            )
         return patched
 
     def _point_datasets_in_memory_at(self, records: Mapping[str, dict]) -> None:
@@ -8218,8 +8244,12 @@ class AuthoringWorkspace:
         there after a draft too, so :meth:`submit` sends https URLs, which work
         once the draft is published. A record on the copy an earlier published
         version holds keeps that working URL until the new version is
-        published. The datasets in memory are pointed there too, so a later
-        :meth:`save` keeps the URLs. Each distribution then states the sha256 of
+        published. When the deposit carries a file inside a zip archive
+        (``bundle``) and a record sits on a copy an earlier deposit held as
+        itself, the record goes back to its local file at that point, since
+        no record can point into an archive, and :meth:`submit` refuses it as
+        after any zipped deposit. The datasets in memory follow, so a later
+        :meth:`save` keeps the locations. Each distribution then states the sha256 of
         the file the deposit holds (and its size, when it gives one), as the
         deposit graph does, so a file that changed since it was added is
         described as it is now. A publish also gives each dataset record the

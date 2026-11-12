@@ -18,6 +18,9 @@
   it, and a record on a published copy only once the new version is
   published. A file that changed is described as the deposit holds it, with
   its own sha256 and size, in the graph, the RO-Crate and the record.
+- A deposit that zips files an earlier one held as themselves points their
+  records back at the local files, so no record names a file URL the deposit
+  does not hold, and ``ws.submit()`` refuses them as after any zipped deposit.
 - A publish gives each dataset record the deposit holds its ``published_at``,
   in memory too, and a record that has one keeps it, in a new version as
   well. A draft and a sandbox deposit date nothing.
@@ -477,6 +480,125 @@ def test_a_draft_leaves_records_on_a_published_copy_until_it_is_published(
     assert second.record_id == draft.record_id and second.published
     assert set(_locations(ws)) == {f"{HOSTS['production']}/records/{second.record_id}/files/cycling.csv"}
     assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == (tmp_path / "C01" / "cycling.csv").read_bytes()
+
+
+# ── A deposit zipped after one that was not ───────────────────────────────────
+
+
+def _dead_zenodo_urls(ws: AuthoringWorkspace, zenodo: _Zenodo) -> list[str]:
+    """The Zenodo file URLs the saved dataset records give whose record does not hold the file."""
+    dead = []
+    for location in _locations(ws):
+        if not location.startswith(f"{HOSTS['production']}/records/"):
+            continue
+        record_id, _files, name = location.removeprefix(f"{HOSTS['production']}/records/").split("/", 2)
+        if unquote(name) not in zenodo.deposit(int(record_id)).files:
+            dead.append(location)
+    return dead
+
+
+def test_a_draft_published_zipped_points_its_records_back_at_their_local_files(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    local = _locations(ws)
+    draft = _deposit(ws)  # each file as itself
+    assert all(location.startswith(f"{HOSTS['production']}/records/{draft.record_id}/") for location in _locations(ws))
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        result = _deposit(ws, publish=True, bundle="single")
+
+    assert result.published and result.record_id == draft.record_id
+    assert set(zenodo.deposit(int(result.record_id)).files) == {"data.zip", "battinfo.json", "ro-crate-metadata.json"}
+    # The record holds the files in data.zip alone, so no record names a file URL under it.
+    assert _dead_zenodo_urls(ws, zenodo) == []
+    assert _locations(ws) == local
+    out = capsys.readouterr().out
+    assert "Dataset records pointed back at their local data files: 2." in out
+    assert "updated with Zenodo file URLs" not in out
+    # The datasets in memory follow, so a later save changes nothing.
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False, False]
+    assert _locations(ws) == local
+
+    # A zipped deposit cannot be submitted, so the registry gets nothing.
+    with pytest.raises(SubmitError, match="files on this computer"):
+        ws.submit(**REGISTRY)
+    assert registry.payloads == []
+
+
+def test_a_zipped_draft_after_a_draft_that_was_not_points_its_records_back_too(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    local = _locations(ws)
+    draft = _deposit(ws)
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        second = _deposit(ws, bundle="single")  # still a draft, which no longer holds cycling.csv
+
+    assert not second.published and second.record_id == draft.record_id
+    assert "cycling.csv" not in zenodo.deposit(int(draft.record_id)).files
+    assert _locations(ws) == local
+
+
+def test_a_zipped_new_version_leaves_no_record_on_the_version_before(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry
+) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    local = _locations(ws)
+    changed, gone = tmp_path / "C01" / "cycling.csv", tmp_path / "C02" / "cycling.csv"
+    # The records state the size each file had when it was added, as ws.add() writes it for a raw file.
+    sizes = {path.resolve().as_uri(): str(path.stat().st_size) for path in (changed, gone)}
+    _edit_datasets(
+        ws, lambda ds: ds["distributions"][0].update(content_size=sizes[ds["distributions"][0]["content_url"]])
+    )
+    first = _deposit(ws, publish=True)  # each file as itself
+    names = {data: name for name, data in zenodo.deposit(int(first.record_id)).files.items()}
+    first_urls = _locations(ws)
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+
+    # A draft of the zipped version leaves the records on the published copies, which work.
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        draft = _deposit(ws, bundle="single")
+    assert _locations(ws) == first_urls and _dead_zenodo_urls(ws, zenodo) == []
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        second = _deposit(ws, publish=True, bundle="single")
+
+    assert second.published and second.record_id == draft.record_id != first.record_id
+    assert set(zenodo.deposit(int(second.record_id)).files) == {"data.zip", "battinfo.json", "ro-crate-metadata.json"}
+    # No record keeps the URL, checksum or size of the version before.
+    assert _locations(ws) == local
+    by_file = {
+        record["dataset"]["distributions"][0]["content_url"]: record["dataset"]["distributions"][0]
+        for _path, record in _datasets(ws)
+    }
+    for path in (changed, gone):
+        dist = by_file[path.resolve().as_uri()]
+        assert dist["checksum"] == {"algorithm": "sha256", "value": hashlib.sha256(path.read_bytes()).hexdigest()}
+        assert dist["content_size"] == str(path.stat().st_size)
+    with pytest.raises(SubmitError, match="files on this computer"):
+        ws.submit(**REGISTRY)
+    assert registry.payloads == []
+
+    # A file deleted locally since is in data.zip alone, and the next version
+    # cannot keep a copy out of an archive, so it is refused before anything is created.
+    kept = gone.read_bytes()
+    gone.unlink()
+    zenodo.requests.clear()
+    with pytest.raises(RuntimeError, match=f"the published record {second.record_id} .* does not hold 1 data file"):
+        _deposit(ws, publish=True)
+    assert not any(line.startswith(("POST", "PUT", "DELETE")) for line in zenodo.sent())
+
+    # With the file back, the next version deposits each file as itself again,
+    # under the name the first version gave it, and the records point there.
+    gone.write_bytes(kept)
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        third = _deposit(ws, publish=True)
+    files = zenodo.deposit(int(third.record_id)).files
+    assert set(files) == {names[kept], "cycling.csv", "battinfo.json", "ro-crate-metadata.json"}
+    assert files[names[kept]] == kept and files["cycling.csv"] == changed.read_bytes()
+    assert _dead_zenodo_urls(ws, zenodo) == []
+    assert all(location.startswith(f"{HOSTS['production']}/records/{third.record_id}/") for location in _locations(ws))
 
 
 # ── Version links ─────────────────────────────────────────────────────────────
