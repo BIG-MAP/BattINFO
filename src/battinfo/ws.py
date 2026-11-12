@@ -8513,7 +8513,9 @@ class AuthoringWorkspace:
             are; ``"none"`` deposits each file as itself and warns, before
             anything is sent, when the deposit would hold more than the 100
             files Zenodo takes in one record by default. A file in an archive
-            is described by the archive's download URL and its own name.
+            is described by the archive's download URL and its own name, in a
+            node whose ``@id`` is that URL with the name as the fragment
+            (``.../files/data.zip#C01.csv``).
         archive_name:
             The archive of ``bundle="single"``, a file name ending in ``.zip``
             (default ``"data.zip"``).
@@ -9869,7 +9871,11 @@ class AuthoringWorkspace:
         A local file's download URL is ``{files_base_url}/{name}`` with the name
         percent-encoded. With ``file_plan`` (a workspace deposit) a distribution
         or artifact finds its file in the plan by resolved path, and takes the
-        file's deposit name and, in a zipped deposit, its archive. A
+        file's deposit name and, in a zipped deposit, its archive. The node of
+        a file inside an archive downloads from the archive's URL and has that
+        URL with the file's name there as the fragment for its ``@id``
+        (``.../files/data.zip#C01.csv``), so each file of an archive is a
+        node of its own. A
         distribution of a file the plan measured states the plan's sha256 and
         size, not the ones its record gives, which date from when the file was
         added.
@@ -10488,12 +10494,27 @@ class AuthoringWorkspace:
             kind_zip = f"{kind}.zip"
             return f"{files_base}/{url_segment(kind_zip)}" if kind_zip in named_files else ""
 
+        def _distribution_id(dist: dict, kind: str) -> str:
+            """The ``@id`` of a distribution node: its download URL. A file inside
+            an archive takes the archive's URL with its own name there as the
+            fragment (``DepositFile.node_id``), so that the files of one archive
+            are a node each."""
+            cu = dist.get("content_url") or ""
+            url = _download_url(dist, kind)
+            if file_plan is not None:
+                entry = file_plan.entry_for(cu)
+                return entry.node_id(files_base) if entry is not None else url
+            fname = dist["filename"]
+            if url and not cu.startswith(("http://", "https://")) and fname not in named_files:
+                return f"{url}#{url_segment(fname)}"  # a file in <kind>.zip
+            return url
+
         for ds_id, meta in sorted(ds_meta.items()):
             dists = []
             schema_dists = []  # schema.org mirror of dcat:distribution (generated)
-            # The hosted URL of the raw (pre-conversion) file, so each processed file
+            # The node of the raw (pre-conversion) file, so each processed file
             # can declare prov:wasDerivedFrom it (the conversion provenance chain).
-            _raw_url = next((_download_url(d, meta["kind"]) for d in meta["dists"] if d.get("role") == "raw"), "")
+            _raw_id = next((_distribution_id(d, meta["kind"]) for d in meta["dists"] if d.get("role") == "raw"), "")
             for dist in meta["dists"]:
                 fname = dist["filename"]
                 dl_url = _download_url(dist, meta["kind"])
@@ -10511,8 +10532,11 @@ class AuthoringWorkspace:
                 }
                 # Identify the distribution by its download URL so it is referenceable
                 # (e.g. as the source of a derivation), not an anonymous blank node.
-                if dl_url:
-                    dnode["@id"] = dl_url
+                # A file inside an archive is named by the archive's URL and its own
+                # name there, since the archive's URL is the same for every file in it.
+                dist_id = _distribution_id(dist, meta["kind"])
+                if dist_id:
+                    dnode["@id"] = dist_id
                 is_raw = dist.get("role") == "raw"
                 # A BDF data file (.bdf.csv / .bdf.parquet) conforms to the published
                 # BDF table schema; link it so the column/unit semantics are one
@@ -10522,8 +10546,8 @@ class AuthoringWorkspace:
                     dnode["dcterms:conformsTo"] = {"@id": _bdf_table_schema_iri(bdf_version)}
                 # Conversion provenance: the processed file was derived from the raw
                 # instrument file (BDF CSV ← .ndax), so a consumer can trace the chain.
-                if not is_raw and _raw_url and _raw_url != dl_url:
-                    dnode["prov:wasDerivedFrom"] = {"@id": _raw_url}
+                if not is_raw and _raw_id and _raw_id != dist_id:
+                    dnode["prov:wasDerivedFrom"] = {"@id": _raw_id}
                 if dist.get("description"):
                     dnode["schema:description"] = dist["description"]
                 # wasGeneratedBy → BatteryTest (the Activity), not the cell (Entity).
