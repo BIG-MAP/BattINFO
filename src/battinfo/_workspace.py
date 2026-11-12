@@ -309,6 +309,8 @@ def _with_seed_fields(entity: Any, data: dict[str, Any]) -> dict[str, Any]:
         for distribution in data.get("distributions") or []:
             if isinstance(distribution, dict):
                 distribution.pop("conditions", None)
+        # That model had no related_ids either, and its dump now holds one, empty or not.
+        data.pop("related_ids", None)
     return data
 
 

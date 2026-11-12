@@ -139,7 +139,6 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
     ("cell-spec", "manufacturing_place"): "schema:manufacturingPlace; country_of_origin carries this today",
     ("cell-spec", "editorial"): "internal curation metadata; deliberately not part of the published model",
     ("organization", "editorial"): "internal curation metadata; deliberately not part of the published model",
-    ("dataset", "about"): "schema:about link to the entity studied; main_entity is the modeled equivalent",
     # Instance links whose modeled form is a list of IRIs, not the record's
     # {id, role} link objects.
     (
@@ -271,6 +270,9 @@ BUILDERS = _builders()
 # deliberately names a field differently from the record key.
 ALIASES: dict[tuple[str, str], str] = {
     ("cell-spec", "cell_format"): "format",
+    # The model splits `about` over its cell, test and related fields; related_ids
+    # takes any reference. tests/test_model_round_trip.py checks that none is lost.
+    ("dataset", "about"): "related_ids",
 }
 
 # Deprecated schema keys that to_record() rewrites to their canonical spelling:
