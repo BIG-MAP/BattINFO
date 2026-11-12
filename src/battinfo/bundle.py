@@ -31,7 +31,7 @@ from battinfo._util import (
     require_orcid_id,
 )
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
-from battinfo.namespace import record_iri_forms, record_iri_pattern
+from battinfo.namespace import BATTINFO_ROOT, parse_record_iri, record_iri_forms, record_iri_pattern
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
 
 PathLike = str | Path
@@ -986,7 +986,28 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
             out["checksum"] = {"algorithm": algorithm, "value": checksum_value}
     elif isinstance(value.get("schema:sha256"), str):
         out["checksum"] = {"algorithm": "sha256", "value": value["schema:sha256"]}
+    # Per-file measurement conditions (the SOC of one EIS file) are carried as they
+    # are given. Validation judges the keys.
+    conditions = value.get("conditions")
+    if isinstance(conditions, Mapping):
+        out["conditions"] = copy.deepcopy(dict(conditions))
     return out if ("content_url" in out or "encoding_format" in out or "checksum" in out) else None
+
+
+def _about_reference_kind(reference: str) -> str | None:
+    """What an entry of a dataset's ``about`` names: ``"cell"``, ``"test"``, or ``None`` for anything else.
+
+    A record IRI of either form is read by its segment (``battinfo.namespace.parse_record_iri``), so a cell spec or a material is neither. An IRI under the BattINFO root that is not a well-formed record IRI, one with a malformed uid for example, is still taken for a cell or a test by the ``/cell/`` or ``/test/`` in it, so that a save names it as the cell or test reference it fails to be. Every other entry is an external reference, a URL with ``/cell/`` in its path included.
+    """
+    parsed = parse_record_iri(reference)
+    if parsed is not None:
+        return parsed.segment if parsed.segment in ("cell", "test") else None
+    if reference.startswith(BATTINFO_ROOT):
+        if "/cell/" in reference:
+            return "cell"
+        if "/test/" in reference:
+            return "test"
+    return None
 
 
 def _canonical_table_column(value: Any) -> dict[str, Any] | None:
@@ -3256,6 +3277,8 @@ class Dataset(BundleJsonModel):
     members name it in ``series_id``. Save it with ``battinfo.save_dataset``.
     A misspelled argument raises ``TypeError`` with a did-you-mean; the
     fields below say what each holds.
+
+    Further cells and tests go in ``related_cell_ids`` and ``related_test_ids``, and whatever else the data is about, such as a cell spec, a material or an external URL, in ``related_ids``. A save writes them all to the record's ``about`` list, cells first, then tests, then the rest.
     """
 
     default_filename: ClassVar[str] = DATASET_FILENAME
@@ -3432,6 +3455,10 @@ class Dataset(BundleJsonModel):
     )
     related_test_ids: _StrList = Field(
         default_factory=list, description="IRIs of additional related tests beyond the primary one."
+    )
+    related_ids: _StrList = Field(
+        default_factory=list,
+        description="IRIs of whatever else the dataset is about that is neither a cell nor a test, such as a cell spec, a material or an external URL (emitted after the cells and tests in the record's about list).",
     )
     test: Test | None = Field(
         default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id)."
@@ -3666,25 +3693,20 @@ class Dataset(BundleJsonModel):
         # to_record() emits the primary cell/test reference first (see there), so the
         # first id of each kind is the primary and the rest are related — reading the
         # FULL list back makes to_record→from_record→to_record a fixed point instead
-        # of silently dropping every reference after the first.
-        related_cell_id = None
-        related_test_id = None
-        related_cell_ids: list[str] = []
-        related_test_ids: list[str] = []
+        # of silently dropping every reference after the first. An entry that is
+        # neither a cell nor a test (a cell spec, a material, an external URL) is
+        # kept in related_ids, in the order given.
+        about_cell_ids: list[str] = []
+        about_test_ids: list[str] = []
+        related_ids: list[str] = []
         if isinstance(about, list):
             for item in about:
                 if not isinstance(item, str):
                     continue
-                if "/cell/" in item:
-                    if related_cell_id is None:
-                        related_cell_id = item
-                    elif item not in related_cell_ids:
-                        related_cell_ids.append(item)
-                elif "/test/" in item:
-                    if related_test_id is None:
-                        related_test_id = item
-                    elif item not in related_test_ids:
-                        related_test_ids.append(item)
+                kind = _about_reference_kind(item)
+                held = about_cell_ids if kind == "cell" else about_test_ids if kind == "test" else related_ids
+                if item not in held:
+                    held.append(item)
         distribution = dataset.get("distributions")
         checksum = ChecksumInfo()
         data_format = None
@@ -3761,10 +3783,11 @@ class Dataset(BundleJsonModel):
                 dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None
             ],
             checksum=checksum,
-            cell_instance_id=related_cell_id,
-            test_id=related_test_id,
-            related_cell_ids=related_cell_ids,
-            related_test_ids=related_test_ids,
+            cell_instance_id=about_cell_ids[0] if about_cell_ids else None,
+            test_id=about_test_ids[0] if about_test_ids else None,
+            related_cell_ids=about_cell_ids[1:],
+            related_test_ids=about_test_ids[1:],
+            related_ids=related_ids,
             source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
@@ -3839,6 +3862,7 @@ class Dataset(BundleJsonModel):
             dataset_obj["spatial_coverage"] = self.spatial_coverage
         # Primary references come FIRST so from_record() can recover the primary/related
         # split from the flat `about` list (first cell id = primary, rest = related).
+        # Cells, then tests, then every other reference, each written once.
         about = list(
             dict.fromkeys(
                 [
@@ -3846,6 +3870,7 @@ class Dataset(BundleJsonModel):
                     *self.related_cell_ids,
                     *([self.test_id] if self.test_id is not None else []),
                     *self.related_test_ids,
+                    *self.related_ids,
                 ]
             )
         )
