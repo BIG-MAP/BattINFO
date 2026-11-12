@@ -173,6 +173,40 @@ def test_create_page_knows_which_records_the_package_cannot_mint() -> None:
     )
 
 
+def test_create_page_offers_the_condition_keys_the_transform_types() -> None:
+    """The Create page's add menu offers these names for conditions and setpoints.
+
+    Each list in web/app/create/vocab.ts must be its package table, less the
+    other spellings that table tolerates, so a name picked from the menu becomes
+    a typed node in the JSON-LD.
+    """
+    from battinfo.jsonld import _METHOD_VOCAB, TEST_CONDITION_CLASS
+    from battinfo.transform.json_to_jsonld import _MEASUREMENT_PARAMETER_TERMS
+
+    source = (ROOT / "web" / "app" / "create" / "vocab.ts").read_text(encoding="utf-8")
+
+    def web_list(name: str) -> set[str]:
+        match = re.search(rf"export const {name} = \[(.*?)\];", source, re.DOTALL)
+        assert match, f"{name} not found in web/app/create/vocab.ts"
+        return set(re.findall(r'"(\w+)"', match.group(1)))
+
+    expected = {
+        "SETPOINT_KEYS": set(_METHOD_VOCAB["quantities"]["setpoints"]),
+        # crate is c_rate, cycles is number_of_iterations, room_temperature is
+        # ambient_temperature.
+        "PROTOCOL_CONDITION_KEYS": set(TEST_CONDITION_CLASS) - {"crate", "cycles", "room_temperature"},
+        # The -e spellings of the -ing keys; voltage_reference is read apart.
+        "CONDITION_KEYS": (set(_MEASUREMENT_PARAMETER_TERMS) - {"discharge_c_rate", "charge_c_rate"})
+        | {"voltage_reference"},
+    }
+    for name, keys in expected.items():
+        web = web_list(name)
+        assert web == keys, (
+            f"web/app/create/vocab.ts {name} drifted from the package: "
+            f"web-only={sorted(web - keys)}, missing={sorted(keys - web)}"
+        )
+
+
 def test_docs_page_quickstart_python_executes(tmp_path: Path) -> None:
     """The /docs quickstart snippet must RUN, not just look plausible.
 

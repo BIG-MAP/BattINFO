@@ -24,6 +24,7 @@ import {
   slugOf,
   typeForSlug,
 } from "../app/create/types";
+import { entryNames } from "../app/create/vocab";
 import { TEMPLATES } from "../lib/templates.generated";
 import { detectRecordType, validateRecordAs } from "../lib/validate";
 
@@ -450,6 +451,22 @@ async function checkTheLinkFormat(): Promise<void> {
   const bomb = gzipSync(Buffer.alloc(MAX_LINKED_BYTES + 1_000_000, 0x20)).toString("base64url");
   const tooBig = await refusal(`#record=${bomb}`);
   if (!tooBig?.includes("larger than")) fail(`a link that inflates past the cap gave: ${tooBig}`);
+}
+
+// 16. Every map's add menu offers names the map can take. A map whose field
+//     name entryNames does not know would offer nothing, and a name its key
+//     pattern refuses would be a menu entry that never appears.
+for (const type of RECORD_TYPES) {
+  walk(type.root, "", new Set(), (path, loc) => {
+    const control = controlFor(loc);
+    if (control.kind !== "map") return;
+    const key = path.split(".").at(-1)?.replace(/\[\]$/, "") ?? "";
+    const names = entryNames(key, loc.file);
+    if (!names.length) fail(`${type.key}: the map at ${path} offers no names`);
+    const pattern = new RegExp(control.keyPattern ?? ".");
+    const refused = names.filter((name) => !pattern.test(name));
+    if (refused.length) fail(`${type.key}: the map at ${path} offers names it refuses: ${refused.join(", ")}`);
+  });
 }
 
 // The only asynchronous check, so the verdict waits for it. tsx compiles this

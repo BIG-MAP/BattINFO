@@ -17,7 +17,7 @@ import { useState } from "react";
 import { blankFor, controlFor, fieldsOf, isDeprecated, join, labelFor, requiredGroups, type Field, type Located } from "./schema";
 import { Leaf } from "./controls";
 import { AddItem, AddMenu, Branch, CHOICE, HINT, ValueRow } from "./ui";
-import { PROPERTY_KEYS } from "./vocab";
+import { entryNames } from "./vocab";
 
 type Obj = Record<string, unknown>;
 
@@ -280,11 +280,13 @@ function MapBranch({
         );
       })}
 
-      {/* The names BattINFO's vocabulary knows are offered; any other that
+      {/* The names the package knows for this map are offered; any other that
           fits the schema's pattern can be typed. */}
       <AddMenu
         to={typeof title === "string" ? title : field.label}
-        options={PROPERTY_KEYS.filter(fits).map((key) => ({ key, label: labelFor(key) }))}
+        options={entryNames(field.key, field.loc.file)
+          .filter(fits)
+          .map((key) => ({ key, label: labelFor(key) }))}
         onAdd={add}
         fits={fits}
       />
