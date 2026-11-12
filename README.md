@@ -224,7 +224,7 @@ The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph wr
 - **Domain-battery is the normative ontology** (semantics and terms). BattINFO is non-normative and operational (schemas, mappings, tooling).
 - **The JSON Schema is the save-time contract**, and the pydantic models in `bundle.py` are the hand-written authoring surface. `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps, and [AGENTS.md](https://github.com/BIG-MAP/BattINFO/blob/main/AGENTS.md#sources-of-truth-and-generated-files) lists which files are generated and how.
 - **JSON-LD-first publication**: `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write valid RDF aligned to domain-battery.
-- **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
+- **Stable, opaque identifiers**: every published record carries a `https://w3id.org/battinfo/id/{prefix}/{type}/{uid}` IRI, or `https://w3id.org/battinfo/{type}/{uid}` when it was minted before the prefixed form, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
 - BattINFO does not host or modify the domain-battery ontology.
 
 ## Contributing
