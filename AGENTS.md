@@ -68,7 +68,7 @@ Identifiers are deterministic. `stable_uid(seed)` turns an identity seed into th
 
 Every record body may also carry a `handle`, a display slug unique within one registry workspace (`flores-ocv/graphite-aq-1-063b77-cell`). It is not an identifier: renaming never moves an IRI, and code reads structured fields rather than parsing handles. `battinfo.naming` builds handles and titles from structured parts and holds the kind-word table; the rules are in `docs/howto/name-your-records.md`.
 
-The JSON Schema is the save-time contract and the pydantic models in `src/battinfo/bundle.py` are the authoring surface. A schema property the models cannot reach is data a user cannot write, so `tests/test_schema_model_parity.py` checks that every one is reachable. `SCHEMA_VERSION` in the same file is the `schema_version` stamped on every record.
+The JSON Schema is the save-time contract and the pydantic models in `src/battinfo/bundle.py` are the authoring surface. A schema property the models cannot reach is data a user cannot write, so `tests/test_schema_model_parity.py` checks that every one is reachable. A record read with `from_record` and written with `to_record` has to say what it said, so `tests/test_model_round_trip.py` sends every packaged example of the five modelled types through its model and fails on a difference its `ALLOWED` list does not explain. `SCHEMA_VERSION` in the same file is the `schema_version` stamped on every record.
 
 ## Which API to build on
 
