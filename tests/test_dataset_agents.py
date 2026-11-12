@@ -1,10 +1,8 @@
-"""The people and organizations of a dataset: what the model keeps, refuses and writes out.
+"""What the ``Dataset`` model keeps, refuses and writes out for the people and organizations of a dataset.
 
-An organization of a dataset, cell, test or test-protocol record may carry its
-BattINFO organization IRI as ``id``, as in every other record type. The
-``Dataset`` model keeps a valid one on the publisher, the creators, the funders
-and a person's affiliations, and refuses any other value; the JSON-LD writers
-make it the organization node's ``@id``.
+An organization of a dataset, cell, test or test-protocol record may carry its BattINFO organization IRI as ``id``, as in every other record type. The ``Dataset`` model keeps a valid one on the publisher, the creators, the funders and a person's affiliations, and refuses any other value. The JSON-LD writers make it the organization node's ``@id``.
+
+A person's ``orcid`` is saved as the ``same_as`` link, the one place the dataset schema has for it. A publisher or an affiliation that states no type is an organization, whatever its other keys.
 """
 
 from __future__ import annotations
@@ -251,3 +249,120 @@ def test_a_deposits_member_dataset_names_its_organizations_and_the_check_names_i
     assert [issue.path for issue in report.issues if issue.path.endswith(".funders")] == [
         f"dataset:{dataset_id}.funders"
     ]
+
+
+# ── A person's ORCID is their same_as link ───────────────────────────────────
+
+ORCID_ID = "0000-0002-1825-0097"
+OTHER_ORCID = "https://orcid.org/0000-0001-5109-3700"
+
+
+@pytest.mark.parametrize(
+    "orcid",
+    [ORCID_ID, ORCID, f"http://orcid.org/{ORCID_ID}", f"orcid.org/{ORCID_ID}", f" {ORCID_ID} ", f"{ORCID}/"],
+)
+def test_a_persons_orcid_becomes_the_same_as_link(orcid: str) -> None:
+    dataset = _dataset(
+        creators=[{"name": "Carberry, Josiah", "orcid": orcid}],
+        funders=[{"name": "Carberry, Josiah", "orcid": orcid, "email": "jc@example.org"}],
+    )
+    assert dataset.creators == [{"name": "Carberry, Josiah", "type": "Person", "same_as": ORCID}]
+    assert dataset.funders == [
+        {"name": "Carberry, Josiah", "type": "Person", "email": "jc@example.org", "same_as": ORCID}
+    ]
+
+
+def test_a_dataset_whose_creator_has_an_orcid_saves_and_validates(tmp_path: Path) -> None:
+    record = _saved(_dataset(creators=[{"name": "Carberry, Josiah", "orcid": ORCID_ID}]), tmp_path)
+    assert record["dataset"]["creators"] == [{"name": "Carberry, Josiah", "type": "Person", "same_as": ORCID}]
+    assert validate_schema_data(record, schema_for_rel_path("dataset.schema.json")).issues == ()
+    node = record_to_jsonld(record, "dataset")
+    assert node["dcterms:creator"] == [{"@type": "schema:Person", "@id": ORCID, "schema:name": "Carberry, Josiah"}]
+    assert Dataset.from_record(record).creators == record["dataset"]["creators"]
+
+
+@pytest.mark.parametrize("orcid", ["not-an-orcid", "0000-0002-1825-009Y", "https://ror.org/01f677e56"])
+def test_an_orcid_that_is_none_is_refused_as_ws_contributor_refuses_it(orcid: str, tmp_path: Path) -> None:
+    workspace = AuthoringWorkspace(tmp_path, registry_url=None)
+    with pytest.raises(ValueError) as from_workspace:
+        workspace.contributor(orcid, name="Carberry, Josiah")
+    message = str(from_workspace.value)
+    assert message.startswith("invalid ORCID iD: ")
+    for fields in (
+        {"creators": [{"name": "Carberry, Josiah", "orcid": orcid}]},
+        {"funders": [{"name": "Carberry, Josiah", "orcid": orcid}]},
+    ):
+        with pytest.raises(ValueError, match=re.escape(message)):
+            Dataset(name="data", **fields)
+
+
+@pytest.mark.parametrize("same_as", [OTHER_ORCID, "https://example.org/people/jc", "0000-0001-5109-3700"])
+def test_an_orcid_beside_another_same_as_is_refused_and_both_are_named(same_as: str) -> None:
+    with pytest.raises(ValueError) as refused:
+        Dataset(name="data", creators=[{"name": "Carberry, Josiah", "orcid": ORCID_ID, "same_as": same_as}])
+    assert repr(ORCID_ID) in str(refused.value)
+    assert repr(same_as) in str(refused.value)
+    assert "'Carberry, Josiah'" in str(refused.value)
+
+
+@pytest.mark.parametrize(
+    ("same_as", "kept"),
+    [(ORCID, ORCID), (f"http://orcid.org/{ORCID_ID}", f"http://orcid.org/{ORCID_ID}"), (ORCID_ID, ORCID)],
+)
+def test_an_orcid_beside_the_same_orcid_as_same_as_gives_one_link(same_as: str, kept: str) -> None:
+    dataset = Dataset(name="data", creators=[{"name": "Carberry, Josiah", "orcid": ORCID_ID, "same_as": same_as}])
+    assert dataset.creators == [{"name": "Carberry, Josiah", "type": "Person", "same_as": kept}]
+
+
+def test_an_organizations_orcid_stays_as_it_was_given() -> None:
+    dataset = Dataset(name="data", creators=[{"type": "Organization", "name": "ACME Lab", "orcid": ORCID}])
+    assert dataset.creators == [{"name": "ACME Lab", "type": "Organization", "orcid": ORCID}]
+
+
+# ── A publisher and an affiliation are organizations ─────────────────────────
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [{"email": "data@example.org"}, {"given_name": "Example"}, {"orcid": ORCID}, {"affiliation": {"name": "Parent"}}],
+)
+def test_a_publisher_without_a_type_is_an_organization_whatever_its_keys(extra: dict[str, Any]) -> None:
+    dataset = Dataset(name="data", publisher={"name": "Example Lab", **extra})
+    assert dataset.publisher is not None and dataset.publisher["type"] == "Organization"
+    # The same value among the creators is still read as a person.
+    assert Dataset(name="data", creators=[{"name": "Example Lab", **extra}]).creators[0]["type"] == "Person"
+
+
+def test_an_affiliation_without_a_type_is_an_organization() -> None:
+    person = {"name": "Doe, Jane", "affiliation": {"name": "Example Lab", "email": "data@example.org"}}
+    dataset = Dataset(name="data", creators=[person])
+    assert dataset.creators[0]["affiliation"]["type"] == "Organization"
+
+
+def test_a_stated_type_is_kept_and_agents_that_worked_are_typed_as_before() -> None:
+    dataset = Dataset(
+        name="data",
+        publisher={"type": "Person", "name": "Doe, Jane"},
+        creators=[
+            {"name": "SINTEF"},
+            {"name": "Doe, Jane", "email": "jane@example.org"},
+            {"type": "Organization", "name": "Example Lab", "email": "data@example.org"},
+            {"@type": "schema:Person", "name": "Roe, Richard"},
+        ],
+    )
+    assert dataset.publisher == {"name": "Doe, Jane", "type": "Person"}
+    assert [creator["type"] for creator in dataset.creators] == ["Organization", "Person", "Organization", "Person"]
+    assert Dataset(name="data", publisher={"name": "Example Lab", "url": "https://example.org"}).publisher == {
+        "name": "Example Lab",
+        "type": "Organization",
+        "url": "https://example.org",
+    }
+
+
+def test_a_publisher_with_an_email_is_refused_for_the_email_alone(tmp_path: Path) -> None:
+    """The schema's Organization has no email, so the save names that key and no longer the type."""
+    dataset = _dataset(publisher={"name": "Example Lab", "email": "data@example.org"})
+    assert dataset.publisher == {"name": "Example Lab", "type": "Organization", "email": "data@example.org"}
+    with pytest.raises(ValueError, match="email") as refused:
+        _saved(dataset, tmp_path)
+    assert "'Organization' was expected" not in str(refused.value)

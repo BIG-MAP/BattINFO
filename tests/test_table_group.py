@@ -1,10 +1,6 @@
-"""A dataset's table group: its list of tables is ``tables``.
+"""A dataset's table group lists its tables under ``tables``.
 
-``battinfo.metadata.csvw_table_group()`` and the ``Dataset`` model write
-``tables``, the key the CSVW metadata vocabulary uses. The dataset schema named
-the property ``table``, so no table group could be saved. The schema now names
-it ``tables``, and a record another client wrote with ``table`` still loads,
-because the reader renames the key.
+``battinfo.metadata.csvw_table_group()`` and the ``Dataset`` model write ``tables``, the key the CSVW metadata vocabulary uses. The dataset schema named the property ``table``, so no table group could be saved. The schema now names it ``tables``, and a record another client wrote with ``table`` still loads, because the reader renames the key.
 """
 
 from __future__ import annotations

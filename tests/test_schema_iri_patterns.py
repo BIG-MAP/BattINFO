@@ -65,8 +65,7 @@ def test_every_pattern_is_the_one_the_namespace_module_builds() -> None:
 
 
 def test_the_schemas_carry_the_patterns_of_the_erratum() -> None:
-    """84 record IRI patterns in 32 files, the three reference $defs split from an own-id one, and the
-    OrganizationRefIri of the four schemas whose Organization gained an id."""
+    """84 record IRI patterns in 32 files, the three reference $defs split from an own-id one, and the OrganizationRefIri of the four schemas whose Organization gained an id."""
     assert len(PATTERNS) == 91
     assert len({rel for rel, _, _ in PATTERNS}) == 32
     assert sum(SYNC._takes_things(where) for _, where, _ in PATTERNS) == 35

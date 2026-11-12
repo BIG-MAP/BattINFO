@@ -21,7 +21,15 @@ from pydantic import (
 
 from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value, jsonld_literal, jsonld_text
+from battinfo._util import (
+    _as_path,
+    _citation_doi_from_url,
+    _citation_url_value,
+    jsonld_literal,
+    jsonld_text,
+    orcid_id,
+    require_orcid_id,
+)
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
 from battinfo.namespace import record_iri_forms, record_iri_pattern
 from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
@@ -766,7 +774,7 @@ def _copy_identifier(value: Any) -> Any:
     return None
 
 
-# What the schemas call OrganizationRefIri: an organization record in either IRI form, or a maker as a shared thing.
+# The OrganizationRefIri of the schemas, an organization record in either IRI form or a maker as a shared thing.
 _ORGANIZATION_REF_IRI = record_iri_pattern("organization", both_shapes=True, things=True)
 
 
@@ -786,7 +794,27 @@ def _organization_ref_iri(value: Mapping[str, Any], name: str) -> str | None:
     return iri
 
 
-def _canonical_agent(value: Any) -> dict[str, Any] | None:
+def _orcid_same_as(name: str, orcid: str, same_as: Any) -> str:
+    """The ``same_as`` of the person *name* who is given an ``orcid``, the link ``https://orcid.org/<iD>``.
+
+    A ``same_as`` that names the same iD is kept as written when it is a URL. Raises ``ValueError`` for an ``orcid`` that names no ORCID iD, with the error ``ws.contributor()`` gives, and for a ``same_as`` that names anything else, since a person has one ``same_as``.
+    """
+    link = f"https://orcid.org/{require_orcid_id(orcid)}"
+    if not isinstance(same_as, str) or not same_as.strip():
+        return link
+    if orcid_id(same_as) != orcid_id(link):
+        raise ValueError(
+            f"The person {name!r} has orcid {orcid!r} and same_as {same_as!r}, which is not that ORCID iD. "
+            "A person takes one same_as, so give the ORCID alone or leave orcid out."
+        )
+    return same_as if "://" in same_as else link
+
+
+def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str, Any] | None:
+    """A person or an organization as a dataset record holds it, or ``None`` for a value without a name.
+
+    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link.
+    """
     if not isinstance(value, Mapping):
         return None
     node_type = value.get("type") or value.get("@type")
@@ -800,6 +828,8 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     out: dict[str, Any] = {"name": name}
     if isinstance(node_type, str) and node_type in {"Person", "Organization"}:
         out["type"] = node_type
+    elif organization_only:
+        out["type"] = "Organization"
     elif any(
         key in value
         for key in (
@@ -821,9 +851,13 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
         organization_id = _organization_ref_iri(value, name)
         if organization_id is not None:
             out["id"] = organization_id
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     orcid = value.get("orcid")
     if isinstance(orcid, str) and orcid.strip():
-        out["orcid"] = orcid
+        if out["type"] == "Person":
+            same_as = _orcid_same_as(name, orcid, same_as)
+        else:
+            out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
         out["email"] = email
@@ -836,7 +870,6 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     url = value.get("url") or value.get("schema:url") or value.get("@id")
     if isinstance(url, str) and "://" in url:
         out["url"] = url
-    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str) and "://" in same_as:
         out["same_as"] = same_as
     # One affiliation, or a list of them.
@@ -844,7 +877,7 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     if isinstance(affiliations, Mapping):
         affiliations = [affiliations]
     if isinstance(affiliations, list):
-        nested = [org for item in affiliations if (org := _canonical_agent(item)) is not None]
+        nested = [org for item in affiliations if (org := _canonical_agent(item, organization_only=True)) is not None]
         if nested:
             out["affiliation"] = nested[0] if len(nested) == 1 else nested
     return out
@@ -3265,7 +3298,7 @@ class Dataset(BundleJsonModel):
     creators: list[dict[str, Any]] = Field(
         default_factory=list,
         validation_alias=AliasChoices("creators", "creator"),
-        description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation. An organization, an affiliation included, also takes id, its BattINFO organization IRI.",
+        description="Creator agents; dicts with name and optionally orcid (saved as the person's same_as link), given_name/family_name, affiliation. An organization, an affiliation included, also takes id, its BattINFO organization IRI.",
     )
     publisher: dict[str, Any] | None = Field(
         default=None,
@@ -3491,7 +3524,7 @@ class Dataset(BundleJsonModel):
     @field_validator("publisher", mode="before")
     @classmethod
     def _coerce_publisher(cls, value: Any) -> dict[str, Any] | None:
-        return _canonical_agent(value)
+        return _canonical_agent(value, organization_only=True)
 
     @field_validator("funders", mode="before")
     @classmethod
@@ -3682,7 +3715,7 @@ class Dataset(BundleJsonModel):
             version=dataset.get("version"),
             keywords=_string_list(dataset.get("keywords")),
             creators=_mapping_list(dataset.get("creators")),
-            publisher=_canonical_agent(dataset.get("publisher")),
+            publisher=_canonical_agent(dataset.get("publisher"), organization_only=True),
             funders=_mapping_list(dataset.get("funders")),
             citations=[
                 citation
@@ -4217,7 +4250,7 @@ class BattinfoBundle(BundleJsonModel):
                 )
                 if (agent := _canonical_agent(item)) is not None
             ],
-            publisher=_canonical_agent(dataset_node.get("schema:publisher")),
+            publisher=_canonical_agent(dataset_node.get("schema:publisher"), organization_only=True),
             funders=[
                 agent
                 for item in (
