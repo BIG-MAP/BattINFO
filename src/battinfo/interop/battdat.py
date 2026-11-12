@@ -252,8 +252,7 @@ def from_battdat(
         BDF-normalised CSV file.  When a path is given, ``batterydf`` is used
         to read and normalise the file; ``pandas.read_csv`` is the fallback.
     cell_id:
-        The BattINFO cell-instance identifier (``https://w3id.org/battinfo/cell/...``
-        or a staging placeholder such as ``urn:staging:a123--cell-07``).
+        The BattINFO cell-instance identifier (``https://w3id.org/battinfo/cell/{uid}`` or ``https://w3id.org/battinfo/id/{prefix}/cell/{uid}``), or a staging placeholder such as ``urn:staging:a123--cell-07``.
     kind:
         Test kind (e.g. ``"cycling"``, ``"eis"``).  Inferred from BDF column
         names when omitted.

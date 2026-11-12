@@ -34,6 +34,7 @@ from battinfo.namespace import (  # noqa: E402
     parse_thing_iri,
     record_base,
     record_iri,
+    record_iri_forms,
     record_iri_pattern,
     record_iri_regex,
     same_record,
@@ -462,6 +463,123 @@ def test_the_source_scan_catches_a_builder_and_a_recogniser(tmp_path: Path) -> N
     )
     offenders = _record_base_offenders(sample, root=tmp_path)
     assert sorted(int(offender.split(":")[1]) for offender in offenders) == [3, 5, 11]
+
+
+# ── A message names both shapes ─────────────────────────────────────────────
+
+
+@pytest.mark.parametrize("things", [False, True])
+def test_record_iri_forms_names_the_shapes_the_recogniser_accepts(things: bool) -> None:
+    wording = record_iri_forms("cell", things=things)
+    assert wording.startswith(
+        "https://w3id.org/battinfo/cell/{uid} or https://w3id.org/battinfo/id/{prefix}/cell/{uid}"
+    )
+    named = [shape.format(uid=UID, prefix="1001") for shape in re.findall(r"https://\S+?\{uid\}", wording)]
+    assert named == [OLD, GENOME, *([THING] if things else [])]
+    recogniser = record_iri_pattern("cell", both_shapes=True, things=things)
+    assert all(recogniser.fullmatch(iri) for iri in named)
+    assert ("shared thing" in wording) is things
+    with pytest.raises(ValueError, match="not a record segment"):
+        record_iri_forms("id")
+
+
+# The shape of a record IRI written out by hand: the record base, a segment and a stand-in for the uid.
+_HAND_WRITTEN_SHAPE = re.compile(r"https://w3id\.org/battinfo/(?!id/)[^\s/]+/(?:\{uid\}|<uid>|xxxx-|\.\.\.)")
+# _adoption names the old form as the form a registry may hold a record in, beside the base it was minted under.
+_NAMES_THE_OLD_FORM_ON_PURPOSE = frozenset({"src/battinfo/_adoption.py"})
+
+
+def _hand_written_shapes(path: Path, root: Path = ROOT) -> list[str]:
+    """The messages of *path* that write out the shape of a record IRI, with ``{}`` for each value an f-string fills in."""
+    source = path.read_text(encoding="utf-8")
+    tree = ast.parse(source, filename=str(path))
+    parents = _parents(tree)
+    where = path.relative_to(root).as_posix()
+    offenders = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.JoinedStr):
+            text = "".join(part.value if isinstance(part, ast.Constant) else "{}" for part in node.values)
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            text = "" if isinstance(parents.get(node), ast.JoinedStr) else node.value
+        else:
+            continue
+        shape = _HAND_WRITTEN_SHAPE.search(text)
+        if shape is not None and _is_message(node, parents):
+            offenders.append(f"{where}:{node.lineno}: {shape[0]}")
+    return offenders
+
+
+def test_no_message_writes_out_the_shape_of_a_record_iri() -> None:
+    """A message that says what a record IRI looks like takes the wording from record_iri_forms.
+
+    A shape written out by hand names one form and leaves the other out, as the messages did before the wording was shared. An exception, a warning, a validation issue, CLI help and a field description all count; a docstring cannot call the function, so it writes both shapes out.
+    """
+    package = ROOT / "src" / "battinfo"
+    offenders = [
+        offender
+        for path in sorted(package.rglob("*.py"))
+        if path != package / "namespace.py" and path.relative_to(ROOT).as_posix() not in _NAMES_THE_OLD_FORM_ON_PURPOSE
+        for offender in _hand_written_shapes(path)
+    ]
+    assert not offenders, "Name the shapes of a record IRI with namespace.record_iri_forms():\n" + "\n".join(offenders)
+
+
+def test_the_message_scan_catches_a_shape_written_out_by_hand(tmp_path: Path) -> None:
+    sample = tmp_path / "sample.py"
+    sample.write_text(
+        '"""A docstring naming https://w3id.org/battinfo/cell/{uid}."""\n'
+        "def fail(value, segment):\n"
+        "    if value is None:\n"
+        "        raise ValueError(f'id must match {record_iri_forms(\"cell\")}.')\n"
+        "    if segment:\n"
+        "        raise ValueError(f'{value} must match https://w3id.org/battinfo/{segment}/{{uid}}.')\n"
+        "    if value:\n"
+        "        raise ValueError(f'{value} is not a test IRI; expected '\n"
+        "                         'https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx.')\n"
+        "    raise ValueError('minted under https://w3id.org/battinfo/id/1001/, not https://w3id.org/battinfo/')\n"
+        "OPTION = Option(None, help='Its IRI (https://w3id.org/battinfo/spec/...) or its name.')\n"
+        "FIELD = Field(default=None, description='A material-spec IRI (https://w3id.org/battinfo/spec/<uid>).')\n"
+        "replacement = f'its replacement is https://w3id.org/battinfo/dataset/{value}'\n"
+        "example = 'https://w3id.org/battinfo/cell/{uid}'\n",
+        encoding="utf-8",
+    )
+    offenders = _hand_written_shapes(sample, root=tmp_path)
+    assert sorted(int(offender.split(":")[1]) for offender in offenders) == [6, 8, 11, 12]
+
+
+def _message(call: Any) -> str:
+    with pytest.raises((ValueError, TypeError)) as raised:
+        call()
+    return str(raised.value)
+
+
+def test_a_message_about_a_record_iri_names_both_shapes(tmp_path: Path) -> None:
+    import battinfo
+    from battinfo import ws
+    from battinfo.api import create_channel, create_material
+    from battinfo.interop import bpx
+
+    spec, dataset, cell = record_iri_forms("spec"), record_iri_forms("dataset"), record_iri_forms("cell")
+    spec_or_thing = record_iri_forms("spec", things=True)
+
+    assert f"material_spec_id must match {spec_or_thing}." == _message(lambda: create_material(material_spec_id="x"))
+    assert f"equipment_id must match {record_iri_forms('equipment')}." == _message(
+        lambda: create_channel(equipment_id="x", index=1)
+    )
+    assert f"cell_id must match {cell}." == _message(
+        lambda: battinfo.save_test(battinfo.Test(cell_id="x", test_type="cycling"), source_root=tmp_path)
+    )
+    assert f"expected {spec}." in _message(lambda: ws._draft_spec_iri("https://example.org/x", None, "draft.json"))
+    assert f"({record_iri_forms('organization', things=True)})" in _message(
+        lambda: ws._deposit_publisher({"name": "Example Lab", "id": "https://example.org/lab"})
+    )
+    assert f"material-spec IRI ({spec_or_thing})" in _message(lambda: bpx._material_target("no such kind", "positive"))
+    claim = {"parameter": "particle_radius", "quantity": {"value": 5.86e-06, "unit": "m"}, "provenance_class": "fitted"}
+    assert f"supersedes must be a parameter-set IRI ({dataset})" in _message(
+        lambda: battinfo.api.create_parameter_set(
+            name="Example - graphite", material_kind="graphite", claims=[claim], supersedes="x"
+        )
+    )
 
 
 # ── A saved record keeps the IRI it has, in either shape ────────────────────

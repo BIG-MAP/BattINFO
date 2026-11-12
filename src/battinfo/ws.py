@@ -123,6 +123,7 @@ from battinfo.namespace import (
     parse_record_iri,
     parse_thing_iri,
     record_iri,
+    record_iri_forms,
     same_record,
 )
 
@@ -1847,8 +1848,8 @@ def _deposit_publisher(publisher: str | Mapping[str, Any] | None) -> dict[str, s
         parsed = parse_record_iri(iri)
         if (parsed is None or parsed.segment != "organization") and parse_thing_iri(iri) is None:
             raise ValueError(
-                f"publisher id={iri!r} is not a registry organization IRI such as "
-                "https://w3id.org/battinfo/organization/{uid}. Give a ROR as ror= instead."
+                f"publisher id={iri!r} is not a registry organization IRI "
+                f"({record_iri_forms('organization', things=True)}). Give a ROR as ror= instead."
             )
         out["id"] = str(iri)
     return out
@@ -12627,7 +12628,7 @@ class AuthoringWorkspace:
             return self._load_equipment_spec(path), None, []
         raise TypeError(
             "spec= must be a canonical equipment-spec record dict, a path to one, "
-            "or its IRI (https://w3id.org/battinfo/spec/...)."
+            f"or its IRI ({record_iri_forms('spec')})."
         )
 
     def _add_equipment(
@@ -13281,7 +13282,7 @@ class AuthoringWorkspace:
                         f"spec={test_spec!r} is not a test-protocol reference. Pass a "
                         "battinfo.TestSpec (authored inline or via ws.load(<draft file>)), "
                         "or the IRI of a test-protocol saved in this workspace "
-                        "(https://w3id.org/battinfo/spec/...). A plain string is "
+                        f"({record_iri_forms('spec')}). A plain string is "
                         "not accepted as a protocol name: it would leave the run unlinked "
                         "to any saved protocol."
                     )
@@ -13514,9 +13515,7 @@ class AuthoringWorkspace:
         pinned: str | None = None
         if iri is not None:
             if not isinstance(iri, str) or not TEST_IRI_RE.fullmatch(iri.strip()):
-                raise ValueError(
-                    f"iri={iri!r} is not a test IRI; expected https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx."
-                )
+                raise ValueError(f"iri={iri!r} is not a test IRI; expected {record_iri_forms('test')}.")
             pinned = iri.strip()
         if uid is not None:
             from_uid = record_iri("test", _normalized_dashed_uid(str(uid)), base_prefix(self._record_base))
@@ -13548,8 +13547,7 @@ class AuthoringWorkspace:
         bad = [item for item in pinned if not DATASET_IRI_RE.fullmatch(item)]
         if bad:
             raise ValueError(
-                f"dataset_iris entries must be dataset IRIs "
-                f"(https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx); got {bad[:3]}."
+                f"dataset_iris entries must be dataset IRIs ({record_iri_forms('dataset')}); got {bad[:3]}."
             )
         if len(set(pinned)) != len(pinned):
             raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
@@ -13641,7 +13639,7 @@ class AuthoringWorkspace:
         if not DATASET_IRI_RE.fullmatch(text):
             raise ValueError(
                 f"series_id={series_id!r} is not a dataset IRI; expected the collection's "
-                "IRI, https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx."
+                f"IRI, {record_iri_forms('dataset')}."
             )
         return text
 
@@ -13699,7 +13697,7 @@ class AuthoringWorkspace:
                 listing = "\n".join(f"  {_describe_registry_cell(c)}" for c in found)
                 raise ValueError(
                     f"{s!r} matches {len(found)} cells in the registry, so it cannot pick one:\n{listing}\n"
-                    'Pass the one you mean by its IRI, cell="https://w3id.org/battinfo/cell/...", '
+                    'Pass the one you mean by its IRI as listed above, cell="<IRI>", '
                     f"or reference it first with ws.load(ws.search(type='cell', serial={s!r})[i])."
                 )
             if found:
@@ -14711,10 +14709,7 @@ def _draft_spec_iri(
     if draft_id:
         text = str(draft_id).strip()
         if not SPEC_IRI_RE.fullmatch(text):
-            raise ValueError(
-                f"{source}: 'id' {draft_id!r} is not a spec IRI; expected "
-                "https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx."
-            )
+            raise ValueError(f"{source}: 'id' {draft_id!r} is not a spec IRI; expected {record_iri_forms('spec')}.")
         pinned = text
     if draft_uid:
         from_uid = record_iri("spec", _normalized_dashed_uid(str(draft_uid)), base_prefix(base))

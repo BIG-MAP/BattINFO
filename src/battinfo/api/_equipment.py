@@ -36,7 +36,7 @@ from battinfo.api._shared import (
 from battinfo.bundle import SCHEMA_VERSION, stamp_provenance
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import stable_uid
-from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri, record_iri_forms
 from battinfo.validate.core import DEFAULT_POLICY
 
 EQUIPMENT_IRI_RE = _component_iri_re("equipment")
@@ -98,7 +98,7 @@ def _record_from_equipment_spec(
     # legacy per-family alternation.
     if id is not None:
         if not SPEC_IRI_RE.fullmatch(id):
-            raise ValueError("equipment-spec id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"equipment-spec id must match {record_iri_forms('spec')}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -166,10 +166,10 @@ def _record_from_equipment(
     base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     if not SPEC_IRI_RE.fullmatch(equipment_spec_id):
-        raise ValueError("equipment_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"equipment_spec_id must match {record_iri_forms('spec')}.")
     if id is not None:
         if not EQUIPMENT_IRI_RE.fullmatch(id):
-            raise ValueError("equipment id must match https://w3id.org/battinfo/equipment/{uid}.")
+            raise ValueError(f"equipment id must match {record_iri_forms('equipment')}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id
@@ -233,12 +233,12 @@ def _record_from_channel(
     base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     if not EQUIPMENT_IRI_RE.fullmatch(equipment_id):
-        raise ValueError("equipment_id must match https://w3id.org/battinfo/equipment/{uid}.")
+        raise ValueError(f"equipment_id must match {record_iri_forms('equipment')}.")
     if isinstance(index, bool) or not isinstance(index, int) or index < 1:
         raise ValueError("index must be an integer >= 1 (channel numbering is 1-based).")
     if id is not None:
         if not CHANNEL_IRI_RE.fullmatch(id):
-            raise ValueError("channel id must match https://w3id.org/battinfo/channel/{uid}.")
+            raise ValueError(f"channel id must match {record_iri_forms('channel')}.")
         if uid is not None:
             _assert_id_matches_uid(id, _normalized_dashed_uid(uid))
         entity_id = id

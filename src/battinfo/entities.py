@@ -716,8 +716,7 @@ class EntityKind:
             ``"cell_spec"``, ``"material"``.
         schema_file: Path (relative to ``data/schemas``) of the JSON Schema.
         subdir: Directory name under a ``source_root`` where records live.
-        iri_namespace: Path segment in the canonical IRI
-            ``https://w3id.org/battinfo/<iri_namespace>/<uid>``.
+        iri_namespace: Path segment in the canonical IRI, ``https://w3id.org/battinfo/<iri_namespace>/<uid>`` or ``https://w3id.org/battinfo/id/<prefix>/<iri_namespace>/<uid>``.
         spec_ref_field: For an instance kind, the body field that links to its
             spec (e.g. ``"cell_spec_id"``); ``None`` for spec kinds.
         spec_entity_type: The ``entity_type`` that ``spec_ref_field`` points to.

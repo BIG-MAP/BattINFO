@@ -85,7 +85,15 @@ from battinfo.entities import (
     save_entity_path,
     seed_iri,
 )
-from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, parse_record_iri, record_base, record_iri, same_record
+from battinfo.namespace import (
+    DEFAULT_RECORD_BASE,
+    base_prefix,
+    parse_record_iri,
+    record_base,
+    record_iri,
+    record_iri_forms,
+    same_record,
+)
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.pydantic import validate_json
@@ -247,7 +255,7 @@ def _library_record_from_input(draft: Mapping[str, Any], *, base: str = DEFAULT_
     uid = draft.get("uid")
     if draft_id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(draft_id):
-            raise ValueError("cell specification id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"cell specification id must match {record_iri_forms('spec')}.")
         if uid is not None:
             _assert_id_matches_uid(draft_id, _normalized_dashed_uid(uid))
         entity_id = draft_id
@@ -917,7 +925,7 @@ def resolve_cell_spec_id(
     """
     if cell_spec_id is not None:
         if not CELL_SPEC_REF_IRI_RE.fullmatch(cell_spec_id):
-            raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"cell_spec_id must match {record_iri_forms('spec', things=True)}.")
         return cell_spec_id
 
     matches = query_cell_specs(
@@ -1011,7 +1019,7 @@ def create_cell_instance(
         raise ValueError("source_type must be one of: measurement, lab, bms, other.")
 
     if dataset_id is not None and not DATASET_IRI_RE.fullmatch(dataset_id):
-        raise ValueError("dataset_id must match https://w3id.org/battinfo/dataset/{uid}.")
+        raise ValueError(f"dataset_id must match {record_iri_forms('dataset')}.")
 
     if uid is None:
         # Mint through the shared cell-instance identity policy so the same
@@ -1139,7 +1147,7 @@ def _record_from_cell_spec(
     for field_name, namespace in _COMPONENT_SPEC_REF_NAMESPACES.items():
         value = getattr(spec, field_name)
         if value is not None and not _spec_iri_re(namespace).fullmatch(value):
-            raise ValueError(f"{field_name} must match https://w3id.org/battinfo/spec/{{uid}}.")
+            raise ValueError(f"{field_name} must match {record_iri_forms('spec')}.")
     # Mint / validate the canonical IRI — the one piece of canonicalization the model does not do.
     return _mint_cell_spec_record(spec, source_root=source_root, base=base)
 
@@ -1362,7 +1370,7 @@ def _mint_cell_spec_record(
 ) -> dict[str, Any]:
     if spec.id is not None:
         if not CELL_SPEC_IRI_RE.fullmatch(spec.id):
-            raise ValueError("cell spec id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"cell spec id must match {record_iri_forms('spec')}.")
         if spec.uid is not None:
             _assert_id_matches_uid(spec.id, _normalized_dashed_uid(spec.uid))
         entity_id = spec.id
@@ -1387,13 +1395,13 @@ def _mint_cell_spec_record(
 
 def _record_from_cell_instance(instance: Cell, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if instance.cell_spec_id is None or not CELL_SPEC_REF_IRI_RE.fullmatch(instance.cell_spec_id):
-        raise ValueError("cell_spec_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"cell_spec_id must match {record_iri_forms('spec', things=True)}.")
     for dataset_id in instance.dataset_ids:
         if not DATASET_IRI_RE.fullmatch(dataset_id):
-            raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+            raise ValueError(f"dataset_ids entries must match {record_iri_forms('dataset')}.")
     if instance.id is not None:
         if not CELL_IRI_RE.fullmatch(instance.id):
-            raise ValueError("cell-instance id must match https://w3id.org/battinfo/cell/{uid}.")
+            raise ValueError(f"cell-instance id must match {record_iri_forms('cell')}.")
         if instance.uid is not None:
             _assert_id_matches_uid(instance.id, _normalized_dashed_uid(instance.uid))
         entity_id = instance.id
@@ -1663,7 +1671,7 @@ def _record_from_dataset(
     to in the identity seed (see ``entities.dataset_locator_seed``)."""
     if dataset.id is not None:
         if not DATASET_IRI_RE.fullmatch(dataset.id):
-            raise ValueError("dataset id must match https://w3id.org/battinfo/dataset/{uid}.")
+            raise ValueError(f"dataset id must match {record_iri_forms('dataset')}.")
         entity_id = dataset.id
     else:
         dashed = (
@@ -1676,11 +1684,11 @@ def _record_from_dataset(
     related_cells = [*dataset.related_cell_ids, *([dataset.cell_instance_id] if dataset.cell_instance_id else [])]
     for cell_id in related_cells:
         if not CELL_IRI_RE.fullmatch(cell_id):
-            raise ValueError("related_cell_ids entries must match https://w3id.org/battinfo/cell/{uid}.")
+            raise ValueError(f"related_cell_ids entries must match {record_iri_forms('cell')}.")
     related_tests = [*dataset.related_test_ids, *([dataset.test_id] if dataset.test_id else [])]
     for test_id in related_tests:
         if not TEST_IRI_RE.fullmatch(test_id):
-            raise ValueError("related_test_ids entries must match https://w3id.org/battinfo/test/{uid}.")
+            raise ValueError(f"related_test_ids entries must match {record_iri_forms('test')}.")
 
     finalized = dataset.model_copy(deep=True)
     finalized.id = entity_id
@@ -1720,15 +1728,15 @@ def _record_from_test(
     IRI (``_test_minted_uid``).
     """
     if test.cell_instance_id is None or not CELL_IRI_RE.fullmatch(test.cell_instance_id):
-        raise ValueError("cell_id must match https://w3id.org/battinfo/cell/{uid}.")
+        raise ValueError(f"cell_id must match {record_iri_forms('cell')}.")
     if test.protocol_id is not None and not TEST_PROTOCOL_IRI_RE.fullmatch(test.protocol_id):
-        raise ValueError("protocol_id must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"protocol_id must match {record_iri_forms('spec')}.")
     for dataset_id in test.dataset_ids:
         if not DATASET_IRI_RE.fullmatch(dataset_id):
-            raise ValueError("dataset_ids entries must match https://w3id.org/battinfo/dataset/{uid}.")
+            raise ValueError(f"dataset_ids entries must match {record_iri_forms('dataset')}.")
     if test.id is not None:
         if not TEST_IRI_RE.fullmatch(test.id):
-            raise ValueError("test id must match https://w3id.org/battinfo/test/{uid}.")
+            raise ValueError(f"test id must match {record_iri_forms('test')}.")
         if test.uid is not None:
             _assert_id_matches_uid(test.id, _normalized_dashed_uid(test.uid))
         entity_id = test.id
@@ -1755,7 +1763,7 @@ def _record_from_test(
 def _record_from_test_protocol(spec: TestSpec, *, base: str = DEFAULT_RECORD_BASE) -> dict[str, Any]:
     if spec.id is not None:
         if not TEST_PROTOCOL_IRI_RE.fullmatch(spec.id):
-            raise ValueError("test protocol id must match https://w3id.org/battinfo/spec/{uid}.")
+            raise ValueError(f"test protocol id must match {record_iri_forms('spec')}.")
         entity_id = spec.id
     else:
         dashed = (
@@ -2690,7 +2698,7 @@ def save_library_cell_spec(
     manufacturer = specification.get("manufacturer")
     model = specification.get("model")
     if not isinstance(entity_id, str) or not CELL_SPEC_IRI_RE.fullmatch(entity_id):
-        raise ValueError("cell specification field 'specification.id' must match https://w3id.org/battinfo/spec/{uid}.")
+        raise ValueError(f"cell specification field 'specification.id' must match {record_iri_forms('spec')}.")
     if not isinstance(manufacturer, str) or not manufacturer.strip():
         raise ValueError("cell specification field 'specification.manufacturer' must be a non-empty string.")
     if not isinstance(model, str) or not model.strip():

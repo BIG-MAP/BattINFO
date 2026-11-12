@@ -7,6 +7,7 @@ from importlib import resources
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
+from battinfo.namespace import record_iri_forms
 from battinfo.validate.core import DEFAULT_POLICY, ValidationIssue, ValidationPolicy, ValidationReport
 
 if TYPE_CHECKING:  # jsonschema/referencing are imported lazily so `import battinfo` stays fast
@@ -217,10 +218,9 @@ def _enhance_message(error: ValidationError) -> str:
             msg = _parameter_set_flavour_message(error.instance) or msg
     if error.validator == "anyOf" and list(error.path) == ["parameter_set", "id"]:
         msg = (
-            f"{error.instance!r} is not a parameter-set IRI: parameter sets mint under "
-            "https://w3id.org/battinfo/dataset/{uid} (IDENTIFIER_POLICY 6.3), and a "
-            "https://w3id.org/battinfo/spec/{uid} IRI is accepted only for a record minted "
-            "before 2026-10-11."
+            f"{error.instance!r} is not a parameter-set IRI. Parameter sets mint under dataset/, as "
+            f"{record_iri_forms('dataset')} (IDENTIFIER_POLICY 6.3), and an IRI with spec/ in place "
+            "of dataset/ is accepted only for a record minted before 2026-10-11."
         )
     if error.validator == "additionalProperties" and list(error.path) == ["properties"]:
         msg += " Run 'battinfo properties list' to see all valid property names."

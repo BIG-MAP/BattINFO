@@ -66,7 +66,7 @@ def test_two_registry_cells_with_one_serial_raise_naming_both(tmp_path, monkeypa
         ws.add("test", type="cycling", cell="C01", data="c01.csv")
 
     message = str(excinfo.value)
-    for expected in (CELL_A, CELL_B, "lab-a", "lab-b", 'cell="https://w3id.org/battinfo/cell/'):
+    for expected in (CELL_A, CELL_B, "lab-a", "lab-b", 'by its IRI as listed above, cell="<IRI>"'):
         assert expected in message
     assert ws._ws.tests == [] and ws._ws.datasets == []
 

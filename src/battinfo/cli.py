@@ -126,7 +126,7 @@ from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.local_workspace import LocalWorkspace
-from battinfo.namespace import DEFAULT_RECORD_BASE
+from battinfo.namespace import DEFAULT_RECORD_BASE, record_iri_forms
 from battinfo.runtime import recover_notebook_runtime
 from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy
@@ -3619,7 +3619,7 @@ def batch_init(
         ...,
         "--cell-spec",
         "-t",
-        help='Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. "Energizer CR2032".',
+        help=f'Cell spec: its IRI ({record_iri_forms("spec")}) or its manufacturer and model, e.g. "Energizer CR2032".',
     ),
     count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
@@ -4113,7 +4113,7 @@ def push(
         None,
         "--cell-spec",
         "-t",
-        help="Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders.",
+        help=f"Cell spec: its IRI ({record_iri_forms('spec')}) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders.",
     ),
     cells: int | None = typer.Option(
         None, "--cells", "-n", help="Number of cells (auto-detected from filenames if omitted)."
