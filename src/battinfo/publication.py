@@ -874,7 +874,8 @@ def _agent_affiliations(agent: Mapping[str, Any]) -> list[dict[str, str]]:
 
 
 def _agent_same_as(agent: Mapping[str, Any]) -> str | None:
-    value = agent.get("sameAs") or agent.get("schema:sameAs")
+    # The models store same_as; the other two spellings are read for agents built by hand.
+    value = agent.get("same_as") or agent.get("sameAs") or agent.get("schema:sameAs")
     return str(value) if isinstance(value, str) and value.strip() else None
 
 

@@ -80,11 +80,20 @@ def test_a_value_that_only_looks_like_an_orcid_names_none(value: Any) -> None:
 
 
 def _name_identifiers(same_as: str) -> list[dict[str, str]] | None:
-    """The DataCite ``nameIdentifiers`` of a creator whose ``sameAs`` is *same_as*."""
+    """The DataCite ``nameIdentifiers`` of a creator whose ``same_as`` is *same_as*."""
     dataset = battinfo.Dataset(name="Example data", creators=[{"name": "Carberry, Josiah"}])
-    # The DataCite writer reads sameAs. The model keeps same_as, so the key is set on the stored creator.
-    dataset.creators[0]["sameAs"] = same_as
+    # Set on the stored creator, under the key the model keeps, so a value the model would refuse can be tried too.
+    dataset.creators[0]["same_as"] = same_as
     return _datacite_creators(dataset)[0].get("nameIdentifiers")
+
+
+@pytest.mark.parametrize("key", ["same_as", "sameAs"])
+def test_datacite_names_the_orcid_of_a_creator_given_to_the_model(key: str) -> None:
+    creator = {"type": "Person", "name": "Carberry, Josiah", key: ORCID_URL}
+    dataset = battinfo.Dataset(name="Example data", creators=[creator])
+    assert _datacite_creators(dataset)[0]["nameIdentifiers"] == [
+        {"nameIdentifier": ORCID_URL, "nameIdentifierScheme": "ORCID", "schemeUri": "https://orcid.org"}
+    ]
 
 
 @pytest.mark.parametrize("same_as", [ORCID_URL, f"http://www.orcid.org/{ORCID}", f"orcid.org/{ORCID}"])
