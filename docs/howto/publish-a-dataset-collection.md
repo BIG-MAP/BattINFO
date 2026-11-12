@@ -174,8 +174,11 @@ Once the preview is clean, publish as usual. The deposit carries the collection 
 result = ws.zenodo(
     title="Graphite half-cell pOCV",
     creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    allow_unchecked_iris=True,
 )
 ```
+
+Before it sends anything, `ws.zenodo()` asks the workspace's registry whether it already holds any of these records under the older form of its IRI; the workspace on this page was opened with `registry_url=None`, so there is no registry to ask, and `allow_unchecked_iris=True` tells the call to deposit the IRIs as they are, with a warning, instead of stopping.
 
 `ws.zenodo()` leaves a draft unless you pass `publish=True`. To send the records to the registry instead, use `ws.submit(submit_all=True)`. The `submit_all` flag matters here: `ws.submit()` normally sends only the records this session wrote with `ws.save()` or `ws.add("equipment")`, and datasets written with `save_dataset` are not among them.
 
@@ -221,6 +224,7 @@ result = ws.zenodo(
     bundle="single",
     archive_name="ocv-study__data.zip",
     bdf_version="1.3.0",
+    allow_unchecked_iris=True,
 )
 ```
 
