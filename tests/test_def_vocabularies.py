@@ -503,6 +503,69 @@ def test_a_publisher_without_a_name_or_homepage_is_shown_by_what_it_has(tmp_path
     assert '<a href="HTTPS://LOUD.EXAMPLE/">Loud Lab</a>' in page
 
 
+CREATORS = """
+<https://w3id.org/battinfo/def/1000> dcterms:creator
+    [ <http://xmlns.com/foaf/0.1/name> "Ada <Lab>" ;
+      <https://schema.org/affiliation> [ <http://xmlns.com/foaf/0.1/name> "Example University" ],
+          <https://ror.org/000000000> ],
+    <https://orcid.org/0000-0002-1825-0097> ,
+    "Plain Name" .
+<https://orcid.org/0000-0002-1825-0097> <http://schema.org/name> "Josiah Carberry" ;
+    <http://schema.org/affiliation> <https://ror.org/05gq02987>, "Wesleyan University" .
+<https://ror.org/05gq02987> <http://xmlns.com/foaf/0.1/name> "Brown University" .
+"""
+
+
+def test_a_page_lists_the_creators_with_their_affiliations(tmp_path: Path) -> None:
+    def_dir = _copy(tmp_path)
+    _add(def_dir, "1.1.0", CREATORS)
+    vocabulary = check.read_vocabulary(def_dir / "1000" / "1.1.0" / "vocab.ttl")
+    assert vocabulary.creators == (
+        ("Ada <Lab>", (("Example University", ""), ("https://ror.org/000000000", "https://ror.org/000000000")), ""),
+        (
+            "Josiah Carberry",
+            (("Brown University", "https://ror.org/05gq02987"), ("Wesleyan University", "")),
+            "https://orcid.org/0000-0002-1825-0097",
+        ),
+        ("Plain Name", (), ""),
+    )
+    page = site.release_page("1000", "1.1.0", vocabulary)
+    assert (
+        "<tr><th>Creators</th><td><ul>\n<li>Ada &lt;Lab&gt;, Example University, "
+        '<a href="https://ror.org/000000000">https://ror.org/000000000</a></li>\n'
+        '<li><a href="https://orcid.org/0000-0002-1825-0097">Josiah Carberry</a>, '
+        '<a href="https://ror.org/05gq02987">Brown University</a>, Wesleyan University</li>\n'
+        "<li>Plain Name</li>\n</ul></td></tr>" in page
+    )
+
+
+def test_the_battery_data_commons_release_1_0_1_names_its_creators(tmp_path: Path) -> None:
+    out = tmp_path / "out"
+    assert site.build(out) == []
+    page = (out / "def" / "1002" / "1.0.1" / "index.html").read_text(encoding="utf-8")
+    for orcid, person, ror, affiliation in (
+        ("0000-0003-4713-5220", "Marwan Hassini", "03x42jk29", "Université Gustave Eiffel"),
+        ("0000-0003-3041-1436", "Philipp Dechent", "035vnjr65", "Toshiba Europe GmbH"),
+        ("0000-0002-5900-1409", "Sara Luciani", "035vnjr65", "Toshiba Europe GmbH"),
+        ("0000-0003-4447-9319", "Shiyun Liu", "024mrxd33", "University of Leeds"),
+        ("0000-0002-8758-6109", "Simon Clark", "01f677e56", "SINTEF AS"),
+        ("0000-0001-8834-9458", "Paul Gasper", "036266993", "National Lab of the Rockies"),
+        ("0000-0002-4993-2672", "Gonçalo dos Reis", "01nrxwf90", "University of Edinburgh"),
+    ):
+        assert (
+            f'<li><a href="https://orcid.org/{orcid}">{person}</a>, '
+            f'<a href="https://ror.org/{ror}">{affiliation}</a></li>' in page
+        )
+    assert (
+        '<tr><th>Previous release</th><td><a href="https://w3id.org/battinfo/def/1002/1.0.0">1.0.0</a></td></tr>'
+        in page
+    )
+    # The ontology IRI serves the newest release.
+    assert (out / "def" / "1002" / "index.html").read_bytes() == (
+        out / "def" / "1002" / "1.0.1" / "index.html"
+    ).read_bytes()
+
+
 def test_a_page_outlines_each_concept_scheme_and_links_the_hierarchy_both_ways(tmp_path: Path) -> None:
     def_dir = _copy(tmp_path)
     _add(def_dir, "1.1.0", CONDITIONS)
