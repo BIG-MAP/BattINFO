@@ -813,7 +813,7 @@ def _orcid_same_as(name: str, orcid: str, same_as: Any) -> str:
 def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str, Any] | None:
     """A person or an organization as a dataset record holds it, or ``None`` for a value without a name.
 
-    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link.
+    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link. Raises ``ValueError`` for an organization given with an ``email``, which no schema's ``Organization`` takes, while a person keeps theirs.
     """
     if not isinstance(value, Mapping):
         return None
@@ -860,6 +860,12 @@ def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str
             out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
+        if out["type"] == "Organization":
+            # Only a Person may carry an email in every schema; an Organization has none.
+            raise ValueError(
+                f"The organization {name!r} is given an email, and BattINFO records carry no email for an "
+                "organization. Leave the email out, or give the organization's web page as url."
+            )
         out["email"] = email
     given_name = value.get("given_name") or value.get("schema:givenName")
     if isinstance(given_name, str):
