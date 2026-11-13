@@ -488,16 +488,19 @@ class Registry:
     ) -> Path:
         """Fetch a dataset's data file and return the local path.
 
-        The file is kept under the cache directory (or *dest*) and reused on
-        the next call. The download is checked against the checksum the record
-        states, in any algorithm :mod:`hashlib` supports (SHA-256 and MD5 among
-        them), and a cached copy that no longer matches is fetched again. A file
-        whose record states no checksum that can be checked is used as it is,
-        with a warning the first time. ``verify=False`` skips the check.
+        The file is kept in a folder named after the dataset's uid, under
+        ``files`` in the cache directory or under *dest* when one is given
+        (``<dest>/<uid>/<file name>``), so files of two datasets never share a
+        path. It is reused on the next call. The download is checked against
+        the checksum the record states, in any algorithm :mod:`hashlib`
+        supports (SHA-256 and MD5 among them), and a kept copy that no longer
+        matches is fetched again. A file whose record states no checksum that
+        can be checked is used as it is, with a warning the first time.
+        ``verify=False`` skips the check.
 
-        The cache folder is named after the dataset's uid, so an entry whose
-        id is not a record uid (one with ``..`` or a slash in it) raises
-        ``ValueError`` before anything is fetched.
+        Because the folder is named after the uid, an entry whose id is not a
+        record uid (one with ``..`` or a slash in it) raises ``ValueError``
+        before anything is fetched.
         """
         uid = _record_ref(dataset)[1]
         if not is_dashed_uid(uid):
@@ -507,7 +510,7 @@ class Registry:
         if not (tabular or candidates):
             raise FileNotFoundError(f"dataset {uid} has no file with role {role!r}")
         chosen = (tabular or candidates)[0]
-        folder = Path(dest) if dest else self.cache_dir / "files" / uid
+        folder = (Path(dest) if dest else self.cache_dir / "files") / uid
         target = _cache_file(folder, chosen.name)
         expected = _stated_digest(chosen)
         algorithm = _hash_name(chosen.checksum_algorithm) if verify and expected else None
