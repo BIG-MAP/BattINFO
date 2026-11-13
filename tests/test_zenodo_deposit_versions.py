@@ -23,6 +23,9 @@
   it, and a record on a published copy only once the new version is
   published. A file that changed is described as the deposit holds it, with
   its own sha256 and size, in the graph, the RO-Crate and the record.
+- The graph of a new version gives each member dataset the URL of the file
+  that version holds, a file it took over unchanged included, and never one
+  of the version before.
 - A deposit that zips files an earlier one held as themselves points their
   records back at the local files, so no record names a file URL the deposit
   does not hold, and ``ws.submit()`` refuses them as after any zipped deposit.
@@ -651,6 +654,78 @@ def test_each_version_names_its_concept_and_the_version_it_follows(tmp_path: Pat
         "dcterms:isVersionOf": f"{records}/{concept}",
         "dcat:previousVersion": f"{records}/{third.record_id}",
     }
+
+
+# ── The file URLs a version's graph gives its datasets ───────────────────────
+
+
+def _members(graph: dict) -> list[dict]:
+    """The member dataset nodes of a deposit graph."""
+    return [node for node in graph["@graph"] if "dcat:Dataset" in (node.get("@type") or [])]
+
+
+def _dataset_urls(graph: dict) -> dict[str, list[str]]:
+    """The ``schema:url`` values an RDF reader finds on each member dataset of a deposit graph."""
+    from rdflib import Graph, URIRef
+
+    rdf = Graph().parse(data=json.dumps(graph), format="json-ld")
+    url = URIRef("https://schema.org/url")
+    return {
+        node["@id"]: sorted(str(value) for value in rdf.objects(URIRef(node["@id"]), url)) for node in _members(graph)
+    }
+
+
+@pytest.mark.parametrize("bundle", ["by_kind", "single"], ids=["each-file-as-itself", "zipped"])
+def test_the_graph_of_a_new_version_names_the_files_that_version_holds(
+    tmp_path: Path, zenodo: _Zenodo, bundle: str
+) -> None:
+    """The records still name the copies of the version before when the graph of the new one is built."""
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    first = _deposit(ws, publish=True)  # each file as itself
+    changed, gone = tmp_path / "C01" / "cycling.csv", tmp_path / "C02" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    gone.unlink()  # the new version takes this file over from the version before, unchanged
+
+    # First as a draft, which leaves the records on the published copies, then published.
+    for publish in (False, True):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # a new version or a reused draft says so; not what is tested here
+            second = _deposit(ws, publish=publish, bundle=bundle)
+        assert second.record_id != first.record_id and second.published is publish
+        graph = zenodo.graph(int(second.record_id))
+        held = zenodo.deposit(int(second.record_id)).files
+        base = f"{HOSTS['production']}/records/{second.record_id}/files/"
+        urls = _dataset_urls(graph)
+        assert len(urls) == 2
+        for node in _members(graph):
+            [dist] = node["dcat:distribution"]
+            # The dataset's own URL is the file this version holds, as its download URL is.
+            assert urls[node["@id"]] == [dist["dcat:downloadURL"]]
+            assert dist["dcat:downloadURL"].startswith(base) and unquote(dist["dcat:downloadURL"][len(base) :]) in held
+            # And no URL of the dataset names a file of the version before.
+            assert f"/records/{first.record_id}/" not in json.dumps(node)
+        if bundle == "single":
+            # The changed file is in the archive, and the one taken over stays a file of its own.
+            [kept] = [name for name in held if name.endswith("cycling.csv")]
+            assert sorted(url for [url] in urls.values()) == sorted([f"{base}data.zip", f"{base}{kept}"])
+
+
+def test_the_graph_of_a_first_version_gives_its_datasets_the_urls_it_did(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws)
+    url = f"{HOSTS['production']}/records/{draft.record_id}/files/cycling.csv"
+    # The records named local files when this graph was built, and a local file is no schema:url.
+    graph = zenodo.graph(int(draft.record_id))
+    assert list(_dataset_urls(graph).values()) == [[]] and _download_urls(graph) == [url]
+
+    # Run again, and then published, the records name the draft's own file.
+    for publish in (False, True):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # a reused draft says so; not what is tested here
+            again = _deposit(ws, publish=publish)
+        assert again.record_id == draft.record_id
+        graph = zenodo.graph(int(again.record_id))
+        assert list(_dataset_urls(graph).values()) == [[url]] and _download_urls(graph) == [url]
 
 
 # ── Versions, retries and a new record ────────────────────────────────────────
@@ -1574,6 +1649,9 @@ def test_the_flag_archives_files_on_r2_and_warns_for_the_private_ones(
     assert sorted(content for name, content in deposit.files.items() if name.endswith("cycling.csv")) == data
     graph_urls = _download_urls(zenodo.graph(int(result.record_id)))
     assert len(graph_urls) == 2 and all(url.startswith(f"{HOSTS['production']}/records/") for url in graph_urls)
+    # The public copy stays the dataset's own URL in the graph, as it does in the record.
+    own_urls = [url for urls in _dataset_urls(zenodo.graph(int(result.record_id))).values() for url in urls]
+    assert own_urls == [public_url]
     assert set(_locations(ws)) == locations
     ws.save()
     assert set(_locations(ws)) == locations
