@@ -12622,6 +12622,7 @@ class AuthoringWorkspace:
 
     def _load_test_spec(self, path: Path) -> Any:
         from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
+        from battinfo.testmethod import _cycles_count  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         # Keys starting with "_" are in-file comments written by ws.template()
@@ -12654,6 +12655,12 @@ class AuthoringWorkspace:
 
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
+        cycles = raw.get("cycles")
+        if cycles is not None:
+            try:
+                cycles = _cycles_count(cycles)
+            except ValueError as exc:
+                raise ValueError(f"{path.name}: {exc}. Nothing was loaded.") from None
 
         # The protocol followed: the record keeps its URL (protocol_url) but has no
         # field for its name, so a named protocol is kept as a note.
@@ -12709,7 +12716,7 @@ class AuthoringWorkspace:
             type=test_type,
             description=raw.get("description"),
             experiment=steps,
-            cycles=raw.get("cycles"),
+            cycles=cycles,
             method=raw.get("method"),
             version=raw.get("version"),
             protocol_url=protocol_info.get("url"),
