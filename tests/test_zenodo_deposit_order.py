@@ -6,6 +6,11 @@
   refuse before any request, and ws.publish() before it saves or uploads.
 - Every ORCID reaches Zenodo as a bare id, and the deposit graph and the
   RO-Crate with one ``https://orcid.org/`` in front, however it was given.
+- Each person reaches the Zenodo form with ``name``, ``affiliation``,
+  ``orcid`` and a contributor's ``type`` only. Several affiliations go as one
+  text and an organisation dict as its name, while the graph and the RO-Crate
+  keep each organisation and its ROR. The licence goes as its normalised id,
+  and people the form took as given before reach it byte for byte as before.
 - A draft gets the check a publish gets, before the deposit exists. The
   check reads the RO-Crate too, and what it finds there, or a missing
   publish extra, is a warning: the deposit goes ahead.
@@ -372,6 +377,151 @@ def test_an_invalid_orcid_is_refused_naming_its_creator(tmp_path: Path, api: _Ze
     with pytest.raises(ValueError, match=r"creator 'Lovelace, Ada': invalid ORCID iD"):
         getattr(ws, call)(creators=creators, **kwargs)
     assert api.requests == []
+
+
+# ── The people and the licence on the form ────────────────────────────────────
+
+
+ROR = "https://ror.org/01abcde23"
+
+# What the form got for these people and the licence before it was built from Zenodo's fields,
+# serialised as the client sends it.
+_FORM_BEFORE = {
+    "argument": '[{"name": "Doe, Jane", "affiliation": "Example Lab"}, {"name": "Lovelace, Ada", "orcid": "0000-0002-1825-0097"}]',
+    "contributors": '[{"orcid": "0000-0002-1825-0097", "name": "Lovelace, Ada", "affiliation": "SINTEF"}]',
+    "config": '[{"name": "Roe, Rick", "affiliation": "Config Lab"}]',
+}
+_FORM_CONTRIBUTORS_BEFORE = (
+    '[{"name": "Turing, Alan", "orcid": "0000-0002-1694-233X", "type": "DataCurator"}, '
+    '{"name": "Roe, Rick", "affiliation": "Example Lab", "type": "ProjectMember"}]'
+)
+
+
+@pytest.mark.parametrize("source", ["argument", "contributors", "config"])
+def test_people_the_form_took_as_given_reach_it_byte_for_byte_as_before(
+    tmp_path: Path, api: _ZenodoAPI, user_config: Path, source: str
+) -> None:
+    user_config.parent.mkdir(parents=True)
+    user_config.write_text('creator: "Roe, Rick; Config Lab"\n', encoding="utf-8")
+    ws = _workspace(tmp_path, save=False)
+    if source == "contributors":
+        ws.contributor(ORCID, name="Lovelace, Ada", affiliation="SINTEF")
+    ws.save()
+    creators = [CREATORS[0], {"name": "Lovelace, Ada", "orcid": ORCID}] if source == "argument" else None
+    contributors = [
+        {"name": "Turing, Alan", "orcid": ORCID_X, "type": "DataCurator"},
+        {"name": "Roe, Rick", "affiliation": "Example Lab"},
+    ]
+    ws.zenodo(token="placeholder", creators=creators, contributors=contributors)
+
+    assert api.metadata is not None
+    assert json.dumps(api.metadata["creators"]) == _FORM_BEFORE[source]
+    assert json.dumps(api.metadata["contributors"]) == _FORM_CONTRIBUTORS_BEFORE
+    assert json.dumps(api.metadata["license"]) == '"cc-by-4.0"'
+
+
+@pytest.mark.parametrize(
+    ("creator", "on_the_form"),
+    [
+        pytest.param(
+            {"name": "Doe, Jane", "affiliation": ["Example Lab", "Second Lab"]},
+            {"name": "Doe, Jane", "affiliation": "Example Lab; Second Lab"},
+            id="affiliation-list",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "affiliation": {"type": "Organization", "name": "Example Lab", "same_as": ROR}},
+            {"name": "Doe, Jane", "affiliation": "Example Lab"},
+            id="affiliation-object",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "affiliation": [{"name": "Example Lab"}, "Second Lab"]},
+            {"name": "Doe, Jane", "affiliation": "Example Lab; Second Lab"},
+            id="affiliation-objects-and-text",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "affiliation": "Example Lab"},
+            {"name": "Doe, Jane", "affiliation": "Example Lab"},
+            id="affiliation-text",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "affiliation": "Example Lab", "affiliation_ror": ROR},
+            {"name": "Doe, Jane", "affiliation": "Example Lab"},
+            id="ror",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "orcid": f"https://orcid.org/{ORCID}", "email": "jane@example.org"},
+            {"name": "Doe, Jane", "orcid": ORCID},
+            id="orcid-url-and-email",
+        ),
+        pytest.param(
+            {"name": "Doe, Jane", "orcid": ORCID, "type": "DataCurator"},
+            {"name": "Doe, Jane", "orcid": ORCID},
+            id="orcid-bare-and-a-type",
+        ),
+    ],
+)
+def test_a_creator_reaches_the_form_with_the_fields_zenodo_takes_for_a_person(
+    tmp_path: Path, api: _ZenodoAPI, creator: dict, on_the_form: dict
+) -> None:
+    ws = _workspace(tmp_path)
+    ws.zenodo(token="placeholder", creators=[creator])
+    assert api.metadata is not None and api.metadata["creators"] == [on_the_form]
+
+
+def test_a_contributor_reaches_the_form_with_its_type_and_the_fields_zenodo_takes(
+    tmp_path: Path, api: _ZenodoAPI
+) -> None:
+    ws = _workspace(tmp_path)
+    contributors = [
+        {"name": "Poe, Pat", "affiliation": {"name": "Third Lab"}, "email": "pat@example.org"},
+        {
+            "name": "Turing, Alan",
+            "orcid": f"https://orcid.org/{ORCID_X}",
+            "type": "DataCurator",
+            "affiliation": ["Example Lab", "Second Lab"],
+            "affiliation_ror": ROR,
+        },
+    ]
+    ws.zenodo(token="placeholder", creators=CREATORS, contributors=contributors)
+    assert api.metadata is not None and api.metadata["contributors"] == [
+        {"name": "Poe, Pat", "affiliation": "Third Lab", "type": "ProjectMember"},
+        {"name": "Turing, Alan", "orcid": ORCID_X, "type": "DataCurator", "affiliation": "Example Lab; Second Lab"},
+    ]
+
+
+def test_the_graph_and_the_crate_keep_each_organisation_the_form_names_in_one_text(
+    tmp_path: Path, api: _ZenodoAPI
+) -> None:
+    ws = _workspace(tmp_path)
+    creator = {
+        "name": "Doe, Jane",
+        "orcid": f"https://orcid.org/{ORCID}",
+        "affiliation": ["Example Lab", "Second Lab"],
+        "affiliation_ror": ROR,
+    }
+    ws.zenodo(token="placeholder", creators=[creator])
+
+    assert api.metadata is not None
+    assert api.metadata["creators"] == [{"name": "Doe, Jane", "orcid": ORCID, "affiliation": "Example Lab; Second Lab"}]
+    [node] = _catalog(api.graph())["schema:creator"]
+    assert node["schema:affiliation"] == [
+        {"@type": "schema:Organization", "schema:name": "Example Lab", "@id": ROR},
+        {"@type": "schema:Organization", "schema:name": "Second Lab"},
+    ]
+    entities = api.crate_entities()
+    assert entities[f"https://orcid.org/{ORCID}"]["affiliation"] == [{"@id": ROR}, {"@id": "#org-second-lab"}]
+    assert entities[ROR]["name"] == "Example Lab"
+
+
+@pytest.mark.parametrize("license", ["CC-BY-4.0", "cc-by-4.0"])
+def test_the_form_gets_the_normalised_licence_however_it_is_spelled(
+    tmp_path: Path, api: _ZenodoAPI, license: str
+) -> None:
+    ws = _workspace(tmp_path)
+    ws.zenodo(token="placeholder", creators=CREATORS, license=license)
+    assert api.metadata is not None and api.metadata["license"] == "cc-by-4.0"
+    # The graph states the licence as it did.
+    assert _catalog(api.graph())["schema:license"] == {"@id": "https://spdx.org/licenses/CC-BY-4.0.html"}
 
 
 # ── The RO-Crate check ───────────────────────────────────────────────────────
