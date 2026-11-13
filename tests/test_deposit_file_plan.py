@@ -8,6 +8,9 @@ finds its file by its resolved path, never by its name.
 - Two files that share a name, or whose names differ only in case or Unicode
   normalisation, are two files in the deposit, in each dataset's own links.
 - A file that two distributions name is uploaded once.
+- A file inside a zip archive is a node of its own in the deposit graph, named
+  by the archive's URL with the file's name there as the fragment, and it
+  downloads from the archive's URL.
 - A data file never takes the name of the deposit's own metadata files.
 - A file name with a space, ``#``, ``?``, ``%`` or a non-ASCII character is
   percent-encoded in every URL, and an upload the HTTP layer refuses is a
@@ -35,6 +38,7 @@ import pytest
 
 import battinfo
 from battinfo import zenodo as zmod
+from battinfo._util import url_segment
 from battinfo.ws import AuthoringWorkspace
 from battinfo.zenodo import ZenodoClient, ZenodoError
 
@@ -330,6 +334,130 @@ def test_a_single_archive_deposit_holds_one_zip_of_every_file(tmp_path: Path, ze
     [entity] = zenodo.crate_files()
     assert entity["@id"] == "cells__data.zip"
     assert entity["sha256"] == _sha256(zenodo.uploaded["cells__data.zip"])
+
+
+# ── The files of an archive in the deposit graph ─────────────────────────────
+
+_DCAT = "http://www.w3.org/ns/dcat#"
+_PROV = "http://www.w3.org/ns/prov#"
+_SPDX = "http://spdx.org/rdf/terms#"
+
+
+def _rdf(graph: dict):  # noqa: ANN202
+    """A deposit graph as an RDF reader holds it."""
+    from rdflib import Graph
+
+    return Graph().parse(data=json.dumps(graph), format="json-ld")
+
+
+def _distribution_nodes(rdf) -> set[str]:  # noqa: ANN001
+    from rdflib import RDF, URIRef
+
+    return {str(node) for node in rdf.subjects(RDF.type, URIRef(f"{_DCAT}Distribution"))}
+
+
+@pytest.mark.parametrize(("bundle", "archive"), [("single", "data.zip"), ("by_kind", "cycling.zip")])
+def test_each_file_in_an_archive_is_a_node_of_its_own(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch, bundle: str, archive: str
+) -> None:
+    """Every file of an archive downloads from the archive's URL, so that URL names none of them."""
+    from rdflib import URIRef
+
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # by_kind zips three files
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv", "C03": "C03/cell 03.csv"})
+    local = _local_files(ws)
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle=bundle)
+
+    archive_url = f"{RECORD_URL}/files/{archive}"
+    with zipfile.ZipFile(io.BytesIO(zenodo.uploaded[archive])) as packed:
+        members = {info.filename: packed.read(info) for info in packed.infolist()}
+    rdf = _rdf(zenodo.graph())
+
+    # One node per file: the archive's URL, then the file's name in the archive.
+    nodes = _distribution_nodes(rdf)
+    assert len(nodes) == 3 and all(node.startswith(f"{archive_url}#") for node in nodes)
+    assert {unquote(node.partition("#")[2]) for node in nodes} == set(members)
+    assert {f"{archive_url}#cycling.csv", f"{archive_url}#cell%2003.csv"} < nodes
+    # Two files called cycling.csv, in two folders, are two nodes.
+    assert sum(node.endswith("-cycling.csv") for node in nodes) == 1
+
+    # Each dataset has its own, which states that file's name, checksum, size and test.
+    tests = set()
+    for iri, path in local.items():
+        data = path.read_bytes()
+        [node] = rdf.objects(URIRef(iri), URIRef(f"{_DCAT}distribution"))
+        [name] = rdf.objects(node, URIRef("https://schema.org/name"))
+        assert str(node) in nodes and unquote(str(node).partition("#")[2]) == str(name)
+        assert members[str(name)] == data
+        assert [str(url) for url in rdf.objects(node, URIRef(f"{_DCAT}downloadURL"))] == [archive_url]
+        [checksum] = rdf.objects(node, URIRef(f"{_SPDX}checksum"))
+        assert [str(v) for v in rdf.objects(checksum, URIRef(f"{_SPDX}checksumValue"))] == [_sha256(data)]
+        assert [int(size) for size in rdf.objects(node, URIRef(f"{_DCAT}byteSize"))] == [len(data)]
+        [test] = rdf.objects(node, URIRef(f"{_PROV}wasGeneratedBy"))
+        tests.add(test)
+    assert len(tests) == 3
+    # The archive is what a reader downloads, and the graph describes it as no file.
+    assert not list(rdf.predicate_objects(URIRef(archive_url)))
+
+
+def test_a_file_deposited_as_itself_is_the_node_its_download_url_names(tmp_path: Path, zenodo: _FakeZenodo) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv", "C03": "C03/cell 03.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS)
+
+    names = zenodo.data_names()
+    assert len(names) == 3  # under the threshold, so nothing is zipped
+    assert _distribution_nodes(_rdf(zenodo.graph())) == {f"{RECORD_URL}/files/{url_segment(name)}" for name in names}
+    for dists in _distributions(zenodo.graph()).values():
+        [dist] = dists
+        assert dist["@id"] == dist["dcat:downloadURL"] and "#" not in dist["@id"]
+
+
+def test_a_processed_file_in_an_archive_names_the_raw_file_it_was_derived_from(tmp_path: Path) -> None:
+    """Both files are in one archive, and the link goes from one file's node to the other's."""
+    from rdflib import URIRef
+
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv"})
+    raw = tmp_path / "C01" / "cycling.ndax"
+    raw.write_bytes(b"raw instrument file")
+    [saved] = (ws._ws.source_root / "dataset").glob("*.json")
+    record = json.loads(saved.read_text(encoding="utf-8"))
+    record["dataset"]["distributions"].append(
+        {"content_url": raw.as_uri(), "encoding_format": "application/octet-stream", "role": "raw"}
+    )
+    saved.write_text(json.dumps(record), encoding="utf-8")
+    preview = json.loads(ws.preview_jsonld(creators=CREATORS, bundle="single").read_text(encoding="utf-8"))
+
+    archive_url = "https://zenodo.org/records/RECORD_ID/files/data.zip"
+    rdf = _rdf(preview)
+    assert _distribution_nodes(rdf) == {f"{archive_url}#cycling.csv", f"{archive_url}#cycling.ndax"}
+    derived = URIRef(f"{_PROV}wasDerivedFrom")
+    assert list(rdf.subject_objects(derived)) == [
+        (URIRef(f"{archive_url}#cycling.csv"), URIRef(f"{archive_url}#cycling.ndax"))
+    ]
+
+
+def test_a_file_in_a_kind_archive_of_a_package_is_a_node_of_its_own(tmp_path: Path) -> None:
+    """Without a file plan, a file whose name is not deposited is in ``<kind>.zip`` when that is."""
+    from battinfo.ws import _read_deposit_record_sets
+
+    ws = _workspace(tmp_path, {"C01": "C01/first.csv", "C02": "C02/second 2.csv"})
+    record_sets, _replaced = _read_deposit_record_sets(ws._ws.source_root)
+    graph = AuthoringWorkspace._assemble_zenodo_jsonld(
+        record_sets,
+        zenodo_record_id=7,
+        prereserved_doi="10.5281/zenodo.7",
+        record_url=RECORD_URL,
+        data_filenames=["cycling.zip"],
+        title="Two cells",
+        creators=CREATORS,
+        license="cc-by-4.0",
+    )
+
+    archive_url = f"{RECORD_URL}/files/cycling.zip"
+    assert _distribution_nodes(_rdf(graph)) == {f"{archive_url}#first.csv", f"{archive_url}#second%202.csv"}
+    for dists in _distributions(graph).values():
+        [dist] = dists
+        assert dist["dcat:downloadURL"] == archive_url
 
 
 def test_the_preview_names_the_single_archive_the_deposit_holds(tmp_path: Path) -> None:

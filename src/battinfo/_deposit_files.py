@@ -224,6 +224,17 @@ class DepositFile:
         """The download URL of the deposit file that holds this file: the file itself, or its archive."""
         return f"{files_base}/{url_segment(self.archive) if self.archive else self.segment}"
 
+    def node_id(self, files_base: str) -> str:
+        """The ``@id`` of the node that describes this file in the deposit graph.
+
+        Its download URL when the file is deposited as itself. A file inside
+        an archive takes the archive's URL with its own name there, percent-
+        encoded, as the fragment (``.../files/data.zip#C01.csv``), since the
+        archive's URL alone would make one node of every file it holds.
+        """
+        url = self.url(files_base)
+        return f"{url}#{self.segment}" if self.archive else url
+
     def stated_by(self, checksum: object) -> bool:
         """True when a record's ``checksum`` block states this file's sha256 or md5.
 
