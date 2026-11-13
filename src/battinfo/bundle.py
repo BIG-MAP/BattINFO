@@ -32,7 +32,7 @@ from battinfo._util import (
 )
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
 from battinfo.namespace import BATTINFO_ROOT, parse_record_iri, record_iri_forms, record_iri_pattern
-from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
+from battinfo.testmethod import Quantity, Step, _cycles_count, compute_facets, parse_experiment
 
 PathLike = str | Path
 
@@ -813,7 +813,7 @@ def _orcid_same_as(name: str, orcid: str, same_as: Any) -> str:
 def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str, Any] | None:
     """A person or an organization as a dataset record holds it, or ``None`` for a value without a name.
 
-    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link.
+    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link. Raises ``ValueError`` for an organization given with an ``email``, which no schema's ``Organization`` takes, while a person keeps theirs.
     """
     if not isinstance(value, Mapping):
         return None
@@ -860,6 +860,12 @@ def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str
             out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
+        if out["type"] == "Organization":
+            # Only a Person may carry an email in every schema; an Organization has none.
+            raise ValueError(
+                f"The organization {name!r} is given an email, and BattINFO records carry no email for an "
+                "organization. Leave the email out, or give the organization's web page as url."
+            )
         out["email"] = email
     given_name = value.get("given_name") or value.get("schema:givenName")
     if isinstance(given_name, str):
@@ -2696,7 +2702,8 @@ class TestSpec(BundleJsonModel):
 
     Give the steps as PyBaMM-style strings with ``experiment=``
     (``["Charge at C/3 until 4.2 V", "Discharge at C/10 until 2.5 V"]``,
-    plus ``cycles=``) or as structured ``method`` steps, and the test type with
+    plus ``cycles=``, any whole number such as ``3`` or ``"3"``) or as
+    structured ``method`` steps, and the test type with
     ``kind=``. Each run of the procedure is a :class:`Test` that points at it:
     ``Test(protocol=spec, ...)`` or ``ws.add("test", spec=spec, ...)``.
     Save it with ``battinfo.save_test_spec``. A misspelled argument raises
@@ -2800,13 +2807,16 @@ class TestSpec(BundleJsonModel):
         if not isinstance(data, Mapping):
             return data
         out = dict(data)
+        # Any whole number counts ("100", 100.0, numpy.int64(100)); anything else raises.
+        cycles = out.get("cycles")
+        if cycles is not None:
+            cycles = _cycles_count(cycles)
         if not out.get("method"):
             source = out.get("experiment")
             if source is None:
                 source = out.get("steps")
             if source and all(isinstance(s, str) for s in source):
-                cycles = out.get("cycles")
-                out["method"] = parse_experiment(list(source), cycles if isinstance(cycles, int) else None)
+                out["method"] = parse_experiment(list(source), cycles)
         # Authoring-only keys are not model fields (extra="forbid").
         for key in ("experiment", "steps", "cycles"):
             out.pop(key, None)

@@ -60,9 +60,11 @@ To fetch a file without loading it:
 
 <!-- doc-snippet: skip -->
 ```python
-path = reg.download(dataset_id)             # into the cache
-path = reg.download(dataset_id, dest="data/raw")
+path = reg.download(dataset_id)                    # <cache>/files/<uid>/<file name>
+path = reg.download(dataset_id, dest="data/raw")   # data/raw/<uid>/<file name>
 ```
+
+Each dataset's file goes in a folder named after the dataset's uid, the last part of its IRI (`xt2a-nsda-njps-9n50` in `https://w3id.org/battinfo/dataset/xt2a-nsda-njps-9n50`), so two datasets whose files have the same name never overwrite each other. A file already in that folder is used again, after the same checksum check as a new download.
 
 ## Check what the columns mean
 
@@ -171,6 +173,6 @@ ws.submit(only="dataset", submit_all=True)
 
 ## Where things are kept
 
-Downloads and the catalog go to the user cache directory (`~/.cache/battinfo`, or `%LOCALAPPDATA%\battinfo` on Windows). Set `BATTINFO_CACHE_DIR`, or pass `cache_dir=` to `Registry`, to put them somewhere else. `BATTINFO_REGISTRY_URL` changes the default registry.
+Downloads and the catalog go to the user cache directory (`~/.cache/battinfo`, or `%LOCALAPPDATA%\battinfo` on Windows). A download sits in `files/<uid>/` there, or in `<dest>/<uid>/` when you pass `dest=`. Set `BATTINFO_CACHE_DIR`, or pass `cache_dir=` to `Registry`, to put them somewhere else. `BATTINFO_REGISTRY_URL` changes the default registry.
 
 The public registry can take half a minute to answer the first request after it has been idle. Later requests are fast.

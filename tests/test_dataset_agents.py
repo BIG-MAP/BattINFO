@@ -3,6 +3,8 @@
 An organization of a dataset, cell, test or test-protocol record may carry its BattINFO organization IRI as ``id``, as in every other record type. The ``Dataset`` model keeps a valid one on the publisher, the creators, the funders and a person's affiliations, and refuses any other value. The JSON-LD writers make it the organization node's ``@id``.
 
 A person's ``orcid`` is saved as the ``same_as`` link, the one place the dataset schema has for it. A publisher or an affiliation that states no type is an organization, whatever its other keys.
+
+An organization given with an email is refused when the model is made, since no schema's ``Organization`` takes one, and a person keeps their email.
 """
 
 from __future__ import annotations
@@ -324,7 +326,7 @@ def test_an_organizations_orcid_stays_as_it_was_given() -> None:
 
 @pytest.mark.parametrize(
     "extra",
-    [{"email": "data@example.org"}, {"given_name": "Example"}, {"orcid": ORCID}, {"affiliation": {"name": "Parent"}}],
+    [{"given_name": "Example"}, {"orcid": ORCID}, {"affiliation": {"name": "Parent"}}],
 )
 def test_a_publisher_without_a_type_is_an_organization_whatever_its_keys(extra: dict[str, Any]) -> None:
     dataset = Dataset(name="data", publisher={"name": "Example Lab", **extra})
@@ -334,7 +336,7 @@ def test_a_publisher_without_a_type_is_an_organization_whatever_its_keys(extra: 
 
 
 def test_an_affiliation_without_a_type_is_an_organization() -> None:
-    person = {"name": "Doe, Jane", "affiliation": {"name": "Example Lab", "email": "data@example.org"}}
+    person = {"name": "Doe, Jane", "affiliation": {"name": "Example Lab", "given_name": "Example"}}
     dataset = Dataset(name="data", creators=[person])
     assert dataset.creators[0]["affiliation"]["type"] == "Organization"
 
@@ -346,7 +348,7 @@ def test_a_stated_type_is_kept_and_agents_that_worked_are_typed_as_before() -> N
         creators=[
             {"name": "SINTEF"},
             {"name": "Doe, Jane", "email": "jane@example.org"},
-            {"type": "Organization", "name": "Example Lab", "email": "data@example.org"},
+            {"type": "Organization", "name": "Example Lab", "given_name": "Example"},
             {"@type": "schema:Person", "name": "Roe, Richard"},
         ],
     )
@@ -359,10 +361,72 @@ def test_a_stated_type_is_kept_and_agents_that_worked_are_typed_as_before() -> N
     }
 
 
-def test_a_publisher_with_an_email_is_refused_for_the_email_alone(tmp_path: Path) -> None:
-    """The schema's Organization has no email, so the save names that key and no longer the type."""
-    dataset = _dataset(publisher={"name": "Example Lab", "email": "data@example.org"})
-    assert dataset.publisher == {"name": "Example Lab", "type": "Organization", "email": "data@example.org"}
-    with pytest.raises(ValueError, match="email") as refused:
-        _saved(dataset, tmp_path)
-    assert "'Organization' was expected" not in str(refused.value)
+# ── An organization carries no email ─────────────────────────────────────────
+
+EMAIL_REFUSAL = (
+    "The organization 'Example Lab' is given an email, and BattINFO records carry no email for an organization. "
+    "Leave the email out, or give the organization's web page as url."
+)
+
+
+@pytest.mark.parametrize(
+    "fields",
+    [
+        pytest.param({"publisher": {"name": "Example Lab", "email": "lab@example.org"}}, id="publisher"),
+        pytest.param(
+            {"publisher": {"type": "Organization", "name": "Example Lab", "schema:email": "lab@example.org"}},
+            id="publisher-typed",
+        ),
+        pytest.param(
+            {"creators": [{"type": "Organization", "name": "Example Lab", "email": "lab@example.org"}]}, id="creator"
+        ),
+        pytest.param(
+            {"funders": [{"@type": "schema:Organization", "name": "Example Lab", "email": "lab@example.org"}]},
+            id="funder",
+        ),
+        pytest.param(
+            {"creators": [{"name": "Doe, Jane", "affiliation": {"name": "Example Lab", "email": "lab@example.org"}}]},
+            id="creator-affiliation",
+        ),
+        pytest.param(
+            {
+                "funders": [
+                    {
+                        "type": "Person",
+                        "name": "Patron, Pat",
+                        "email": "pat@example.org",
+                        "affiliation": [{"name": "Second Lab"}, {"name": "Example Lab", "email": "lab@example.org"}],
+                    }
+                ]
+            },
+            id="funder-affiliation",
+        ),
+    ],
+)
+def test_an_organization_with_an_email_is_refused_when_the_dataset_is_made(fields: dict[str, Any]) -> None:
+    with pytest.raises(ValueError, match=re.escape(EMAIL_REFUSAL)):
+        _dataset(**fields)
+
+
+def test_a_stored_record_whose_publisher_has_an_email_does_not_load() -> None:
+    record = _saved_record_with(publisher={"type": "Organization", "name": "Example Lab", "email": "lab@example.org"})
+    with pytest.raises(ValueError, match=re.escape(EMAIL_REFUSAL)):
+        Dataset.from_record(record)
+
+
+def test_a_persons_email_is_kept_and_saved_beside_an_organization_with_a_url(tmp_path: Path) -> None:
+    lab = {"name": "Example Lab", "url": "https://example.org"}
+    dataset = _dataset(
+        publisher=lab,
+        creators=[{"name": "Doe, Jane", "email": "jane@example.org", "affiliation": lab}],
+        funders=[{"name": "Patron, Pat", "email": "pat@example.org"}],
+    )
+    organization = {**lab, "type": "Organization"}
+    assert dataset.publisher == organization
+    # A creator or funder that states no type and has an email is a person, as before.
+    assert dataset.creators == [
+        {"name": "Doe, Jane", "type": "Person", "email": "jane@example.org", "affiliation": organization}
+    ]
+    assert dataset.funders == [{"name": "Patron, Pat", "type": "Person", "email": "pat@example.org"}]
+    record = _saved(dataset, tmp_path)
+    assert validate_schema_data(record, schema_for_rel_path("dataset.schema.json")).issues == ()

@@ -1035,9 +1035,9 @@ class Workspace:
                         "test-protocol authoring JSON 'experiment'/'steps' must be a list of PyBaMM-style strings."
                     )
                 method_fields["experiment"] = list(authored)
-                cycles = payload.get("cycles")
-                if isinstance(cycles, int):
-                    method_fields["cycles"] = cycles
+        if payload.get("cycles") is not None:
+            # TestSpec reads any whole number and refuses anything else.
+            method_fields["cycles"] = payload["cycles"]
 
         return TestSpec(
             name=name,
@@ -1289,8 +1289,8 @@ class Workspace:
             authored = experiment if experiment is not None else steps
             if authored:
                 fields["experiment"] = list(authored)
-                if cycles is not None:
-                    fields["cycles"] = cycles
+        if cycles is not None:
+            fields["cycles"] = cycles
         protocol = TestSpec(**fields)
         self.test_specs.append(protocol)
         return protocol

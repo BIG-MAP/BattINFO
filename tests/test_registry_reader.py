@@ -6,6 +6,7 @@ by replacing ``Registry._open``, so no test touches the network.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import io
 import json
@@ -57,6 +58,7 @@ class FakeRegistry:
         self.calls: list[str] = []
         self.revision = 1
         self.file_bytes = CSV_BYTES
+        self.file_bytes_by_url: dict[str, bytes] = {}  # files that differ from file_bytes
         self.summaries: dict[str, list[dict]] = {
             "dataset": [
                 self._summary(
@@ -159,7 +161,7 @@ class FakeRegistry:
         self.calls.append(url)
         parsed = urllib.parse.urlparse(url)
         if url.startswith(FILES):
-            return _Response(self.file_bytes)
+            return _Response(self.file_bytes_by_url.get(url, self.file_bytes))
         query = urllib.parse.parse_qs(parsed.query)
         if parsed.path == "/health":
             return _Response(json.dumps({"corpus_revision": self.revision}).encode())
@@ -292,12 +294,14 @@ def test_download_reports_a_dataset_with_no_data_file(reg: Registry) -> None:
 def test_download_refuses_an_entry_whose_id_is_not_a_uid(
     reg: Registry, fake: FakeRegistry, tmp_path: Path, hostile: str
 ) -> None:
-    """The cache folder is named after the dataset's uid, so the uid may not climb out of it."""
+    """The download folder is named after the dataset's uid, in the cache or under dest, so the uid may not climb out of it."""
     entry = {key: value for key, value in fake.details["dataset/aaaa-bbbb-cccc-dddd"].items() if key != "canonical_iri"}
     entry["canonical_id"] = hostile
 
     with pytest.raises(ValueError, match="not a record uid"):
         reg.download(entry)
+    with pytest.raises(ValueError, match="not a record uid"):
+        reg.download(entry, dest=tmp_path / "data")
 
     assert not any(url.startswith(FILES) for url in fake.calls)
     assert [path for path in tmp_path.rglob("*") if path.is_file()] == []
@@ -403,6 +407,61 @@ def test_download_without_verify_does_not_warn(reg: Registry, fake: FakeRegistry
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         assert reg.download(DATASET, verify=False).read_bytes() == CSV_BYTES
+
+
+# ── Downloads into dest ───────────────────────────────────────────────────────
+
+OTHER_DATASET = "https://w3id.org/battinfo/dataset/wwww-xxxx-yyyy-zzzz"
+
+
+def _add_dataset_with_the_same_file_name(fake: FakeRegistry, *, checksum: bool) -> None:
+    """A second dataset whose data file has the first one's name and other bytes."""
+    entry = copy.deepcopy(fake.details["dataset/aaaa-bbbb-cccc-dddd"])
+    url = f"{FILES}/other/cell1.bdf.csv"
+    entry["canonical_iri"] = OTHER_DATASET
+    entry["distributions"] = [{"title": "cell1.bdf.csv", "access_url": url, "role": "processed"}]
+    body = entry["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]
+    distribution = body["distributions"][0]
+    distribution.update(content_url=url, content_size=str(len(OTHER_CSV_BYTES)))
+    distribution.pop("checksum", None)
+    if checksum:
+        distribution["checksum"] = {"algorithm": "sha256", "value": hashlib.sha256(OTHER_CSV_BYTES).hexdigest()}
+    fake.details["dataset/wwww-xxxx-yyyy-zzzz"] = entry
+    fake.file_bytes_by_url[url] = OTHER_CSV_BYTES
+
+
+@pytest.mark.parametrize("checksum", [True, False], ids=["with-checksums", "without-checksums"])
+def test_download_keeps_two_datasets_apart_in_one_dest(
+    reg: Registry, fake: FakeRegistry, tmp_path: Path, checksum: bool
+) -> None:
+    """Two datasets whose files have one name used to share <dest>/<name>. The second
+    download overwrote the first, or, with no checksum to compare, was given the first."""
+    if not checksum:
+        _state_checksum(fake, None)
+    _add_dataset_with_the_same_file_name(fake, checksum=checksum)
+    dest = tmp_path / "data"
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)  # files with no checksum warn
+        first = reg.download(DATASET, dest=dest)
+        second = reg.download(OTHER_DATASET, dest=dest)
+        fetches = sum(u.startswith(FILES) for u in fake.calls)
+        assert reg.download(DATASET, dest=dest) == first
+        assert reg.download(OTHER_DATASET, dest=dest) == second
+    assert sum(u.startswith(FILES) for u in fake.calls) == fetches  # both reused
+    assert first == dest / "aaaa-bbbb-cccc-dddd" / "cell1.bdf.csv"
+    assert second == dest / "wwww-xxxx-yyyy-zzzz" / "cell1.bdf.csv"
+    assert first.read_bytes() == CSV_BYTES
+    assert second.read_bytes() == OTHER_CSV_BYTES
+
+
+def test_download_into_dest_fetches_again_a_copy_that_went_bad(reg: Registry, tmp_path: Path) -> None:
+    path = reg.download(DATASET, dest=tmp_path / "data")
+    path.write_bytes(OTHER_CSV_BYTES)
+    assert reg.download(DATASET, dest=tmp_path / "data").read_bytes() == CSV_BYTES
+
+
+def test_download_without_dest_keeps_the_cache_layout(reg: Registry) -> None:
+    assert reg.download(DATASET) == reg.cache_dir / "files" / "aaaa-bbbb-cccc-dddd" / "cell1.bdf.csv"
 
 
 # ── Reading ───────────────────────────────────────────────────────────────────

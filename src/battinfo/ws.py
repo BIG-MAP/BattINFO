@@ -1612,6 +1612,37 @@ def _deposit_agents(agents: Iterable[Any], role: str) -> list[dict]:
     return out
 
 
+def _zenodo_person(agent: Mapping[str, Any], role: str) -> dict:
+    """*agent* as a person on the Zenodo deposit form, with the fields the form takes for one and no others.
+
+    These are ``name``, ``affiliation``, ``orcid`` and, for a contributor,
+    ``type``. Several affiliations go as one string, their names joined with
+    ``"; "`` in the order given, and an affiliation given as an organisation
+    dict goes as its name. A ROR or any other key is left off the form; the
+    deposit graph and the RO-Crate keep it. The ORCID goes as the bare iD
+    (:func:`~battinfo._util.orcid_id`). A contributor without a ``type`` gets
+    ``ProjectMember``, since Zenodo requires one. The keys keep the order
+    *agent* gives them, so a person given in this shape goes as given.
+    """
+    person: dict[str, Any] = {}
+    for key, value in agent.items():
+        if key == "name":
+            person["name"] = value
+        elif key == "affiliation":
+            names = _affiliation_names(value)
+            if names:
+                person["affiliation"] = "; ".join(names)
+        elif key == "orcid":
+            orcid = orcid_id(value)
+            if orcid:
+                person["orcid"] = orcid
+        elif key == "type" and role == "contributor":
+            person["type"] = value
+    if role == "contributor":
+        person.setdefault("type", "ProjectMember")
+    return person
+
+
 # A pragmatic set of the license identifiers Zenodo accepts most often (open
 # data + common software licenses), lower-cased for comparison. This is a
 # recognition list, not a hard allowlist: an unknown identifier is kept verbatim
@@ -8449,7 +8480,11 @@ class AuthoringWorkspace:
             are the creators, and without those the creator set with
             ``battinfo config set creator``. With none of these the call is
             refused before anything is sent. An ORCID may be the bare id or its
-            ``https://orcid.org/`` URL; Zenodo gets the bare id.
+            ``https://orcid.org/`` URL; Zenodo gets the bare id. The Zenodo
+            form gets each person's name, affiliation and ORCID and nothing
+            else, with several affiliations as one text joined with ``"; "``;
+            the deposit graph and the RO-Crate keep each organisation and its
+            ``affiliation_ror``.
         contributors:
             More people, as dicts like ``creators``, each with an optional Zenodo
             contributor ``"type"`` (default ``"ProjectMember"``).
@@ -8556,6 +8591,8 @@ class AuthoringWorkspace:
         License precedence: an explicit ``license=`` here is authoritative for the
         deposit; otherwise the workspace default (``ws.license(...)``) is used; if
         neither is set, ``cc-by-4.0`` is applied (Zenodo requires a license).
+        The Zenodo form gets a known licence id in lower case, as
+        :meth:`license` keeps it, so ``"CC-BY-4.0"`` goes as ``"cc-by-4.0"``.
         """
         import tempfile
 
@@ -11310,7 +11347,9 @@ class AuthoringWorkspace:
         come from :func:`_zenodo_access`. *related_identifiers* come first,
         then the funding project's page when the workspace has one
         (:meth:`project`) and none of them names it with the same relation.
-        *version* and *publication_date* are set only when given.
+        *version* and *publication_date* are set only when given. Each
+        creator and contributor goes as :func:`_zenodo_person` builds it, and
+        the licence as its normalised id (:func:`_normalize_license`).
         """
         access = _zenodo_access(access_right, embargo_date, access_conditions)
         related = _zenodo_related_identifiers(related_identifiers)
@@ -11351,9 +11390,10 @@ class AuthoringWorkspace:
             "title": self._deposit_title(title, specs),
             # Zenodo shows the description as HTML: plain-text paragraphs go as <p>s.
             "description": _zenodo_description_html(description) if description else auto_desc,
-            "creators": creators,
+            "creators": [_zenodo_person(c, "creator") for c in creators],
             **access,
-            "license": license,
+            # The licence id as ws.license() keeps it ("CC-BY-4.0" goes as "cc-by-4.0"); a blank one goes as given.
+            "license": _normalize_license(license)[0] if str(license).strip() else license,
         }
         if kw:
             meta["keywords"] = kw
@@ -11362,8 +11402,7 @@ class AuthoringWorkspace:
         if publication_date is not None:
             meta["publication_date"] = _zenodo_date(publication_date, "publication_date")
         if contributors:
-            # Zenodo requires a "type" on each contributor; default to "ProjectMember"
-            meta["contributors"] = [{**c, "type": c.get("type", "ProjectMember")} for c in contributors]
+            meta["contributors"] = [_zenodo_person(c, "contributor") for c in contributors]
         if community:
             meta["communities"] = [{"identifier": community}]
         # Funding project (grant) → a related identifier pointing at the project's
@@ -12622,6 +12661,7 @@ class AuthoringWorkspace:
 
     def _load_test_spec(self, path: Path) -> Any:
         from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
+        from battinfo.testmethod import _cycles_count  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         # Keys starting with "_" are in-file comments written by ws.template()
@@ -12654,6 +12694,12 @@ class AuthoringWorkspace:
 
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
+        cycles = raw.get("cycles")
+        if cycles is not None:
+            try:
+                cycles = _cycles_count(cycles)
+            except ValueError as exc:
+                raise ValueError(f"{path.name}: {exc}. Nothing was loaded.") from None
 
         # The protocol followed: the record keeps its URL (protocol_url) but has no
         # field for its name, so a named protocol is kept as a note.
@@ -12709,7 +12755,7 @@ class AuthoringWorkspace:
             type=test_type,
             description=raw.get("description"),
             experiment=steps,
-            cycles=raw.get("cycles"),
+            cycles=cycles,
             method=raw.get("method"),
             version=raw.get("version"),
             protocol_url=protocol_info.get("url"),
