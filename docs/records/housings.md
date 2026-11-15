@@ -81,7 +81,7 @@ record = create_housing_spec(
   "provenance": {
     "source_type": "datasheet",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0rc2"
+    "battinfo_version": "0.8.0rc3"
   }
 }
 ```
@@ -194,7 +194,7 @@ record = create_housing(
   "provenance": {
     "source_type": "lab",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.0rc2"
+    "battinfo_version": "0.8.0rc3"
   }
 }
 ```
