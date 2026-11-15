@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.2.0",
+  "cell_instance": {
+    "id": "https://w3id.org/battinfo/cell/sqkc-fwnm-n6ds-vsx1",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/10sa-7tag-1za8-fy0q",
+    "name": "empa__ccid_123456 negative electrode half cell"
+  },
+  "notes": [
+    "Placeholder: the template records that this electrode was measured in a half cell, not which one."
+  ],
+  "provenance": {
+    "source_type": "lab",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

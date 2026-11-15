@@ -65,9 +65,10 @@ def _files(root: Path) -> dict[str, str]:
     }
 
 
-# A dataset saved without a publication time takes the save time as created_at
-# and published_at, so saving it again in a new session changes those stamps.
-SAVE_TIME = ("created_at", "modified_at", "published_at", "retrieved_at")
+# A dataset saved without a creation time takes the save time as created_at, so
+# saving it again in a new session changes the save-time stamps. It gets no
+# published_at, so that key is compared like any other.
+SAVE_TIME = ("created_at", "modified_at", "retrieved_at")
 
 
 def _without_save_time(files: dict[str, str]) -> dict[str, dict]:

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import mimetypes
 import os
 import shutil
 import tempfile
@@ -14,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validat
 from battinfo._fs_guard import check_relative_path, is_within, remove_temp_tree, remove_tree, require_within
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _now_iso, _sha256, file_uri_to_path, is_file_uri
+from battinfo._util import _as_path, _now_iso, _sha256, file_media_type, file_uri_to_path, is_file_uri
 from battinfo._workspace import Workspace
 from battinfo.bundle import Cell, CellSpec, Dataset, Test
 from battinfo.local_workspace import (
@@ -25,6 +24,7 @@ from battinfo.local_workspace import (
     SubmissionRelatedResource,
     SubmissionResource,
 )
+from battinfo.namespace import DEFAULT_RECORD_BASE, OLD_FORM_BASE, base_prefix
 from battinfo.validate.record import validate_record
 
 PathLike = str | Path
@@ -120,11 +120,7 @@ def _swap_dir(staging: Path, target: Path) -> None:
         remove_temp_tree(backup)
 
 
-def _guess_media_type(path: str | None) -> str | None:
-    if not path:
-        return None
-    guessed, _ = mimetypes.guess_type(path)
-    return guessed
+_guess_media_type = file_media_type
 
 
 def _path_from_file_uri(uri: str) -> Path | None:
@@ -186,6 +182,17 @@ class WorkspaceStateManifest(BaseModel):
     artifacts_dir: str = "artifacts"
     dist_dir: str = "dist"
     dataset_artifacts: list[WorkspaceArtifact] = Field(default_factory=list)
+    # The base the workspace's records mint under, recorded when it was
+    # created. A manifest without one belongs to a workspace created before
+    # the switch, which keeps the old form (IRI ruling, decision 5).
+    record_base: str | None = None
+
+    @field_validator("record_base")
+    @classmethod
+    def _a_record_base(cls, value: str | None) -> str | None:
+        if value is not None:
+            base_prefix(value)
+        return value
 
     @field_validator("artifacts_dir", "dist_dir")
     @classmethod
@@ -209,6 +216,7 @@ class WorkspaceStateStore:
         comment: list[str] | None = None,
         clean: bool = False,
         inputs: Sequence[PathLike | None] = (),
+        base: str = DEFAULT_RECORD_BASE,
     ) -> None:
         self.workspace = Workspace(
             root=root,
@@ -221,6 +229,7 @@ class WorkspaceStateStore:
             comment=comment,
             clean=clean,
             inputs=inputs,
+            base=base,
         )
         self.name = name
         self.title = title
@@ -546,6 +555,7 @@ class WorkspaceStateStore:
             publisher=manifest.publisher,
             version=manifest.version,
             comment=list(manifest.comment),
+            base=manifest.record_base or OLD_FORM_BASE,
         )
         store.workspace.descriptions.clear()
         store.workspace.cell_specs.clear()
@@ -617,6 +627,9 @@ class WorkspaceStateStore:
             publisher=self.publisher,
             version=self.version,
             comment=list(self.comment),
+            # The old form is recorded by recording nothing, so a workspace of
+            # the old form is never given a base.
+            record_base=None if self.workspace.record_base == OLD_FORM_BASE else self.workspace.record_base,
         )
 
     def _persist(self) -> tuple[WorkspaceStateManifest, dict[str, list[dict[str, Any]]], dict[str, str | None]]:
@@ -1109,6 +1122,23 @@ def workspace_open(root: PathLike) -> Workspace:
     return WorkspaceStateStore.open(root).workspace
 
 
+def recorded_record_base(root: PathLike) -> str | None:
+    """The base the workspace state at *root* mints under, or ``None`` when *root* holds none.
+
+    The base its manifest records, else the old form: a manifest without one
+    was written before the switch (IRI ruling, decision 5).
+    """
+    path = _as_path(root) / WORKSPACE_STATE_FILENAME
+    if not path.is_file():
+        return None
+    raw = _read_json(path)
+    recorded = raw.get("record_base") if isinstance(raw, dict) else None
+    if recorded is None:
+        return OLD_FORM_BASE
+    base_prefix(recorded)
+    return str(recorded)
+
+
 def _store_for_workspace(workspace: Workspace) -> WorkspaceStateStore:
     store = WorkspaceStateStore(
         workspace.root,
@@ -1119,6 +1149,7 @@ def _store_for_workspace(workspace: Workspace) -> WorkspaceStateStore:
         publisher=workspace.publisher,
         version=workspace.version,
         comment=list(workspace.comment),
+        base=workspace.record_base,
     )
     store.add(*workspace.cell_specs, *workspace.cells, *workspace.tests, *workspace.datasets)
     return store
@@ -1165,6 +1196,7 @@ __all__ = [
     "WorkspacePaths",
     "workspace_build_submission_package",
     "workspace_check",
+    "recorded_record_base",
     "workspace_open",
     "workspace_save",
 ]

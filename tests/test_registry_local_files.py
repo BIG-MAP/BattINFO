@@ -22,6 +22,8 @@ import battinfo
 from battinfo.api import submit_publication_package
 from battinfo.ws import AuthoringWorkspace, SubmitError
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 _CREDS = dict(registry_url="https://registry.example", api_key="k", workspace_id="w", publisher_id="p")
 CSV = "test_time_second,voltage_volt\n0,1.6\n3600,0.9\n"
 CREATORS = [{"name": "Doe, Jane"}]
@@ -76,7 +78,7 @@ def test_submit_refuses_local_paths_and_sends_nothing(tmp_path: Path, fake: _Fak
     assert "Nothing was sent" in message
     assert "ws.zenodo()" in message and "allow_local_files=True" in message
     # Each record and field is named.
-    assert "dataset-" in message and "https://w3id.org/battinfo/dataset/" in message
+    assert "dataset-" in message and "https://w3id.org/battinfo/id/1001/dataset/" in message
     for field in ("dataset.access_url", "dataset.distributions[0].content_url", "provenance.source_url"):
         assert field in message
     assert (tmp_path / "ws" / "bdf" / "C1.bdf.csv").resolve().as_uri() in message
@@ -98,7 +100,7 @@ def test_submit_allow_partial_sends_the_records_without_local_files(tmp_path: Pa
     ws = _workspace_with_local_data(tmp_path / "ws")
     outcomes = ws.submit(allow_partial=True, **_CREDS)
     refused = [o for o in outcomes if o["status"] == "local_files"]
-    assert len(refused) == 1 and refused[0]["iri"].startswith("https://w3id.org/battinfo/dataset/")
+    assert len(refused) == 1 and refused[0]["iri"].startswith("https://w3id.org/battinfo/id/1001/dataset/")
     sent_types = {p["resource"]["resource_type"] for p in fake.payloads}
     assert "dataset" not in sent_types and {"cell_spec", "cell", "test"} <= sent_types
     assert "file:" not in json.dumps(fake.payloads)
@@ -265,6 +267,42 @@ def test_submit_publication_package_leaves_out_a_workspace_root(monkeypatch: pyt
 
     assert sent[0]["workspace"] == {"workspace_id": "w", "registry": {"tenant": "t", "workspace": "w"}}
     assert envelope["workspace"]["root"] == "C:\\Users\\someone\\release"  # the caller's package is unchanged
+
+
+def test_submit_publication_package_cuts_an_editorial_record_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A curated package built by an earlier version sends the record's folder and file name only."""
+    sent: list[dict] = []
+
+    def fake_urlopen(request, timeout=None):  # noqa: ANN001
+        sent.append(json.loads(request.data.decode("utf-8")))
+        return _Resp({"status": "validated"})
+
+    monkeypatch.setattr("battinfo.api.urlopen", fake_urlopen)
+    envelope = _envelope("https://zenodo.org/records/1/files/C1.bdf.csv")
+    record_path = "C:\\Users\\someone\\records\\cell-spec\\a123--x\\record.json"
+    envelope["workspace"] = {"editorial": {"record_path": record_path, "record_id": "a123--x"}}
+
+    submit_publication_package(envelope, registry_base_url="https://r.example", api_key="k")
+
+    assert sent[0]["workspace"] == {"editorial": {"record_path": "a123--x/record.json", "record_id": "a123--x"}}
+    assert envelope["workspace"]["editorial"]["record_path"] == record_path  # the caller's package is unchanged
+
+
+def test_curated_cell_spec_submission_names_no_local_path(tmp_path: Path) -> None:
+    from battinfo.api import build_curated_cell_spec_submission
+
+    source = Path(__file__).resolve().parents[1] / "examples" / "cell-spec" / "A123__ANR26650M1-B.json"
+    record_file = tmp_path / "a123--anr26650m1-b--2012" / "record.json"
+    record_file.parent.mkdir()
+    record_file.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+    package = build_curated_cell_spec_submission(
+        record_file, workspace_id="battinfo-records", publisher_id="battinfo-records-bot", source_version="t"
+    )
+
+    assert package["workspace"]["editorial"]["record_path"] == "a123--anr26650m1-b--2012/record.json"
+    assert str(tmp_path) not in json.dumps(package)
+    assert tmp_path.as_posix() not in json.dumps(package)
 
 
 def test_demo_pipeline_refuses_its_local_file_by_default(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

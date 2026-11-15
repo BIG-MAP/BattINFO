@@ -12,15 +12,31 @@
   comes before a draft is made, and names each dataset and how to go on. A
   draft's files count in the index only once it is published, so a draft
   deleted on the website leaves the published copy its checksums.
+- The index names a file in the workspace folder by its path inside the
+  folder, so a workspace that was renamed or moved finds its files, and an
+  index an earlier version wrote, with absolute paths alone, still reads. A
+  copy kept for want of a local file is named in a printed line, with the
+  path that was looked for.
 - The dataset records, and the datasets in memory, point at the deposited
   files: a record that names a local file after a draft as after a publish,
   so ``ws.submit()`` sends https URLs and a later ``ws.save()`` does not undo
   it, and a record on a published copy only once the new version is
   published. A file that changed is described as the deposit holds it, with
   its own sha256 and size, in the graph, the RO-Crate and the record.
+- The graph of a new version gives each member dataset the URL of the file
+  that version holds, a file it took over unchanged included, and never one
+  of the version before.
+- A deposit that zips files an earlier one held as themselves points their
+  records back at the local files, so no record names a file URL the deposit
+  does not hold, and ``ws.submit()`` refuses them as after any zipped deposit.
+- A publish gives each dataset record the deposit holds its ``published_at``,
+  in memory too, and a record that has one keeps it, in a new version as
+  well, also after a new session ran the authoring script again. A draft and
+  a sandbox deposit date nothing.
 - A recorded draft is checked with Zenodo, so one published on the website
-  gets a new version, and ``ws.submit()`` records its DOI. One deleted there
-  stops the run, which names the way on that keeps the record's lineage.
+  gets a new version, and ``ws.submit()`` records its DOI. Its datasets are
+  dated when that is found, by ``ws.submit()`` or ``ws.zenodo()``. One deleted
+  there stops the run, which names the way on that keeps the record's lineage.
 - Each Zenodo has its own state file: ``.battinfo/zenodo.json`` and
   ``.battinfo/zenodo-sandbox.json``. A sandbox deposit never touches the
   records or the production record, and ``ws.submit()`` never records a
@@ -34,6 +50,9 @@
   would put there, is refused before any request unless
   ``archive_hosted_files=True``, which archives them from their local files and
   names each one from the private bucket in a warning.
+- A protocol file outside the workspace, which the deposit does not carry, is
+  named in the graph by its file name alone, so nothing sent to Zenodo holds a
+  path on this computer, and the registry refuses the record that names it.
 
 All offline: Zenodo's HTTP API (production and sandbox) and the registry are
 answered in memory, so the real ZenodoClient runs.
@@ -46,6 +65,7 @@ import hashlib
 import io
 import json
 import sys
+import time
 import types
 import urllib.error
 import warnings
@@ -61,6 +81,8 @@ from battinfo import zenodo as zmod
 from battinfo._deposit_index import DepositIndexError
 from battinfo.ws import AuthoringWorkspace, SubmitError
 from battinfo.zenodo import KeptFilesError, ZenodoClient, ZenodoError
+
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
 
 CREATORS = [{"name": "Doe, Jane", "affiliation": "Example Lab"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
@@ -103,7 +125,8 @@ class _Zenodo:
     new version starts as a draft holding a copy of every file of the version
     it was made from, as Zenodo's does. A published deposit refuses edits.
     ``requests`` logs ``"<environment> METHOD path"``; a request line in
-    ``fail`` is answered with HTTP 500 as many times as it says.
+    ``fail`` is answered with HTTP 500 as many times as it says. A published
+    deposit reports ``publication_date`` in its metadata when one is set.
     """
 
     def __init__(self) -> None:
@@ -111,6 +134,7 @@ class _Zenodo:
         self._next = {"production": 7000, "sandbox": 500}
         self.requests: list[str] = []
         self.fail: dict[str, int] = {}
+        self.publication_date: str | None = None
 
     # ── the service ──────────────────────────────────────────────────────────
 
@@ -149,6 +173,8 @@ class _Zenodo:
         if deposit.published:
             reply["doi"] = doi
             reply["metadata"]["doi"] = doi
+            if self.publication_date is not None:
+                reply["metadata"]["publication_date"] = self.publication_date
         return reply
 
     def urlopen(self, request, timeout: float | None = None) -> _Reply:  # noqa: ANN001
@@ -469,6 +495,239 @@ def test_a_draft_leaves_records_on_a_published_copy_until_it_is_published(
     assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == (tmp_path / "C01" / "cycling.csv").read_bytes()
 
 
+# ── A deposit zipped after one that was not ───────────────────────────────────
+
+
+def _dead_zenodo_urls(ws: AuthoringWorkspace, zenodo: _Zenodo) -> list[str]:
+    """The Zenodo file URLs the saved dataset records give whose record does not hold the file."""
+    dead = []
+    for location in _locations(ws):
+        if not location.startswith(f"{HOSTS['production']}/records/"):
+            continue
+        record_id, _files, name = location.removeprefix(f"{HOSTS['production']}/records/").split("/", 2)
+        if unquote(name) not in zenodo.deposit(int(record_id)).files:
+            dead.append(location)
+    return dead
+
+
+def test_a_draft_published_zipped_points_its_records_back_at_their_local_files(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    local = _locations(ws)
+    draft = _deposit(ws)  # each file as itself
+    assert all(location.startswith(f"{HOSTS['production']}/records/{draft.record_id}/") for location in _locations(ws))
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        result = _deposit(ws, publish=True, bundle="single")
+
+    assert result.published and result.record_id == draft.record_id
+    assert set(zenodo.deposit(int(result.record_id)).files) == {"data.zip", "battinfo.json", "ro-crate-metadata.json"}
+    # The record holds the files in data.zip alone, so no record names a file URL under it.
+    assert _dead_zenodo_urls(ws, zenodo) == []
+    assert _locations(ws) == local
+    out = capsys.readouterr().out
+    assert "Dataset records pointed back at their local data files: 2." in out
+    assert "updated with Zenodo file URLs" not in out
+    # The datasets in memory follow, so a later save changes nothing.
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False, False]
+    assert _locations(ws) == local
+
+    # A zipped deposit cannot be submitted, so the registry gets nothing.
+    with pytest.raises(SubmitError, match="files on this computer"):
+        ws.submit(**REGISTRY)
+    assert registry.payloads == []
+
+
+def test_a_zipped_draft_after_a_draft_that_was_not_points_its_records_back_too(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    local = _locations(ws)
+    draft = _deposit(ws)
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        second = _deposit(ws, bundle="single")  # still a draft, which no longer holds cycling.csv
+
+    assert not second.published and second.record_id == draft.record_id
+    assert "cycling.csv" not in zenodo.deposit(int(draft.record_id)).files
+    assert _locations(ws) == local
+
+
+def test_a_zipped_new_version_leaves_no_record_on_the_version_before(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry
+) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    local = _locations(ws)
+    changed, gone = tmp_path / "C01" / "cycling.csv", tmp_path / "C02" / "cycling.csv"
+    # The records state the size each file had when it was added, as ws.add() writes it for a raw file.
+    sizes = {path.resolve().as_uri(): str(path.stat().st_size) for path in (changed, gone)}
+    _edit_datasets(
+        ws, lambda ds: ds["distributions"][0].update(content_size=sizes[ds["distributions"][0]["content_url"]])
+    )
+    first = _deposit(ws, publish=True)  # each file as itself
+    names = {data: name for name, data in zenodo.deposit(int(first.record_id)).files.items()}
+    first_urls = _locations(ws)
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+
+    # A draft of the zipped version leaves the records on the published copies, which work.
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        draft = _deposit(ws, bundle="single")
+    assert _locations(ws) == first_urls and _dead_zenodo_urls(ws, zenodo) == []
+
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        second = _deposit(ws, publish=True, bundle="single")
+
+    assert second.published and second.record_id == draft.record_id != first.record_id
+    assert set(zenodo.deposit(int(second.record_id)).files) == {"data.zip", "battinfo.json", "ro-crate-metadata.json"}
+    # No record keeps the URL, checksum or size of the version before.
+    assert _locations(ws) == local
+    by_file = {
+        record["dataset"]["distributions"][0]["content_url"]: record["dataset"]["distributions"][0]
+        for _path, record in _datasets(ws)
+    }
+    for path in (changed, gone):
+        dist = by_file[path.resolve().as_uri()]
+        assert dist["checksum"] == {"algorithm": "sha256", "value": hashlib.sha256(path.read_bytes()).hexdigest()}
+        assert dist["content_size"] == str(path.stat().st_size)
+    with pytest.raises(SubmitError, match="files on this computer"):
+        ws.submit(**REGISTRY)
+    assert registry.payloads == []
+
+    # A file deleted locally since is in data.zip alone, and the next version
+    # cannot keep a copy out of an archive, so it is refused before anything is created.
+    kept = gone.read_bytes()
+    gone.unlink()
+    zenodo.requests.clear()
+    with pytest.raises(RuntimeError, match=f"the published record {second.record_id} .* does not hold 1 data file"):
+        _deposit(ws, publish=True)
+    assert not any(line.startswith(("POST", "PUT", "DELETE")) for line in zenodo.sent())
+
+    # With the file back, the next version deposits each file as itself again,
+    # under the name the first version gave it, and the records point there.
+    gone.write_bytes(kept)
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        third = _deposit(ws, publish=True)
+    files = zenodo.deposit(int(third.record_id)).files
+    assert set(files) == {names[kept], "cycling.csv", "battinfo.json", "ro-crate-metadata.json"}
+    assert files[names[kept]] == kept and files["cycling.csv"] == changed.read_bytes()
+    assert _dead_zenodo_urls(ws, zenodo) == []
+    assert all(location.startswith(f"{HOSTS['production']}/records/{third.record_id}/") for location in _locations(ws))
+
+
+# ── Version links ─────────────────────────────────────────────────────────────
+
+
+def _version_links(graph: dict) -> dict[str, str]:
+    """The concept and the previous version the deposit graph's catalog names."""
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in (node.get("@type") or []))
+    return {term: catalog[term]["@id"] for term in ("dcterms:isVersionOf", "dcat:previousVersion") if term in catalog}
+
+
+def test_each_version_names_its_concept_and_the_version_it_follows(tmp_path: Path, zenodo: _Zenodo) -> None:
+    records = f"{HOSTS['production']}/records"
+    ws = _workspace(tmp_path)
+    first = _deposit(ws, publish=True)
+    concept = zenodo.deposit(int(first.record_id)).concept
+    # A new record's first version belongs to its concept and follows nothing.
+    assert _version_links(zenodo.graph(int(first.record_id))) == {"dcterms:isVersionOf": f"{records}/{concept}"}
+
+    # A new version, a draft, follows the published record it was made from.
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws)
+    assert not second.published and second.record_id != first.record_id
+    expected = {"dcterms:isVersionOf": f"{records}/{concept}", "dcat:previousVersion": f"{records}/{first.record_id}"}
+    assert _version_links(zenodo.graph(int(second.record_id))) == expected
+
+    # Updating that draft keeps both links: the concept is not the previous version.
+    with pytest.warns(UserWarning, match="updating that draft in place"):
+        third = _deposit(ws, version="2")
+    assert third.record_id == second.record_id
+    graph = zenodo.graph(int(third.record_id))
+    assert _version_links(graph) == expected
+    catalog = next(node for node in graph["@graph"] if "dcat:Catalog" in (node.get("@type") or []))
+    assert catalog["schema:version"] == "2"
+
+    # An explicit record id forks a new version from it in the same way.
+    zenodo.website_publish(int(third.record_id))
+    fourth = _deposit(ws, record_id=third.record_id)
+    assert _version_links(zenodo.graph(int(fourth.record_id))) == {
+        "dcterms:isVersionOf": f"{records}/{concept}",
+        "dcat:previousVersion": f"{records}/{third.record_id}",
+    }
+
+
+# ── The file URLs a version's graph gives its datasets ───────────────────────
+
+
+def _members(graph: dict) -> list[dict]:
+    """The member dataset nodes of a deposit graph."""
+    return [node for node in graph["@graph"] if "dcat:Dataset" in (node.get("@type") or [])]
+
+
+def _dataset_urls(graph: dict) -> dict[str, list[str]]:
+    """The ``schema:url`` values an RDF reader finds on each member dataset of a deposit graph."""
+    from rdflib import Graph, URIRef
+
+    rdf = Graph().parse(data=json.dumps(graph), format="json-ld")
+    url = URIRef("https://schema.org/url")
+    return {
+        node["@id"]: sorted(str(value) for value in rdf.objects(URIRef(node["@id"]), url)) for node in _members(graph)
+    }
+
+
+@pytest.mark.parametrize("bundle", ["by_kind", "single"], ids=["each-file-as-itself", "zipped"])
+def test_the_graph_of_a_new_version_names_the_files_that_version_holds(
+    tmp_path: Path, zenodo: _Zenodo, bundle: str
+) -> None:
+    """The records still name the copies of the version before when the graph of the new one is built."""
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    first = _deposit(ws, publish=True)  # each file as itself
+    changed, gone = tmp_path / "C01" / "cycling.csv", tmp_path / "C02" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    gone.unlink()  # the new version takes this file over from the version before, unchanged
+
+    # First as a draft, which leaves the records on the published copies, then published.
+    for publish in (False, True):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # a new version or a reused draft says so; not what is tested here
+            second = _deposit(ws, publish=publish, bundle=bundle)
+        assert second.record_id != first.record_id and second.published is publish
+        graph = zenodo.graph(int(second.record_id))
+        held = zenodo.deposit(int(second.record_id)).files
+        base = f"{HOSTS['production']}/records/{second.record_id}/files/"
+        urls = _dataset_urls(graph)
+        assert len(urls) == 2
+        for node in _members(graph):
+            [dist] = node["dcat:distribution"]
+            # The dataset's own URL is the file this version holds, as its download URL is.
+            assert urls[node["@id"]] == [dist["dcat:downloadURL"]]
+            assert dist["dcat:downloadURL"].startswith(base) and unquote(dist["dcat:downloadURL"][len(base) :]) in held
+            # And no URL of the dataset names a file of the version before.
+            assert f"/records/{first.record_id}/" not in json.dumps(node)
+        if bundle == "single":
+            # The changed file is in the archive, and the one taken over stays a file of its own.
+            [kept] = [name for name in held if name.endswith("cycling.csv")]
+            assert sorted(url for [url] in urls.values()) == sorted([f"{base}data.zip", f"{base}{kept}"])
+
+
+def test_the_graph_of_a_first_version_gives_its_datasets_the_urls_it_did(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws)
+    url = f"{HOSTS['production']}/records/{draft.record_id}/files/cycling.csv"
+    # The records named local files when this graph was built, and a local file is no schema:url.
+    graph = zenodo.graph(int(draft.record_id))
+    assert list(_dataset_urls(graph).values()) == [[]] and _download_urls(graph) == [url]
+
+    # Run again, and then published, the records name the draft's own file.
+    for publish in (False, True):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # a reused draft says so; not what is tested here
+            again = _deposit(ws, publish=publish)
+        assert again.record_id == draft.record_id
+        graph = zenodo.graph(int(again.record_id))
+        assert list(_dataset_urls(graph).values()) == [[url]] and _download_urls(graph) == [url]
+
+
 # ── Versions, retries and a new record ────────────────────────────────────────
 
 
@@ -762,6 +1021,105 @@ def test_a_later_version_keeps_the_name_an_earlier_one_gave_a_file(tmp_path: Pat
     assert files[other] == (tmp_path / "C11" / "cycling.csv").read_bytes()
 
 
+# ── A workspace folder that was renamed or moved ──────────────────────────────
+
+KEPT = "is kept as the Zenodo record already holds it, not uploaded again, because"
+
+
+def _index(root: Path) -> dict:
+    return json.loads((root / ".battinfo" / "deposit-files.json").read_text(encoding="utf-8"))
+
+
+def test_a_renamed_workspace_folder_finds_its_data_files(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str]
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    first = _deposit(_workspace(old, ("C01", "C02")), publish=True)
+    names = {data: name for name, data in zenodo.deposit(int(first.record_id)).files.items()}
+    as_deposited, unchanged = (old / "C01" / "cycling.csv").read_bytes(), (old / "C02" / "cycling.csv").read_bytes()
+    old.rename(new)  # as a folder copied to another computer is, too
+    changed = new / "C01" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=new, registry_url=None)  # a new session, in the folder as it is named now
+    zenodo.requests.clear()
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    # The changed file goes up from where it is now, and no copy of the version before is kept in its place.
+    files = zenodo.deposit(int(second.record_id)).files
+    assert files[names[as_deposited]] == changed.read_bytes() and files[names[unchanged]] == unchanged
+    assert f"PUT /files/bucket-{second.record_id}/{names[as_deposited]}" in zenodo.sent()
+    assert KEPT not in capsys.readouterr().out
+    # The index names each file by its path inside the workspace folder, and by where that is now.
+    [entry] = _index(new)["deposits"]["production"].values()
+    assert {name: item["path_in_workspace"] for name, item in entry["files"].items()} == {
+        names[as_deposited]: "C01/cycling.csv",
+        names[unchanged]: "C02/cycling.csv",
+    }
+    assert entry["files"][names[as_deposited]]["path"] == str(changed.resolve())
+    assert entry["files"][names[as_deposited]]["md5"] == _md5(changed.read_bytes())
+
+
+def test_a_copy_kept_for_want_of_a_local_file_is_named_with_the_path_looked_for(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str]
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    _deposit(_workspace(old), publish=True)
+    data = (old / "C01" / "cycling.csv").read_bytes()
+    old.rename(new)
+    gone = (new / "C01" / "cycling.csv").resolve()
+    gone.unlink()
+    ws = AuthoringWorkspace(root=new, registry_url=None)
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    # The file was looked for in the folder as it is named now.
+    assert zenodo.deposit(int(second.record_id)).files["cycling.csv"] == data
+    assert f"  NOTE: cycling.csv {KEPT} no local file was found at {gone}.\n" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("renamed", [False, True], ids=["in-place", "renamed"])
+def test_an_index_an_earlier_version_wrote_is_read_by_its_absolute_paths(
+    tmp_path: Path, zenodo: _Zenodo, capsys: pytest.CaptureFixture[str], renamed: bool
+) -> None:
+    old, new = tmp_path / "campaign", tmp_path / "campaign-2026"
+    _deposit(_workspace(old), publish=True)
+    recorded = (old / "C01" / "cycling.csv").resolve()
+    as_deposited = recorded.read_bytes()
+    # The index as an earlier version wrote it, with each file's absolute path alone.
+    index = _index(old)
+    [entry] = index["deposits"]["production"].values()
+    del entry["files"]["cycling.csv"]["path_in_workspace"]
+    (old / ".battinfo" / "deposit-files.json").write_text(json.dumps(index), encoding="utf-8")
+    root = old
+    if renamed:
+        old.rename(new)
+        root = new
+    changed = root / "C01" / "cycling.csv"
+    changed.write_text(f"{CSV}120,3.6,0.001\n", encoding="utf-8")
+    ws = AuthoringWorkspace(root=root, registry_url=None)
+    capsys.readouterr()
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+
+    held = zenodo.deposit(int(second.record_id)).files["cycling.csv"]
+    out = capsys.readouterr().out
+    if renamed:
+        # Nothing says where the file is now, and no file is taken for it by its name.
+        # The copy of the version before is kept, and the run names it and the path it looked for.
+        assert held == as_deposited
+        assert f"  NOTE: cycling.csv {KEPT} no local file was found at {recorded}.\n" in out
+    else:
+        assert held == changed.read_bytes() and KEPT not in out
+        [entry] = _index(root)["deposits"]["production"].values()
+        assert entry["files"]["cycling.csv"]["path_in_workspace"] == "C01/cycling.csv"
+
+
 # ── Sandbox and production ────────────────────────────────────────────────────
 
 
@@ -953,6 +1311,195 @@ def test_a_sandbox_url_in_a_production_deposit_is_refused(tmp_path: Path, zenodo
     assert zenodo.requests == []
 
 
+# ── Publication dates ─────────────────────────────────────────────────────────
+
+
+def _publication_times(ws: AuthoringWorkspace) -> dict[str, object]:
+    """Each saved dataset record's ``published_at`` (``None`` without one), by dataset IRI."""
+    return {record["dataset"]["id"]: record["dataset"].get("published_at") for _path, record in _datasets(ws)}
+
+
+def test_a_publish_dates_the_dataset_records_and_a_draft_does_not(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path, ("C01", "C02"))
+    _deposit(ws)  # a draft
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
+
+    before = int(time.time())
+    with pytest.warns(UserWarning, match="unpublished draft"):
+        result = _deposit(ws, publish=True)
+    after = int(time.time())
+
+    assert result.published
+    times = _publication_times(ws)
+    assert len(times) == 2 and len(set(times.values())) == 1
+    [published_at] = set(times.values())
+    assert isinstance(published_at, int) and before <= published_at <= after
+    assert {dataset.id: dataset.published_at for dataset in ws._ws.datasets} == times
+    # The datasets in memory carry it, so a later save keeps it and changes nothing.
+    saved = ws.save()
+    assert [item["content_changed"] for item in saved["datasets"]] == [False, False]
+    assert _publication_times(ws) == times
+
+
+CREATED_2023 = 1700000000  # 2023-11-14
+MARCH_2024 = 1709251200  # 2024-03-01T00:00:00Z
+
+
+def _created_in_2023(ws: AuthoringWorkspace) -> None:
+    """Make each saved dataset, and each dataset in memory, one created in 2023."""
+    _edit_datasets(ws, lambda dataset: dataset.update(created_at=CREATED_2023))
+    for dataset in ws._ws.datasets:
+        dataset.created_at = CREATED_2023
+
+
+def test_a_new_version_keeps_the_date_its_datasets_were_first_published(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    [first_iri] = _publication_times(ws)
+    # A dataset created in 2023, in a deposit whose metadata gives 2024-03-01
+    # as its publication date: the record takes that date, from midnight UTC.
+    _created_in_2023(ws)
+    zenodo.publication_date = "2024-03-01"
+    _deposit(ws, publish=True)
+    assert _publication_times(ws) == {first_iri: MARCH_2024}
+
+    # Data saved since joins the record in a new version, whose metadata still
+    # gives 2024-03-01. The new dataset was created after that day, so it was
+    # published by this call; the first one keeps the date it was published.
+    _data_file(tmp_path, "C02")
+    ws.add("test", type="cycling", cell="C01", data="C02/cycling.csv")
+    ws.save()
+    before = int(time.time())
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, publish=True)
+    after = int(time.time())
+
+    assert second.published and second.is_new_version
+    times = _publication_times(ws)
+    assert times.pop(first_iri) == MARCH_2024
+    [new_time] = times.values()
+    assert isinstance(new_time, int) and before <= new_time <= after
+    # Both still save under the strict policy, unchanged.
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False, False]
+
+
+def test_a_dataset_this_session_created_after_the_reported_date_takes_the_publish_time(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    """A record saved in 2023 that this session added again: the dataset in memory was created now."""
+    ws = _workspace(tmp_path)
+    _edit_datasets(ws, lambda dataset: dataset.update(created_at=CREATED_2023))
+    zenodo.publication_date = "2024-03-01"
+    before = int(time.time())
+    _deposit(ws, publish=True)
+
+    [published_at] = _publication_times(ws).values()
+    assert isinstance(published_at, int) and before <= published_at <= int(time.time())
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False]
+
+
+def test_a_sandbox_publish_dates_nothing(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    result = _deposit(ws, sandbox=True, publish=True)
+    assert result.published
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
+
+
+def test_a_script_run_again_in_a_new_session_keeps_the_date_of_the_first_publication(
+    tmp_path: Path, zenodo: _Zenodo
+) -> None:
+    ws = _workspace(tmp_path)
+    [iri] = _publication_times(ws)
+    _created_in_2023(ws)
+    zenodo.publication_date = "2024-03-01"
+    _deposit(ws, publish=True)
+    assert _publication_times(ws) == {iri: MARCH_2024}
+
+    # The authoring script runs again, in a new session, with nothing changed. Its
+    # dataset states no publication time and is created now, as far as it knows.
+    again = _workspace(tmp_path)
+
+    assert all(dataset.published_at is None for dataset in again._ws.datasets)
+    [(_path, record)] = _datasets(again)
+    assert record["dataset"]["distributions"][0]["content_url"].startswith("file:")  # the record was written again
+    assert record["dataset"]["published_at"] == MARCH_2024
+    # A dataset published in 2024 was not created at this save.
+    assert record["dataset"]["created_at"] == CREATED_2023
+
+    # The next version is published on another day, and leaves the date as it is.
+    zenodo.publication_date = None
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(again, publish=True)
+    assert second.published and second.is_new_version
+    assert _publication_times(again) == {iri: MARCH_2024}
+
+
+@pytest.mark.parametrize("found_by", ["ws.submit()", "ws.zenodo()"])
+def test_a_draft_published_on_the_website_dates_its_datasets_when_that_is_found(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch, found_by: str
+) -> None:
+    ws = _workspace(tmp_path)
+    [iri] = _publication_times(ws)
+    _created_in_2023(ws)
+    draft = _deposit(ws)
+    # Published by a click on the Zenodo website, on a day Zenodo reports.
+    zenodo.publication_date = "2024-03-01"
+    zenodo.website_publish(int(draft.record_id))
+    assert _publication_times(ws) == {iri: None}
+    monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+
+    if found_by == "ws.submit()":
+        ws.submit(**REGISTRY)
+        # The registry gets the time with the DOI.
+        [payload] = [sent for sent in registry.payloads if sent["resource"]["resource_type"] == "dataset"]
+        assert _values(payload, "published_at") == [MARCH_2024]
+        assert _values(payload, "citation_doi") == [f"10.5281/zenodo.{draft.record_id}"]
+    else:
+        with pytest.warns(UserWarning, match="NEW VERSION"):
+            _deposit(ws)  # leaves a draft of a new version, which dates nothing itself
+    assert _publication_times(ws) == {iri: MARCH_2024}
+    assert [dataset.published_at for dataset in ws._ws.datasets] == [MARCH_2024]
+
+    # A version published on another day leaves the date of the first publication.
+    zenodo.publication_date = None
+    with pytest.warns(UserWarning, match="NEW VERSION" if found_by == "ws.submit()" else "unpublished draft"):
+        second = _deposit(ws, publish=True)
+    assert second.published and second.record_id != draft.record_id
+    assert _publication_times(ws) == {iri: MARCH_2024}
+    assert [item["content_changed"] for item in ws.save()["datasets"]] == [False]
+
+
+def test_a_website_publish_zenodo_gives_no_earlier_day_for_is_dated_at_the_check(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws)
+    zenodo.website_publish(int(draft.record_id))  # its answer carries no publication date
+    monkeypatch.setenv("ZENODO_API_TOKEN", "placeholder")
+
+    before = int(time.time())
+    ws.submit(**REGISTRY)
+    after = int(time.time())
+
+    [published_at] = _publication_times(ws).values()
+    assert isinstance(published_at, int) and before <= published_at <= after
+
+
+def test_a_sandbox_draft_published_on_the_website_dates_nothing(tmp_path: Path, zenodo: _Zenodo) -> None:
+    ws = _workspace(tmp_path)
+    draft = _deposit(ws, sandbox=True)
+    zenodo.publication_date = "2024-03-01"
+    zenodo.website_publish(int(draft.record_id), "sandbox")
+
+    with pytest.warns(UserWarning, match="NEW VERSION"):
+        second = _deposit(ws, sandbox=True, publish=True)  # finds the draft published, and makes a new version
+
+    assert second.published and second.record_id != draft.record_id
+    assert set(_publication_times(ws).values()) == {None}
+    assert all(dataset.published_at is None for dataset in ws._ws.datasets)
+
+
 # ── R2 storage ────────────────────────────────────────────────────────────────
 
 
@@ -1102,6 +1649,9 @@ def test_the_flag_archives_files_on_r2_and_warns_for_the_private_ones(
     assert sorted(content for name, content in deposit.files.items() if name.endswith("cycling.csv")) == data
     graph_urls = _download_urls(zenodo.graph(int(result.record_id)))
     assert len(graph_urls) == 2 and all(url.startswith(f"{HOSTS['production']}/records/") for url in graph_urls)
+    # The public copy stays the dataset's own URL in the graph, as it does in the record.
+    own_urls = [url for urls in _dataset_urls(zenodo.graph(int(result.record_id))).values() for url in urls]
+    assert own_urls == [public_url]
     assert set(_locations(ws)) == locations
     ws.save()
     assert set(_locations(ws)) == locations
@@ -1283,7 +1833,9 @@ def test_records_on_a_draft_no_run_recorded_are_refused_in_a_new_session(
     assert set(_locations(fresh)) == {new_url}
     assert _download_urls(zenodo.graph(int(state["record_id"]))) == [new_url]
     if entry == "publish":
-        assert new_url in json.dumps(registry.payloads) and str(orphan.id) not in json.dumps(registry.payloads)
+        # The orphan's record and DOI, not its bare number: a timestamp can contain it.
+        sent = json.dumps(registry.payloads)
+        assert new_url in sent and f"/records/{orphan.id}/" not in sent and f"zenodo.{orphan.id}" not in sent
 
 
 def test_a_file_in_an_unpublished_draft_of_this_account_is_refused_not_linked(tmp_path: Path, zenodo: _Zenodo) -> None:
@@ -1497,6 +2049,62 @@ def test_a_pending_draft_of_a_new_version_publishes_after_the_index_is_deleted(t
     assert set(_locations(ws)) == {f"{HOSTS['production']}/records/{draft.record_id}/files/cycling.csv"}
 
 
+# ── A protocol file the deposit does not carry ────────────────────────────────
+
+
+def test_an_artifact_outside_the_workspace_puts_no_local_path_in_the_deposit(
+    tmp_path: Path, zenodo: _Zenodo, registry: _Registry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    home = tmp_path / "jdoe-home"
+    root, elsewhere = home / "campaign", home / "protocols-elsewhere"
+    elsewhere.mkdir(parents=True)
+    protocol = elsewhere / "cycle.json"
+    protocol.write_text("{}", encoding="utf-8")
+    ws = _workspace(root)
+    # A test record that names the protocol file it ran by its path on this computer.
+    [test_file] = (ws._ws.source_root / "test").glob("*.json")
+    record = json.loads(test_file.read_text(encoding="utf-8"))
+    record["artifacts"] = [{"role": "source_protocol", "format": "aurora-unicycler-json", "locator": str(protocol)}]
+    test_file.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    sent: list[bytes] = []  # every body sent to Zenodo, the form and each file of the deposit among them
+
+    def recording(request, timeout: float | None = None):  # noqa: ANN001, ANN202
+        if request.data is not None:
+            sent.append(bytes(request.data))
+        return zenodo.urlopen(request, timeout)
+
+    monkeypatch.setattr(zmod.urllib.request, "urlopen", recording)
+
+    result = _deposit(ws, publish=True)
+
+    # The deposit does not carry the file, and its graph names it by its file name alone.
+    assert result.published
+    deposit = zenodo.deposit(int(result.record_id))
+    assert set(deposit.files) == {"cycling.csv", "battinfo.json", "ro-crate-metadata.json"}
+    [node] = [node for node in zenodo.graph(int(result.record_id))["@graph"] if node.get("@id") == record["test"]["id"]]
+    assert node["dcat:distribution"] == [
+        {
+            "@type": "dcat:Distribution",
+            "dcterms:title": "source protocol (aurora-unicycler-json)",
+            "dcat:downloadURL": "cycle.json",
+            "dcterms:type": "source_protocol",
+            "dcterms:format": "aurora-unicycler-json",
+        }
+    ]
+    # Neither the form, the graph, the RO-Crate nor a data file names a folder
+    # outside the workspace, or the folder the workspace itself lies in.
+    assert any(body.startswith(b'{"metadata"') for body in sent) and set(deposit.files.values()) <= set(sent)
+    for body in sent:
+        text = body.decode("utf-8")
+        assert "protocols-elsewhere" not in text and "jdoe-home" not in text
+
+    # The registry gets no such path either, since it refuses the record that names one.
+    with pytest.raises(SubmitError, match="files on this computer") as excinfo:
+        ws.submit(**REGISTRY)
+    assert f"artifacts[0].locator: {protocol}" in str(excinfo.value)
+    assert registry.payloads == []
+
+
 # ── The client ────────────────────────────────────────────────────────────────
 
 
@@ -1616,8 +2224,9 @@ def test_a_sandbox_state_file_that_names_a_production_record_is_refused(tmp_path
         {"production": {"7000": {"records": [7001]}}},
         {"production": {"7000": {"files": {"a.csv": {"path": 3}}}}},
         {"production": {"7000": {"drafts": {"7001": {"a.csv": {"md5": 5}}}}}},
+        {"production": {"7000": {"files": {"a.csv": {"path_in_workspace": "../elsewhere/a.csv"}}}}},
     ],
-    ids=["list", "environment", "record-ids", "path", "draft-md5"],
+    ids=["list", "environment", "record-ids", "path", "draft-md5", "path-out-of-the-workspace"],
 )
 def test_an_index_whose_deposits_cannot_be_read_stops_the_deposit(
     tmp_path: Path, zenodo: _Zenodo, deposits: object
@@ -1652,6 +2261,7 @@ def test_the_index_records_each_deposited_file_by_environment_and_concept(tmp_pa
             "size": len(data),
             "md5": _md5(data),
             "sha256": hashlib.sha256(data).hexdigest(),
+            "path_in_workspace": "C01/cycling.csv",
         }
     }
     state = _state(tmp_path)

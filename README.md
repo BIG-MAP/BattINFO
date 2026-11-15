@@ -111,7 +111,7 @@ result = publish(
     root=".battinfo/my-library",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx
+# https://w3id.org/battinfo/id/1001/spec/xxxx-xxxx-xxxx-xxxx
 ```
 
 That IRI is **permanent, but not yet resolvable on the web** — opening it in a
@@ -179,14 +179,14 @@ needs the `processing` extra).
 | Layer | What it provides |
 |-------|-----------------|
 | `battinfo.ttl` | OWL application ontology; imports EMMO domain-battery 0.21.0 and domain-electrochemistry 0.39.0 with pinned versioned IRIs |
-| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 117 curated property→EMMO-IRI mappings and 75 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
+| [`assets/mappings/domain-battery/`](https://github.com/BIG-MAP/BattINFO/tree/main/assets/mappings/domain-battery) | 117 curated property→EMMO-IRI mappings and 77 unit→EMMO-IRI mappings; drives JSON→JSON-LD transformation |
 | `assets/schemas/` | 25 JSON Schema (draft 2020-12) files: one for each of the 22 record types, plus the shared base, the canonical cell description and the ingest manifest |
 | [`src/battinfo/transform/json_to_jsonld.py`](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/transform/json_to_jsonld.py) | Deterministic, mapping-table-driven transformation to EMMO-aligned JSON-LD using the canonical domain-battery context |
 | [`src/battinfo/validate/`](https://github.com/BIG-MAP/BattINFO/tree/main/src/battinfo/validate) | Multi-layer validation: JSON Schema, Pydantic, JSON-LD (URDNA2015), semantic rules, referential integrity, publication |
 
 The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write uses:
 
-- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for cell specs, cells, tests, datasets, materials and components; some test-protocol and parameter-set values do not follow it yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
+- `hasProperty` → `[ClassName, ConventionalProperty]` → `hasNumericalPart` → `hasNumberValue` (canonical EMMO quantity pattern) for the specified values of cell specs, cells, tests, datasets, materials and components. A value stated as measured takes `MeasuredProperty` in place of `ConventionalProperty`, and its conditions describe the measurement it is the output of (`isOutputOf`). Test-protocol values carry their quantity class without `ConventionalProperty`, and one parameter-set value has no quantity class yet (see the [known limitations](https://github.com/BIG-MAP/BattINFO/blob/main/docs/scope.md#known-limitations-in-080))
 - `hasMeasurementUnit` → full EMMO or QUDT IRI (never a bare string)
 - `@type` stacking: the cell that a cylindrical LFP cell spec describes is a `BatteryCell`, a `CylindricalBattery`, a `LithiumIonBattery` and a `LithiumIonIronPhosphateBattery`, taken from its format, chemistry and `positive_electrode_basis`. `LithiumIonGraphiteBattery` is added only when `negative_electrode_basis` is graphite.
 
@@ -224,7 +224,7 @@ The JSON-LD that `record_to_jsonld`, `ws.export` and the Zenodo deposit graph wr
 - **Domain-battery is the normative ontology** (semantics and terms). BattINFO is non-normative and operational (schemas, mappings, tooling).
 - **The JSON Schema is the save-time contract**, and the pydantic models in `bundle.py` are the hand-written authoring surface. `tests/test_schema_model_parity.py` checks that every schema property can be reached from the models, apart from a listed set of known gaps, and [AGENTS.md](https://github.com/BIG-MAP/BattINFO/blob/main/AGENTS.md#sources-of-truth-and-generated-files) lists which files are generated and how.
 - **JSON-LD-first publication**: `record_to_jsonld`, `ws.export` and the Zenodo deposit graph write valid RDF aligned to domain-battery.
-- **Stable, opaque identifiers**: all published entities carry a `https://w3id.org/battinfo/{type}/{uid}` IRI, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
+- **Stable, opaque identifiers**: every published record carries a `https://w3id.org/battinfo/id/{prefix}/{type}/{uid}` IRI, or `https://w3id.org/battinfo/{type}/{uid}` when it was minted before the prefixed form, governed by [`IDENTIFIER_POLICY.md`](https://github.com/BIG-MAP/BattINFO/blob/main/IDENTIFIER_POLICY.md).
 - BattINFO does not host or modify the domain-battery ontology.
 
 ## Contributing

@@ -39,7 +39,7 @@ def test_publish_cell_spec_local_writes_canonical_record(tmp_path: Path) -> None
     assert result.destination == "local"
     assert result.resource_type == "cell_spec"
     assert result.canonical_id is not None
-    assert result.canonical_iri == f"https://w3id.org/battinfo/spec/{result.canonical_id}"
+    assert result.canonical_iri == f"https://w3id.org/battinfo/id/1001/spec/{result.canonical_id}"
 
     canonical_record_path = Path(result.debug_paths["canonical_record_path"])
     assert canonical_record_path.exists()

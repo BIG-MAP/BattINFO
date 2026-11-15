@@ -745,7 +745,8 @@ def test_publish_cli_force_refuses_the_folder_where_a_workspace_keeps_its_record
 
     assert result.exit_code == 1
     assert "keeps a project's records there" in result.stdout
-    assert len(saved) == 4 and all(path.exists() for path in saved)
+    # The spec, the two cells, the index and workspace.json, which records the base.
+    assert len(saved) == 5 and all(path.exists() for path in saved)
 
 
 # ── Ingest builds ───────────────────────────────────────────────────────────

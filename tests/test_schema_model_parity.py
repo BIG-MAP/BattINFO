@@ -139,7 +139,6 @@ KNOWN_GAPS: dict[tuple[str, str], str] = {
     ("cell-spec", "manufacturing_place"): "schema:manufacturingPlace; country_of_origin carries this today",
     ("cell-spec", "editorial"): "internal curation metadata; deliberately not part of the published model",
     ("organization", "editorial"): "internal curation metadata; deliberately not part of the published model",
-    ("dataset", "about"): "schema:about link to the entity studied; main_entity is the modeled equivalent",
     # Instance links whose modeled form is a list of IRIs, not the record's
     # {id, role} link objects.
     (
@@ -271,6 +270,9 @@ BUILDERS = _builders()
 # deliberately names a field differently from the record key.
 ALIASES: dict[tuple[str, str], str] = {
     ("cell-spec", "cell_format"): "format",
+    # The model splits `about` over its cell, test and related fields; related_ids
+    # takes any reference. tests/test_model_round_trip.py checks that none is lost.
+    ("dataset", "about"): "related_ids",
 }
 
 # Deprecated schema keys that to_record() rewrites to their canonical spelling:
@@ -304,7 +306,7 @@ SAMPLE_OVERRIDES: dict[tuple[str, str], Any] = {
 }
 
 _PATTERN_SAMPLES = {"short_id": "abcdef", "in_language": "en", "handle": "probe-group/probe-sample"}
-_NAMESPACE_RE = re.compile(r"battinfo/\(\?:([a-z-]+)|battinfo/([a-z-]+)/")
+_SEGMENT_RE = re.compile(r"[a-z][a-z0-9-]*")
 
 
 def _load_schema(relative: str) -> dict:
@@ -380,9 +382,13 @@ def sample_value(schema: dict, root: dict, name: str = "", base: str = "", depth
     if schema.get("pattern"):
         if name in _PATTERN_SAMPLES:
             return _PATTERN_SAMPLES[name]
-        match = _NAMESPACE_RE.search(schema["pattern"])
-        if match:
-            return f"https://w3id.org/battinfo/{match.group(1) or match.group(2)}/{UID}"
+        # A record IRI pattern: a record of the first segment it names (id/ is the
+        # branch of prefixed records and shared things, never a segment).
+        pattern = re.compile(schema["pattern"])
+        for segment in _SEGMENT_RE.findall(schema["pattern"].partition("battinfo/")[2]):
+            candidate = f"https://w3id.org/battinfo/{segment}/{UID}"
+            if segment != "id" and pattern.fullmatch(candidate):
+                return candidate
         return None  # unsamplable pattern; treated as a sweep gap, not a parity gap
     return "probe"
 

@@ -17,6 +17,8 @@ import pytest
 from battinfo.jsonld import record_to_jsonld
 from battinfo.ws import AuthoringWorkspace
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 _SPEC_JSON = (
     '{"manufacturer":"Duracell","model":"MN2400","format":"cylindrical",'
     '"chemistry":"Zn-MnO2","size_code":"R03","iec_code":"LR03",'

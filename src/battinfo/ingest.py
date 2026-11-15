@@ -13,6 +13,7 @@ from battinfo._jsonio import write_json as _write_json
 from battinfo._util import _as_path, is_local_location, local_path, path_name
 from battinfo._workspace import Workspace
 from battinfo.api import submit_publication_package
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix
 from battinfo.validate.schema import build_validator, schema_for_rel_path
 
 PathLike = str | Path
@@ -543,13 +544,24 @@ def build_ingest_workspace(
     clean: bool = False,
     validation_policy: str = "strict",
     bundle: bool = True,
+    base: str | None = None,
 ) -> dict[str, Any]:
     """Build the linked ingest workspace for one evidence folder.
 
     ``clean=True`` deletes ``workspace_root`` first and builds it again. The
     delete is refused for a folder BattINFO did not create, and for one that
     holds the evidence files, the type record or the ingest manifest.
+
+    Records without an IRI mint under the base of the ingest workspace: the
+    one its state manifest records when ``workspace_root`` holds one (the old
+    form when that records none), read before a clean, so rebuilding a
+    workspace never moves its IRIs. A new workspace takes ``base``, by default
+    ``https://w3id.org/battinfo/id/1001/``.
     """
+    from battinfo.workspace_state import recorded_record_base  # noqa: PLC0415
+
+    if base is not None:
+        base_prefix(base)
     inspection = inspect_ingest_root(
         ingest_root,
         manifest_path=manifest_path,
@@ -585,6 +597,10 @@ def build_ingest_workspace(
         *(item["path"] for item in inspection["datasets"]),
     ]
 
+    # A workspace keeps the base it was created with (IRI ruling, decision 5).
+    recorded_base = recorded_record_base(resolved_workspace_root)
+    record_base = recorded_base or (DEFAULT_RECORD_BASE if base is None else base)
+
     workspace = Workspace(
         root=resolved_workspace_root,
         name=str(resolved_workspace_id),
@@ -596,6 +612,7 @@ def build_ingest_workspace(
         clean=clean,
         inputs=build_inputs,
         generated=True,
+        base=record_base,
     )
 
     if resolved_resource_type != "cell-instance":
@@ -907,8 +924,11 @@ def publish_ingest_workspace(
     platform_base_url: str | None = None,
     timeout_sec: float = 30.0,
     allow_local_files: bool = False,
+    base: str | None = None,
 ) -> dict[str, Any]:
     """Build an ingest workspace and publish it to the registry.
+
+    ``base`` is passed to :func:`build_ingest_workspace`.
 
     If ``artifact_uploader`` is provided it is called for every distribution
     that has a ``package_path`` before the submission is sent to the registry.
@@ -949,6 +969,7 @@ def publish_ingest_workspace(
         clean=clean,
         validation_policy=validation_policy,
         bundle=True,
+        base=base,
     )
     submission_payload = build["submission_package"]
 

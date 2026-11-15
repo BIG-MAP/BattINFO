@@ -27,7 +27,7 @@ def test_id_is_deterministic_from_the_name() -> None:
     b = api.create_organization(name="A123 Systems", type="Manufacturer")["organization"]["id"]
     c = api.create_organization(name="Celgard")["organization"]["id"]
     assert a == b != c
-    assert a.startswith("https://w3id.org/battinfo/organization/")
+    assert a.startswith("https://w3id.org/battinfo/id/1001/organization/")
 
 
 def test_existing_random_minted_ids_are_kept() -> None:

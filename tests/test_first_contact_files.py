@@ -178,7 +178,7 @@ def test_quickstart_step_4_runs_as_written_in_any_shell(tmp_path: Path, monkeypa
     monkeypatch.chdir(tmp_path)
     namespace: dict = {"__name__": "quickstart_step_1"}
     exec(compile(step1, "QUICKSTART.md step 1", "exec"), namespace)
-    printed_iri = re.search(r"^# (https://w3id\.org/battinfo/spec/\S+)$", step1, re.MULTILINE)
+    printed_iri = re.search(r"^# (https://w3id\.org/battinfo/id/1001/spec/\S+)$", step1, re.MULTILINE)
     assert printed_iri, "step 1 shows the IRI it prints"
     assert namespace["result"].canonical_iri == printed_iri.group(1), "the IRI step 1 shows is the one it mints"
 
@@ -360,7 +360,7 @@ def test_docs_home_page_python_tab_says_it_mints_its_own_iri(tmp_path: Path, mon
 
     flagship = json.loads(_read("examples/cell-spec/A123__ANR26650M1-B.json"))["cell_spec"]["id"]
     minted = namespace["result"].canonical_iri
-    assert minted.startswith("https://w3id.org/battinfo/spec/") and minted != flagship
+    assert minted.startswith("https://w3id.org/battinfo/id/1001/spec/") and minted != flagship
     comments = " ".join(line.strip(" #") for line in code.splitlines() if line.lstrip().startswith("#"))
     assert "own IRI" in comments and "flagship" in comments, "say that the snippet mints its own IRI"
 

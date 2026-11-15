@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import re
 import time
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.request import Request as UrlRequest
 
@@ -17,6 +17,9 @@ from battinfo._util import local_file_references, local_files_message
 from battinfo.api._shared import PathLike
 from battinfo.api._staging import build_curated_cell_spec_submission
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
+
+if TYPE_CHECKING:
+    from battinfo._adoption import RetiredRecord
 
 
 def _urlopen(request: UrlRequest, *, timeout: float):  # noqa: ANN202
@@ -106,6 +109,8 @@ def submit_publication_package(
     max_attempts: int = 3,
     backoff_sec: float = 0.5,
     allow_local_files: bool = False,
+    allow_unchecked_iris: bool = False,
+    checked_iris: Mapping[str, str | RetiredRecord] | None = None,
 ) -> dict[str, Any]:
     """POST a publication package to the registry, defending against a hostile/cold registry.
 
@@ -125,20 +130,54 @@ def submit_publication_package(
     registry only.
 
     The local workspace folder (``workspace.root``), which packages built by
-    earlier versions carry, is left out of what is sent.
+    earlier versions carry, is left out of what is sent, and an editorial
+    record path (``workspace.editorial.record_path``) is cut to the record's
+    folder and file name.
+
+    Before the package is sent, each IRI it names that was minted under
+    ``https://w3id.org/battinfo/id/1001/`` is looked up in the registry. One
+    the registry already holds in the old form,
+    ``https://w3id.org/battinfo/{segment}/{uid}``, is sent in that form, and
+    the result's ``adopted`` maps it to that form. A registry that cannot be
+    asked raises ``UncheckedIrisError`` before anything is sent, naming the
+    IRIs, unless ``allow_unchecked_iris=True``. A record the registry holds as
+    superseded or withdrawn raises ``RetiredIrisError`` before anything is
+    sent, whatever ``allow_unchecked_iris`` says. *checked_iris* maps the
+    IRIs a caller has already looked up in this registry to the IRI to use
+    for each, or to the ``RetiredRecord`` that stops it, as ``ws.submit()``
+    does for a whole workspace; they are not asked about again.
     """
+    from battinfo._adoption import adopt_registry_iris, adopted_iris, minted_iris, rewrite_iris  # noqa: PLC0415
+
     if max_attempts < 1:
         raise ValueError("max_attempts must be >= 1")
     if not allow_local_files:
         offenders = _local_file_offenders(payload)
         if offenders:
             raise ValueError(local_files_message(offenders))
+    adopted = adopted_iris(
+        adopt_registry_iris(
+            minted_iris(payload),
+            registry_url=registry_base_url,
+            action="submit_publication_package()",
+            allow_unchecked_iris=allow_unchecked_iris,
+            answers=dict(checked_iris or {}),
+        )
+    )
+    if adopted:
+        payload = rewrite_iris(payload, adopted)
     request_url = registry_base_url.rstrip("/") + "/publication-packages"
     request_payload = dict(payload)
     workspace = request_payload.get("workspace")
-    if isinstance(workspace, Mapping) and "root" in workspace:
-        # A package built by an earlier version names the local workspace folder.
-        request_payload["workspace"] = {key: value for key, value in workspace.items() if key != "root"}
+    if isinstance(workspace, Mapping):
+        # A package built by an earlier version names the local workspace folder
+        # and the absolute path of an editorial record; neither leaves this computer.
+        cleaned = {key: value for key, value in workspace.items() if key != "root"}
+        editorial = cleaned.get("editorial")
+        if isinstance(editorial, Mapping) and isinstance(editorial.get("record_path"), str):
+            parts = [part for part in re.split(r"[\\/]", editorial["record_path"]) if part]
+            cleaned["editorial"] = {**editorial, "record_path": "/".join(parts[-2:])}
+        request_payload["workspace"] = cleaned
     request_body = json.dumps(request_payload, ensure_ascii=False).encode("utf-8")
     headers = {"Content-Type": "application/json", api_key_header: api_key}
 
@@ -185,6 +224,7 @@ def submit_publication_package(
                 "url": request_url,
                 "status_code": status_code,
                 "response": response_payload,
+                "adopted": adopted,
             }
         except HTTPError as exc:
             body = _scrub_secret(exc.read().decode("utf-8", errors="replace")[:_REGISTRY_ERROR_BODY_LIMIT])

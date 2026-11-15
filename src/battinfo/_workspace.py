@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import mimetypes
 import shutil
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
@@ -13,10 +12,12 @@ if TYPE_CHECKING:
 from battinfo._fs_guard import is_empty_or_missing, remove_tree, write_marker
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._util import (
+    EXTENSION_MEDIA_TYPE_MAP,  # noqa: F401 - imported from here by name
     LOCATION_FIELDS,
     _as_path,
     _now_unix,
     _sha256,
+    file_media_type,
     file_uri_to_path,
     is_file_uri,
     is_local_location,
@@ -79,24 +80,17 @@ from battinfo.entities import (
     save_entity_path,
     saved_record_body,
     saved_record_document,
+    seed_iri,
     seed_text,
     stable_uid,
     test_identity_seed,
 )
+from battinfo.namespace import DEFAULT_RECORD_BASE, base_prefix, record_iri, same_record
 from battinfo.publication import DEFAULT_PUBLISH_FILENAME
 from battinfo.publication import publish as publish_bundle
 from battinfo.validate.record import validate_record_report
 
 PathLike = str | Path
-EXTENSION_MEDIA_TYPE_MAP = {
-    ".csv": "text/csv",
-    ".tsv": "text/tab-separated-values",
-    ".json": "application/json",
-    ".jsonld": "application/ld+json",
-    ".h5": "application/x-hdf5",
-    ".hdf5": "application/x-hdf5",
-    ".parquet": "application/vnd.apache.parquet",
-}
 
 
 def quantity(
@@ -173,18 +167,21 @@ _IRI_NAMESPACE: dict[str, str] = {
 }
 
 
-def _entity_iri(entity_type: str, seed: str) -> str:
+def _entity_iri(entity_type: str, seed: str, *, prefix: str | None = None) -> str:
+    """The IRI *seed* mints, in the old form unless a publisher *prefix* is given (``namespace.record_iri``)."""
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"https://w3id.org/battinfo/{namespace}/{_stable_uid(seed)}"
+    return record_iri(namespace, _stable_uid(seed), prefix)
 
 
 def _legacy_entity_iri(entity_type: str, seed: str) -> str:
     """The IRI the minting of before 0.8.0 gave *seed*, which had no NFC step (``entities.legacy_stable_uid``).
 
     Only for finding a record saved under it; nothing new is minted with it.
+    Every record of before 0.8.0 has the old form, and a lookup finds a saved
+    record in either form, so this one gives the old form.
     """
     namespace = _IRI_NAMESPACE.get(entity_type, entity_type)
-    return f"https://w3id.org/battinfo/{namespace}/{legacy_stable_uid(seed)}"
+    return record_iri(namespace, legacy_stable_uid(seed))
 
 
 def _iri_uid(iri: str) -> str:
@@ -212,8 +209,8 @@ def _cell_spec_fields(manufacturer: Any, model: Any, format: Any, chemistry: Any
     }
 
 
-def _cell_spec_iri(uid: str) -> str:
-    return f"https://w3id.org/battinfo/{_IRI_NAMESPACE['cell-spec']}/{uid}"
+def _cell_spec_iri(uid: str, *, prefix: str | None = None) -> str:
+    return record_iri(_IRI_NAMESPACE["cell-spec"], uid, prefix)
 
 
 # Fields that vary across runs and must NOT influence a content-derived
@@ -264,6 +261,8 @@ def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True, eve
     The record's own ``id`` is the one at its top level; a nested ``id`` stays
     (see :data:`_VOLATILE_SEED_KEYS`). With *every_id*, every ``id`` is left
     out, as the content seed of before 0.8.0 did (:func:`_legacy_content_seed`).
+    Every record IRI that stays enters in the old form (``entities.seed_iri``),
+    so the seed does not depend on the base the records it names were minted under.
     """
     if isinstance(value, dict):
         view: dict[str, Any] = {}
@@ -276,6 +275,8 @@ def _seed_view(value: Any, workspace_root: Path | None, *, top: bool = True, eve
         return view
     if isinstance(value, list):
         return [_seed_view(item, workspace_root, top=False, every_id=every_id) for item in value]
+    if isinstance(value, str):
+        return seed_iri(value)
     return value
 
 
@@ -287,6 +288,32 @@ _DERIVED_BACK_LINKS = ("dataset_ids",)
 _DERIVED_DOCUMENT_LINKS = ("datasets",)
 
 
+def _with_seed_fields(entity: Any, data: dict[str, Any]) -> dict[str, Any]:
+    """*data*, a dump of *entity*, with the fields its seed reads as an earlier release gave them.
+
+    ``ws.add()`` now fills fields that release left empty or wrote otherwise,
+    such as the measured period and media type of a parquet file, and records
+    the values that release gave in the entity's ``_seed_fields`` (``None``
+    for a field it left out), so the seeds below, and the IRIs minted from
+    them, stay as they were. What the ``Dataset`` model of that release did
+    not carry is left out for the same reason.
+    """
+    for key, value in (getattr(entity, "_seed_fields", None) or {}).items():
+        if value is None:
+            data.pop(key, None)
+        else:
+            data[key] = value
+    if isinstance(entity, Dataset):
+        # Seed rules are frozen with 0.8.0, whose model dropped the conditions of a
+        # distribution. A dataset given them keeps the seed that release gave it.
+        for distribution in data.get("distributions") or []:
+            if isinstance(distribution, dict):
+                distribution.pop("conditions", None)
+        # That model had no related_ids either, and its dump now holds one, empty or not.
+        data.pop("related_ids", None)
+    return data
+
+
 def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
     """A stable, order-independent seed from an entity's distinguishing content
     (its canonical record minus its own IRI and the volatile timestamps, with
@@ -294,12 +321,19 @@ def _content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
 
     A derived back-link (``dataset_ids``, which each finalize pass sets from the
     datasets that name the record) enters empty, as it is before any pass, so a
-    content seed never depends on an earlier pass.
+    content seed never depends on an earlier pass. A field ``ws.add()`` fills
+    where an earlier release did not enters as that release gave it
+    (:func:`_with_seed_fields`).
     """
-    data = entity.model_dump(mode="json", exclude_none=True)
+    data = _with_seed_fields(entity, entity.model_dump(mode="json", exclude_none=True))
     for key in _DERIVED_BACK_LINKS:
         if key in data:
             data[key] = []
+    if isinstance(entity, Dataset) and "published_at" not in data and entity._seed_published_at is not None:
+        # Seed rules are a public contract from 0.8.0 on. The 0.8.0 model gave a dataset
+        # built with created_at and no published_at that created_at as published_at, and
+        # this seed carried it. The model no longer sets it, so the seed keeps the value.
+        data["published_at"] = entity._seed_published_at
     return json.dumps(_seed_view(data, workspace_root), sort_keys=True, ensure_ascii=False)
 
 
@@ -393,6 +427,7 @@ def _disambiguate_entity_ids(
     *,
     workspace_root: Path | None = None,
     assigned: Sequence[bool] | None = None,
+    prefix: str | None = None,
 ) -> None:
     """Make the IRIs of *entities* unique without moving one that was assigned before this pass.
 
@@ -420,46 +455,54 @@ def _disambiguate_entity_ids(
     assigned before this pass". The content seed names a local data file by its
     locator relative to *workspace_root* (see ``entities.dataset_locator_seed``),
     not its absolute path, and leaves derived back-links out (``_content_seed``).
+    A re-minted IRI takes the publisher *prefix* of the pass (``None`` for the
+    old form), and its seed takes the shared IRI in the old form
+    (``entities.seed_iri``), so the uid is the same under every base.
     """
     flags = list(assigned) if assigned is not None else [False] * len(entities)
     if len(flags) != len(entities):
         raise ValueError("assigned must say, for each entity, whether it had its IRI before the pass.")
-    by_id: dict[str, list[int]] = {}
+    # Records are grouped by their IRI in the old form (entities.seed_iri): the
+    # two forms of one segment and uid name one record, and one record file.
+    by_key: dict[str, list[int]] = {}
     for index, entity in enumerate(entities):
         current = getattr(entity, "id", None)
         if current is not None:
-            by_id.setdefault(current, []).append(index)
+            by_key.setdefault(seed_iri(current), []).append(index)
 
-    for current, members in by_id.items():
+    for members in by_key.values():
         held = [entities[index] for index in members if flags[index]]
         if len(held) > 1:
             labels = ", ".join(_entity_label(entity) for entity in held)
             kind = entity_type.replace("-", " ")
             raise ValueError(
-                f"{len(held)} {kind} records in this session have the IRI {current}: {labels}. One IRI names "
+                f"{len(held)} {kind} records in this session have the IRI {held[0].id}: {labels}. One IRI names "
                 "one record, and an IRI a record already has (pinned, imported or saved earlier) is never "
                 "re-minted. Give each record its own IRI, or remove the duplicate."
             )
 
     # Assigned IRIs are fixed first, so a member minted in this pass never takes one.
-    seen: set[str] = {entity.id for index, entity in enumerate(entities) if flags[index] and entity.id is not None}
+    seen: set[str] = {
+        seed_iri(entity.id) for index, entity in enumerate(entities) if flags[index] and entity.id is not None
+    }
     for index, entity in enumerate(entities):
         current = getattr(entity, "id", None)
         if current is None or flags[index]:
             continue
-        if len(by_id[current]) > 1:
+        if len(by_key[seed_iri(current)]) > 1:
             # Shares its IRI with another record: re-seed from content (order-independent).
-            current = _entity_iri(entity_type, f"{current}::{_content_seed(entity, workspace_root=workspace_root)}")
-        if current in seen:
+            content = _content_seed(entity, workspace_root=workspace_root)
+            current = _entity_iri(entity_type, f"{seed_iri(current)}::{content}", prefix=prefix)
+        if seed_iri(current) in seen:
             # Genuine full-content duplicate: keep both with a stable ordinal suffix.
             ordinal = 1
-            candidate = _entity_iri(entity_type, f"{current}::dup{ordinal}")
-            while candidate in seen:
+            candidate = _entity_iri(entity_type, f"{seed_iri(current)}::dup{ordinal}", prefix=prefix)
+            while seed_iri(candidate) in seen:
                 ordinal += 1
-                candidate = _entity_iri(entity_type, f"{current}::dup{ordinal}")
+                candidate = _entity_iri(entity_type, f"{seed_iri(current)}::dup{ordinal}", prefix=prefix)
             current = candidate
         entity.id = current
-        seen.add(current)
+        seen.add(seed_iri(current))
 
 
 def _legacy_content_seed(entity: Any, *, workspace_root: Path | None = None) -> str:
@@ -468,7 +511,7 @@ def _legacy_content_seed(entity: Any, *, workspace_root: Path | None = None) -> 
     Only for finding a record saved under an IRI minted from it
     (:func:`_legacy_disambiguated_ids`).
     """
-    data = entity.model_dump(mode="json", exclude_none=True)
+    data = _with_seed_fields(entity, entity.model_dump(mode="json", exclude_none=True))
     return json.dumps(_seed_view(data, workspace_root, every_id=True), sort_keys=True, ensure_ascii=False)
 
 
@@ -499,13 +542,13 @@ def _legacy_disambiguated_ids(
             continue
         if counts[current] > 1:
             content = _legacy_content_seed(entity, workspace_root=workspace_root)
-            current = _legacy_entity_iri(entity_type, f"{current}::{content}")
+            current = _legacy_entity_iri(entity_type, f"{seed_iri(current)}::{content}")
         if current in seen:
             ordinal = 1
-            candidate = _legacy_entity_iri(entity_type, f"{current}::dup{ordinal}")
+            candidate = _legacy_entity_iri(entity_type, f"{seed_iri(current)}::dup{ordinal}")
             while candidate in seen:
                 ordinal += 1
-                candidate = _legacy_entity_iri(entity_type, f"{current}::dup{ordinal}")
+                candidate = _legacy_entity_iri(entity_type, f"{seed_iri(current)}::dup{ordinal}")
             current = candidate
         seen.add(current)
         result.append(current)
@@ -529,14 +572,7 @@ def _path_from_file_uri(uri: str) -> Path | None:
     return file_uri_to_path(uri) if is_file_uri(uri) else None
 
 
-def _guess_media_type(value: str | None) -> str | None:
-    if value is None:
-        return None
-    suffix = Path(value).suffix.lower()
-    if suffix in EXTENSION_MEDIA_TYPE_MAP:
-        return EXTENSION_MEDIA_TYPE_MAP[suffix]
-    guessed, _ = mimetypes.guess_type(value)
-    return guessed
+_guess_media_type = file_media_type
 
 
 def _sync_model_state(target: Any, source: Any) -> None:
@@ -589,6 +625,7 @@ class Workspace:
         clean: bool = False,
         inputs: Sequence[PathLike | None] = (),
         generated: bool = False,
+        base: str = DEFAULT_RECORD_BASE,
     ) -> None:
         """Open or create the workspace at ``root``.
 
@@ -599,7 +636,15 @@ class Workspace:
         reads. ``generated=True`` says ``root`` is BattINFO output, so a root
         this call creates gets the marker that lets a later ``clean=True``
         delete it.
+
+        ``base`` is the base the records this session mints take
+        (``namespace.base_prefix``), given by the caller: ``battinfo.workspace()``
+        passes the one its folder recorded when it was created. A record
+        already saved under the records folder keeps the IRI it has, in
+        either form (:meth:`_hold_saved_iris`).
         """
+        self.record_base = base
+        self._record_prefix = base_prefix(base)
         self.root = _as_path(root)
         creates_root = is_empty_or_missing(self.root)
         if clean:
@@ -990,9 +1035,9 @@ class Workspace:
                         "test-protocol authoring JSON 'experiment'/'steps' must be a list of PyBaMM-style strings."
                     )
                 method_fields["experiment"] = list(authored)
-                cycles = payload.get("cycles")
-                if isinstance(cycles, int):
-                    method_fields["cycles"] = cycles
+        if payload.get("cycles") is not None:
+            # TestSpec reads any whole number and refuses anything else.
+            method_fields["cycles"] = payload["cycles"]
 
         return TestSpec(
             name=name,
@@ -1041,14 +1086,17 @@ class Workspace:
         specification_comment: str | list[str] | None = None,
         comment: str | list[str] | None = None,
     ) -> CellSpec:
-        from battinfo.api._records import _library_cell_spec_uid  # noqa: PLC0415
+        from battinfo.api._records import _library_cell_spec_iri  # noqa: PLC0415
 
         fields = _cell_spec_fields(manufacturer, model, format, chemistry, size_code)
         # The library holds one file per manufacturer and model; a spec it holds
-        # under the IRI the seeds of before 0.8.0 gave it keeps that IRI.
-        uid = _library_cell_spec_uid(fields, self.library_root) or cell_spec_uid(fields)
+        # under the IRI the seeds of before 0.8.0 gave it, or under the other
+        # form of its IRI, keeps that IRI.
+        specification_id = _library_cell_spec_iri(fields, self.library_root, base=self.record_base) or _cell_spec_iri(
+            cell_spec_uid(fields), prefix=self._record_prefix
+        )
         specification = build_cell_description(
-            id=_cell_spec_iri(uid),
+            id=specification_id,
             manufacturer=manufacturer,
             model=model,
             format=format,
@@ -1241,8 +1289,8 @@ class Workspace:
             authored = experiment if experiment is not None else steps
             if authored:
                 fields["experiment"] = list(authored)
-                if cycles is not None:
-                    fields["cycles"] = cycles
+        if cycles is not None:
+            fields["cycles"] = cycles
         protocol = TestSpec(**fields)
         self.test_specs.append(protocol)
         return protocol
@@ -1677,6 +1725,8 @@ class Workspace:
         emit_bundle_dir: bool = False,
         emit_html_page: bool = False,
         validation_policy: str = "strict",
+        registry_url: str | None = None,
+        allow_unchecked_iris: bool = False,
     ) -> dict[str, Any]:
         return self.build_publication_package(
             dataset,
@@ -1692,6 +1742,8 @@ class Workspace:
             emit_bundle_dir=emit_bundle_dir,
             emit_html_page=emit_html_page,
             validation_policy=validation_policy,
+            registry_url=registry_url,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def build_publication_package(
@@ -1713,8 +1765,15 @@ class Workspace:
         emit_datacite_metadata: bool = True,
         emit_dcat_export: bool = False,
         validation_policy: str = "strict",
+        registry_url: str | None = None,
+        allow_unchecked_iris: bool = False,
     ) -> dict[str, Any]:
-        """Preferred name for locally building a publication package from `Workspace`."""
+        """Preferred name for locally building a publication package from `Workspace`.
+
+        Given a registry (*registry_url*, else ``BATTINFO_REGISTRY_URL``), a
+        record it already holds in the old form keeps that IRI in the package
+        (see :func:`battinfo.publication.publish`).
+        """
 
         resolved_test, resolved_cell, resolved_cell_spec = self._resolve_dataset_chain(
             dataset,
@@ -1743,6 +1802,9 @@ class Workspace:
             emit_datacite_metadata=emit_datacite_metadata,
             emit_dcat_export=emit_dcat_export,
             validation_policy=validation_policy,
+            base=self.record_base,
+            registry_url=registry_url,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def export_release(
@@ -2000,6 +2062,7 @@ class Workspace:
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self.record_base,
                 )
                 for item in finalized["cell_specs"]
             ],
@@ -2011,6 +2074,7 @@ class Workspace:
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self.record_base,
                 )
                 for item in finalized["cells"]
             ],
@@ -2022,6 +2086,7 @@ class Workspace:
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self.record_base,
                 )
                 for item in finalized["test_specs"]
             ],
@@ -2033,6 +2098,7 @@ class Workspace:
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self.record_base,
                 )
                 for item in finalized["tests"]
             ],
@@ -2044,6 +2110,7 @@ class Workspace:
                     resolve_references=resolve_references,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self.record_base,
                 )
                 for item in finalized["datasets"]
             ],
@@ -2284,7 +2351,11 @@ class Workspace:
             is_legacy_record=lambda index, body: _same_cell_spec_identity(body, finalized_cell_specs[index]),
         )
         _disambiguate_entity_ids(
-            finalized_cell_specs, "cell-spec", workspace_root=self.data_root, assigned=held_cell_specs
+            finalized_cell_specs,
+            "cell-spec",
+            workspace_root=self.data_root,
+            assigned=held_cell_specs,
+            prefix=self._record_prefix,
         )
 
         finalized_cells = [self._finalize_cell(item, cell_spec_map) for item in self.cells]
@@ -2292,7 +2363,9 @@ class Workspace:
         # Break IRI collisions before datasets link to these ids (cell_map holds
         # the same objects, so in-place re-minting propagates to dataset linking).
         held_cells = self._hold_saved_iris(finalized_cells, "cell", assigned=assigned_cells, record_roots=roots)
-        _disambiguate_entity_ids(finalized_cells, "cell", workspace_root=self.data_root, assigned=held_cells)
+        _disambiguate_entity_ids(
+            finalized_cells, "cell", workspace_root=self.data_root, assigned=held_cells, prefix=self._record_prefix
+        )
 
         finalized_test_specs = [self._finalize_test_spec(item) for item in self.test_specs]
         test_spec_map = {
@@ -2303,7 +2376,11 @@ class Workspace:
             finalized_test_specs, "test-protocol", assigned=assigned_test_specs, record_roots=roots
         )
         _disambiguate_entity_ids(
-            finalized_test_specs, "test-protocol", workspace_root=self.data_root, assigned=held_test_specs
+            finalized_test_specs,
+            "test-protocol",
+            workspace_root=self.data_root,
+            assigned=held_test_specs,
+            prefix=self._record_prefix,
         )
 
         finalized_tests = [self._finalize_test(item, cell_map, test_spec_map) for item in self.tests]
@@ -2319,7 +2396,9 @@ class Workspace:
                 body, self.tests[index], finalized_tests[index], cell_map
             ),
         )
-        _disambiguate_entity_ids(finalized_tests, "test", workspace_root=self.data_root, assigned=held_tests)
+        _disambiguate_entity_ids(
+            finalized_tests, "test", workspace_root=self.data_root, assigned=held_tests, prefix=self._record_prefix
+        )
         if refuse_replaced_runs:
             self._refuse_replacing_saved_runs(
                 finalized_tests, assigned=assigned_tests, record_roots=roots, cell_map=cell_map
@@ -2329,7 +2408,13 @@ class Workspace:
         held_datasets = self._hold_saved_iris(
             finalized_datasets, "dataset", assigned=assigned_datasets, record_roots=roots
         )
-        _disambiguate_entity_ids(finalized_datasets, "dataset", workspace_root=self.data_root, assigned=held_datasets)
+        _disambiguate_entity_ids(
+            finalized_datasets,
+            "dataset",
+            workspace_root=self.data_root,
+            assigned=held_datasets,
+            prefix=self._record_prefix,
+        )
 
         dataset_ids_by_cell: dict[str, list[str]] = {}
         for dataset in finalized_datasets:
@@ -2481,7 +2566,7 @@ class Workspace:
             fields = _cell_spec_fields(
                 finalized.manufacturer, finalized.model, finalized.format, finalized.chemistry, finalized.size_code
             )
-            finalized.id = _cell_spec_iri(cell_spec_uid(fields, roots=record_roots))
+            finalized.id = _cell_spec_iri(cell_spec_uid(fields, roots=record_roots), prefix=self._record_prefix)
         if finalized.name is None:
             finalized.name = f"{finalized.manufacturer} {finalized.model}"
         if finalized.source.type is None:
@@ -2515,8 +2600,8 @@ class Workspace:
             # available; the fallback keeps the pre-refactor anonymous seed
             # (colliding siblings are re-minted by _disambiguate_entity_ids).
             if seed is None:
-                seed = "::".join([_with_default(finalized.cell_spec_id, "unknown-cell-spec"), "", "", "cell"])
-            finalized.id = _entity_iri("cell", seed)
+                seed = "::".join([seed_iri(_with_default(finalized.cell_spec_id, "unknown-cell-spec")), "", "", "cell"])
+            finalized.id = _entity_iri("cell", seed, prefix=self._record_prefix)
         if finalized.source.type is None:
             finalized.source.type = "measurement"
         if finalized.source.retrieved_at is None:
@@ -2535,6 +2620,7 @@ class Workspace:
                         seed_text(finalized.version),
                     ]
                 ),
+                prefix=self._record_prefix,
             )
         if finalized.source.type is None:
             finalized.source.type = "manual"
@@ -2580,6 +2666,7 @@ class Workspace:
                     started_at=finalized.started_at,
                     name=given_name,
                 ),
+                prefix=self._record_prefix,
             )
         if finalized.source.type is None:
             finalized.source.type = "measurement"
@@ -2641,7 +2728,9 @@ class Workspace:
         keeps it, and only the others are re-minted from their content; so a
         record keeps its IRI whether or not a save ran before the record that
         collides with it was added. A record alone on an IRI that is saved
-        already has its own record and keeps it.
+        already has its own record and keeps it. A record is saved under its
+        IRI in either form, the old form or ``/id/1001/`` (``namespace.same_record``),
+        and keeps the form it is saved in whichever form this pass minted.
 
         A record saved under a seed of before 0.8.0 keeps that IRI too.
         *legacy_ids* holds, for each record, the IRIs the rule of before 0.8.0
@@ -2658,21 +2747,32 @@ class Workspace:
         roots = [Path(root) for root in record_roots]
         if not roots:
             return held
+        record_key = ENTITY_BY_TYPE[entity_type].record_key
+        # Records are grouped by their IRI in the old form (entities.seed_iri):
+        # the two forms of one segment and uid are one record, saved in one file.
         groups: dict[str, list[int]] = {}
         for index, item in enumerate(finalized):
             if item.id is not None:
-                groups.setdefault(item.id, []).append(index)
+                groups.setdefault(seed_iri(item.id), []).append(index)
         own_record: set[int] = set()  # alone on an IRI saved under the roots: the record is its own
-        for iri, members in groups.items():
+        for members in groups.values():
             if any(held[index] for index in members):
                 continue
+            iri = finalized[members[0]].id  # every member was minted in this pass, in one form
             uid = _iri_uid(iri)
             if not any(save_entity_path(entity_type, uid, root).is_file() for root in roots):
                 continue
+            doc = saved_record_document(entity_type, uid, roots)
+            saved_iri = doc[record_key].get("id") if doc is not None else None
+            if not same_record(saved_iri, iri):
+                doc = None
+            elif saved_iri != iri:
+                # Saved under the other form of this IRI: the record keeps the IRI it is saved under.
+                for index in members:
+                    finalized[index].id = saved_iri
             if len(members) == 1:
                 own_record.add(members[0])
                 continue
-            doc = saved_record_document(entity_type, uid, roots)
             match = next(
                 (index for index in members if doc is not None and self._is_saved_record(finalized[index], doc)),
                 None,
@@ -2681,8 +2781,9 @@ class Workspace:
                 held[match] = True
         if legacy_ids is None or is_legacy_record is None:
             return held
-        record_key = ENTITY_BY_TYPE[entity_type].record_key
-        taken = {item.id for item in finalized if item.id is not None}
+        # Compared in the old form, as the legacy IRIs are, so a record that has
+        # the other form of one is seen to take it.
+        taken = {seed_iri(item.id) for item in finalized if item.id is not None}
         pending = [
             index
             for index, item in enumerate(finalized)
@@ -2693,7 +2794,7 @@ class Workspace:
             claims: dict[str, list[int]] = {}
             for index in pending:
                 candidates = legacy_ids[index]
-                if held[index] or position >= len(candidates) or candidates[position] in taken:
+                if held[index] or position >= len(candidates) or seed_iri(candidates[position]) in taken:
                     continue
                 claims.setdefault(candidates[position], []).append(index)
             for legacy, claimants in claims.items():
@@ -2709,9 +2810,10 @@ class Workspace:
                     ][:1]
                 if len(matches) != 1:
                     continue
-                finalized[matches[0]].id = legacy
+                saved_iri = doc[record_key]["id"]  # the legacy IRI, in the form it is saved under
+                finalized[matches[0]].id = saved_iri
                 held[matches[0]] = True
-                taken.add(legacy)
+                taken.add(seed_iri(saved_iri))
         return held
 
     def _is_saved_record(self, item: Any, saved: Mapping[str, Any]) -> bool:
@@ -2721,8 +2823,9 @@ class Workspace:
         as a cell spec's ``properties``) included. Left out are the record's
         own IRI, the volatile timestamps, the schema and BattINFO versions that
         wrote it, the derived back-links (``dataset_ids``, a cell's
-        ``datasets``) and, for a dataset that has none of its own, the
-        publication time and licence a save fills in.
+        ``datasets``) and, for a dataset that has none of its own, the licence
+        a save fills in and the publication time, which a publish on Zenodo
+        sets on the saved record (and which earlier releases set at save).
         """
         builders: dict[type, Callable[[Any], dict[str, Any]]] = {
             CellSpec: _record_from_cell_spec,
@@ -2762,7 +2865,19 @@ class Workspace:
             return data
 
         mine = view(doc)
-        return mine is not None and mine == view(saved)
+        theirs = view(saved)
+        if mine is not None and mine == theirs:
+            return True
+        # A record saved by an earlier release lacks the fields ws.add() now
+        # fills (see _with_seed_fields); it is still this record.
+        earlier = getattr(item, "_seed_fields", None)
+        if not earlier or theirs is None:
+            return False
+        try:
+            then = view(builder(item.model_copy(update=dict(earlier))))
+        except (ValueError, TypeError):
+            return False
+        return then is not None and then == theirs
 
     def _legacy_cell_spec_ids(self, finalized: Sequence[CellSpec], assigned: Sequence[bool]) -> list[tuple[str, ...]]:
         """The IRIs the finalize pass of before 0.8.0 can have given each cell spec of *finalized*.
@@ -2771,12 +2886,13 @@ class Workspace:
         (:func:`_legacy_disambiguated_ids`), then the plain natural-key IRI of
         before 0.8.0 (``entities.legacy_cell_spec_identity_seed``, hashed
         without NFC), which a spec saved on its own has. A spec in *assigned*
-        starts from the IRI it has. Only for finding specs saved under those
+        starts from the IRI it has, in the old form as every IRI of before
+        0.8.0 is. Only for finding specs saved under those
         IRIs (:meth:`_hold_saved_iris`).
         """
         started = [
-            spec.id
-            if held
+            seed_iri(spec.id)
+            if held and spec.id is not None
             else _legacy_entity_iri(
                 "cell-spec",
                 legacy_cell_spec_identity_seed(
@@ -2795,12 +2911,13 @@ class Workspace:
         (:func:`_legacy_disambiguated_ids`), then the plain IRI of its seed of
         before 0.8.0 (``entities.legacy_test_identity_seed``), which a test
         saved without such a sibling has. A test in *assigned* starts from the
-        IRI it has. Only for finding tests saved under those IRIs
+        IRI it has, in the old form as every IRI of before 0.8.0 is. Only for
+        finding tests saved under those IRIs
         (:meth:`_hold_saved_iris`).
         """
         started = [
-            test.id
-            if held
+            seed_iri(test.id)
+            if held and test.id is not None
             else _legacy_entity_iri(
                 "test",
                 legacy_test_identity_seed(
@@ -2926,8 +3043,8 @@ class Workspace:
                 "dataset",
                 "::".join(
                     [
-                        _with_default(finalized.cell_instance_id, "unknown-cell"),
-                        finalized.test_id or "",
+                        seed_iri(_with_default(finalized.cell_instance_id, "unknown-cell")),
+                        seed_iri(finalized.test_id or ""),
                         dataset_locator_seed(
                             access_url=finalized.access_url,
                             download_url=finalized.download_url,
@@ -2937,6 +3054,7 @@ class Workspace:
                         _seed_text_or(finalized.name, "dataset"),
                     ]
                 ),
+                prefix=self._record_prefix,
             )
         if finalized.source.type is None:
             finalized.source.type = "measurement"

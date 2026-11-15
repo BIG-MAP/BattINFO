@@ -627,7 +627,7 @@ def test_a_corrected_file_names_the_record_it_supersedes() -> None:
         claims=[{"parameter": "particle_radius", "quantity": {"value": 5.86e-6, "unit": "m"}}],
     )
     assert batch["parameter_set"]["supersedes"] == OLD_IRI
-    assert batch["parameter_set"]["id"].startswith("https://w3id.org/battinfo/dataset/")
+    assert batch["parameter_set"]["id"].startswith("https://w3id.org/battinfo/id/1001/dataset/")
 
 
 # ── Publishing through the workspace ─────────────────────────────────────────

@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,7 @@ def test_setup_demo_environment_writes_submission_without_lightweight_metadata(t
     assert resources["dataset"]["semantic_payload"]["battinfo_records"]["dataset"]["dataset"]["license"] == "CC-BY-4.0"
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_run_demo_pipeline_publishes_and_checks_platform_page(tmp_path: Path, monkeypatch) -> None:
     response_payload = {
         "kind": "BattinfoSubmissionResult",

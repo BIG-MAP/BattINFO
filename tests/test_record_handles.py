@@ -407,7 +407,8 @@ def test_a_new_test_title_keeps_the_test_iri_and_moves_its_datasets_unless_they_
 
 def test_a_test_can_be_pinned_by_uid(tmp_path: Path) -> None:
     _gitt_session(tmp_path, name="any title", uid="AAAA-BBBB-CCCC-0002", dataset_iris=[DATASET_PIN])
-    assert _records(tmp_path, "test")[0]["test"]["id"] == TEST_PIN
+    # A uid pins the IRI of that uid under the workspace's base, /id/1001/ for a new one.
+    assert _records(tmp_path, "test")[0]["test"]["id"] == "https://w3id.org/battinfo/id/1001/test/aaaa-bbbb-cccc-0002"
     assert _records(tmp_path, "dataset")[0]["dataset"]["id"] == DATASET_PIN
 
 
@@ -475,7 +476,7 @@ def test_a_test_spec_draft_may_pin_by_uid_and_rejects_a_foreign_id(tmp_path: Pat
     ws = AuthoringWorkspace(root=tmp_path, registry_url=None)
     draft = tmp_path / "gitt.test-spec.json"
     draft.write_text(json.dumps({"name": "GITT", "type": "gitt", "uid": SPEC_UID}), encoding="utf-8")
-    assert ws.load(draft).id == SPEC_PIN
+    assert ws.load(draft).id == f"https://w3id.org/battinfo/id/1001/spec/{SPEC_UID}"  # the new workspace's base
     draft.write_text(json.dumps({"name": "GITT", "type": "gitt", "id": TEST_PIN}), encoding="utf-8")
     with pytest.raises(ValueError, match="not a spec IRI"):
         ws.load(draft)

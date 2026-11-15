@@ -728,14 +728,66 @@ def test_tier3_richness_structured_conditions_versioning_keywords_ror() -> None:
     assert term["hasNumericalPart"]["hasNumberValue"] == 0.9
     assert term["hasMeasurementUnit"] == {"@id": "emmo:Volt"}
     prop = plan["hasProperty"][0]
-    assert prop["@type"] == "ConventionalProperty"
+    assert prop["@type"] == "CelsiusTemperature"
     assert prop["hasNumericalPart"]["hasNumberValue"] == 25
-    assert prop["rdfs:label"] == "temperature"
+    assert prop["skos:prefLabel"] == "temperature"
     assert "schema:additionalProperty" not in plan  # all names mapped → no fallback
     assert {"battery", "capacity_check", "cylindrical", "nmc", "SINTEF"} <= set(cat["schema:keywords"])
     assert cat["schema:version"] == "2"
     assert cat["dcterms:isVersionOf"]["@id"] == "https://zenodo.org/records/concept"
     assert prov["@id"] == "https://ror.org/01f677e56"
+
+
+def test_member_dataset_keeps_what_its_record_states() -> None:
+    """A member dataset's own creators, publisher, publication and DOI win over the
+    deposit's, as its licence does."""
+    ds_id = "https://w3id.org/battinfo/dataset/d1"
+    empa = {"type": "Organization", "name": "Empa", "same_as": "http://www.wikidata.org/entity/Q683116"}
+    author = {"type": "Person", "name": "C. B.", "same_as": "https://orcid.org/0000-0002-5003-1134"}
+    doi = "https://doi.org/10.5281/zenodo.15481956"
+    rs = {
+        "cell-spec": [],
+        "cell-instance": [{"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1", "name": "c1"}}],
+        "test": [
+            {
+                "test": {
+                    "id": "https://w3id.org/battinfo/test/t1",
+                    "cell_id": "https://w3id.org/battinfo/cell/c1",
+                    "kind": "cycling",
+                    "dataset_ids": [ds_id],
+                }
+            }
+        ],
+        "test-protocol": [],
+        "dataset": [
+            {
+                "dataset": {
+                    "id": ds_id,
+                    "name": "d1",
+                    "creators": [author],
+                    "publisher": empa,
+                    "same_as": [doi],
+                    "citations": [{"kind": "article", "doi": "10.1002/batt.202500155"}],
+                }
+            }
+        ],
+    }
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        data_filenames=[],
+        title="t",
+        description="d",
+        creators=[{"name": "Deposit Person"}],
+        license="cc-by-4.0",
+    )
+    member = next(n for n in doc["@graph"] if n.get("@id") == ds_id)
+    assert [c["@id"] for c in member["schema:creator"]] == [author["same_as"]]
+    assert member["dcterms:publisher"]["@id"] == empa["same_as"]
+    assert member["schema:sameAs"] == [{"@id": doi}]
+    assert "10.1002/batt.202500155" in json.dumps(member["schema:citation"])
 
 
 def test_dcat_richness_dcterms_bytesize_derivation_mediatype() -> None:

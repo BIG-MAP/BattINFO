@@ -1,0 +1,89 @@
+{
+  "schema_version": "0.2.0",
+  "test_spec": {
+    "id": "https://w3id.org/battinfo/spec/gc8e-hqby-ve43-efza",
+    "name": "Negative electrode half-cell rated capacity vs Li/Li+",
+    "kind": "capacity_check",
+    "description": "Rated-capacity measurement of the negative electrode in a half cell with a lithium reference electrode, as in the Empa coin cell template (CatINFO converter, CoinCellSchema 2.0.0). Charging lithiates the electrode, so its voltage falls towards the lower limit."
+  },
+  "method": [
+    {
+      "mode": "cc",
+      "direction": "charge",
+      "setpoints": {
+        "current_density": {
+          "value": 0.1,
+          "unit": "mA/cm2"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 0.01,
+          "unit": "V",
+          "direction": "below"
+        },
+        {
+          "quantity": "voltage",
+          "value": 1,
+          "unit": "V",
+          "direction": "above"
+        }
+      ]
+    },
+    {
+      "mode": "cv",
+      "direction": "charge",
+      "setpoints": {
+        "voltage": {
+          "value": 0.01,
+          "unit": "V"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "current",
+          "value": 0.01,
+          "unit": "mA/cm2",
+          "direction": "below"
+        },
+        {
+          "quantity": "voltage",
+          "value": 1,
+          "unit": "V",
+          "direction": "above"
+        }
+      ]
+    },
+    {
+      "mode": "cc",
+      "direction": "discharge",
+      "setpoints": {
+        "current_density": {
+          "value": 0.1,
+          "unit": "mA/cm2"
+        }
+      },
+      "termination": [
+        {
+          "quantity": "voltage",
+          "value": 1,
+          "unit": "V",
+          "direction": "above"
+        },
+        {
+          "quantity": "voltage",
+          "value": 0.01,
+          "unit": "V",
+          "direction": "below"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

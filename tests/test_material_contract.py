@@ -85,7 +85,7 @@ def test_material_spec_and_instance_roundtrip(tmp_path: Path) -> None:
         property={"specific_capacity": {"value": 160, "unit": "mAh/g"}},
     )
     spec_id = spec["material_spec"]["id"]
-    assert spec_id.startswith("https://w3id.org/battinfo/spec/")
+    assert spec_id.startswith("https://w3id.org/battinfo/id/1001/spec/")
 
     saved_spec = api.save_material_spec(spec, source_root=tmp_path)
     assert saved_spec["status"] == "created"

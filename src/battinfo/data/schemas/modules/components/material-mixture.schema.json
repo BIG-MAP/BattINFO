@@ -19,11 +19,11 @@
       "description": "Component materials of the mixture, each with its fraction under property: volume_fraction (v/v) or mass_fraction (w/w), using one basis for the whole mixture."
     },
     "manufacturer": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Manufacturer of the item."
     },
     "supplier": {
-      "type": "string",
+      "$ref": "../common/organization-ref.schema.json",
       "description": "Supplier or vendor the item was sourced from."
     },
     "product_id": {

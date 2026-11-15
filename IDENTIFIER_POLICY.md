@@ -1,10 +1,12 @@
-# BattINFO Identifier Policy (v1.0)
+# BattINFO Identifier Policy (v1.1)
+
+Version 1.1, 2026-10-26, takes in the IRI ruling of 22 October 2026 (issue #476). One w3id name holds the standard at its root and everything else in branches (1, 7). New records carry a publisher prefix (3.1, 5.6, 6.4). Shared things and prefix holders' vocabularies have rules of their own (6.5, 6.6), and versions have addresses (11). The amendment that version 1.0 carried as 5.6 is written into 5.1 to 5.6, and the second section 16 is numbered 17. No IRI minted under version 1.0 changes.
 
 ## 1. Purpose
 
 This document defines the rules for minting, representing, resolving, and managing persistent identifiers in the BattINFO ecosystem.
 
-Identifiers issued under `https://w3id.org/battinfo/` are:
+Identifiers issued under `https://w3id.org/battinfo/`, called BattINFO IDs, are:
 
 - Globally unique
 - Opaque (non-semantic)
@@ -14,6 +16,17 @@ Identifiers issued under `https://w3id.org/battinfo/` are:
 
 Identifiers must remain stable for the lifetime of the registry.
 
+`https://w3id.org/battinfo` is the only w3id name BattINFO uses. Every address under it sits in one branch:
+
+- The root holds the standard: the BattINFO ontology with its formats and version paths, the JSON-LD contexts under `context/`, the JSON Schemas under `schema/`, and the 57 terms of the records vocabulary.
+- Under `def/{prefix}/` a prefix holder (6.4) defines its own terms (6.6).
+- Records are `id/{prefix}/{segment}/{uid}` (3.1).
+- A shared thing, such as a product model or a maker, is `id/{uid}`, and only the registry mints one (6.5).
+
+Records of the old form, `{segment}/{uid}`, also sit at the root. Every record minted before 0.8.0 has that form and keeps resolving there. Section 7.1 lists every case an address can fall into.
+
+The BattINFO ontology's IRI is `https://w3id.org/battinfo#`, as `battinfo.ttl` declares. Its document is served at the root, `https://w3id.org/battinfo/`, and `https://w3id.org/battinfo` redirects there. The records vocabulary has an ontology IRI of its own, `https://w3id.org/battinfo/vocab/records`.
+
 ## 2. Normative Language
 
 The keywords `MUST`, `MUST NOT`, `SHOULD`, and `MAY` are to be interpreted as requirement levels.
@@ -22,22 +35,34 @@ The keywords `MUST`, `MUST NOT`, `SHOULD`, and `MAY` are to be interpreted as re
 
 ### 3.1 Structure
 
-Canonical entity IRIs use the pattern:
+A record IRI has one of two forms. The prefixed form is
 
 ```text
-https://w3id.org/battinfo/{entity-type}/{uid}
+https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}
 ```
 
-Example (the flagship cell-spec record):
+and the old form is
 
 ```text
+https://w3id.org/battinfo/{segment}/{uid}
+```
+
+Examples (the first uid is illustrative; the second IRI is the flagship cell-spec record):
+
+```text
+https://w3id.org/battinfo/id/1001/cell/b6yn-0sxe-t2qk-9mjv
 https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0
 ```
 
 Where:
 
-- `{entity-type}` is a registered BattINFO entity class (for example `spec`, `cell`, `test`, `dataset`; see §6.1 for how the segment encodes the spec/instance duality)
+- `{prefix}` is a publisher prefix, a number of four or more digits that does not start with 0 (6.4)
+- `{segment}` is a registered record segment (for example `spec`, `cell`, `test`, `dataset`; see 6.1 for how the segment encodes the spec/instance duality), never a reserved segment
 - `{uid}` is a 16-character Base32 token formatted as 4-4-4-4 (with dashes)
+
+From 0.8.0 new records mint in the prefixed form. Every record minted before has the old form and keeps it, and a workspace or folder created before the switch goes on minting the old form (5.6). A record has one canonical IRI. Under prefix 1001 the old form and the prefixed form of one segment and uid name the same record, and the form the registry holds is the canonical one (5.3). Under any other prefix the same uid names a different record.
+
+A shared thing has neither prefix nor segment: `https://w3id.org/battinfo/id/{uid}` (6.5).
 
 ### 3.2 Canonical vs Accepted Forms
 
@@ -85,11 +110,21 @@ Undashed UID regex (accepted input only):
 ^[0-9a-hjkmnp-tv-z]{16}$
 ```
 
-Canonical IRI regex:
+Record IRI regex, either form:
 
 ```text
-^https://w3id\.org/battinfo/[a-z][a-z0-9-]*/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$
+^https://w3id\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?[a-z][a-z0-9-]*/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$
 ```
+
+The segment must also not be one of the reserved segments of 6.1, which the expression does not check.
+
+Shared-thing IRI regex:
+
+```text
+^https://w3id\.org/battinfo/id/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$
+```
+
+`battinfo.namespace` builds and reads both forms, and the IRI patterns of the v1 JSON Schemas are generated from it by `scripts/sync_schema_iri_patterns.py`. Each such pattern names the segments of the record type it accepts. A field that refers to an organization, a cell spec or a material accepts a shared thing as well (11.1).
 
 ## 4. Opaqueness Requirement
 
@@ -108,11 +143,13 @@ All metadata belongs in RDF properties, not in identifiers.
 
 ### 5.1 Where uids are minted
 
-BattINFO mints a record's uid on the machine that writes the record, offline and without asking the registry. Every authoring path mints through one primitive, `battinfo.entities.stable_uid(seed)`: the seed is put in Unicode NFC and hashed with SHA-256, and the first 16 bytes of the digest, read as one big-endian integer, are written as 16 characters of the alphabet in 3.3, dashed 4-4-4-4. The paths that mint this way are the workspace (`battinfo.workspace()`) and the engine behind it, the `create_*` and `save_*` functions, a save of a record without an id, the publication package (`battinfo.publish`, `build_publication_package`) and the folder-based batch path (`battinfo batch init`, `battinfo batch add`, `battinfo batch package`). Section 5.4 names the exceptions. The registry does not issue uids for these records: it takes the IRI a record carries (5.3).
+BattINFO mints a record's uid on the machine that writes the record, offline and without asking the registry. Every authoring path mints through one primitive, `battinfo.entities.stable_uid(seed)`: the seed is put in Unicode NFC and hashed with SHA-256, and the first 16 bytes of the digest, read as one big-endian integer, are written as 16 characters of the alphabet in 3.3, dashed 4-4-4-4. The paths that mint this way are the workspace (`battinfo.workspace()`) and the engine behind it, the `create_*` and `save_*` functions, a save of a record without an id, the publication package (`battinfo.publish`, `build_publication_package`) and the folder-based batch path (`battinfo batch init`, `battinfo batch add`, `battinfo batch package`). Section 5.4 names the exceptions. The registry does not issue uids for these records: it takes the IRI a record carries (5.3). A uid never depends on the base a record mints under, so one identity gives one uid in either form of 3.1; section 5.6 says which base a record takes.
 
 ### 5.2 Identity seeds
 
 A seed is built from what identifies the record, its natural key, by the seed builders in `battinfo.entities`, so one identity gives one uid on every path that sees that identity (5.4 names the paths that see less of it), and saving a record again updates it instead of adding a copy. A cell spec is seeded from its manufacturer, model, format, chemistry and size code; a cell from its spec's IRI, its serial number and batch, and its name when it has no serial number; a test from its cell's IRI, its kind, its protocol (the protocol's IRI when it has one, else its name) and its run (the location of its first data file, else a start time the caller gives, else a name the caller gives, never a title BattINFO generates). Free-text fields go through one normaliser, `entities.seed_text`, which applies Unicode NFC, strips the text and turns each run of whitespace into one space. Cell specs, cells and tests keep the case of the text, and a cell spec's chemistry enters as its key in the chemistry vocabulary as it stood in 0.8.0 (5.5); material and electrode specs lower-case their fields. Locators get NFC alone, and hashes and content seeds enter as they are. Some seeds take a name: a cell without a serial number is seeded from its name, a test protocol from its name and version, and a dataset from its title, which `ws.add("test")` builds from the test's name, so renaming a test moves the IRIs of its datasets (pin them with `dataset_iris=`). A test's own title enters only when the caller gave it to a test with no data file and no start time, and a title BattINFO generates (`C01 cycling`) never does.
+
+A seed that names another record, as a cell names its spec or a test its cell and protocol, takes that record's IRI in the old form, whichever form the record has (`entities.seed_iri`). A cell of a spec in the `/id/1001/` form therefore gets the uid it would get from the same spec in the old form, and adopting either form of the spec never moves the cell. A seed reads the segment and uid of the record it names and never its prefix, 1001 or any other, so a record's uid does not change with the form or the prefix its parent is named in. Records of two prefix holders stay apart by their own prefixes, since the same segment and uid under another prefix name another record (3.1), the old form counting as 1001 (5.3).
 
 On every path that mints through `battinfo.entities`:
 
@@ -123,9 +160,13 @@ On every path that mints through `battinfo.entities`:
 
 ### 5.3 The registry
 
-The registry takes the BattINFO IRI a submission carries as the record's canonical IRI. A submission that carries none, such as a record written by another tool, gets one from the registry's fallback minter, `mint_canonical_id` in battinfo-registry's `publishing/identifiers.py`. It derives an opaque uid of the form in section 3 from the record type, the publisher and the submission's source-local id, so the same publisher submitting the same record again gets the same IRI, under the namespace segment of the record type (6.1).
+The Battery Genome registry holds prefix 1001 (6.4). It takes the BattINFO IRI a submission carries as the record's canonical IRI. A submission that carries none, such as a record written by another tool, gets one from the registry's fallback minter, `mint_canonical_id` in battinfo-registry's `publishing/identifiers.py`. It derives an opaque uid of the form in section 3 from the record type, the publisher and the submission's source-local id, so the same publisher submitting the same record again gets the same IRI, under `/id/1001/` and the segment of the record type (6.1).
 
-The first publisher to register an IRI owns it. The registry refuses a submission from another publisher that carries an IRI already registered (conflict `canonical_identity`) and never reassigns or re-mints that IRI; the submitter gives the record an identity of its own or pins another IRI. Lab labels such as `C01` are not scoped to their publisher before 0.9, so two labs can mint one IRI for two cells, and this rule decides which keeps it.
+The registry accepts record IRIs in the old form and under 1001. It refuses a submission whose IRI carries any other prefix.
+
+Under 1001 the old form and the prefixed form of one segment and uid are one record, for lookup and for ownership. The first publisher to register an IRI owns it in both forms. The registry refuses a submission from another publisher that carries an IRI already registered, in either form (conflict `canonical_identity`), and never reassigns or re-mints that IRI; the submitter gives the record an identity of its own or pins another IRI. Lab labels such as `C01` are not scoped to their publisher before 0.9, so two labs can mint one IRI for two cells, and this rule decides which keeps it.
+
+BattINFO looks a record up before it submits or deposits it and adopts the form the registry already holds (5.6), so a record published in the old form is not sent again under `/id/1001/`.
 
 ### 5.4 Minting outside the identity contract
 
@@ -142,11 +183,23 @@ Seed rules are a public contract from 0.8.0, the first release on PyPI: a seed c
 - A seed change after 0.8.0, such as scoping lab labels to their publisher, or 0.9's move of every minting path onto `battinfo.entities`, MUST keep the IRIs minted under the old seed findable through a legacy-seed lookup. The code keeps the old seed, so that the record an old IRI names can still be found from its fields, as `_LEGACY_PARAMETER_FILE_SEED` (`api/_parameters.py`) does for parameter files minted before 2026-10-11, and as `entities.keep_legacy_uid` and `Workspace._hold_saved_iris` do for cell specs and tests saved before 0.8.0, whose saves reuse the IRI already on disk. That includes a record that collided with a sibling then and was minted from its content, and a record saved on its own then that a sibling with the same old seed joins later: the record whose save would write the saved one again keeps its IRI.
 - The chemistry part of a cell-spec seed reads the chemistry vocabulary as it stood in 0.8.0, frozen in `entities.CHEMISTRY_SEED_KEYS`, never the vendored vocabulary, which grows when the ontology mappings are vendored again. Adding a key or an alias to that table, or pointing an alias at another key, is a seed change.
 - A 0.8.x patch release MUST keep every IRI already on disk or published. A fix may change what a new record mints, never the IRI of a record that exists.
+- A change of base is not a seed change. Minting under `/id/1001/` instead of the root moves no uid (5.6), and the two forms of one record are one record (5.3).
 - Every move is listed in the changelog, and in `MOVED` in `tests/test_golden_iris.py` with its reason.
+
+### 5.6 The base a record mints under (IRI ruling of 22 October 2026)
+
+From 0.8.0 a new record mints under `https://w3id.org/battinfo/id/1001/`, the base of Battery Genome's prefix (6.4), with the uid that 5.1 and 5.2 give it. Where the base comes from depends on where the record is written:
+
+- A workspace, batch folder or contribution folder records its base when it is created, and every record minted in it takes that base. One that records none mints the old form for good, as every folder created before 0.8.0 does.
+- The paths without such a folder, such as the `save_*` and `create_*` functions, the publication package and the importers, take an explicit base, by default `/id/1001/`. A record already saved where they write keeps its IRI, in either form. A `uid=` pin mints under the base too, so a published record is pinned by its IRI (`id=`, `iri=`).
+- A record that exists keeps its IRI. A save into a folder that holds a record in the old form adopts that form.
+- Before a record is submitted to the registry or deposited, each IRI minted under `/id/1001/` is looked up in the registry (5.3), and one the registry holds in the old form is adopted in every record that names it. One the registry holds, in either form, as superseded or withdrawn is not adopted, and the submission or deposit stops with `RetiredIrisError`: the record described has the identity of a retired record. A registry that cannot be asked stops the submission or deposit unless the caller passes `allow_unchecked_iris=True`, which does not lift the stop for a retired record.
+
+`tests/test_golden_iris.py` checks every path under both bases.
 
 ## 6. Entity-Type Registry Governance
 
-The set of `{entity-type}` tokens is registry-managed.
+The set of record segments, `{segment}` in 3.1, is registry-managed.
 
 - Entity-type values MUST use lowercase ASCII and hyphen-safe tokens.
 - New entity types MUST be approved through documented BattINFO governance.
@@ -175,16 +228,11 @@ duality at the heart of the data model — and nothing else:
 
 Rationale: type names have churned three times (cell-type→cell-spec, test-protocol→test-spec, coin_hardware→housing) and the generic `spec/` segment survived every rename untouched; per-type spec segments demonstrably do not. Tooling MUST NOT infer a record's type from its namespace segment. `spec/` is shared by design, and so is `dataset/` (dataset records and parameter sets); the type lives in the record and its `@type`.
 
-Superseded segments (`material-spec/`, `electrode-spec/`, `separator-spec/`,
-`electrolyte-spec/`, `current-collector-spec/`, `housing-spec/`, and the
-older `cell-type/`, `cell_type/`, `test_protocol/` forms) remain permanent
-resolver aliases — anything ever minted resolves forever.
+Superseded segments (`material-spec/`, `electrode-spec/`, `separator-spec/`, `electrolyte-spec/`, `current-collector-spec/`, `housing-spec/`, and the older `cell-type/`, `cell_type/`, `test-protocol/`, `test_protocol/` forms) are never minted under again, and every IRI ever minted under one resolves forever. A superseded segment resolves for every record of a type that minted under it. Cell specs minted under `cell/` before they moved to `spec/` keep resolving there the same way.
 
-Reserved segments (never usable as entity namespaces): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
-`turtle`, `latest`, `source`. The last five are claimed by the ontology
-block in the upstream w3id.org `.htaccess`, so requests to those paths can
-never reach the record resolver.
+Reserved segments (never usable as entity namespaces): `id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`.
+
+The list, with the reason each segment is held, is kept as data in `src/battinfo/data/namespace/reserved-segments.json`, and code that builds or serves BattINFO IRIs reads it from there. `id` is the branch for records and shared things (6.4, 6.5), and `def` the branch for prefix holders' definitions (6.6). `raw`, `inferred`, `turtle`, `latest` and `source` are claimed by the ontology rules in the upstream w3id.org `.htaccess`, so requests to those paths never reach the record resolver. So are `def/{prefix}`, its releases and its terms, which those rules send to the vocabularies on GitHub Pages (6.6).
 
 ### 6.2 Equipment and channels (ratified 2026-07-08)
 
@@ -214,6 +262,45 @@ A legacy `spec/` parameter-set IRI is accepted read-only (ruling 2026-10-12). Th
 
 **Amendment, 2026-10-07, revised 2026-10-11: a parameter file is one record, addressed by its parameters.** A parameter file (a BPX file today) becomes exactly one parameter-set record, holding every value of the file grouped by part. Its uid is `stable_uid("parameter-file:<parameters_sha256>")`, minted under `dataset/`, where `parameters_sha256` is the SHA-256 of the file's canonical JSON; there are no per-part or per-block records and no other seeds. Canonical means RFC 8785, the JSON Canonicalization Scheme: numbers written as ECMAScript writes doubles, object keys sorted by UTF-16 code units, minimal string escaping, no whitespace, UTF-8. Names, the cell the file is linked to and the materials its parts are mapped to do not enter the seed. The IRI therefore names the canonical parameters, not the bytes of one copy. The same parameters in any formatting share an IRI, whether a copy is re-indented, has CRLF line endings, orders its keys differently or spells `1.0` as `1`, and any changed value mints a new IRI; a corrected file is a new record that supersedes the old. A file holding a value JSON cannot express (NaN, an infinity) gets no IRI. The reason is that a solver can be handed the record's IRI, and the parameters behind it must never change. The record stores the fingerprint as `parameters_sha256`, so anyone holding a file can check it against the IRI, and it carries the file itself under `distributions` (exactly one source, each entry with its sha256), so the IRI resolves to a file with exactly those parameters. The registry keeps the first copy of the file it is given; a later copy with the same parameters resolves to that record and its stored bytes. The first publisher to submit a file owns its IRI: a submission of the same parameters by another publisher is refused, and the owner's later versions of the record keep the same source file. The registry checks every file itself, downloading it and recomputing its checksum and fingerprint, and a validator refuses a record whose `id` is not the one its `parameters_sha256` gives, under every policy. Which cell or material a curator maps the file to is description: it can be corrected in a new version of the record without touching the identity. A corrected file has other parameters, so it is a new record with a new IRI that names the old record in `supersedes`; only the publisher of the old record may do that, the registry then marks the old record superseded (section 10), and the old IRI keeps resolving to its file. Two files whose values differ only beyond double precision (`0.1000000000000000001` and `0.1`) hold the same JSON numbers, so they share an IRI.
 
+### 6.4 Publisher prefixes (ruled 2026-10-22, revised 2026-10-26)
+
+A publisher prefix is a number of four or more digits, held by one prefix holder, such as a registry. The holder answers for every record address under `https://w3id.org/battinfo/id/{prefix}/` and defines its own terms under `https://w3id.org/battinfo/def/{prefix}/` (6.6). A prefix is a number, never a name, so a holder that changes its name keeps its addresses.
+
+A prefix says who answers for an address, not who did the work. The people who made or contributed a record are credited in the record itself, in its `contributor` entries, with their ORCID iDs.
+
+- The register is `src/battinfo/data/namespace/prefixes.json`. It lists each prefix with its holder, whether records are minted under it and the date it was allocated.
+- The maintainers of the battinfo entry on w3id.org give out prefixes, in sequence from 1000. A holder asks for one by pull request to this repository. A number is never reused or passed to another holder.
+- 1000 is BattINFO's own and holds definitions only: no record is minted under `id/1000/`. 1001 is the Battery Genome registry, and 1002 is Battery Data Commons.
+- The prefix of an IRI never changes once the IRI is minted.
+- If a holder closes, its prefix is pointed at an archived copy of what it published, so its IRIs keep resolving.
+
+The registry answers for every address under 1001, and a 1001 address resolves once the registry holds its record. In the registry's API a publisher is an account with its own keys. A lab with such an account publishes under 1001 and owns the IRIs it registers (5.3), but the prefix stays the registry's.
+
+A holder may serve its records itself. The register then says where they live: for that prefix it holds an address pattern for a record's RDF and one for its page, each filled in with the record's uid. The registry forwards a request for such a record there and keeps no copy.
+
+### 6.5 Shared things (ruled 2026-10-22)
+
+A shared thing is something many records point to, such as a product model, a maker or a material. Its IRI is `https://w3id.org/battinfo/id/{uid}`, with no prefix and no segment.
+
+- Only the registry mints a shared thing, and only after curation. BattINFO never mints one offline.
+- A record points to a thing from one of its reference fields, such as a cell's `cell_spec_id` or a manufacturer's `id` (11.1). A record's own `id` is never a thing's IRI.
+- A datasheet record keeps its own IRI. The registry links its `#described` node to the thing with `owl:sameAs`.
+- When two things turn out to be one, they are merged. The thing that goes keeps its IRI as a tombstone, marked `owl:deprecated true`, with `dcterms:isReplacedBy` naming the one that stays (10).
+
+How things are curated is not part of this policy; it is the subject of issue #486.
+
+### 6.6 Prefix holders' vocabularies (ruled 2026-10-26)
+
+A prefix holder defines its terms in one vocabulary, an OWL ontology whose IRI is `https://w3id.org/battinfo/def/{prefix}`. BattINFO's own definitions are under 1000.
+
+- A prefix whose holder has no terms to release yet gets an empty release 0.1.0, so that `def/{prefix}` answers before the first terms are released.
+- Each release is a file, `def/{prefix}/{X.Y.Z}/vocab.ttl`, in the BattINFO repository. It is added by pull request, checked in CI and served from the repository's GitHub Pages. Section 11 says how releases and terms are versioned.
+- A term is `https://w3id.org/battinfo/def/{prefix}/{term}`, and a vocabulary defines terms only under its own prefix.
+- Each vocabulary states its own licence, which applies to it in place of the licence of the BattINFO repository.
+- Section 14 applies: a prefix holder uses EMMO and BattINFO terms directly and never mints an equivalent of one.
+
+A prefix holder's terms do not go into v1 records. Every v1 record schema rejects a key it does not list.
+
 ## 7. Resolver and Dereferencing Policy
 
 BattINFO IRIs identify resources and MUST resolve via HTTP.
@@ -224,6 +311,25 @@ BattINFO IRIs identify resources and MUST resolve via HTTP.
 - `Accept: text/turtle` MAY resolve to Turtle.
 
 Resolver behavior MUST preserve canonical IRI identity and SHOULD redirect non-canonical UID forms to canonical dashed lowercase IRIs.
+
+### 7.1 Address layout (ruled 2026-10-22)
+
+Every address under `https://w3id.org/battinfo/` fits exactly one of these cases:
+
+- The ontology: the root, its formats and source files (`inferred`, `turtle`, `latest`, `source`, `raw/…`), and each release, a pre-release such as `0.8.0-beta` included, at `{version}`, `{version}/inferred` and `{version}/turtle`, with the version IRI the release declares, `{version}/battinfo`.
+- A file of the standard under a reserved segment (6.1): the contexts under `context/`, the schemas under `schema/`, and `vocab/records`, the records vocabulary's own ontology IRI.
+- A term of the records vocabulary at the root: one of its 57 terms, or a term it declares deprecated; and `ns`, the vocabulary's former address, which answers with the vocabulary document.
+- A prefix holder's vocabulary (6.6): `def/{prefix}`, a release `def/{prefix}/{X.Y.Z}`, or a term `def/{prefix}/{term}`.
+- A record: `id/{prefix}/{segment}/{uid}` under a prefix that holds records (6.4), or `{segment}/{uid}` for a record that has that IRI in the old form.
+- A record under a superseded segment, when the record is of a type that minted under it (6.1).
+- A version of a record, the record's IRI followed by `/v{n}` (11). These addresses are reserved and not yet served.
+- A shared thing, `id/{uid}` (6.5).
+
+Some of these addresses serve whatever is newest and others name one release. `latest` and `source` serve the ontology's source as it develops, and `def/{prefix}` and its terms serve the vocabulary's newest release, so what they return can change. An ontology release at `{version}`, with its `inferred` and `turtle` forms, and a vocabulary release at `def/{prefix}/{X.Y.Z}` do not change.
+
+A record or thing that was superseded or merged keeps answering at its IRI, with its tombstone (10). Under 1001, the other form of a record's IRI resolves to that record (5.3).
+
+Anything else is answered with 404: a word that is not a listed term, a segment that is not a record segment, a prefix nobody holds, a record address under 1000, or a uid that no record has. This rule takes effect only after two checks show that nothing legitimate breaks: a replay of every known IRI against it, and a period in which the resolver runs it in shadow mode beside its earlier rules.
 
 ## 8. Short Human Identifier (ShortID)
 
@@ -279,15 +385,21 @@ If an entity is superseded:
 - Keep original resource dereferenceable
 - Do not modify or recycle original identifier
 
+The old IRI then resolves to a tombstone, a short description that makes these two statements and points to the replacement, as 6.3 describes for parameter sets. A shared thing merged into another becomes a tombstone the same way (6.5). An edit to a record is not a supersession: it makes a new version under the same IRI (11).
+
 ## 11. Versioning
 
-Version information MUST NOT be encoded in the UID.
+Version information MUST NOT be encoded in the UID. Identifiers stay version-free.
 
 If versioning is required:
 
 - Use metadata properties
 - Use separate versioned resources
 - Maintain a stable base entity identifier
+
+A record's IRI names the record and answers with its newest version. An edit to the record makes a new version under the same IRI. Each version has an address of its own, the record's IRI in whichever form it has, followed by `/v{n}`, n being the version's number; for example `https://w3id.org/battinfo/id/1001/cell/b6yn-0sxe-t2qk-9mjv/v3`. Version addresses are reserved; the registry does not serve them yet. A version address names that one version and never changes meaning. A change to a record's identity is not a new version. It gives the record a new IRI, and the old one becomes a tombstone (10).
+
+A prefix holder's vocabulary (6.6) is versioned by release. Release X.Y.Z is `https://w3id.org/battinfo/def/{prefix}/{X.Y.Z}`, which it states as its `owl:versionIRI`, and it may name an earlier release with `owl:priorVersion`. A release never changes once published; a mistake is fixed in a new release. Terms are never versioned, reused or removed. When a meaning changes, a new term takes it and the old term is marked `owl:deprecated true`, with `dcterms:isReplacedBy` naming the new term where there is one.
 
 ### 11.1 Served-Artifact Immutability
 
@@ -298,7 +410,7 @@ The shared documents served under `https://w3id.org/battinfo/`, the records JSON
 
 Both are frozen from the `v0.8.0` tag of BattINFO, its first release on PyPI. Consumers may cache them indefinitely and rely on their meaning staying the same for the lifetime of the URL. The first version of this section, of 30 July 2026, already declared them frozen, yet both changed in place until the release; the [erratum](#erratum-changes-made-in-place-before-080) below lists every such change.
 
-The `v1` records context is append-only from the tag. It defines 705 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
+The `v1` records context is append-only from the tag. It defines 710 terms at the tag, and `tests/fixtures/context/records-v1-0.8.0.json` records each of them with its full definition. From the tag:
 
 - A term that `v1` defines in a release MUST NOT change any part of its definition (its IRI, `@type`, `@container` or anything else) and MUST NOT be removed, and `v1` MUST NOT gain a JSON-LD keyword such as `@vocab`, which would change how every document expands. For the terms of 0.8.0, `scripts/gen_context.py` refuses to write such a change and `tests/test_context_v1_freeze.py` fails on one. For the terms of later releases, the same test compares `v1` with the copy at each release tag the commit contains; CI fetches the tags for it. `PRE_RELEASE_CORRECTIONS`, the table in that script that corrected terms before the tag, is closed and no longer applied.
 - A release MAY add terms. A release whose records use a new term ships only after the registry serves the context that defines it.
@@ -316,7 +428,7 @@ So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descri
 
 #### Erratum: changes made in place before 0.8.0
 
-When this section was first written, on 30 July 2026, it named "the 373 terms defined by the `v1` records context" as frozen. The registry had then served the complete `v1` context at its URL since 22 July (a smaller context before that) and the schemas since early July. It went on re-syncing both from BattINFO until 12 October 2026, and the release itself corrects more. This erratum lists every change made after 30 July 2026, up to the `v0.8.0` tag, to the definition of an existing term or to what an existing schema accepts. It leaves out new terms (`v1` grows from 373 to 705), new schema files, and edits to descriptions, titles, comments and annotations, such as the withdrawn Battery Pass profile and the IEC wording of `size_code`. It was compiled by comparing the context at each commit that changed it, and the schemas at each registry re-sync, with the copies 0.8.0 ships.
+When this section was first written, on 30 July 2026, it named "the 373 terms defined by the `v1` records context" as frozen. The registry had then served the complete `v1` context at its URL since 22 July (a smaller context before that) and the schemas since early July. It went on re-syncing both from BattINFO until 12 October 2026, and the release itself corrects more. This erratum lists every change made after 30 July 2026, up to the `v0.8.0` tag, to the definition of an existing term or to what an existing schema accepts. It leaves out new terms (`v1` grows from 373 to 710), new schema files, and edits to descriptions, titles, comments and annotations, such as the withdrawn Battery Pass profile and the IEC wording of `size_code`. It was compiled by comparing the context at each commit that changed it, and the schemas at each registry re-sync, with the copies 0.8.0 ships.
 
 A record published before a change keeps the expansion it was rendered with until the registry renders it again with the 0.8.0 copies.
 
@@ -367,6 +479,8 @@ These changes can make a record that validated before fail now:
 - The provenance block of electrode-spec and electrode records lost `comment`, `curated_by`, `file_hash` and `workflow_version` (8 September, PR #388), which it had accepted from 14 August.
 - `modules/components/specification.schema.json` requires `name` and `cell_format` instead of `format`, `positive_electrode_basis` and `negative_electrode_basis`, and its `id` must be a `spec/` IRI, no longer a `cell/` one (8 September, PR #388). `cell-spec.schema.json` uses only its `separator`, so cell-spec records are not affected; a document validated against the module as a whole may be.
 - Parameter sets lost `members` and `set_id` (11 October, PRs #421 and #436), which were served from 4 October. A parameter set is now either a claim batch (`claims` and exactly one target, as in August) or one parameter file (`parts`, `parameters_sha256` and exactly one cell link).
+- The `manufacturer` and `supplier` of an inline component no longer take an empty string (25 October, PR #471). Each was any string and is now a name of at least one character or an organization object (`modules/common/organization-ref.schema.json`).
+- A table group lists its tables under `tables` (12 November). In `dataset.schema.json`, `CsvwTableGroup` required the list under `table` and now requires it under `tables`, the key the CSVW metadata vocabulary uses and the one battinfo writes, so until now no table group written by battinfo validated. A dataset record that another client wrote with `table` no longer validates against the schema. When battinfo reads such a record (`Dataset.from_record()`, record validation), it still takes the old key and writes `tables`.
 
 These changes only accept more, so a record that validated before still does:
 
@@ -376,9 +490,22 @@ These changes only accept more, so a record that validated before still does:
 - A cell spec's `reference_electrode` takes an inline electrode as well as a string, and a parameter set no longer needs `claims` (4 October).
 - A parameter set's `id` and `supersedes` take a `dataset/` IRI as well as a `spec/` one (12 October, PR #436). New parameter sets mint under `dataset/`, and a `spec/` IRI remains valid for a record minted before (section 6.3).
 - Enumerations gained values: the housing part type `vent` (31 July), the material classes `thickener` and `dispersant` (8 September), the test and test-protocol kinds `pitt` and `cyclic_voltammetry`, and the termination quantity `soc` (4 October).
+- Record IRIs take both shapes that the IRI ruling of 22 October allows (issues #476 and #478). Every pattern that reads a record IRI, in 32 schema files, accepts `https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}`, with a prefix of four or more digits, as well as `https://w3id.org/battinfo/{segment}/{uid}`, because records of other publishers appear as parents. The patterns are now built by `battinfo.namespace` (`scripts/sync_schema_iri_patterns.py`).
+- A field that references a maker, a product model or a material also accepts a shared thing, `https://w3id.org/battinfo/id/{uid}` (issue #478): the `id` of an organization given as a manufacturer, supplier, brand or parent organization, a cell's or a parameter set's `cell_spec_id`, and `material_spec_id`, `active_material_spec_id` and `base_material_id`. A record's own `id` does not. These fields refer to `OrganizationRefIri`, `CellSpecRefIri` and `MaterialSpecRefIri`, split from the definition of a record's own `id` where one served both.
+- An electrolyte's `salt` and a person's `affiliation` each take one object or a list of them (25 October, PR #471).
+- The `manufacturer` and `supplier` of an inline component (electrode, coating, tab, current collector, electrolyte, salt, material, mixture, separator) take an organization object (`modules/common/organization-ref.schema.json`) as well as a name, and an `Organization` takes `same_as`, an external IRI such as a ROR ID (PR #471).
+- An inline electrode (`modules/components/electrode.schema.json`) may consist of its `material` alone, such as a lithium-metal counter electrode (PR #471).
+- An `Organization` in `dataset.schema.json`, `cell-instance.schema.json`, `test.schema.json` and `test-protocol.schema.json` takes `id`, the IRI of its organization record in either form or of a maker as a shared thing (12 November). The 17 other schemas that define an `Organization` already took it, and the four now refer to the same `OrganizationRefIri`. In a dataset it reaches the `publisher`, an organization among the `creators` and `funders`, and a person's `affiliation`; in all four it reaches the `affiliation` of a person in `contributor`.
 - Optional properties were added to most schemas, `license` and `handle` among them. A record written before uses none of them. The 0.8.0 changelog describes each.
 
 The first version of this section allowed additive, backward-compatible changes within a version, so the changes in this last list did not break it; they are listed so that the record is complete.
+
+##### The records vocabulary
+
+The records vocabulary, `assets/vocab/battinfo-records.ttl`, which the registry serves for each of its terms, changed in two ways before the tag (issue #481):
+
+- It declares its own ontology IRI, `https://w3id.org/battinfo/vocab/records`. It declared `https://w3id.org/battinfo/`, the root, where the BattINFO ontology's document is served (the ontology's own IRI is `https://w3id.org/battinfo#`, section 1), so two documents claimed one address. Its 57 term IRIs are unchanged; each term's `rdfs:isDefinedBy` names the new IRI.
+- The 39 terms that earlier served copies declared and later dropped are declared again, as `owl:deprecated`, so that records and deposits that use them still find a definition. Nine name the EMMO term that replaced them with `dcterms:isReplacedBy`, `ambientTemperature` (AmbientCelsiusTemperature) among them.
 
 ## 12. Governance Scope
 
@@ -427,18 +554,11 @@ identifiers**:
   exports, plus the generated property & unit reference;
 - querying: a generated labels-companion file for SPARQL users.
 
-`battinfo.ttl` is an **application ontology** in the strict sense: (a) the
-import/pin manifest for the EMMO modules a release speaks, (b) the small
-record-layer residue of genuinely non-domain terms (after re-homing to
-DCTERMS/PROV/DCAT/schema.org where standard terms exist), and (c) optionally
-the profile constraints (SHACL shapes). Nothing else. The same ruling applies
-to sub-namespaces granted under `w3id.org/battinfo/` (e.g. `/twin`): quantity
-terms resolve to EMMO or go upstream; only structural terms may be minted
-locally, hand-defined.
+`battinfo.ttl` is an **application ontology** in the strict sense: (a) the import/pin manifest for the EMMO modules a release speaks, (b) the small record-layer residue of genuinely non-domain terms (after re-homing to DCTERMS/PROV/DCAT/schema.org where standard terms exist), and (c) optionally the profile constraints (SHACL shapes). Nothing else. The same ruling applies to every branch under `w3id.org/battinfo/`, prefix holders' vocabularies under `def/{prefix}/` (6.6) and `/twin` among them: quantity terms resolve to EMMO or go upstream; only structural terms may be minted locally, hand-defined.
 
-Reserved namespace segments (never usable as entity types): `id`, `ontology`,
-`vocab`, `doc`, `context`, `resolver`, `twin`, `w3id`, `raw`, `inferred`,
-`turtle`, `latest`, `source`.
+So no branch holds an alias layer over EMMO or BattINFO (ruled 2026-10-26). A prefix holder uses an existing EMMO or BattINFO term directly and never mints an equivalent of it. A `def/` term whose label matches the label of an EMMO or BattINFO term states how it differs, with `skos:closeMatch`, `skos:broadMatch` or `skos:narrowMatch`. A `def/` term is never linked to an EMMO or BattINFO term with `owl:equivalentClass` or `skos:exactMatch`.
+
+Reserved namespace segments (never usable as entity types): `id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`.
 
 ## 15. Design Principles
 
@@ -461,11 +581,11 @@ The 16-character Base32 UID:
 - Avoids semantic fragility
 - Aligns with modern infrastructure practice
 
-## 16. Cell-Spec Identifier Usability Decision (v1.0)
+## 17. Cell-Spec Identifier Usability Decision (v1.0)
 
 BattINFO cell-spec identifiers MUST remain opaque and policy-compliant:
 
-- `https://w3id.org/battinfo/spec/{uid}` (a cell spec is a reusable description; per §6.1 every spec mints under the shared `spec/` segment, e.g. the flagship `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`)
+- `https://w3id.org/battinfo/id/{prefix}/spec/{uid}`, or `https://w3id.org/battinfo/spec/{uid}` in the old form (a cell spec is a reusable description; per §6.1 every spec mints under the shared `spec/` segment, e.g. the flagship `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`)
 
 Human-readable model/manufacturer semantics MUST NOT be encoded in the canonical identifier.
 

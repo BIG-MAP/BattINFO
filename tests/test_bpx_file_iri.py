@@ -124,7 +124,7 @@ def test_the_record_states_the_fingerprint_its_iri_derives_from() -> None:
     # dataset/ namespace are the registry contract (IDENTIFIER_POLICY 6.3).
     uid = stable_uid(f"parameter-file:{bpx_content_digest(FIXTURE)}")
     assert uid == "94pv-g7vd-2e2r-0t34"
-    assert body["id"] == f"https://w3id.org/battinfo/dataset/{uid}"
+    assert body["id"] == f"https://w3id.org/battinfo/id/1001/dataset/{uid}"
     assert from_bpx_parameters(FIXTURE).file_uid() == uid
 
 

@@ -89,6 +89,8 @@ jobs:
       prerelease: ${{ steps.tag.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # the final-tag step below reads main's history
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -122,6 +124,17 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           else
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Verify a final tag is on main
+        if: startsWith(github.ref, 'refs/tags/') && steps.tag.outputs.prerelease == 'false'
+        run: |
+          # The schema and context freeze checks compare main with the release tags its
+          # history holds, so a final tag has to name a commit that main contains.
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+            echo "::error::$GITHUB_REF_NAME is not on main. Tag a final release on main (RELEASING.md, step 7), where the freeze checks find it."
+            exit 1
           fi
 
       - name: Upload dist artifact

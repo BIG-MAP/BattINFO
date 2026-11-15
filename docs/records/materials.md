@@ -41,7 +41,7 @@ record = create_material_spec(
 {
   "schema_version": "0.2.0",
   "material_spec": {
-    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "NMC811 cathode powder",
     "kind": "nmc811",
@@ -83,7 +83,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:ProductModel",
     "schema:CreativeWork"
   ],
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "NMC811 cathode powder",
   "schema:sameAs": {
     "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_e877987f_3b08_4e21_8f2e_c280e6bef52f"
@@ -121,7 +121,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
         "hasMeasurementUnit": "https://w3id.org/emmo#MilliAmpereHourPerGram"
       }
     ],
-    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described",
+    "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5#described",
     "skos:prefLabel": "NMC811 cathode powder"
   }
 }
@@ -157,7 +157,7 @@ record = create_material(
 {
   "schema_version": "0.2.0",
   "material": {
-    "id": "https://w3id.org/battinfo/material/y9xy-kr0v-y5tn-dfj7",
+    "id": "https://w3id.org/battinfo/id/1001/material/y9xy-kr0v-y5tn-dfj7",
     "material_spec_id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "y9xykr",
     "name": "NMC811 lot 2026-04"
@@ -184,7 +184,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "battinfo": "https://w3id.org/battinfo/"
     }
   ],
-  "@id": "https://w3id.org/battinfo/material/y9xy-kr0v-y5tn-dfj7",
+  "@id": "https://w3id.org/battinfo/id/1001/material/y9xy-kr0v-y5tn-dfj7",
   "@type": "schema:ChemicalSubstance",
   "schema:name": "NMC811 lot 2026-04",
   "schema:isVariantOf": {
@@ -1273,7 +1273,7 @@ Schema: [`material.schema.json`](https://w3id.org/battinfo/schema/material.schem
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | → MaterialIri | yes |  |
-| `material_spec_id` | → MaterialSpecIri | yes | IRI of the material-spec this physical lot realizes. |
+| `material_spec_id` | → MaterialSpecRefIri | yes | IRI of the material-spec this physical lot realizes. |
 | `short_id` | → ShortId |  |  |
 | `name` | string |  | Human-readable label for this physical lot (e.g. a lab/inventory id). |
 | `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |

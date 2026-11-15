@@ -231,11 +231,11 @@ export default function ValidatePage() {
           </span>
         </div>
         <p className="mt-4 text-sm text-ink-muted">
-          Building a new record from scratch? Start in the{" "}
+          Writing a new record from scratch?{" "}
           <Link href="/create" className="font-semibold text-brandtext hover:text-brandtext">
-            Playground
-          </Link>
-          , which gives you a working template and checks it as you type.
+            Create
+          </Link>{" "}
+          builds the form from these same schemas and checks it as you type.
         </p>
       </header>
 

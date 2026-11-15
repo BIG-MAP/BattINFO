@@ -42,6 +42,7 @@ from battinfo.api import (
 from battinfo.api._records import _find_record_path_by_id
 from battinfo.bundle import Dataset, ProvenanceInfo
 from battinfo.entities import stable_uid
+from battinfo.namespace import OLD_FORM_BASE
 from battinfo.validate import validate_record_report
 from battinfo.validate.references import _find_record
 
@@ -109,7 +110,8 @@ def test_a_saved_template_lands_on_the_builders_iri(tmp_path: Path) -> None:
 @pytest.mark.parametrize("path", [*EXAMPLES, CLAIM_BATCH_FIXTURE], ids=lambda p: p.stem)
 def test_a_packaged_example_saved_without_its_id_gets_it_back(path: Path, tmp_path: Path) -> None:
     record = _load(path)
-    saved = save_parameter_set(_stripped(record), source_root=tmp_path)
+    # The examples are published records of the old form, so the save mints in it.
+    saved = save_parameter_set(_stripped(record), source_root=tmp_path, base=OLD_FORM_BASE)
     assert saved["id"] == record["parameter_set"]["id"]
 
 
@@ -118,7 +120,7 @@ def test_a_stripped_legacy_claim_batch_saved_with_supersedes_gets_a_new_uid(tmp_
     old = legacy["parameter_set"]["id"]
     draft = _stripped(legacy)
     draft["parameter_set"]["supersedes"] = old
-    saved = save_parameter_set(draft, source_root=tmp_path)
+    saved = save_parameter_set(draft, source_root=tmp_path, base=OLD_FORM_BASE)
     assert saved["id"].startswith("https://w3id.org/battinfo/dataset/")
     assert saved["id"].rsplit("/", 1)[-1] != old.rsplit("/", 1)[-1]
     assert saved["id"] == _load(CLAIM_BATCH_FIXTURE)["parameter_set"]["id"]
@@ -434,8 +436,11 @@ def test_the_legacy_warning_names_the_replacement_iri() -> None:
         report = validate_record_report(record, policy=policy)
         message = next(issue.message for issue in report.issues if issue.code == LEGACY_CODE)
         assert "https://w3id.org/battinfo/dataset/3zge-ge5d-cdn7-vzfy" in message
+    # The builder gives the replacement the validator names: the old form of the record it supersedes.
     replacement = supersede_parameter_set(record)
     assert replacement["parameter_set"]["id"] == "https://w3id.org/battinfo/dataset/3zge-ge5d-cdn7-vzfy"
+    given = supersede_parameter_set(record, base="https://w3id.org/battinfo/id/1001/")
+    assert given["parameter_set"]["id"] == "https://w3id.org/battinfo/id/1001/dataset/3zge-ge5d-cdn7-vzfy"
 
 
 # ── a save never replaces a record of another kind ───────────────────────────
@@ -496,7 +501,7 @@ def test_the_kind_check_holds_inside_a_bulk_session(tmp_path: Path) -> None:
 def test_supersede_parameter_set_mints_the_replacement_from_the_current_seeds(path: Path) -> None:
     legacy = _legacy(path)
     replacement = supersede_parameter_set(legacy)
-    current = _load(path)  # the packaged example is the record the current seeds give
+    current = _load(path)  # the packaged example is the record the current seeds give, in the old form
     assert replacement["parameter_set"]["id"] == current["parameter_set"]["id"]
     assert replacement["parameter_set"]["short_id"] == current["parameter_set"]["short_id"]
     assert replacement["parameter_set"]["supersedes"] == legacy["parameter_set"]["id"]

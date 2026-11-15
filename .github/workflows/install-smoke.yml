@@ -173,7 +173,7 @@ jobs:
               mass={"value": 48.0, "unit": "g"},
           )
           result = publish(cell_spec, destination="local", root=".battinfo/quickstart")
-          assert result.canonical_iri.startswith("https://w3id.org/battinfo/spec/"), result.canonical_iri
+          assert result.canonical_iri.startswith("https://w3id.org/battinfo/id/1001/spec/"), result.canonical_iri
           record = json.loads(pathlib.Path(result.debug_paths["canonical_record_path"]).read_text())
           validate_record(record)
           codes = [issue.code for issue in validate_record_report(record).issues]

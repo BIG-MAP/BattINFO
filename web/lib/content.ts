@@ -39,7 +39,7 @@ export const features = [
   },
   {
     title: "Persistent identifiers",
-    body: "Published entities carry stable, opaque w3id.org/battinfo/{type}/{uid} IRIs, governed by a published identifier policy.",
+    body: "Published entities carry stable, opaque w3id.org/battinfo IRIs, governed by a published identifier policy.",
   },
 ] as const;
 

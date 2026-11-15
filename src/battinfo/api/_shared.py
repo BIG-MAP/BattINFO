@@ -16,17 +16,21 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+from battinfo._jsonio import read_record_json
 from battinfo._util import _as_path, _now_unix
 from battinfo.bundle import (
     BatteryTestType,
 )
 from battinfo.entities import (
     ENTITY_KINDS,
+    PLACEHOLDER_UID,
     entity_id_from_doc,
+    held_record_iri,
     iter_entity_files,
     kind_for_doc,
 )
 from battinfo.entities import UID_DASHED_RE as UID_DASHED_RE  # battinfo.api re-exports it
+from battinfo.namespace import UID_PATTERN, record_iri, record_iri_pattern
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.friendly import format_report_errors
 from battinfo.validate.publication import validate_publication_report
@@ -39,20 +43,23 @@ TestKind = BatteryTestType
 UID_UNDASHED_RE = re.compile(r"^[0-9a-hjkmnp-tv-z]{16}$")
 UID_ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz"
 
-SPEC_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+# Every recogniser takes both record shapes, the old form and /id/{prefix}/
+# (IRI ruling of 22 October 2026, BIG-MAP/BattINFO#476).
+SPEC_IRI_RE = record_iri_pattern("spec", both_shapes=True)
 CELL_SPEC_IRI_RE = SPEC_IRI_RE
 TEST_PROTOCOL_IRI_RE = SPEC_IRI_RE
-CELL_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-DATASET_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
-TEST_IRI_RE = re.compile(r"^https://w3id\.org/battinfo/test/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+CELL_IRI_RE = record_iri_pattern("cell", both_shapes=True)
+DATASET_IRI_RE = record_iri_pattern("dataset", both_shapes=True)
+TEST_IRI_RE = record_iri_pattern("test", both_shapes=True)
 # spec/ is canonical; the superseded material-spec/ form stays accepted as
 # input so pre-consolidation records keep loading (IDENTIFIER_POLICY 6.1).
-MATERIAL_SPEC_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/(?:spec|material-spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
-MATERIAL_IRI_RE = re.compile(
-    r"^https://w3id\.org/battinfo/material/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
-)
+MATERIAL_SPEC_IRI_RE = record_iri_pattern("spec", "material-spec", both_shapes=True)
+MATERIAL_IRI_RE = record_iri_pattern("material", both_shapes=True)
+# A field that references a product model (a cell's spec) or a material (a
+# material spec) also takes a shared thing, https://w3id.org/battinfo/id/{uid},
+# which only the registry mints. A record's own id never does.
+CELL_SPEC_REF_IRI_RE = record_iri_pattern("spec", both_shapes=True, things=True)
+MATERIAL_SPEC_REF_IRI_RE = record_iri_pattern("spec", "material-spec", both_shapes=True, things=True)
 
 # The battinfo package root (this file lives in the api/ subpackage, one level down).
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
@@ -81,8 +88,8 @@ DEFAULT_PUBLISH_SOURCES = tuple(EXAMPLES_ROOT / kind.subdir for kind in ENTITY_K
 DEFAULT_INDEX_SOURCE_ROOT = EXAMPLES_ROOT
 DEFAULT_REGISTRATION_SOURCE_ROOT = Path("examples")
 TEMPLATE_UID = "0000000000000000"
-TEMPLATE_CELL_SPEC_ID = "https://w3id.org/battinfo/spec/0000-0000-0000-0000"
-TEMPLATE_CELL_ID = "https://w3id.org/battinfo/cell/0000-0000-0000-0000"
+TEMPLATE_CELL_SPEC_ID = record_iri("spec", PLACEHOLDER_UID)
+TEMPLATE_CELL_ID = record_iri("cell", PLACEHOLDER_UID)
 
 REGISTER_MODE_CREATE_ONLY = "create_only"
 REGISTER_MODE_UPSERT = "upsert"
@@ -422,6 +429,66 @@ def _without_minted_identity(record: dict[str, Any], record_key: str | None = No
     return record
 
 
+def _with_held_iri(record: dict[str, Any], source_root: PathLike | None) -> dict[str, Any]:
+    """*record*, whose IRI a builder has just minted, with the IRI *source_root* already holds it under.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5): when the record file a save of *record*
+    would write holds the same record under the other form of its IRI, such
+    as the old form where the builder minted ``/id/1001/``, *record* takes
+    that IRI (``entities.held_record_iri``). Otherwise, and without
+    *source_root*, *record* is returned as it is. Only for an IRI the builder
+    minted: an IRI the caller gave is never changed.
+    """
+    kind = kind_for_doc(record)
+    body = record.get(kind.record_key) if kind is not None else None
+    if kind is None or source_root is None or not isinstance(body, dict) or not isinstance(body.get("id"), str):
+        return record
+    held = held_record_iri(kind.entity_type, body["id"], [_as_path(source_root)])
+    if held == body["id"]:
+        return record
+    return {**record, kind.record_key: {**body, "id": held}}
+
+
+def _with_held_iris(doc: dict[str, Any], source_root: PathLike | None) -> dict[str, Any]:
+    """*doc* with each ``/id/1001/`` IRI it names that *source_root* holds in the old form rewritten to that form.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5). A record saved into a folder of the old
+    form, such as an importer run again into a folder written by 0.8.0rc2,
+    adopts the old form there for its own IRI and for the IRIs of the records
+    it names, so the folder never names one record in two forms. A uid never
+    depends on the base, so a record keeps the file it was saved in. Only the
+    file a save of each IRI would write is read (``entities.save_entity_path``).
+    """
+    from battinfo._adoption import minted_iris, rewrite_iris  # noqa: PLC0415
+    from battinfo.entities import ENTITY_BY_TYPE, entity_types_for_namespace, save_entity_path  # noqa: PLC0415
+    from battinfo.namespace import parse_record_iri, same_record  # noqa: PLC0415
+
+    if source_root is None:
+        return doc
+    root = _as_path(source_root)
+    adopted: dict[str, str] = {}
+    for iri in sorted(minted_iris(doc)):
+        parsed = parse_record_iri(iri)
+        if parsed is None:
+            continue
+        for entity_type in entity_types_for_namespace(parsed.segment):
+            path = save_entity_path(entity_type, parsed.uid, root) if entity_type in ENTITY_BY_TYPE else None
+            if path is None or not path.is_file():
+                continue
+            try:
+                held = entity_id_from_doc(read_record_json(path))
+            except (OSError, ValueError):
+                continue
+            if held == iri:
+                break
+            if isinstance(held, str) and same_record(held, iri):
+                adopted[iri] = held
+                break
+    return rewrite_iris(doc, adopted) if adopted else doc
+
+
 def _iri_tail(iri: str) -> tuple[str, str]:
     parts = iri.rstrip("/").split("/")
     if len(parts) < 2:
@@ -441,15 +508,15 @@ def _relative_or_absolute(path: Path, root: Path) -> str:
 # follow one spec+instance shape that reuses an existing embedded holder. These generic
 # functions are parameterized by family; thin per-family wrappers are generated below.
 
-_UID_TAIL = r"[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}"
+_UID_TAIL = UID_PATTERN
 
 
 def _component_iri_re(namespace: str) -> re.Pattern[str]:
-    return re.compile(rf"^https://w3id\.org/battinfo/{re.escape(namespace)}/{_UID_TAIL}$")
+    return record_iri_pattern(namespace, both_shapes=True)
 
 
 def _spec_iri_re(family_namespace: str) -> re.Pattern[str]:
     """Spec IRIs mint under the shared spec/ namespace (IDENTIFIER_POLICY 6.1);
     the superseded per-family '{family}-spec/' form stays accepted as input so
     records minted before the consolidation keep loading (never break an IRI)."""
-    return re.compile(rf"^https://w3id\.org/battinfo/(?:spec|{re.escape(family_namespace)})/{_UID_TAIL}$")
+    return record_iri_pattern("spec", family_namespace, both_shapes=True)

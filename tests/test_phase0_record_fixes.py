@@ -2,6 +2,7 @@
 
 0.1 — dataset agents preserve ORCID and classify people as Person (regression introduced by
       the DatasetInput retirement: the old builder passed creator dicts through verbatim).
+      A person's ORCID is now kept as the ``same_as`` link (tests/test_dataset_agents.py).
 0.3 — timestamp conversion symmetry: expires_at converts like manufactured_at; provenance
       retrieved_at accepts ISO strings on every builder, preserves epoch zero, and raises on
       garbage instead of silently substituting the current time.
@@ -47,8 +48,8 @@ def test_dataset_creator_orcid_survives_and_is_a_person() -> None:
     )
     record = _record_from_dataset(dataset)
     (creator,) = record["dataset"]["creators"]
-    assert creator["orcid"] == ORCID
-    assert creator["type"] == "Person"
+    # The ORCID is the person's same_as link, the one place the dataset schema has for it.
+    assert creator == {"name": "Jane Doe", "type": "Person", "same_as": ORCID}
 
 
 def test_dataset_funder_and_publisher_orcid_survive() -> None:
@@ -58,8 +59,9 @@ def test_dataset_funder_and_publisher_orcid_survive() -> None:
         publisher={"name": "Jane Doe", "orcid": ORCID},
         uid=UID,
     )
-    assert dataset.funders[0]["orcid"] == ORCID
-    assert dataset.publisher is not None and dataset.publisher["orcid"] == ORCID
+    assert dataset.funders[0] == {"name": "Jane Doe", "type": "Person", "same_as": ORCID}
+    # A publisher is an organization, whatever keys it has, and an organization's orcid stays as given.
+    assert dataset.publisher == {"name": "Jane Doe", "type": "Organization", "orcid": ORCID}
 
 
 def test_agent_without_person_signals_stays_organization() -> None:

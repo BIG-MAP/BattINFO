@@ -102,7 +102,7 @@ canonical JSON to a local ``.battinfo/`` tree.
 .. note::
 
    The printed IRI is **permanent, but not yet resolvable on the web** —
-   opening ``https://w3id.org/battinfo/spec/...`` in a browser returns 404 for
+   opening ``https://w3id.org/battinfo/id/1001/spec/...`` in a browser returns 404 for
    a record published locally. It becomes resolvable once you publish the
    record to the registry (see :doc:`Tutorial 6 — Publish your first dataset
    <../guides/06-publish-your-data>`). A local publish mints the identity; the
@@ -127,7 +127,7 @@ BattINFO ships a command-line interface for validation and querying. The example
 
    battinfo query cell-spec --include-packaged-examples
 
-The commands below continue from the CR2032 cell spec published above. Replace ``<id>`` with the end of the IRI it printed (``https://w3id.org/battinfo/spec/<id>``):
+The commands below continue from the CR2032 cell spec published above. Replace ``<id>`` with the end of the IRI it printed (``https://w3id.org/battinfo/id/1001/spec/<id>``):
 
 .. doc-snippet: skip
 
@@ -137,7 +137,7 @@ The commands below continue from the CR2032 cell spec published above. Replace `
    battinfo validate .battinfo/publish/energizer-cr2032/examples/cell-spec/cell-spec-<id>.json
 
    # Write a draft for a physical cell of that spec
-   battinfo template cell-instance --cell-spec-id https://w3id.org/battinfo/spec/<id> --out draft.json
+   battinfo template cell-instance --cell-spec-id https://w3id.org/battinfo/id/1001/spec/<id> --out draft.json
 
    # Set "serial_number" under "cell_instance" in draft.json, then save the cell
    # next to its spec, where the reference to the spec resolves

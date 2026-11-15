@@ -1,7 +1,8 @@
 name: Docs
 
 # Builds the Sphinx documentation and checks that the guide notebooks parse,
-# so docs and the advertised notebooks cannot silently rot.
+# so docs and the advertised notebooks cannot silently rot. It also lays out
+# the publishers' vocabularies under def/ for GitHub Pages.
 #
 # The build is strict (-W): any Sphinx warning fails the job. Notebook
 # *execution* (nbmake) is deferred — the notebooks ship with stored outputs
@@ -54,13 +55,28 @@ jobs:
         with:
           name: docs-html
           path: docs/_build/html
+      # The publishers' vocabularies under def/, laid out as GitHub Pages serves
+      # them. The step fails when def/ fails its checks
+      # (scripts/check_def_vocabularies.py). It always writes def/index.html,
+      # so the artifact is never empty.
+      - name: Build the def/ vocabulary pages
+        run: uv run --no-sync python scripts/build_def_site.py docs/_build/def-site
+      - name: Upload the vocabulary pages
+        uses: actions/upload-artifact@v7
+        with:
+          name: def-site
+          path: docs/_build/def-site
 
   # Versioned deploy to gh-pages: main -> dev/, each v* tag -> its own folder.
   # A final release tag (vX.Y.Z) also updates switcher.json, and stable/ when
   # it is the newest release; a pre-release tag such as v0.8.0rc1 leaves both
   # alone (docs-deploy.sh). A final tag also publishes battinfo.ttl where w3id
   # serves the ontology from: battinfo/versions/X.Y.Z/, and the root when it is
-  # the newest release.
+  # the newest release, each with the battinfo-inferred.ttl ROBOT writes.
+  # Every deploy, of main or of any tag, adds the vocabulary releases under
+  # def/ that gh-pages lacks and never replaces a published one, so a release
+  # goes live when its pull request is merged. No path filter applies, so a
+  # change to def/ alone deploys too.
   # (Requires GitHub Pages to be enabled from the gh-pages branch.)
   deploy:
     name: Deploy versioned docs
@@ -75,7 +91,9 @@ jobs:
       group: docs-deploy-gh-pages
       cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # The reasoner of a final tag gets 20 minutes (REASONER_TIMEOUT in
+    # docs-deploy.sh); the rest of a deploy takes one or two.
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -86,6 +104,33 @@ jobs:
         with:
           name: docs-html
           path: docs/_build/html
+      - uses: actions/download-artifact@v8
+        with:
+          name: def-site
+          path: docs/_build/def-site
+      # ROBOT, run with the runner's Java, writes battinfo-inferred.ttl for a
+      # final tag (a pre-release tag downloads it for nothing). The file is
+      # optional: when this step fails or stalls, ROBOT stays unset, the next
+      # step warns, and the deploy publishes the ontology without it.
+      - name: Install ROBOT
+        id: robot
+        if: startsWith(github.ref, 'refs/tags/v')
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          ROBOT_VERSION: "1.9.10"
+          ROBOT_SHA256: 16a73c074f3df359a7338a84b4e0788785fe06117f931bb9796e9619ea776105
+        run: |
+          curl -fsSL --retry 3 --max-time 300 -o "$RUNNER_TEMP/robot.jar" \
+            "https://github.com/ontodev/robot/releases/download/v$ROBOT_VERSION/robot.jar"
+          echo "$ROBOT_SHA256  $RUNNER_TEMP/robot.jar" | sha256sum --check --strict
+          java -version
+          echo "ROBOT=java -Xmx6g -jar $RUNNER_TEMP/robot.jar" >> "$GITHUB_ENV"
+      - name: Warn that ROBOT is missing
+        if: steps.robot.outcome == 'failure'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: echo "::warning::ROBOT could not be installed for $TAG; a final tag publishes its ontology without battinfo-inferred.ttl."
       - name: Deploy to GitHub Pages
         env:
           DOCS_VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'dev' }}

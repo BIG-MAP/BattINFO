@@ -24,10 +24,13 @@ import builtins  # AuthoringWorkspace.list shadows the builtin in class-scope an
 import copy
 import difflib
 import functools
+import hashlib
 import json
 import os
 import re
+import unicodedata
 import warnings
+from collections import Counter
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -38,6 +41,9 @@ if TYPE_CHECKING:
 
     from battinfo._workspace import Workspace
 
+from battinfo._adoption import RetiredIrisError as RetiredIrisError  # ws.submit/zenodo raise it
+from battinfo._adoption import RetiredRecord
+from battinfo._adoption import UncheckedIrisError as UncheckedIrisError  # ws.submit/zenodo raise it
 from battinfo._deposit_files import (
     DepositContext,
     DepositFile,
@@ -48,11 +54,14 @@ from battinfo._deposit_files import (
     build_deposit_file_plan,
     dataset_distributions,
     deposit_file_problems,
+    extra_deposit_files,
+    extra_file_conflicts,
     kept_copy_problems,
     location_key,
     location_path,
     measured_file,
     path_key,
+    single_archive_name,
 )
 from battinfo._deposit_index import (
     ZENODO_HOSTS,
@@ -65,6 +74,7 @@ from battinfo._deposit_index import (
     note_deposit,
     note_hosted,
     note_published,
+    parse_zenodo_file_url,
     register_sources,
     registered_keys,
     save_deposit_index,
@@ -79,12 +89,21 @@ from battinfo._jsonio import chmod_owner_only as _chmod_owner_only
 from battinfo._jsonio import read_json as _read_json
 from battinfo._jsonio import write_private_text as _write_private_text
 from battinfo._util import (
+    PARQUET_MEDIA_TYPE,
+    PARQUET_MEDIA_TYPE_ALIAS,
     _now_iso,
+    _now_unix,
+    file_media_type,
+    has_parent_reference,
+    is_absolute_local_path,
     is_dataset_series,
     is_local_location,
     is_real_number,
     local_file_references,
+    orcid_id,
     path_name,
+    registered_media_type,
+    require_orcid_id,
     url_segment,
 )
 from battinfo._util import file_uri_to_path as _file_uri_to_path
@@ -92,7 +111,26 @@ from battinfo._util import jsonld_literal as _jsonld_literal
 from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
-from battinfo.entities import entity_id_from_doc, is_dashed_uid, kind_for_type, record_set_dirs, save_entity_path
+from battinfo.entities import (
+    entity_id_from_doc,
+    given_test_name,
+    held_record_iri,
+    is_dashed_uid,
+    kind_for_type,
+    record_set_dirs,
+    save_entity_path,
+)
+from battinfo.namespace import (
+    BATTINFO_ROOT,
+    DEFAULT_RECORD_BASE,
+    OLD_FORM_BASE,
+    base_prefix,
+    parse_record_iri,
+    parse_thing_iri,
+    record_iri,
+    record_iri_forms,
+    same_record,
+)
 
 # Short-name pattern: 6 lowercase alphanumeric characters at the end of a
 # dash-delimited name component (e.g. "666h1s" in "duracell-mn2400-2026-02-666h1s").
@@ -341,7 +379,11 @@ def _describe_session_cell(cell: Any) -> str:
     """One line naming a session cell: serial, name, spec and IRI."""
     serial = getattr(cell, "serial_number", None)
     name = getattr(cell, "name", None)
-    spec = getattr(cell, "cell_spec_id", None) or getattr(getattr(cell, "cell_spec", None), "id", None)
+    held_spec = getattr(cell, "cell_spec", None)
+    spec = getattr(cell, "cell_spec_id", None) or getattr(held_spec, "id", None)
+    if not spec and held_spec is not None:
+        # A spec not saved yet has no IRI; its name tells two cells that share a label apart.
+        spec = held_spec.name or f"{held_spec.manufacturer} {held_spec.model}"
     parts = [f"serial {serial!r}" if serial else "no serial"]
     if name and name != serial:
         parts.append(f"name {name!r}")
@@ -602,11 +644,34 @@ BATTINFO_LD_FILENAME_LEGACY = "battinfo.jsonld"
 _ROCRATE_FILENAME = "ro-crate-metadata.json"
 
 # Battery Data Format (BDF) CSVW table schema. A BDF data file declares
-# conformance to this so a consumer can resolve every column name, type and unit
-# from one link instead of a per-record data dictionary. The VERSIONED IRI is
-# used deliberately: an archived deposit must keep pointing at the exact schema
-# version it was built against (the floating `.../schema` IRI tracks latest).
-BDF_TABLE_SCHEMA_IRI = "https://w3id.org/battery-data-alliance/ontology/battery-data-format/1.2.0/schema"
+# conformance to it so a consumer can resolve every column name, type and unit
+# from one link instead of a per-record data dictionary. A deposit names the
+# versioned schema of the BDF version its files follow when the caller gives it
+# (``bdf_version=``, see _bdf_table_schema_iri), and otherwise this unversioned
+# IRI, which resolves to the current schema: nothing in a data file names its
+# BDF version, and a version the files do not follow is a false statement on a
+# permanent record.
+_BDF_SCHEMA_BASE = "https://w3id.org/battery-data-alliance/ontology/battery-data-format"
+BDF_TABLE_SCHEMA_IRI = f"{_BDF_SCHEMA_BASE}/schema"
+_BDF_VERSION_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+
+
+def _bdf_version(value: object) -> str | None:
+    """*value*, a BDF version such as ``"1.3.0"``, stripped; ``None`` for none given.
+
+    Raises ``ValueError`` for anything else, before a deposit is made.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if not isinstance(value, str) or not _BDF_VERSION_RE.match(value.strip()):
+        raise ValueError(f"bdf_version={value!r} is not a BDF version such as '1.3.0'.")
+    return value.strip()
+
+
+def _bdf_table_schema_iri(version: str | None) -> str:
+    """The BDF table schema of *version* (``.../battery-data-format/1.3.0/schema``), else :data:`BDF_TABLE_SCHEMA_IRI`."""
+    return f"{_BDF_SCHEMA_BASE}/{version}/schema" if version else BDF_TABLE_SCHEMA_IRI
+
 
 # Loaded once at import time; used as the base for all JSON-LD context dicts.
 # The versioned hosted context is the one authority — inline embedding must
@@ -829,6 +894,41 @@ def _deposit_record_iris(record_sets: Mapping[str, list[dict]], graph: Mapping[s
     return sorted(iri for iri in iris if iri and iri in node_ids)
 
 
+def _zenodo_publication_time(deposit: object, called_at: int) -> int:
+    """The publication time Zenodo reports in *deposit*, its answer to the publish, in Unix seconds.
+
+    Zenodo reports a publication date (``metadata.publication_date``), not a
+    time. A date before the day of the publish call (UTC), one the deposit's
+    metadata gave, counts from midnight UTC. The day of the call, a later day
+    (Zenodo's calendar may be ahead of UTC) or no date gives *called_at*, so
+    the time is never later than the publish.
+    """
+    import datetime as _dt  # noqa: PLC0415
+
+    metadata = deposit.get("metadata") if isinstance(deposit, dict) else None
+    reported = metadata.get("publication_date") if isinstance(metadata, dict) else None
+    if not isinstance(reported, str):
+        return called_at
+    try:
+        day = _dt.date.fromisoformat(reported.strip())
+    except ValueError:
+        return called_at
+    if day >= _dt.datetime.fromtimestamp(called_at, tz=_dt.timezone.utc).date():
+        return called_at
+    return int(_dt.datetime(day.year, day.month, day.day, tzinfo=_dt.timezone.utc).timestamp())
+
+
+def _saved_published_at(path: Path) -> int | None:
+    """The ``published_at`` the dataset record saved at *path* states; ``None`` without one, or when it cannot be read."""
+    try:
+        record = _read_json(path)
+    except (OSError, ValueError):
+        return None
+    body = record.get("dataset") if isinstance(record, dict) else None
+    when = body.get("published_at") if isinstance(body, dict) else None
+    return when if isinstance(when, int) and not isinstance(when, bool) else None
+
+
 def _with_citation_doi(record: dict, doi: str | None) -> dict:
     """*record* with ``provenance.citation_doi`` set to *doi* when it has none; *record* itself without a DOI."""
     if not doi:
@@ -838,14 +938,39 @@ def _with_citation_doi(record: dict, doi: str | None) -> dict:
     return {**record, "provenance": provenance}
 
 
-def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
-    """Return ``(start_unix, end_unix)`` for a BDF CSV from its ``unix_time_second``
-    column (first and last data rows), or None if unavailable. The end row is read by
-    seeking the tail, so this is cheap even for multi-hundred-MB files."""
+def _implausible_unix_time(file_name: str, value: int) -> bool:
+    """Whether *value*, a ``unix_time_second`` of the data file *file_name*, lies outside 2000..2100, said in a warning.
+
+    Epochs outside that span are converter garbage (batterydf 0.1.0 emitted
+    epoch/1000 - a 1970 date on a citable record is worse than no date), so the
+    caller withholds the period rather than stamp it.
+    """
+    if 946684800 <= value <= 4102444800:
+        return False
+    print(
+        f"  warning: {file_name} unix_time_second={value} is implausible "
+        "(outside 2000-2100) - not stamping test/dataset times from it. "
+        "Known cause: batterydf<0.2 wrote epoch/1000; upgrade the converter "
+        '(pip install "battinfo[processing]") and re-run ws.convert().'
+    )
+    return True
+
+
+def _bdf_measurement_period(data_path: "str | Path") -> tuple[int, int] | None:
+    """Return ``(start_unix, end_unix)`` for a BDF data file from its ``unix_time_second``
+    column, or None if unavailable.
+
+    A CSV gives its first and last data rows; the end row is read by seeking the
+    tail, so this is cheap even for multi-hundred-MB files. A parquet file, told
+    apart by its suffix, gives the span its footer records for the column (see
+    :func:`_parquet_measurement_period`).
+    """
     try:
-        path = Path(csv_path)
+        path = Path(data_path)
         if not path.is_file():
             return None
+        if path.suffix.lower() == ".parquet":
+            return _parquet_measurement_period(path)
         with path.open(encoding="utf-8") as fh:
             header = fh.readline().rstrip("\n").split(",")
             if "unix_time_second" not in header:
@@ -861,20 +986,68 @@ def _bdf_measurement_period(csv_path: "str | Path") -> tuple[int, int] | None:
             tail = fb.read().decode("utf-8", "ignore").splitlines()
         last = next((ln for ln in reversed(tail) if ln.strip() and "," in ln), "")
         end = int(float(last.split(",")[col])) if last else start
-        # Plausibility gate: epochs outside 2000..2100 are converter garbage
-        # (batterydf 0.1.0 emitted epoch/1000 - a 1970 date on a citable record
-        # is worse than no date). Warn and withhold rather than stamp it.
-        if not (946684800 <= start <= 4102444800):
-            print(
-                f"  warning: {path.name} unix_time_second={start} is implausible "
-                "(outside 2000-2100) - not stamping test/dataset times from it. "
-                "Known cause: batterydf<0.2 wrote epoch/1000; upgrade the converter "
-                '(pip install "battinfo[processing]") and re-run ws.convert().'
-            )
+        if _implausible_unix_time(path.name, start):
             return None
         return (start, end) if end >= start else (end, start)
     except Exception:
         return None
+
+
+def _pyarrow_missing() -> bool:
+    """Whether pyarrow, which reads parquet files (the ``tabular`` extra), cannot be imported."""
+    try:
+        import pyarrow.parquet  # noqa: F401, PLC0415
+    except ImportError:
+        return True
+    return False
+
+
+def _numbers(values: Sequence[Any]) -> builtins.list[float]:
+    """The real numbers among *values*, a column's values: no null, no NaN."""
+    return [float(v) for v in values if isinstance(v, (int, float)) and not isinstance(v, bool) and v == v]
+
+
+def _parquet_measurement_period(path: Path) -> tuple[int, int] | None:
+    """``(start_unix, end_unix)`` of a BDF parquet file, or None (see :func:`_bdf_measurement_period`).
+
+    The span is the smallest and the largest ``unix_time_second`` the footer's
+    statistics record over all row groups, so no data page is read. When a row
+    group has no statistics, the column is read from the first and the last row
+    group only, never whole: a measurement file can hold millions of rows. Its
+    smallest and largest values there count, as the statistics would, so a null
+    or NaN row is passed over. Both ends must pass the plausibility check.
+    Reading parquet needs pyarrow (the ``tabular`` extra); without it the period
+    is None, and ``ws.add()`` warns (:func:`_pyarrow_missing`).
+    """
+    if _pyarrow_missing():
+        return None
+    import pyarrow.parquet as pq  # noqa: PLC0415
+
+    with pq.ParquetFile(path) as parquet:
+        columns = parquet.schema.names
+        if "unix_time_second" not in columns:
+            return None
+        column = columns.index("unix_time_second")
+        footer = parquet.metadata
+        groups = footer.num_row_groups
+        if groups == 0:
+            return None
+        stats = [footer.row_group(i).column(column).statistics for i in range(groups)]
+        if all(s is not None and s.has_min_max for s in stats):
+            first: Any = min(s.min for s in stats)
+            last: Any = max(s.max for s in stats)
+        else:
+            head = _numbers(parquet.read_row_group(0, columns=["unix_time_second"]).column(0).to_pylist())
+            tail = _numbers(parquet.read_row_group(groups - 1, columns=["unix_time_second"]).column(0).to_pylist())
+            if not head or not tail:
+                return None
+            first, last = min(head), max(tail)
+    if first is None or last is None:
+        return None
+    start, end = int(float(first)), int(float(last))
+    if _implausible_unix_time(path.name, start) or _implausible_unix_time(path.name, end):
+        return None
+    return (start, end) if end >= start else (end, start)
 
 
 def _distribution_file_name(url: str) -> str:
@@ -981,12 +1154,15 @@ def _agent_node(c: dict) -> dict:
     node: dict = {"@type": ["schema:Person", "prov:Agent"], "schema:name": c.get("name", "")}
     if c.get("orcid"):
         node["@id"] = f"https://orcid.org/{c['orcid']}"
-    if c.get("affiliation"):
-        org: dict = {"@type": "schema:Organization", "schema:name": c["affiliation"]}
-        # ROR gives the organisation a globally-resolvable identifier.
+    # One affiliation, or a list of them: one Organization node each.
+    orgs: list[dict] = [
+        {"@type": "schema:Organization", "schema:name": name} for name in _affiliation_names(c.get("affiliation"))
+    ]
+    if orgs:
+        # ROR gives the organisation a globally-resolvable identifier (the first, for a list).
         if c.get("affiliation_ror"):
-            org["@id"] = _ror_url(c["affiliation_ror"])
-        node["schema:affiliation"] = org
+            orgs[0]["@id"] = _ror_url(c["affiliation_ror"])
+        node["schema:affiliation"] = orgs[0] if len(orgs) == 1 else orgs
     if c.get("type"):
         node["schema:roleName"] = c["type"]
     return node
@@ -998,26 +1174,322 @@ def _ror_url(ror: str) -> str:
     return ror if ror.startswith("http") else f"https://ror.org/{ror.rsplit('/', 1)[-1]}"
 
 
+def _affiliation_names(value: Any) -> list[str]:
+    """The organisation names of an affiliation: a name, an ``Organization`` dict, or a list of them."""
+    items = value if isinstance(value, list) else [value]
+    names = [item.get("name") if isinstance(item, dict) else item for item in items]
+    return [name for name in names if isinstance(name, str) and name]
+
+
 def _agent_from_record_contributor(c: dict) -> dict:
     """Map a record's stamped ``contributor`` Person dict to the ``_agent_node``
     input shape ``{name, orcid, affiliation}``.
 
     Record contributors carry the ORCID in ``same_as`` and the affiliation as a
-    nested ``Organization``; the publication emitter's agent builder wants the bare
-    ORCID and a plain affiliation name.
+    nested ``Organization`` or a list of them; the publication emitter's agent
+    builder wants the bare ORCID and a plain affiliation name, or a list of names.
     """
-    same_as = str(c.get("same_as") or "")
-    tail = same_as.rstrip("/").rsplit("/", 1)[-1]
-    orcid = tail if _ORCID_RE.match(tail) else None
-    affiliation = c.get("affiliation")
-    if isinstance(affiliation, dict):
-        affiliation = affiliation.get("name")
+    orcid = orcid_id(c.get("same_as"))
+    affiliations = _affiliation_names(c.get("affiliation"))
     out: dict = {"name": c.get("name", "")}
     if orcid:
         out["orcid"] = orcid
-    if affiliation:
-        out["affiliation"] = affiliation
+    if affiliations:
+        out["affiliation"] = affiliations[0] if len(affiliations) == 1 else affiliations
     return out
+
+
+# ── RO-Crate people and organisations ────────────────────────────────────────
+# RO-Crate 1.1 metadata is flattened JSON-LD: every entity it describes is a
+# direct entry of the @graph with an @id, and other entities point at it by
+# that @id. The deposit's people and their organisations are such contextual
+# entities. One with no ORCID (or ROR) gets a crate-local "#" identifier, the
+# kind of local identifier RO-Crate recommends.
+
+
+def _clean_name(value: object) -> str:
+    """*value* as a string, with each run of whitespace a single space."""
+    return " ".join(str(value or "").split())
+
+
+def _name_slug(name: str) -> str:
+    """The lower-case ASCII letters and digits of *name*, each run of anything else a hyphen."""
+    folded = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]+", "-", folded.lower()).strip("-")
+
+
+def _crate_local_ids(names: Iterable[str], kind: str) -> dict[str, str]:
+    """A crate-local ``#<kind>-<slug>`` @id for each distinct name, no two alike.
+
+    The slug is :func:`_name_slug` of the name, so ``"Doe, Jane"`` becomes
+    ``#person-doe-jane``. Names that share a slug, or have none, also carry
+    the first 12 hex digits of the sha256 of the name, and should two ids
+    still coincide every name carries its full digest. Two different names
+    therefore never share an @id, and the ids depend on the set of names only,
+    not on their order.
+    """
+    slugs = {name: _name_slug(name) for name in sorted(set(names))}
+    shared = Counter(slugs.values())
+
+    def local_id(name: str, slug: str, digits: int) -> str:
+        digest = hashlib.sha256(name.encode("utf-8")).hexdigest()[:digits]
+        return f"#{kind}-" + "-".join(part for part in (slug, digest) if part)
+
+    ids = {name: local_id(name, slug, 0 if slug and shared[slug] == 1 else 12) for name, slug in slugs.items()}
+    if len(set(ids.values())) < len(ids):
+        ids = {name: local_id(name, slug, 64) for name, slug in slugs.items()}
+    return ids
+
+
+def _add_value(node: dict, key: str, value: object) -> None:
+    """Add *value* to ``node[key]`` once: the value alone, or a list once there are several."""
+    current = node.get(key)
+    if current is None:
+        node[key] = value
+        return
+    values = current if isinstance(current, list) else [current]
+    if value not in values:
+        node[key] = [*values, value]
+
+
+def _rocrate_agents(
+    creators: Iterable[Mapping[str, Any]], contributors: Iterable[Mapping[str, Any]]
+) -> tuple[list[dict], list[dict], list[dict]]:
+    """The people and organisations of a deposit's RO-Crate, and the references to them.
+
+    *creators* and *contributors* are dicts as :func:`_deposit_agents` returns
+    them. Returns the ``creator`` references and the ``contributor``
+    references of the root dataset (``{"@id": ...}``, each person once, in the
+    order given), and the Person and Organization entities for the
+    ``@graph``, people first.
+
+    A person's @id is the ORCID URL, else ``#person-`` and a slug of the name;
+    an organisation's is the ROR URL, else ``#org-`` and a slug of the name
+    (:func:`_crate_local_ids`). ``affiliation_ror`` gives the ROR of an
+    entry's first affiliation, as in the deposit graph (:func:`_agent_node`).
+    Entries with the same ORCID are one person, and entries without one are
+    one person when they have the same name. An entry without an ORCID is
+    never taken for a person who has one: a name does not prove it, and the
+    crate is published with the deposit's DOI. An organisation without a ROR
+    is the organisation of that name with a ROR when exactly one ROR goes
+    with the name. So someone listed as a creator and as a contributor is
+    one entity, which both lists reference. A person points at
+    each organisation by ``affiliation``, and the Zenodo ``type`` of each of
+    their contributor entries is kept as the person's ``roleName``.
+    """
+    entries = [("creator", agent) for agent in creators] + [("contributor", agent) for agent in contributors]
+
+    def affiliations(agent: Mapping[str, Any]) -> list[tuple[str, str]]:
+        """``(name, ROR URL or "")`` of each affiliation of *agent*."""
+        names = [_clean_name(name) for name in _affiliation_names(agent.get("affiliation"))]
+        ror = _ror_url(agent["affiliation_ror"]) if agent.get("affiliation_ror") else ""
+        pairs = [(name, ror if position == 0 else "") for position, name in enumerate(names)]
+        # An affiliation that is blank once cleaned names no organisation.
+        return [(name, org_ror) for name, org_ror in pairs if name]
+
+    # The RORs given with each organisation's name.
+    rors: dict[str, set[str]] = {}
+    for _role, agent in entries:
+        for name, ror in affiliations(agent):
+            if ror:
+                rors.setdefault(name, set()).add(ror)
+
+    def known_id(name: str, given: str, by_name: dict[str, set[str]]) -> str:
+        """The identifier given, else the only one given with *name* elsewhere, else ""."""
+        if given:
+            return given
+        found = by_name.get(name, set())
+        return next(iter(found)) if len(found) == 1 else ""
+
+    person_ids: list[tuple[str, str]] = []
+    org_ids: list[list[tuple[str, str]]] = []
+    for _role, agent in entries:
+        name = _clean_name(agent.get("name"))
+        orcid = f"https://orcid.org/{agent['orcid']}" if agent.get("orcid") else ""
+        person_ids.append((name, orcid))
+        org_ids.append([(org, known_id(org, ror, rors)) for org, ror in affiliations(agent)])
+    local_people = _crate_local_ids((name for name, iri in person_ids if not iri), "person")
+    local_orgs = _crate_local_ids((name for orgs in org_ids for name, iri in orgs if not iri), "org")
+
+    people: dict[str, dict] = {}
+    organisations: dict[str, dict] = {}
+    references: dict[str, list[dict]] = {"creator": [], "contributor": []}
+    for (role, agent), (name, iri), orgs in zip(entries, person_ids, org_ids, strict=True):
+        person_id = iri or local_people[name]
+        person = people.setdefault(person_id, {"@id": person_id, "@type": "Person", "name": name})
+        for org_name, org_iri in orgs:
+            org_id = org_iri or local_orgs[org_name]
+            organisations.setdefault(org_id, {"@id": org_id, "@type": "Organization", "name": org_name})
+            _add_value(person, "affiliation", {"@id": org_id})
+        if role == "contributor" and agent.get("type"):
+            _add_value(person, "roleName", str(agent["type"]))
+        if {"@id": person_id} not in references[role]:
+            references[role].append({"@id": person_id})
+    return references["creator"], references["contributor"], [*people.values(), *organisations.values()]
+
+
+def _rocrate_shape_problems(crate: Mapping[str, Any]) -> list[str]:
+    """What keeps *crate* from the flattened form RO-Crate 1.1 metadata takes.
+
+    Every entity is a direct entry of the ``@graph`` with its own ``@id``, no
+    ``@id`` is described twice, a property points at an entity by ``@id``
+    alone instead of describing it in place, and every crate-local ``#``
+    identifier pointed at is described. An empty list when all of that holds.
+    """
+    graph = crate.get("@graph")
+    if not isinstance(graph, list):
+        return ["it has no @graph list"]
+    problems: list[str] = []
+    entities: list[Mapping[str, Any]] = []
+    described: set[str] = set()
+    for position, entity in enumerate(graph, start=1):
+        entity_id = entity.get("@id") if isinstance(entity, Mapping) else None
+        if not isinstance(entity_id, str) or not entity_id:
+            problems.append(f"@graph entry {position} has no @id")
+            continue
+        if entity_id in described:
+            problems.append(f"{entity_id} is described more than once in the @graph")
+        described.add(entity_id)
+        entities.append(entity)
+    for entity in entities:
+        for key, value in entity.items():
+            if key.startswith("@"):
+                continue
+            for item in value if isinstance(value, list) else [value]:
+                if not isinstance(item, Mapping) or "@value" in item:
+                    continue
+                target = item.get("@id")
+                if set(item) - {"@id"}:
+                    kind = item.get("@type")
+                    label = " ".join(
+                        str(part)
+                        for part in ("/".join(map(str, kind)) if isinstance(kind, list) else kind, item.get("name"))
+                        if part
+                    )
+                    problems.append(
+                        f"{entity['@id']} describes its {key!r} in place ({label or 'no type or name'}); "
+                        "RO-Crate wants each entity as its own @graph entry, referenced by @id"
+                    )
+                elif isinstance(target, str) and target.startswith("#") and target not in described:
+                    problems.append(
+                        f"{entity['@id']} points at {target} under {key!r}, which the @graph does not describe"
+                    )
+    return problems
+
+
+def _read_rocrate(crate: Mapping[str, Any], feature: str) -> Any:
+    """*crate* as the rocrate library reads it (a ``rocrate.rocrate.ROCrate``).
+
+    Raises ImportError naming the publish extra and *feature* when the
+    library is not installed, and whatever the library raises for a crate it
+    cannot read.
+    """
+    from battinfo._util import require_extra  # noqa: PLC0415
+
+    rocrate = require_extra("rocrate.rocrate", "publish", feature)
+    # The library takes the entities it reads apart, so it gets a copy.
+    return rocrate.ROCrate(copy.deepcopy(dict(crate)))
+
+
+def _rocrate_check(crate: Mapping[str, Any]) -> tuple[list[str], str]:
+    """The problems the RO-Crate check finds in *crate*, and why the rocrate library did not read it.
+
+    The shape check (:func:`_rocrate_shape_problems`) always runs; what the
+    library refuses comes first. The second value is the teaching ImportError
+    message when the publish extra is not installed, else ``""``.
+    """
+    problems = _rocrate_shape_problems(crate)
+    try:
+        _read_rocrate(crate, "the RO-Crate check reads the crate with the rocrate library")
+    except ImportError as exc:
+        return problems, str(exc)
+    except Exception as exc:  # noqa: BLE001 - a crate the library refuses is a problem to report
+        problems.insert(0, f"the rocrate library cannot read it: {exc}")
+    return problems, ""
+
+
+def _warn_rocrate_problems(crate: Mapping[str, Any]) -> None:
+    """Warn, and print, what the RO-Crate check finds in a deposit's ``ro-crate-metadata.json``.
+
+    Never raises: a deposit goes ahead whatever the check finds, and when the
+    publish extra is not installed the warning says so.
+    """
+    problems, unread = _rocrate_check(crate)
+    messages: list[str] = []
+    if problems:
+        messages.append(
+            f"The deposit's {_ROCRATE_FILENAME} fails the RO-Crate check ({len(problems)} problem(s)), "
+            "which does not stop the deposit: " + "; ".join(problems)
+        )
+    if unread:
+        messages.append(f"The deposit's {_ROCRATE_FILENAME} was only partly checked: {unread}")
+    for message in messages:
+        # From zenodo(), through prepare() and _assert_publishable(), to the caller.
+        warnings.warn(message, stacklevel=5)
+        print(f"  WARNING: {message}")
+
+
+def _planned_deposit_files(plan: DepositFilePlan) -> list[DepositFile]:
+    """The data files *plan* deposits, for an RO-Crate made before any archive is packed.
+
+    The files themselves, or for a zipped deposit one entry per archive, not
+    yet measured, followed by the files the deposit keeps.
+    """
+    if not plan.zipped:
+        return list(plan.files)
+    archives = [DepositFile(path=Path(), name=name, segment=url_segment(name)) for name in plan.archives()]
+    return [*archives, *plan.kept_files()]
+
+
+def _extra_file_media_type(name: str) -> str:
+    """The media type of the extra file *name*, from its extension.
+
+    :func:`battinfo._util.file_media_type`, never the table the system keeps
+    (the Windows registry reads ``.csv`` as ``application/vnd.ms-excel``), so
+    a deposit states the same type on every computer;
+    ``application/octet-stream`` when it does not know the extension.
+    """
+    return file_media_type(name) or "application/octet-stream"
+
+
+def _rocrate_extra_file_entities(extra_files: Sequence[DepositFile]) -> list[dict]:
+    """The RO-Crate ``File`` entity of each extra file, as the data files have theirs."""
+    entities: list[dict] = []
+    for extra in extra_files:
+        entity: dict = {
+            "@type": "File",
+            "@id": extra.segment,
+            "name": extra.name,
+            "encodingFormat": _extra_file_media_type(extra.name),
+        }
+        if extra.sha256:
+            entity["contentSize"] = str(extra.size)
+            entity["sha256"] = extra.sha256
+        entities.append(entity)
+    return entities
+
+
+def _extra_file_document_node(extra: DepositFile, files_base: str) -> dict:
+    """An extra file of the deposit as the ``schema:DigitalDocument`` the catalog lists under ``schema:hasPart``.
+
+    Its checksum and size are written as
+    :func:`battinfo.jsonld.artifact_distribution_node` writes an
+    artifact's, so the two kinds of documentation file read alike.
+    """
+    from battinfo.jsonld import checksum_node  # noqa: PLC0415
+
+    url = extra.url(files_base)
+    node: dict = {
+        "@type": "schema:DigitalDocument",
+        "@id": url,
+        "schema:name": extra.name,
+        "schema:encodingFormat": _extra_file_media_type(extra.name),
+        "schema:contentUrl": url,
+    }
+    if extra.sha256:
+        node["spdx:checksum"] = checksum_node({"algorithm": "sha256", "value": extra.sha256})
+        node["dcat:byteSize"] = extra.size
+    return node
 
 
 # ── Funding / project provenance ─────────────────────────────────────────────
@@ -1099,19 +1571,9 @@ class ProjectRef:
         return f"{label} ({self.identifier})" if label else self.identifier
 
 
-_ORCID_RE = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$")
-
-
 def _normalize_orcid(value: str) -> str:
     """Return the bare ORCID id (``0000-0002-1825-0097``) from an id or full URL."""
-    token = str(value).strip()
-    token = re.sub(r"^https?://orcid\.org/", "", token, flags=re.IGNORECASE).rstrip("/")
-    token = token.upper()
-    if not _ORCID_RE.match(token):
-        raise ValueError(
-            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
-        )
-    return token
+    return require_orcid_id(value)
 
 
 # How to give a Zenodo deposit its creators: the refusal and the preview say it.
@@ -1148,6 +1610,37 @@ def _deposit_agents(agents: Iterable[Any], role: str) -> list[dict]:
             entry.pop("orcid", None)  # an empty ORCID is left out
         out.append(entry)
     return out
+
+
+def _zenodo_person(agent: Mapping[str, Any], role: str) -> dict:
+    """*agent* as a person on the Zenodo deposit form, with the fields the form takes for one and no others.
+
+    These are ``name``, ``affiliation``, ``orcid`` and, for a contributor,
+    ``type``. Several affiliations go as one string, their names joined with
+    ``"; "`` in the order given, and an affiliation given as an organisation
+    dict goes as its name. A ROR or any other key is left off the form; the
+    deposit graph and the RO-Crate keep it. The ORCID goes as the bare iD
+    (:func:`~battinfo._util.orcid_id`). A contributor without a ``type`` gets
+    ``ProjectMember``, since Zenodo requires one. The keys keep the order
+    *agent* gives them, so a person given in this shape goes as given.
+    """
+    person: dict[str, Any] = {}
+    for key, value in agent.items():
+        if key == "name":
+            person["name"] = value
+        elif key == "affiliation":
+            names = _affiliation_names(value)
+            if names:
+                person["affiliation"] = "; ".join(names)
+        elif key == "orcid":
+            orcid = orcid_id(value)
+            if orcid:
+                person["orcid"] = orcid
+        elif key == "type" and role == "contributor":
+            person["type"] = value
+    if role == "contributor":
+        person.setdefault("type", "ProjectMember")
+    return person
 
 
 # A pragmatic set of the license identifiers Zenodo accepts most often (open
@@ -1357,9 +1850,277 @@ def _resolve_project_openaire(identifier: str, *, timeout: float = 15.0) -> dict
 def _provider(creators: list[dict] | None, contributors: list[dict] | None) -> tuple[str, str]:
     """Best-effort publishing organisation: the first affiliation (name, ror) among agents."""
     for c in (creators or []) + (contributors or []):
-        if c.get("affiliation"):
-            return c["affiliation"], c.get("affiliation_ror", "")
+        names = _affiliation_names(c.get("affiliation"))
+        if names:
+            return names[0], c.get("affiliation_ror", "")
     return "", ""
+
+
+def _deposit_publisher(publisher: str | Mapping[str, Any] | None) -> dict[str, str] | None:
+    """The ``publisher=`` of a deposit as ``{"name", "ror", "id"}``, or ``None`` when not given.
+
+    *publisher* is the organisation's name, or a dict with ``"name"`` and
+    optionally ``"ror"`` (a ROR id or URL) and ``"id"`` (its registry
+    organization IRI, ``https://w3id.org/battinfo/organization/{uid}`` in
+    either form, or a shared thing ``https://w3id.org/battinfo/id/{uid}``).
+    Raises ``ValueError`` for anything else, before a deposit sends anything.
+    """
+    if publisher is None:
+        return None
+    entry: Mapping[str, Any] = {"name": publisher} if isinstance(publisher, str) else publisher
+    if not isinstance(entry, Mapping) or not isinstance(entry.get("name"), str) or not entry["name"].strip():
+        raise ValueError(
+            "publisher= takes the organisation's name, or a dict such as "
+            '{"name": "Example Lab", "ror": "https://ror.org/01abcde23"}.'
+        )
+    unknown = sorted(str(key) for key in entry if key not in ("name", "ror", "id"))
+    if unknown:
+        raise ValueError(f"publisher= takes the keys name, ror and id, not {', '.join(unknown)}.")
+    out = {"name": entry["name"].strip()}
+    ror = entry.get("ror")
+    if ror:
+        if not isinstance(ror, str) or not re.fullmatch(r"(?:https?://ror\.org/)?0[a-z0-9]{8}", ror.strip()):
+            raise ValueError(f"publisher ror={ror!r} is not a ROR id such as 01abcde23 or https://ror.org/01abcde23.")
+        out["ror"] = f"https://ror.org/{ror.strip().rsplit('/', 1)[-1]}"
+    iri = entry.get("id")
+    if iri:
+        parsed = parse_record_iri(iri)
+        if (parsed is None or parsed.segment != "organization") and parse_thing_iri(iri) is None:
+            raise ValueError(
+                f"publisher id={iri!r} is not a registry organization IRI "
+                f"({record_iri_forms('organization', things=True)}). Give a ROR as ror= instead."
+            )
+        out["id"] = str(iri)
+    return out
+
+
+def _publisher_node(publisher: Mapping[str, str], record_url: str) -> dict:
+    """The deposit graph's provider node for *publisher* (see :func:`_deposit_publisher`).
+
+    Its registry organization IRI is the node's ``@id``, with the ROR as
+    ``schema:sameAs``; without one the ROR is the ``@id``, and without either
+    the node is ``{record_url}#provider``, as for a provider taken from the
+    creators' affiliations.
+    """
+    node: dict = {
+        "@type": ["schema:Organization", "prov:Agent"],
+        "@id": publisher.get("id") or publisher.get("ror") or f"{record_url}#provider",
+        "schema:name": publisher["name"],
+    }
+    if publisher.get("id") and publisher.get("ror"):
+        node["schema:sameAs"] = {"@id": publisher["ror"]}
+    return node
+
+
+# The values Zenodo takes for a deposit's access_right.
+_ZENODO_ACCESS_RIGHTS = ("open", "embargoed", "restricted", "closed")
+
+
+def _zenodo_date(value: object, keyword: str) -> str:
+    """*value*, a ``datetime.date`` or an ISO 8601 date such as ``2027-01-31``, as Zenodo takes it."""
+    import datetime as dt  # noqa: PLC0415
+
+    if isinstance(value, dt.datetime):
+        value = value.date()
+    if isinstance(value, dt.date):
+        return value.isoformat()
+    if isinstance(value, str):
+        try:
+            return dt.date.fromisoformat(value.strip()).isoformat()
+        except ValueError:
+            pass
+    raise ValueError(f"{keyword}={value!r} is not a date. Pass a datetime.date or an ISO date such as '2027-01-31'.")
+
+
+def _zenodo_access(
+    access_right: str, embargo_date: object = None, access_conditions: str | None = None
+) -> dict[str, str]:
+    """The access fields of a deposit's Zenodo metadata.
+
+    ``access_right`` is one of ``open``, ``embargoed``, ``restricted`` and
+    ``closed``. An embargoed deposit needs ``embargo_date``, the day its
+    files open, and a restricted one ``access_conditions``, the conditions
+    on which access is granted, as Zenodo requires. Raises ``ValueError``
+    for any other value or combination, before a deposit sends anything.
+    """
+    if access_right not in _ZENODO_ACCESS_RIGHTS:
+        raise ValueError(
+            f"access_right={access_right!r} is not one of {', '.join(repr(v) for v in _ZENODO_ACCESS_RIGHTS)}."
+        )
+    fields = {"access_right": access_right}
+    if access_right == "embargoed":
+        if embargo_date is None:
+            raise ValueError("access_right='embargoed' needs embargo_date=, the day the files open.")
+        fields["embargo_date"] = _zenodo_date(embargo_date, "embargo_date")
+        import datetime as dt  # noqa: PLC0415
+
+        # Zenodo refuses an embargo that does not end in the future, and only
+        # once a draft exists, so the date is checked before anything is sent.
+        if dt.date.fromisoformat(fields["embargo_date"]) <= dt.datetime.now(dt.timezone.utc).date():
+            raise ValueError(
+                f"embargo_date={fields['embargo_date']!r} is not in the future: Zenodo takes an embargo "
+                "that ends after today."
+            )
+    elif embargo_date is not None:
+        raise ValueError(f"embargo_date= applies to access_right='embargoed', not {access_right!r}.")
+    if access_right == "restricted":
+        if not isinstance(access_conditions, str) or not access_conditions.strip():
+            raise ValueError("access_right='restricted' needs access_conditions=, the terms on which access is given.")
+        fields["access_conditions"] = access_conditions.strip()
+    elif access_conditions is not None:
+        raise ValueError(f"access_conditions= applies to access_right='restricted', not {access_right!r}.")
+    return fields
+
+
+def _zenodo_related_identifiers(entries: Iterable[Any] | None) -> list[dict]:
+    """Copies of the ``related_identifiers=`` of a deposit, each a dict with an identifier and a relation."""
+    out: list[dict] = []
+    for position, entry in enumerate(entries or [], start=1):
+        if not isinstance(entry, Mapping) or not all(
+            isinstance(entry.get(key), str) and entry[key].strip() for key in ("identifier", "relation")
+        ):
+            raise ValueError(
+                f"related identifier {position} needs an identifier and a relation, such as "
+                '{"identifier": "10.1234/example", "relation": "isSupplementTo"}.'
+            )
+        out.append(dict(entry))
+    return out
+
+
+# A tag in a description that is HTML already.
+_HTML_TAG = re.compile(r"</?[A-Za-z][A-Za-z0-9]*(?:\s[^<>]*)?/?>")
+
+
+def _zenodo_description_html(text: str) -> str:
+    """*text* with its paragraphs as HTML paragraphs, for the description Zenodo shows.
+
+    Zenodo shows the description as HTML, where a blank line between two
+    paragraphs of plain text collapses to a space. Text of two or more
+    paragraphs (split at blank lines) becomes one ``<p>`` each, escaped.
+    Text of one paragraph, and text that holds an HTML tag, are returned as
+    they are.
+    """
+    import html  # noqa: PLC0415
+
+    if _HTML_TAG.search(text):
+        return text
+    paragraphs = [part.strip() for part in re.split(r"\n[ \t]*\n", text.replace("\r\n", "\n")) if part.strip()]
+    if len(paragraphs) < 2:
+        return text
+    return "".join(f"<p>{html.escape(paragraph, quote=False)}</p>" for paragraph in paragraphs)
+
+
+def _keyword_key(keyword: str) -> str:
+    """The form under which two keywords count as one: case-folded, each run of spaces, hyphens, underscores
+    and slashes as one space. Other punctuation is kept, so ``Li`` and ``Li+`` stay two keywords."""
+    import unicodedata  # noqa: PLC0415
+
+    return " ".join(re.sub(r"[\s\-_/]+", " ", unicodedata.normalize("NFKC", keyword).casefold()).split())
+
+
+def _unique_keywords(keywords: Iterable[str]) -> list[str]:
+    """*keywords* without the ones an earlier one already covers (:func:`_keyword_key`), first spelling kept."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for keyword in keywords:
+        text = str(keyword).strip()
+        key = _keyword_key(text)
+        if key and key not in seen:
+            seen.add(key)
+            out.append(text)
+    return out
+
+
+def _warn_zenodo_file_limit(plan: DepositFilePlan, bundle: str, extra_files: Sequence[DepositFile] = ()) -> None:
+    """Warn when the deposit would hold more files than Zenodo takes in one record by default.
+
+    Every file counts: the data files or their archives, the extra files,
+    ``battinfo.json`` and ``ro-crate-metadata.json``. The message names the
+    extra files apart from the data files, and says which packing would help.
+    """
+    data = len(plan.deposited_names())
+    total = data + len(extra_files) + 2  # with battinfo.json and ro-crate-metadata.json
+    if total <= _ZENODO_FILE_LIMIT:
+        return
+
+    def count(number: int, noun: str) -> str:
+        return f"{number} {noun}" + ("" if number == 1 else "s")
+
+    if plan.zipped:
+        kept = len(plan.kept_files())
+        held = count(data - kept, "archive") + " of data files" + (f", {count(kept, 'data file')}" if kept else "")
+    else:
+        held = count(data, "data file")
+    if extra_files:
+        held += f", {count(len(extra_files), 'extra file')} ({_shown_list([f.name for f in extra_files])})"
+    if bundle == "none":
+        advice = (
+            "Pass bundle='by_kind' to zip the data files one archive per test kind, or "
+            "bundle='single' to zip them in one archive"
+        )
+    elif not plan.zipped:
+        advice = "Pass bundle='single' to zip the data files in one archive"
+    else:
+        advice = ""
+    if extra_files:
+        advice = f"{advice}, or deposit fewer extra files" if advice else "Deposit fewer extra files"
+    lead = "With bundle='none' the deposit" if bundle == "none" else "The deposit"
+    message = (
+        f"{lead} holds {total} files ({held}, battinfo.json and ro-crate-metadata.json), and Zenodo "
+        f"takes at most {_ZENODO_FILE_LIMIT} files in one record by default." + (f" {advice}." if advice else "")
+    )
+    warnings.warn(message, stacklevel=3)
+    print(f"  WARNING: {message}")
+
+
+def _refuse_extra_file_conflicts(extra_files: Sequence[DepositFile], plan: DepositFilePlan) -> None:
+    """Refuse extra files the deposit cannot carry under their names (see :func:`extra_file_conflicts`).
+
+    Raises ``ValueError`` naming each one, before anything is sent.
+    """
+    problems = extra_file_conflicts(extra_files, plan, reserved=_DEPOSIT_OWN_FILES)
+    if problems:
+        raise ValueError(
+            "extra_files= cannot go into the deposit: "
+            + "; ".join(problems)
+            + ". Pass a mapping of path to deposit name, {path: name}, to give a file a name of its own."
+        )
+
+
+def _dropped_extra_files(state: Mapping[str, Any], extra_files: Sequence[DepositFile]) -> list[str]:
+    """The extra files the state file records for the deposit that *extra_files* leaves out, by name."""
+    recorded = state.get("extra_files")
+    kept = {f.name for f in extra_files}
+    return [name for name in recorded or [] if isinstance(name, str) and name not in kept]
+
+
+def _warn_dropped_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
+    """Warn that this run will remove the extra files *dropped*, which *recorded_in* lists for the deposit."""
+    if not dropped:
+        return
+    message = (
+        f"This run does not name the extra files {recorded_in} records for the deposit: "
+        f"{_shown_list(list(dropped))}. A deposit holds the extra files the call names, so the run will "
+        "remove them from the draft. Pass them in extra_files= to keep them."
+    )
+    warnings.warn(message, stacklevel=3)
+    print(f"  WARNING: {message}")
+
+
+def _refuse_publish_dropping_extra_files(dropped: Sequence[str], recorded_in: str) -> None:
+    """Refuse a publish whose call names none of the extra files *dropped*, which *recorded_in* lists for the deposit.
+
+    A published record keeps its files for good, so the extra files of a
+    reviewed draft are not left out of it unless the call says so with
+    ``extra_files=[]``.
+    """
+    raise ValueError(
+        f"Refusing to publish: {recorded_in} records the extra files {_shown_list(list(dropped))} for this "
+        "deposit, and this call does not name them, so the published record would hold none of them. "
+        "Pass them again in extra_files=, or extra_files=[] to publish without them. Nothing was sent. "
+        "ws.publish(zenodo=True) passes no extra files; publish such a deposit with "
+        "ws.zenodo(publish=True, extra_files=[...])."
+    )
 
 
 # Record-type subdirectories under a workspace's records source folder
@@ -1458,13 +2219,10 @@ def _replaced_legacy_parameter_sets(record_sets: dict[str, list[dict]]) -> dict[
         if not isinstance(body, dict):
             continue
         old, new = body.get("supersedes"), body.get("id")
-        if (
-            isinstance(old, str)
-            and old.startswith("https://w3id.org/battinfo/spec/")
-            and isinstance(new, str)
-            and new != old
-        ):
-            replaced[old] = new
+        superseded = parse_record_iri(old)
+        if isinstance(old, str) and superseded is not None and superseded.segment == "spec":
+            if isinstance(new, str) and new != old:
+                replaced[old] = new
     return replaced
 
 
@@ -1616,7 +2374,7 @@ def _unresolved_record_references(doc: dict) -> list[str]:
             refs.extend(about if isinstance(about, list) else [about])
         for ref in refs:
             iri = ref.get("@id") if isinstance(ref, dict) else None
-            if isinstance(iri, str) and iri.startswith("https://w3id.org/battinfo/") and iri not in present:
+            if isinstance(iri, str) and iri.startswith(BATTINFO_ROOT) and iri not in present:
                 missing.add(iri)
     return sorted(missing)
 
@@ -1632,6 +2390,39 @@ def _shown_list(items: list[str], limit: int = 10) -> str:
     """*items* on one line for a message: the first *limit*, then how many more."""
     shown = "; ".join(items[:limit])
     return shown + (f"; and {len(items) - limit} more" if len(items) > limit else "")
+
+
+def _test_cell_labels(cell_id: str, cell_name: str, instance: dict | None) -> tuple[str, ...]:
+    """What a title BattINFO generated for a test on *cell_id* may start with.
+
+    The cell's name, serial number and batch, and its uid: a cell known only
+    by its IRI is named after its uid (``entities.given_test_name``).
+    """
+    body = instance or {}
+    uid = str(cell_id or "").rstrip("/").rsplit("/", 1)[-1]
+    return tuple(str(value) for value in (cell_name, body.get("serial_number"), body.get("batch_id"), uid) if value)
+
+
+def _record_fidelity_summary(issues: Iterable[Any]) -> builtins.list[str]:
+    """``publication.record_field_not_emitted`` findings, one line per record kind and field.
+
+    A deposit of hundreds of records repeats one gap hundreds of times, so the
+    lines count the records and name the first.
+    """
+    groups: dict[tuple[str, str, bool], builtins.list[str]] = {}
+    for issue in issues:
+        kind, _, rest = str(issue.path).partition(":")
+        iri, _, field = rest.rpartition(".")
+        other_value = str(issue.message).endswith("carries another value for it.")
+        groups.setdefault((kind, field, other_value), []).append(iri)
+    lines = []
+    for (kind, field, other_value), iris in groups.items():
+        what = "another value for it" if other_value else "nothing for it"
+        lines.append(
+            f"{len(iris)} {kind} record(s) have {field!r}, but their nodes in the deposit carry {what} "
+            f"(first: {iris[0]})"
+        )
+    return lines
 
 
 def _not_found_locally_note(iris: list[str]) -> str:
@@ -2197,8 +2988,21 @@ def _filled_quantities(quantities: Mapping[str, Any], path: Path) -> dict[str, A
 # registry envelope carries the canonical record under the same key in
 # semantic_payload.battinfo_records.
 _REGISTRY_RESOURCE_TYPES = {"cell": "cell", "cell-spec": "cell_spec", "test-protocol": "test_spec"}
+# Zenodo takes at most this many files in one record by default.
+_ZENODO_FILE_LIMIT = 100
+# The files a workspace deposit writes itself, which no extra file may be
+# named as, each with what it holds. ws.import_() takes the graph from the
+# first file of a record under either of its names.
+_DEPOSIT_OWN_FILES = {
+    BATTINFO_LD_FILENAME: "deposit graph",
+    _ROCRATE_FILENAME: "RO-Crate metadata",
+    BATTINFO_LD_FILENAME_LEGACY: "deposit graph's former name, which ws.import_() reads",
+    "ro-crate-metadata.jsonld": "RO-Crate 1.0 metadata file name, which crate readers look for",
+}
 # A Zenodo deposit of more than this many data files is zipped, one archive per
-# test kind (see AuthoringWorkspace._bundle_data_files).
+# test kind (bundle="by_kind", the default; see AuthoringWorkspace._bundle_data_files),
+# so that with battinfo.json and ro-crate-metadata.json it stays under
+# _ZENODO_FILE_LIMIT with room to spare.
 _ZENODO_ZIP_THRESHOLD = 90
 # Seconds to wait for the registry when looking up one referenced record. ws.add()
 # blocks on it, and the outcome is remembered for the session either way.
@@ -2304,10 +3108,15 @@ class AuthoringWorkspace:
         root: str | Path = ".",
         records_repo: str | Path | None = None,
         registry_url: str | None = None,
+        *,
+        base: str | None = None,
     ):
         self._root = Path(root).resolve()
         self._records_root = self._root / ".battinfo" / "records"
         self._legacy_layout_announced = False
+        # The base this workspace's records mint under: the one it recorded when
+        # it was created. Read before the engine is made, which mints under it.
+        self._record_base = self._open_record_base(base)
         self._ws = self._make_engine()
         self._records_repo = Path(records_repo).resolve() if records_repo else _find_records_repo(self._root)
         # This workspace's .battinfo/credentials, parsed into the instance and
@@ -2344,6 +3153,11 @@ class AuthoringWorkspace:
         # "unreachable", ...), so a record is asked for once per registry, and a
         # failed lookup is not retried on every ws.add() that references it.
         self._reference_lookups: dict[tuple[str, str, str], str] = {}
+        # registry -> {IRI minted under /id/1001/: the IRI to use for it, or the
+        # RetiredRecord that stops it}, as that registry answered when a submit
+        # or deposit asked (_adopt_registry_iris), so each IRI is asked about
+        # once per registry in a session.
+        self._registry_answers: dict[str, dict[str, str | RetiredRecord]] = {}
         # channel reference -> (equipment_id, channel_id) for test attachment.
         # Keys: the channel IRI, the channel label, and "unit/CHn" for the
         # unit's name and serial number. Populated by ws.add("equipment", ...)
@@ -2416,8 +3230,180 @@ class AuthoringWorkspace:
             if not self._legacy_layout_announced:
                 print("  note: using legacy records/examples/ layout (pre-0.8 workspace)")
                 self._legacy_layout_announced = True
-            return Workspace(root=self._records_root)
-        return Workspace(root=self._root / ".battinfo", source_dir_name="records")
+            return Workspace(root=self._records_root, base=self._record_base)
+        return Workspace(root=self._root / ".battinfo", source_dir_name="records", base=self._record_base)
+
+    def _open_record_base(self, base: str | None) -> str:
+        """The base this workspace mints under, recorded in ``.battinfo/workspace.json`` when it is created.
+
+        A folder that holds no workspace yet (:meth:`_holds_a_workspace`) is a
+        new workspace and records *base*, by default
+        :data:`battinfo.namespace.DEFAULT_RECORD_BASE`
+        (``https://w3id.org/battinfo/id/1001/``). A workspace that exists keeps
+        the base it recorded, and one that recorded none was created before
+        the switch and keeps the old form, ``https://w3id.org/battinfo/``, for
+        good (IRI ruling of 22 October 2026, decision 5). Opening an existing
+        workspace never records a base in it. The old form is recorded by
+        recording no base, so a new workspace that takes it writes a
+        ``workspace.json`` without one. A *base* that is not the one an
+        existing workspace mints under raises ``ValueError``.
+        """
+        if base is not None:
+            base_prefix(base)
+        if not self._holds_a_workspace():
+            chosen = DEFAULT_RECORD_BASE if base is None else base
+            state = self._load_workspace_state()
+            state.setdefault("schema_version", "0.1.0")
+            if chosen != OLD_FORM_BASE:
+                state["record_base"] = chosen
+            self._save_workspace_state(state)
+            return chosen
+        recorded = self._recorded_record_base()
+        if base is not None and base != recorded:
+            raise ValueError(
+                f"The workspace at {self._root} mints its records under {recorded}, the base it was "
+                f"created with, and a workspace keeps its base; base={base!r} cannot change it. "
+                "Open it without base=, or create a new workspace in another folder."
+            )
+        return recorded
+
+    def _holds_a_workspace(self) -> bool:
+        """True when this folder's ``.battinfo/`` holds a workspace, seen by its ``workspace.json`` or a saved record.
+
+        ``.battinfo/`` alone does not make one. ``publish(destination="local")``
+        and several CLI commands write their output there, a ``config.yaml``
+        or a ``credentials`` file written by hand may lie there, and 0.8.0rc2
+        left it empty when it opened a folder. A workspace has written its
+        settings (``workspace.json``, which holds the base, the project, the
+        contributors and the licence) or has saved a record under
+        ``.battinfo/records/`` (``.battinfo/records/examples/`` in a pre-0.8
+        workspace).
+        """
+        if self._workspace_state_path().is_file():
+            return True
+        return any(
+            any((source_root / name).glob("*.json"))
+            for source_root in (self._records_root, self._records_root / "examples")
+            for name in _RECORD_SET_DIRS
+        )
+
+    def _recorded_record_base(self) -> str:
+        """The base ``.battinfo/workspace.json`` records, else the old form (a workspace from before the switch)."""
+        recorded = self._load_workspace_state().get("record_base")
+        if recorded is None:
+            return OLD_FORM_BASE
+        try:
+            base_prefix(recorded)
+        except ValueError as exc:
+            raise ValueError(f"{self._workspace_state_path()} records record_base {recorded!r}, which {exc}") from exc
+        return str(recorded)
+
+    @property
+    def record_base(self) -> str:
+        """The base this workspace's new records mint under.
+
+        ``https://w3id.org/battinfo/id/1001/`` for a workspace created from
+        0.8.0 on, ``https://w3id.org/battinfo/`` (the old form) for one created
+        before. It is recorded in ``.battinfo/workspace.json`` when the
+        workspace is created and never changes; a record already saved keeps
+        the IRI it has.
+        """
+        return self._record_base
+
+    def _held_iri(self, entity_type: str, iri: str) -> str:
+        """*iri*, minted in this workspace, or the IRI its records folder already holds the record under.
+
+        A folder that already holds a record keeps that record's IRI, in
+        either form (``entities.held_record_iri``).
+        """
+        return held_record_iri(entity_type, iri, [self._ws.source_root])
+
+    def _with_saved_iri(self, record: dict) -> dict:
+        """*record*, whose IRI was just minted, with the IRI this workspace already saved it under (:meth:`_held_iri`)."""
+        from battinfo.api._shared import _with_held_iri  # noqa: PLC0415
+
+        return _with_held_iri(record, self._ws.source_root)
+
+    def _adopt_registry_iris(
+        self, registry_url: str | None, *, allow_unchecked_iris: bool, action: str
+    ) -> dict[str, str]:
+        """Adopt the old form of each record this workspace names under ``/id/1001/`` that the registry holds in it.
+
+        Run first by :meth:`submit`, :meth:`zenodo` and :meth:`publish`. Every
+        IRI of the ``/id/1001/`` form in the saved records is looked up in the
+        registry at *registry_url* (``battinfo._adoption.adopt_registry_iris``).
+        One the registry holds under its old form is adopted: the record
+        files, the index and the records in this session are rewritten to
+        name the old form, and the call prints what it adopted. A uid never
+        depends on the base, so every record keeps its file and its uid.
+
+        Returns each IRI looked up, mapped to the IRI to use for it (the old
+        form when adopted, else itself). A record the registry holds as
+        superseded or withdrawn raises ``RetiredIrisError``, and an IRI it
+        cannot be asked about raises ``UncheckedIrisError`` unless
+        *allow_unchecked_iris*, both before anything is changed.
+        """
+        from battinfo._adoption import (  # noqa: PLC0415
+            adopt_registry_iris,
+            adopted_iris,
+            adoption_lines,
+            minted_iris,
+            rewrite_files,
+        )
+
+        records_dir = self._ws.source_root
+        files = sorted(records_dir.rglob("*.json")) if records_dir.exists() else []
+        found: set[str] = set()
+        for path in files:
+            try:
+                found |= minted_iris(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeDecodeError):
+                continue  # the submit or deposit reports an unreadable record itself
+        checked = adopt_registry_iris(
+            found,
+            registry_url=registry_url,
+            action=action,
+            allow_unchecked_iris=allow_unchecked_iris,
+            answers=self._registry_answers.setdefault(registry_url, {}) if registry_url else None,
+        )
+        adopted = adopted_iris(checked)
+        if adopted:
+            rewrite_files([*files, self._ws.index_path], adopted)
+            self._rewrite_session_iris(adopted)
+            for line in adoption_lines(adopted):
+                print(line)
+        return checked
+
+    def _rewrite_session_iris(self, adopted: Mapping[str, str]) -> None:
+        """Give the records this session holds the IRIs *adopted* maps to, so the next save keeps them."""
+        from battinfo._adoption import rewrite_iris, rewrite_iris_in_place  # noqa: PLC0415
+
+        held: builtins.list[Any] = [
+            *self._ws.descriptions,
+            *self._ws.cell_specs,
+            *self._ws.cells,
+            *self._ws.test_specs,
+            *self._ws.tests,
+            *self._ws.datasets,
+            *(cell for cell, _ in self._indexed_cells),
+            *self._material_specs,
+            *self._materials,
+            *self._electrode_specs,
+            *self._electrodes,
+            *self._parameter_sets,
+        ]
+        for record in held:
+            rewrite_iris_in_place(record, adopted)
+        # The lookups keyed by IRI answer to the adopted IRI too.
+        for specs in (self._material_specs_by_ref, self._electrode_specs_by_ref):
+            for key, body in list(specs.items()):
+                rewrite_iris_in_place(body, adopted)
+                if key in adopted:
+                    specs[adopted[key]] = body
+        for key, pair in list(self._channels_by_ref.items()):
+            self._channels_by_ref[key] = rewrite_iris(pair, adopted)
+            if key in adopted:
+                self._channels_by_ref[adopted[key]] = self._channels_by_ref[key]
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
@@ -4009,8 +4995,10 @@ class AuthoringWorkspace:
             # ...or from a JSON map {serial: iri}:
             ws.add("cell", spec=spec, from_file="cell_iris.json")
 
-        It returns the cells it names, in the order given; a serial (or name)
-        the workspace already holds returns that cell, so a re-run adds nothing.
+        It returns the cells it names, in the order given. When the workspace
+        already holds a cell of this spec under a serial (or name), that cell
+        is returned, so a re-run adds nothing. A label names a cell within its
+        spec, so ``"C01"`` of another spec is another cell and is added.
 
         **Tests** (``"test"``) — link a cell and its data explicitly::
 
@@ -4172,7 +5160,10 @@ class AuthoringWorkspace:
         if rt_key in ("parameter-set", "parameters"):
             from battinfo.api._parameters import _record_from_parameter_set  # noqa: PLC0415
 
-            accepted = [*_signature_keywords(self._add_parameter_set), *_signature_keywords(_record_from_parameter_set)]
+            accepted = [
+                *_signature_keywords(self._add_parameter_set),
+                *(key for key in _signature_keywords(_record_from_parameter_set) if key != "base"),
+            ]
             _check_add_keywords("parameter_set", accepted, kwargs)
             return self._add_parameter_set(**kwargs)
         try:
@@ -4402,6 +5393,7 @@ class AuthoringWorkspace:
                     resolve_references=False,
                     validation_policy=validation_policy,
                     stamp=stamp,
+                    base=self._record_base,
                 )
                 for rec in records
             ]
@@ -4436,6 +5428,7 @@ class AuthoringWorkspace:
         allow_partial: bool = False,
         allow_local_files: bool = False,
         archive_hosted_files: bool = False,
+        allow_unchecked_iris: bool = False,
     ) -> builtins.list[dict]:
         """Save and submit the workspace in one call (staged for review by default).
 
@@ -4465,6 +5458,11 @@ class AuthoringWorkspace:
 
         For finer control — e.g. reviewing a Zenodo draft before it goes live —
         call those four steps individually instead.
+
+        Right after the save, each IRI minted under
+        ``https://w3id.org/battinfo/id/1001/`` is looked up in the registry, and
+        a record the registry already holds in the old form keeps that IRI
+        (see :meth:`submit`), before anything is uploaded, deposited or sent.
 
         Parameters
         ----------
@@ -4507,6 +5505,10 @@ class AuthoringWorkspace:
             :meth:`upload` before the deposit, so it needs this too. Without
             it such a call is refused after the save, before anything is
             uploaded or sent, and the refusal names the files.
+        allow_unchecked_iris:
+            Go on with IRIs minted under ``/id/1001/`` that could not be
+            checked with the registry, with a warning, instead of stopping
+            (see :meth:`submit` and :meth:`zenodo`).
         """
         if zenodo:
             # A deposit without a token or a creator, or one whose recorded
@@ -4528,6 +5530,13 @@ class AuthoringWorkspace:
             self.save()
         finally:
             self._publishing = False
+        # A record minted under /id/1001/ that the registry already holds in the
+        # old form takes that IRI before anything is uploaded, deposited or sent;
+        # ws.zenodo() and ws.submit() below reuse the registry's answers. Without
+        # a registry and a deposit, ws.submit() refuses below.
+        registry_url = self._registry_base()[0]
+        if zenodo or registry_url is not None:
+            self._adopt_registry_iris(registry_url, allow_unchecked_iris=allow_unchecked_iris, action="ws.publish()")
         if zenodo:
             # Both checks below come before the R2 upload and the deposit.
             plan = self._deposit_file_plan(
@@ -4554,7 +5563,13 @@ class AuthoringWorkspace:
                 )
             # ws.submit() takes the DOI from the deposit's record in
             # .battinfo/zenodo.json, and puts it on the records the deposit holds.
-            self.zenodo(publish=True, sandbox=sandbox, creators=creators, archive_hosted_files=archive_hosted_files)
+            self.zenodo(
+                publish=True,
+                sandbox=sandbox,
+                creators=creators,
+                archive_hosted_files=archive_hosted_files,
+                allow_unchecked_iris=allow_unchecked_iris,
+            )
         return self.submit(
             note=note,
             doi=doi,
@@ -4562,6 +5577,7 @@ class AuthoringWorkspace:
             publication_mode=publication_mode,
             allow_partial=allow_partial,
             allow_local_files=allow_local_files,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
 
     def status(
@@ -5678,6 +6694,7 @@ class AuthoringWorkspace:
         submit_all: bool = False,
         resume: bool = True,
         allow_local_files: bool = False,
+        allow_unchecked_iris: bool = False,
     ) -> builtins.list[dict]:
         """Submit workspace records to the battinfo registry (staged for review).
 
@@ -5709,6 +6726,17 @@ class AuthoringWorkspace:
         ``names=`` only your lab uses) or pin an IRI of your own.  Lab labels
         such as ``"S1"`` are not scoped to a lab until 0.9, so two labs that both
         name a cell of one spec ``"S1"`` mint one IRI.
+
+        Once the records are read and checked, and before anything is sent,
+        each IRI minted under ``https://w3id.org/battinfo/id/1001/`` is looked
+        up in the registry. A record it already holds in the old form,
+        ``https://w3id.org/battinfo/{segment}/{uid}``, keeps that IRI: the
+        records that name it are rewritten and saved, and the call prints what
+        it adopted. A registry that cannot be asked stops the submission with
+        :class:`SubmitError`, naming the IRIs not checked, unless
+        ``allow_unchecked_iris=True``. A record it holds as superseded or
+        withdrawn stops it too, whatever ``allow_unchecked_iris`` says, and
+        the error names what replaced it.
 
         Credentials can be passed as arguments, established with ``ws.login()``
         (scoped to this workspace instance), set as environment variables, or
@@ -5753,7 +6781,8 @@ class AuthoringWorkspace:
             on zenodo.org: never a sandbox DOI, nor the DOI a draft has
             reserved. A recorded draft is first checked with Zenodo (when
             ``ZENODO_API_TOKEN`` is set), in case it was published on the
-            website since.
+            website since. Its dataset records then get their
+            ``published_at`` (see :meth:`zenodo`), which is sent with the DOI.
         allow_local_files:
             Records whose download or source locations (``access_url``,
             ``content_url``, ``download_url``, ``provenance.source_url``,
@@ -5762,6 +6791,10 @@ class AuthoringWorkspace:
             nobody else can open. Deposit the files first (``ws.zenodo()``
             points the records at the deposited copies), then submit.
             ``True`` lifts the check, for a local test registry only.
+        allow_unchecked_iris:
+            Submit IRIs minted under ``/id/1001/`` that could not be checked
+            with the registry as they are, with a warning, instead of
+            stopping.
 
         Example::
 
@@ -6029,11 +7062,36 @@ class AuthoringWorkspace:
                 outcomes=prefailed,
             )
 
+        # One record, one IRI: a record minted here under /id/1001/ that the
+        # registry already holds in the old form takes that IRI, in the saved
+        # records and in those read above, before anything is sent (IRI
+        # ruling, decision 5). The checks above need no network.
+        from battinfo._adoption import adopted_iris, rewrite_iris
+
+        try:
+            checked_iris = self._adopt_registry_iris(
+                url, allow_unchecked_iris=allow_unchecked_iris, action="ws.submit()"
+            )
+        except (UncheckedIrisError, RetiredIrisError) as exc:
+            raise SubmitError(str(exc)) from exc
+        adopted = adopted_iris(checked_iris)
+        if adopted:
+            parsed = {path: rewrite_iris(rec, adopted) for path, rec in parsed.items()}
+
         # The Zenodo DOI is recorded as provenance.citation_doi, a field the
         # registry record schemas allow, so each submitted record links to its
         # archived dataset: the DOI passed for every record, or else the
         # deposit's DOI for the records it holds, once it is published.
         doi_for = self._submission_doi(doi)
+        # A draft found to be published since has just had its dataset records
+        # dated, after they were read above. Each takes the time its file now
+        # states, so the registry gets it with the DOI.
+        for path, rec in parsed.items():
+            body = rec.get("dataset")
+            if isinstance(body, dict) and body.get("published_at") is None and doi_for(body.get("id")):
+                when = _saved_published_at(path)
+                if when is not None:
+                    body["published_at"] = when
 
         def _selected(subdir: str) -> list[Path]:
             return [f for f in selected.get(subdir, []) if f in parsed]
@@ -6229,6 +7287,8 @@ class AuthoringWorkspace:
                         publication_mode=publication_mode,
                         validation=validations[src],
                         allow_local_files=allow_local_files,
+                        checked_iris=checked_iris,
+                        allow_unchecked_iris=allow_unchecked_iris,
                     )
                 )
 
@@ -6267,6 +7327,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6326,6 +7388,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6369,6 +7433,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6412,6 +7478,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6476,6 +7544,8 @@ class AuthoringWorkspace:
                     publication_mode=publication_mode,
                     validation=validations[src],
                     allow_local_files=allow_local_files,
+                    checked_iris=checked_iris,
+                    allow_unchecked_iris=allow_unchecked_iris,
                 )
             )
 
@@ -6734,27 +7804,42 @@ class AuthoringWorkspace:
         URL works, until the draft is published. A record already on this
         deposit's copy is brought up to date either way.
 
+        A record on a Zenodo copy of a file this deposit carries inside a zip
+        archive goes back to the local file, with the checksum and size the
+        plan measured. An earlier deposit held the file as itself and this
+        one does not, and no record can point into an archive. :meth:`submit`
+        then refuses the record as it does after any zipped deposit. These
+        records are counted in a printed line of their own.
+
         The datasets in memory get the same locations, so a later
-        :meth:`save` keeps them. Returns the number of records updated.
+        :meth:`save` keeps them. Returns the number of records updated,
+        without those that went back to a local file.
         """
         ds_dir = self._ws.source_root / "dataset"
         if not ds_dir.is_dir():
             return 0
         own_files = f"{record_url}/files/"
 
-        def _deposited(location: object) -> DepositFile | None:
+        def _deposited(location: object) -> tuple[DepositFile, str] | None:
+            """The planned file *location* names, and the location its record gives after this deposit."""
             if isinstance(location, str) and location in plan.hosted:
                 return None  # the records keep pointing at a hosted copy
             if local_only and not is_local_location(location) and not str(location).startswith(own_files):
                 return None  # a copy in another record moves when the draft is published
             entry = plan.entry_for(location)
-            return None if entry is None or entry.archive else entry
+            if entry is None:
+                return None
+            if not entry.archive:
+                return entry, f"{record_url}/files/{entry.segment}"
+            if parse_zenodo_file_url(location) is None:
+                return None  # a local file stays the record's location
+            return entry, entry.path.as_uri()  # the deposit holds no such copy any more
 
         def _public_url(location: object) -> str | None:
-            entry = _deposited(location)
-            return f"{record_url}/files/{entry.segment}" if entry is not None else None
+            found = _deposited(location)
+            return found[1] if found is not None else None
 
-        patched = 0
+        patched = returned = 0
         rewritten: dict[str, dict] = {}
         for record_path in sorted(ds_dir.glob("*.json")):
             # Read as the deposit read it (a BOM is allowed), and leave alone what
@@ -6768,18 +7853,19 @@ class AuthoringWorkspace:
                 continue
             new_dists: list[dict] = []
             primary_url: str | None = None
-            changed = deposited = False
+            changed = deposited = went_back = False
             for dist in dists:
                 if not isinstance(dist, dict):
                     new_dists.append(dist)
                     continue
                 local_url = dist.get("content_url") or ds.get("access_url") or ""
-                entry = _deposited(local_url)
-                if entry is None:
+                found = _deposited(local_url)
+                if found is None:
                     new_dists.append(dist)
                     continue
                 deposited = True
-                public_url = f"{record_url}/files/{entry.segment}"
+                entry, public_url = found
+                went_back = went_back or bool(entry.archive)
                 if public_url != dist.get("content_url"):
                     dist = {**dist, "content_url": public_url}
                     changed = True
@@ -6807,8 +7893,17 @@ class AuthoringWorkspace:
                 continue
             _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
             self._session_paths.add(record_path)
-            patched += 1
+            if went_back:
+                returned += 1
+            else:
+                patched += 1
         self._point_datasets_in_memory_at(rewritten)
+        if returned:
+            print(
+                f"  Dataset records pointed back at their local data files: {returned}. The deposit holds these "
+                "files inside a zip archive, which no record can point into, and ws.submit() refuses a record "
+                "whose data file is on this computer."
+            )
         return patched
 
     def _point_datasets_in_memory_at(self, records: Mapping[str, dict]) -> None:
@@ -6830,6 +7925,48 @@ class AuthoringWorkspace:
             provenance = record.get("provenance") if isinstance(record, dict) else None
             if isinstance(provenance, dict) and isinstance(provenance.get("source_url"), str):
                 dataset.source.url = provenance["source_url"]
+
+    def _date_published_datasets(self, held: Iterable[str], reported: int, called_at: int) -> int:
+        """Give each dataset record of *held* that states no ``published_at`` its publication time.
+
+        Runs once Zenodo has published the deposit that holds the records
+        (*held*, their IRIs). The time is *reported*, the one Zenodo gave
+        (:func:`_zenodo_publication_time`), or *called_at*, the time of the
+        publish call, for a dataset created after *reported*, as its record or
+        the dataset in memory says: that dataset was published by this call,
+        and strict validation refuses a ``published_at`` before
+        ``created_at``. For a deposit found to be published afterwards
+        (:meth:`_reconcile_zenodo_draft`), *called_at* is the time of the
+        check that found it. A record that already states when it was published
+        keeps that time, so the datasets of a new version keep the date they
+        were first published. The datasets in memory get the same time, so a
+        later :meth:`save` keeps it. Returns the number of records dated.
+        """
+        ds_dir = self._ws.source_root / "dataset"
+        held_ids = set(held)
+        if not held_ids or not ds_dir.is_dir():
+            return 0
+        # A session that added its datasets again holds its own creation times.
+        created_in_memory = {dataset.id: dataset.created_at for dataset in self._ws.datasets if dataset.id}
+        dated: dict[str, int] = {}
+        for record_path in sorted(ds_dir.glob("*.json")):
+            # Read as the deposit read it, and leave alone what is not a dataset
+            # record: this runs after a publish, and must not fail.
+            raw = _read_json(record_path)
+            ds = raw.get("dataset") if isinstance(raw, dict) else None
+            if not isinstance(ds, dict) or ds.get("id") not in held_ids or ds.get("published_at") is not None:
+                continue
+            created = (ds.get("created_at"), created_in_memory.get(ds["id"]))
+            later = any(isinstance(value, (int, float)) and value > reported for value in created)
+            when = called_at if later else reported
+            ds["published_at"] = when
+            _atomic_write_text(record_path, json.dumps(raw, indent=2, ensure_ascii=False))
+            self._session_paths.add(record_path)
+            dated[ds["id"]] = when
+        for dataset in self._ws.datasets:
+            if dataset.id in dated and dataset.published_at is None:
+                dataset.published_at = dated[dataset.id]
+        return len(dated)
 
     def upload(
         self,
@@ -7126,6 +8263,19 @@ class AuthoringWorkspace:
         license: str | None = None,
         keywords: builtins.list[str] | None = None,
         archive_hosted_files: bool = False,
+        allow_unchecked_iris: bool = False,
+        access_right: str = "open",
+        embargo_date: "str | _datetime.date | None" = None,
+        access_conditions: str | None = None,
+        version: str | None = None,
+        related_identifiers: builtins.list[dict] | None = None,
+        publication_date: "str | _datetime.date | None" = None,
+        auto_keywords: bool = True,
+        publisher: str | Mapping[str, str] | None = None,
+        bundle: str = "by_kind",
+        archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
+        bdf_version: str | None = None,
     ) -> "ZenodoResult":
         """Deposit workspace records and data files to Zenodo.
 
@@ -7167,11 +8317,26 @@ class AuthoringWorkspace:
         there after a draft too, so :meth:`submit` sends https URLs, which work
         once the draft is published. A record on the copy an earlier published
         version holds keeps that working URL until the new version is
-        published. The datasets in memory are pointed there too, so a later
-        :meth:`save` keeps the URLs. Each distribution then states the sha256 of
+        published. When the deposit carries a file inside a zip archive
+        (``bundle``) and a record sits on a copy an earlier deposit held as
+        itself, the record goes back to its local file at that point, since
+        no record can point into an archive, and :meth:`submit` refuses it as
+        after any zipped deposit. The datasets in memory follow, so a later
+        :meth:`save` keeps the locations. Each distribution then states the sha256 of
         the file the deposit holds (and its size, when it gives one), as the
         deposit graph does, so a file that changed since it was added is
-        described as it is now.
+        described as it is now. A publish also gives each dataset record the
+        deposit holds its ``published_at``: the time of the publish call, or
+        midnight UTC of the publication date Zenodo reports when that is an
+        earlier day and the record was created by then. A record that already
+        states one keeps it, so the datasets of a new version keep the date
+        they were first published. A draft and a sandbox deposit date nothing.
+        A draft found to have been published since, on the Zenodo website or
+        by a run that stopped before it dated them, dates its datasets when
+        that is found, by this call or by :meth:`submit`, and the time of
+        that check stands in for the time of the publish call. A dataset that
+        a later session adds again, without a ``published_at``, keeps the one
+        its saved record holds at the next :meth:`save`.
 
         A record pointed at its deposited copy keeps its data in later deposits.
         ``.battinfo/deposit-files.json`` records the local file behind each
@@ -7189,11 +8354,29 @@ class AuthoringWorkspace:
         before anything is sent. Each file keeps its name, and so its URL, from
         one version to the next.
 
+        The index names a file that lies in the workspace folder by its path
+        inside the folder, and reads it from the folder as it is now, so a
+        workspace that was renamed, moved or copied to another computer finds
+        the files behind its deposited copies. Each file the deposit keeps for
+        want of a local one is named in a printed line, with the path that was
+        looked for.
+
         A deposit whose records point at files :meth:`upload` put in R2 storage
         is refused before anything is sent, and the refusal names the files,
         unless ``archive_hosted_files=True``: the deposit then archives each from
         the local file :meth:`upload` recorded, and the records keep their R2
         URLs.
+
+        Once the records pass the publication check, and before Zenodo is
+        contacted, each IRI minted under ``https://w3id.org/battinfo/id/1001/``
+        is looked up in the workspace's registry. A record it already holds in
+        the old form, ``https://w3id.org/battinfo/{segment}/{uid}``, keeps that
+        IRI: the records that name it are rewritten and saved, and the result's
+        ``adopted`` lists it. A registry that cannot be asked, or a workspace
+        without one, stops the deposit before anything is sent, naming the
+        IRIs not checked, unless ``allow_unchecked_iris=True``. A record it
+        holds as superseded or withdrawn stops the deposit with
+        :class:`RetiredIrisError`, whatever ``allow_unchecked_iris`` says.
 
         A record that points at a copy of its data the deposit should carry, but
         whose local file this workspace has no record of, refuses the deposit
@@ -7230,7 +8413,22 @@ class AuthoringWorkspace:
         file of the deposit already has gets a short hash of its path in the
         workspace in front (``3f2a9c1d-cycling.csv``), and the first file keeps
         its name. URLs carry the names percent-encoded.
-        A deposit of more than 90 data files is zipped, one archive per test kind.
+        A deposit of more than 90 data files is zipped, one archive per test
+        kind, since Zenodo takes at most 100 files in one record by default;
+        ``bundle`` chooses another packing.
+
+        Files that document the deposit as a whole, such as a README or a
+        list of checksums, go in ``extra_files``. They are not distributions
+        of a dataset. Each goes up as itself, never zipped, and the RO-Crate
+        lists it as a ``File`` and the deposit graph's catalog as a
+        ``schema:DigitalDocument`` under ``schema:hasPart``, each with its
+        media type, size and sha256. The state file records their names. A
+        run describes the whole deposit, so an extra file the last run
+        deposited and this one does not name is removed from the draft, with
+        a warning that names it, and one that has not changed since is not
+        uploaded again. A publish (``publish=True``) that would leave such a
+        file out of the record is refused before anything is sent, unless
+        the call passes ``extra_files=[]``.
 
         Each data file location in the records is screened from its text before
         anything asks the file system about it. A file on this computer is read
@@ -7243,6 +8441,11 @@ class AuthoringWorkspace:
         goes up a folder with ``..`` is never read. A record that names a file
         the screen refuses stops the deposit before anything is sent, and the
         refusal names it.
+
+        The deposit graph's catalog names the concept record, the Zenodo
+        record every version of the deposit belongs to, as
+        ``dcterms:isVersionOf``, and the version a new version (or a draft of
+        one) follows as ``dcat:previousVersion``.
 
         The token is *token*, else ``ZENODO_API_TOKEN`` (production) or
         ``ZENODO_SANDBOX_TOKEN`` (sandbox) from the environment, then from this
@@ -7258,7 +8461,9 @@ class AuthoringWorkspace:
             ``False`` (default) leaves a draft for review: publish it by clicking
             on Zenodo, or re-run with ``publish=True``. Either way the publication
             check runs before Zenodo is contacted, so a refusal leaves no draft
-            behind. With ``True`` the deposit's files are checked after the
+            behind. It checks the deposit's RO-Crate too
+            (:meth:`validate_rocrate`), and what it finds there is a warning,
+            never a refusal. With ``True`` the deposit's files are checked after the
             upload and before the publish, and a draft whose files do not match
             stays a draft.
         sandbox:
@@ -7275,17 +8480,100 @@ class AuthoringWorkspace:
             are the creators, and without those the creator set with
             ``battinfo config set creator``. With none of these the call is
             refused before anything is sent. An ORCID may be the bare id or its
-            ``https://orcid.org/`` URL; Zenodo gets the bare id.
+            ``https://orcid.org/`` URL; Zenodo gets the bare id. The Zenodo
+            form gets each person's name, affiliation and ORCID and nothing
+            else, with several affiliations as one text joined with ``"; "``;
+            the deposit graph and the RO-Crate keep each organisation and its
+            ``affiliation_ror``.
         contributors:
             More people, as dicts like ``creators``, each with an optional Zenodo
             contributor ``"type"`` (default ``"ProjectMember"``).
+        description:
+            The deposit's description. On the Zenodo form, which shows it as
+            HTML, plain text of two or more paragraphs (split at blank lines)
+            goes as one HTML paragraph each; the deposit graph keeps the text
+            as given. Text that holds HTML tags goes as it is.
         keywords:
-            Extra keywords appended to auto-derived list.
+            Extra keywords appended to auto-derived list. A keyword that differs
+            from an earlier one only in case, spaces, hyphens, underscores or
+            slashes (``LFP`` and
+            ``lfp``, ``li-ion`` and ``Li ion``) is left out.
         archive_hosted_files:
             Archive the data files :meth:`upload` put in R2 storage, which a
             deposit otherwise refuses. Each comes from its local file, and a
             warning names each one from the private bucket
             (``upload(public=False)``), since the deposit makes it public.
+        allow_unchecked_iris:
+            Deposit IRIs minted under ``/id/1001/`` that could not be checked
+            with the registry as they are, with a warning, instead of
+            stopping.
+        access_right:
+            Zenodo's access right: ``"open"`` (default), ``"embargoed"``,
+            ``"restricted"`` or ``"closed"``.
+        embargo_date:
+            The day an embargoed deposit's files open, a ``datetime.date`` or
+            an ISO date such as ``"2027-01-31"``. Needed with, and only with,
+            ``access_right="embargoed"``.
+        access_conditions:
+            The terms on which access is given. Needed with, and only with,
+            ``access_right="restricted"``.
+        version:
+            The version, such as ``"0.2.0"``, on the Zenodo form and as
+            ``schema:version`` in the deposit graph.
+        related_identifiers:
+            Zenodo related identifiers, each a dict such as
+            ``{"identifier": "10.1234/example", "relation": "isSupplementTo"}``,
+            with an optional ``"resource_type"`` and ``"scheme"``. The page
+            of the funding project (:meth:`project`) is added after them, as
+            before, unless one of them names it with ``"isPartOf"``.
+        publication_date:
+            The publication date on the Zenodo form, a ``datetime.date`` or an
+            ISO date. Without it Zenodo sets the day the record is published.
+        auto_keywords:
+            ``True`` (default) puts ``BattINFO``, ``battery``,
+            ``electrochemistry`` and the manufacturer, model, chemistry,
+            format and IEC code of each saved cell spec in front of
+            *keywords*. ``False`` sends *keywords* alone.
+        publisher:
+            The organisation that publishes the deposit, as the deposit graph's
+            ``schema:publisher``: its name, or a dict with ``"name"`` and an
+            optional ``"ror"`` (a ROR id or URL) and ``"id"`` (its registry
+            organization IRI). Without it the publisher is the first
+            affiliation among the creators and contributors. It does not go
+            on the Zenodo form.
+        bundle:
+            How the data files travel. ``"by_kind"`` (default) zips them one
+            archive per test kind, ``<kind>.zip``, when there are more than
+            90; ``"single"`` zips them all in one archive, however many there
+            are; ``"none"`` deposits each file as itself and warns, before
+            anything is sent, when the deposit would hold more than the 100
+            files Zenodo takes in one record by default. A file in an archive
+            is described by the archive's download URL and its own name, in a
+            node whose ``@id`` is that URL with the name as the fragment
+            (``.../files/data.zip#C01.csv``).
+        archive_name:
+            The archive of ``bundle="single"``, a file name ending in ``.zip``
+            (default ``"data.zip"``).
+        extra_files:
+            Files that document the deposit, as a list of paths, each
+            deposited under its own file name, or as a mapping of path to
+            deposit name. A relative path is read from the workspace folder.
+            The call is refused before anything is sent when a path is not a
+            file, or when a name is one the deposit gives a data file, an
+            archive, ``battinfo.json``, ``ro-crate-metadata.json``,
+            ``battinfo.jsonld`` or another extra file, ignoring case and
+            Unicode normalisation. They count toward the 100 files Zenodo
+            takes in one record, which the call warns about before anything is
+            sent. :meth:`publish` passes none, so it refuses to publish a draft
+            that holds extra files; publish one with
+            ``zenodo(publish=True, extra_files=...)``.
+        bdf_version:
+            The Battery Data Format version the BDF data files follow, such as
+            ``"1.3.0"``. Each of them then names that version's table schema
+            (``dcterms:conformsTo``,
+            ``.../battery-data-format/1.3.0/schema``). Without it they name the
+            unversioned schema, since a data file does not record its BDF
+            version.
 
         Returns
         -------
@@ -7303,9 +8591,12 @@ class AuthoringWorkspace:
         License precedence: an explicit ``license=`` here is authoritative for the
         deposit; otherwise the workspace default (``ws.license(...)``) is used; if
         neither is set, ``cc-by-4.0`` is applied (Zenodo requires a license).
+        The Zenodo form gets a known licence id in lower case, as
+        :meth:`license` keeps it, so ``"CC-BY-4.0"`` goes as ``"cc-by-4.0"``.
         """
         import tempfile
 
+        from battinfo._adoption import adopted_iris
         from battinfo.zenodo import KeptFilesError, ZenodoClient, ZenodoError
 
         # Each numbered step runs only once the steps before it have passed, so
@@ -7313,6 +8604,19 @@ class AuthoringWorkspace:
         # runs step 1 before it saves or uploads anything.
 
         # ── 1. Token, creators and the stored record, before anything is sent ─
+        # The form's access fields, related identifiers and dates, the publisher
+        # and the packing are checked first: a value Zenodo or the plan cannot
+        # take stops the call here.
+        _zenodo_access(access_right, embargo_date, access_conditions)
+        _zenodo_related_identifiers(related_identifiers)
+        if publication_date is not None:
+            _zenodo_date(publication_date, "publication_date")
+        given_publisher = _deposit_publisher(publisher)
+        single_archive_name(bundle, archive_name)
+        bdf_version = _bdf_version(bdf_version)
+        # The extra files, each read now: a path that is no file, a name that
+        # is no file name and a name given twice stop the call here.
+        extras = extra_deposit_files(extra_files, root=self._root)
         # License precedence: explicit arg > workspace default > cc-by-4.0.
         if license is None:
             license = self._get_license() or "cc-by-4.0"
@@ -7334,65 +8638,135 @@ class AuthoringWorkspace:
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
-
-        # The deposit's parameter sets must pass the record check ws.submit() runs.
-        deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
-        _print_replaced_legacy_parameter_sets(replaced_legacy)
-        parameter_set_errors = _parameter_set_publication_errors(deposit_records)
-        if parameter_set_errors:
-            raise RuntimeError(
-                f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
-                "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
-            )
-
         # One title for the deposit graph, the RO-Crate and the Zenodo metadata:
         # the one given, or the automatic one the metadata would derive, so a
         # deposit made without a title still names its catalog node.
         title = self._deposit_title(title)
         domain = ZENODO_HOSTS[environment]
-
-        # ── 3. File plan ───────────────────────────────────────────────────────
-        # One entry per file, with its deposit name and digests. Everything
-        # below takes file names and URLs from the plan. A record that points
-        # at a copy an earlier deposit made is found through the index: its
-        # local file goes up again when it changed, and when it is gone the
-        # copy the record already holds is kept.
         context = self._deposit_context(sandbox=sandbox, record_id=record_id, state=state, index=index)
-        plan = self._deposit_file_plan(records_dir, context=context)
-        kept_files = plan.kept_files()
-        # A file ws.upload() put in R2 storage goes into the deposit only when
-        # the call asks for it, and one from the private bucket with a warning.
-        if archive_hosted_files:
-            self._warn_private_hosted_files(plan)
-        else:
-            self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
+        # The version this deposit follows, for the placeholder graph: the
+        # record it forks, else the workspace's published record, else the
+        # one an open draft of a new version was made from.
+        follows = record_id or (state.get("record_id") if state.get("published") else state.get("version_of"))
 
-        # ── 4. Placeholder graph, checked for a draft as for a publish ─────────
-        # A refusal here leaves no draft behind. The graph is built as
-        # ws.preview_jsonld() builds it, with placeholders for the record id and
-        # DOI the deposit does not have yet. No check reads those values beyond
-        # their form, which the placeholders share, and the dataset records take
-        # the deposited file URLs only at the end, so the verdict is the one the
-        # deposit's own graph gets. That graph is checked again before a DOI is
-        # minted. A record the plan or the graph had to leave out refuses the
-        # deposit first, naming each record and why.
-        omissions = list(plan.omissions)
-        version_of = record_id or (state.get("record_id") if state.get("published") else None)
-        placeholder_graph = self._build_zenodo_jsonld(
-            zenodo_record_id=0,
-            prereserved_doi="10.5281/zenodo.RECORD_ID",
-            record_url=f"https://{domain}/records/RECORD_ID",
-            file_plan=plan,
-            title=title,
-            description=description or "",
-            creators=creators,
-            contributors=contributors,
-            license=license or "",
-            keywords=keywords or [],
-            is_version_of=f"https://{domain}/records/{version_of}" if version_of else "",
-            omissions=omissions,
+        def prepare(first: bool) -> tuple[dict, DepositFilePlan, list, list, dict]:
+            """Steps 2 to 4 on the records as saved: they run again after an adoption rewrites them."""
+            # The deposit's parameter sets must pass the record check ws.submit() runs.
+            deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
+            if first:
+                _print_replaced_legacy_parameter_sets(replaced_legacy)
+            parameter_set_errors = _parameter_set_publication_errors(deposit_records)
+            if parameter_set_errors:
+                raise RuntimeError(
+                    f"Refusing to deposit: {len(parameter_set_errors)} parameter set(s) cannot be "
+                    "published, so nothing was sent to Zenodo: " + " | ".join(parameter_set_errors)
+                )
+
+            # ── 3. File plan ───────────────────────────────────────────────────
+            # One entry per file, with its deposit name and digests. Everything
+            # below takes file names and URLs from the plan. A record that points
+            # at a copy an earlier deposit made is found through the index: its
+            # local file goes up again when it changed, and when it is gone the
+            # copy the record already holds is kept.
+            plan = self._deposit_file_plan(
+                records_dir, report=first, context=context, bundle=bundle, archive_name=archive_name
+            )
+            # An extra file cannot take a name the deposit gives a file already.
+            _refuse_extra_file_conflicts(extras, plan)
+            if first:
+                _warn_zenodo_file_limit(plan, bundle, extras)
+            kept_files = plan.kept_files()
+            # A file ws.upload() put in R2 storage goes into the deposit only when
+            # the call asks for it, and one from the private bucket with a warning.
+            if first and archive_hosted_files:
+                self._warn_private_hosted_files(plan)
+            elif first:
+                self._refuse_hosted_files(plan, verb="publish" if publish else "deposit")
+
+            # ── 4. Placeholder graph, checked for a draft as for a publish ─────
+            # A refusal here leaves no draft behind. The graph is built as
+            # ws.preview_jsonld() builds it, with placeholders for the record id
+            # and DOI the deposit does not have yet. No check reads those values
+            # beyond their form, which the placeholders share, and the dataset
+            # records take the deposited file URLs only at the end, so the
+            # verdict is the one the deposit's own graph gets. That graph is
+            # checked again before a DOI is minted. A record the plan or the
+            # graph had to leave out refuses the deposit first, naming each
+            # record and why.
+            omissions = list(plan.omissions)
+            placeholder_graph = self._build_zenodo_jsonld(
+                zenodo_record_id=0,
+                prereserved_doi="10.5281/zenodo.RECORD_ID",
+                record_url=f"https://{domain}/records/RECORD_ID",
+                file_plan=plan,
+                title=title,
+                description=description or "",
+                creators=creators,
+                contributors=contributors,
+                license=license or "",
+                keywords=keywords or [],
+                version=version or "",
+                # The concept record is known only once the deposit exists.
+                is_version_of=f"https://{domain}/records/CONCEPT_RECORD_ID",
+                previous_version=f"https://{domain}/records/{follows}" if follows else "",
+                publisher=given_publisher,
+                omissions=omissions,
+                extra_files=extras,
+                bdf_version=bdf_version,
+            )
+            # The RO-Crate is checked with it, once, and only warned about: the
+            # people in it do not change when an adoption rewrites the records.
+            placeholder_crate = (
+                self._rocrate_metadata(
+                    _planned_deposit_files(plan),
+                    title=title,
+                    description=description or "",
+                    creators=creators,
+                    contributors=contributors,
+                    license=license,
+                    zenodo_record_id=0,
+                    prereserved_doi="10.5281/zenodo.RECORD_ID",
+                    sandbox=sandbox,
+                    extra_files=extras,
+                )
+                if first
+                else None
+            )
+            self._assert_publishable(
+                placeholder_graph,
+                omissions=omissions,
+                nothing_sent=True,
+                draft=not publish,
+                record_sets=deposit_records if first else None,
+                rocrate=placeholder_crate,
+            )
+            return deposit_records, plan, kept_files, omissions, placeholder_graph
+
+        deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=True)
+        # Extra files an earlier run deposited and this one does not name go
+        # from the draft, with a warning that names them; a publish that would
+        # leave them out of the record for good is refused unless the call
+        # passed extra_files=[] itself. They belong to the record the state
+        # file continues, not to another one record_id= names.
+        dropped = (
+            _dropped_extra_files(state, extras)
+            if record_id is None or record_id == str(state.get("record_id") or "")
+            else []
         )
-        self._assert_publishable(placeholder_graph, omissions=omissions, nothing_sent=True, draft=not publish)
+        if dropped and publish and extra_files is None:
+            _refuse_publish_dropping_extra_files(dropped, recorded_in)
+        _warn_dropped_extra_files(dropped, recorded_in)
+        # One record, one IRI: once the records pass the checks above, a record
+        # minted here under /id/1001/ that the registry already holds in the old
+        # form takes that IRI (IRI ruling, decision 5), and the deposit is
+        # planned and checked again on the rewritten records.
+        adopted = adopted_iris(
+            self._adopt_registry_iris(
+                self._registry_base()[0], allow_unchecked_iris=allow_unchecked_iris, action="ws.zenodo()"
+            )
+        )
+        if adopted:
+            deposit_records, plan, kept_files, omissions, placeholder_graph = prepare(first=False)
         # The records the deposit holds: ws.submit() records its DOI on these only.
         held_records = _deposit_record_iris(deposit_records, placeholder_graph)
 
@@ -7446,8 +8820,8 @@ class AuthoringWorkspace:
 
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-zenodo-"))
         try:
-            # The files to upload: the data files themselves, or one zip per
-            # test kind when there are more than _ZENODO_ZIP_THRESHOLD.
+            # The files to upload: the data files themselves, or the archives
+            # the plan assigned them to (bundle=).
             data_files = self._bundle_data_files(tmpdir, plan)
 
             # ── 6. Create or reuse the deposit, and record it ──────────────────
@@ -7488,6 +8862,8 @@ class AuthoringWorkspace:
                 "published": False,
                 **({"version_of": str(made_from)} if made_from else {}),
                 "records": held_records,
+                # The extra files this run deposits, which the next run warns about leaving out.
+                **({"extra_files": [f.name for f in extras]} if extras else {}),
             }
             self._save_zenodo_state(state)
             # The records may point at files under this version, under the one it
@@ -7496,15 +8872,15 @@ class AuthoringWorkspace:
             if note_deposit(index, environment, concept, record_ids=[item for item in known if item]):
                 save_deposit_index(self._root, index)
 
-            # A version (new fork or an updated draft) is a version of its concept record;
-            # record the lineage in the JSON-LD. For a new fork that's the source record_id;
-            # for a reused draft it's the deposit's concept record id.
-            if record_id:
-                is_version_of = f"https://{domain}/records/{record_id}"
-            elif reuse_draft_id and deposit.get("conceptrecid"):
-                is_version_of = f"https://{domain}/records/{deposit['conceptrecid']}"
-            else:
-                is_version_of = ""
+            # The lineage in the JSON-LD: every version, a new record's first
+            # one included, is a version of its concept record, and a new
+            # version (a fork, or an updated draft of one) follows the
+            # published record it was made from. A concept that is only the
+            # fallback above, a record id, is no concept to name.
+            is_version_of = (
+                f"https://{domain}/records/{concept}" if concept not in {str(zenodo_record_id), str(made_from)} else ""
+            )
+            previous_version = f"https://{domain}/records/{made_from}" if made_from else ""
 
             record_url = f"https://{domain}/records/{zenodo_record_id}"
             draft_url = f"https://{domain}/deposit/{deposit_id}"
@@ -7523,6 +8899,13 @@ class AuthoringWorkspace:
                         license=license,
                         community=community,
                         extra_keywords=keywords,
+                        access_right=access_right,
+                        embargo_date=embargo_date,
+                        access_conditions=access_conditions,
+                        version=version,
+                        related_identifiers=related_identifiers,
+                        publication_date=publication_date,
+                        auto_keywords=auto_keywords,
                     ),
                 )
             except ZenodoError as exc:
@@ -7545,7 +8928,12 @@ class AuthoringWorkspace:
                 contributors=contributors,
                 license=license or "",
                 keywords=keywords or [],
+                version=version or "",
                 is_version_of=is_version_of,
+                previous_version=previous_version,
+                publisher=given_publisher,
+                extra_files=extras,
+                bdf_version=bdf_version,
             )
             (tmpdir / BATTINFO_LD_FILENAME).write_text(
                 json.dumps(jsonld, indent=2, ensure_ascii=False),
@@ -7564,6 +8952,7 @@ class AuthoringWorkspace:
                 zenodo_record_id=zenodo_record_id,
                 prereserved_doi=prereserved_doi,
                 sandbox=sandbox,
+                extra_files=extras,
             )
 
             # Each file under its deposit name, the data files from where they
@@ -7573,6 +8962,13 @@ class AuthoringWorkspace:
             upload_map = {f.path: f.name for f in sorted(data_files, key=lambda f: f.name)}
             # The md5 of each file as sent, for the check in step 10.
             sent = {f.name: f.md5 for f in data_files}
+            # The extra files go up as themselves, from where they are. They
+            # are in the map, never in keep: one unchanged since the last run
+            # stays on the deposit, a changed one is replaced, and one this
+            # run does not name is removed.
+            for extra in extras:
+                upload_map[extra.path] = extra.name
+                sent[extra.name] = extra.md5
             for name in (BATTINFO_LD_FILENAME, _ROCRATE_FILENAME):
                 upload_map[tmpdir / name] = name
                 sent[name] = measured_file(tmpdir / name, name).md5
@@ -7663,10 +9059,14 @@ class AuthoringWorkspace:
         # ── 11. and 12. Publish, and record the deposit as published ───────────
         doi = prereserved_doi
         published = False
+        publication_times: tuple[int, int] | None = None
 
         if publish:
             self._assert_publishable(jsonld)  # fail closed BEFORE minting an irreversible DOI (R-7)
+            # Taken before the call, so no dataset is dated later than Zenodo's publish.
+            called_at = _now_unix()
             pub = client.publish_deposit(deposit_id)
+            publication_times = (_zenodo_publication_time(pub, called_at), called_at)
             doi = pub.get("doi", prereserved_doi)
             published = True
             # Published, the record is the version the next one is made from.
@@ -7687,13 +9087,18 @@ class AuthoringWorkspace:
         # draft moves only the records that still name a local file: a record
         # on the copy a published version holds has a working URL, and moves
         # when the new version is published. A sandbox deposit is a dry run,
-        # and its URLs must never reach a record.
+        # and its URLs must never reach a record. Once published, the dataset
+        # records the deposit holds get their publication time, a draft none.
         if sandbox:
             print("  The dataset records are left as they are: a sandbox deposit is a dry run.")
         else:
             patched = self._apply_zenodo_file_urls(record_url, plan, local_only=not publish)
             if patched:
                 print(f"  Dataset records updated with Zenodo file URLs: {patched}")
+            if publication_times is not None:
+                dated = self._date_published_datasets(held_records, *publication_times)
+                if dated:
+                    print(f"  Dataset records given their publication time: {dated}")
 
         return ZenodoResult(
             record_id=str(zenodo_record_id),
@@ -7702,16 +9107,24 @@ class AuthoringWorkspace:
             draft_url=draft_url,
             published=published,
             is_new_version=record_id is not None,
+            adopted=adopted,
         )
 
     def validate_rocrate(self, path: str | Path | None = None) -> bool:
         """Validate a ``ro-crate-metadata.json`` using the official rocrate library.
 
+        Reads the crate with the rocrate library and checks the flattened form
+        RO-Crate 1.1 metadata takes: every entity is its own ``@graph`` entry
+        with an ``@id``, and a property points at an entity by ``@id`` instead
+        of describing it in place. :meth:`zenodo` runs the same check on the
+        deposit's crate and warns about what it finds.
+
         Parameters
         ----------
         path:
-            Path to the RO-Crate directory or to ``ro-crate-metadata.json``
-            directly.  Defaults to the workspace root.
+            Path to the RO-Crate directory or to the metadata file itself
+            (``ro-crate-metadata.json`` or ``ro-crate-metadata.preview.json``).
+            Defaults to the workspace root.
 
         Returns
         -------
@@ -7728,7 +9141,7 @@ class AuthoringWorkspace:
         from battinfo._util import require_extra
 
         try:
-            ROCrate = require_extra("rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata").ROCrate
+            require_extra("rocrate.rocrate", "publish", "validate_rocrate() checks RO-Crate metadata")
         except ImportError as exc:
             print(f"  {exc}")
             print("  Alternatively validate at: https://www.researchobject.org/ro-crate/")
@@ -7736,33 +9149,37 @@ class AuthoringWorkspace:
 
         p = Path(path) if path else self._root
         if p.is_file():
-            p = p.parent  # accept the metadata file itself, use its directory
-
-        metadata_path = p / "ro-crate-metadata.json"
-        if not metadata_path.exists():
-            metadata_path = p / "ro-crate-metadata.preview.json"
+            metadata_path = p
+        else:
+            metadata_path = p / _ROCRATE_FILENAME
+            if not metadata_path.exists():
+                metadata_path = p / "ro-crate-metadata.preview.json"
         if not metadata_path.exists():
             print(f"  No ro-crate-metadata.json found in {p}")
             print("  Run ws.preview_rocrate() first.")
             return False
 
-        import shutil
-        import tempfile
-
-        # rocrate library requires the file to be named ro-crate-metadata.json
-        tmpdir = Path(tempfile.mkdtemp())
         try:
-            shutil.copy2(metadata_path, tmpdir / "ro-crate-metadata.json")
-            crate = ROCrate(str(tmpdir))
-            entities = list(crate.get_entities())
-            print(f"  Valid RO-Crate 1.1  ({len(entities)} entities)")
-            print(f"  Root: {crate.root_dataset.id}")
-            return True
-        except Exception as exc:
-            print(f"  Validation failed: {exc}")
+            crate = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"  Validation failed: {metadata_path} cannot be read as JSON ({exc})")
             return False
-        finally:
-            remove_temp_tree(tmpdir)
+        if not isinstance(crate, dict):
+            print(f"  Validation failed: {metadata_path} does not hold a JSON object")
+            return False
+        problems = _rocrate_shape_problems(crate)
+        try:
+            reader = _read_rocrate(crate, "validate_rocrate() checks RO-Crate metadata")
+            entities = len(list(reader.get_entities()))
+        except Exception as exc:  # noqa: BLE001 - whatever stops the reader fails the validation
+            problems.insert(0, str(exc))
+        if problems:
+            for problem in problems:
+                print(f"  Validation failed: {problem}")
+            return False
+        print(f"  Valid RO-Crate 1.1  ({entities} entities)")
+        print(f"  Root: {reader.root_dataset.id}")
+        return True
 
     def preview_rocrate(
         self,
@@ -7772,11 +9189,23 @@ class AuthoringWorkspace:
         creators: builtins.list[dict] | None = None,
         contributors: builtins.list[dict] | None = None,
         license: str = "cc-by-4.0",
+        *,
+        bundle: str = "by_kind",
+        archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
     ) -> Path:
         """Generate ``ro-crate-metadata.json`` locally for review.
 
         Uses placeholder values for the Zenodo URL. The creators and their
-        ORCIDs are the ones :meth:`zenodo` would give the deposit.
+        ORCIDs are the ones :meth:`zenodo` would give the deposit. Each
+        person and organisation is an entity of its own, identified by ORCID
+        or ROR, else by a ``#person-`` or ``#org-`` identifier made from the
+        name. The preview then prints what the RO-Crate check
+        (:meth:`validate_rocrate`) finds, which :meth:`zenodo` warns about
+        and does not refuse. Pass the *bundle*, *archive_name* and
+        *extra_files* you will give :meth:`zenodo`: a zipped deposit's
+        archives are built here, to measure them, and each extra file is a
+        ``File`` entity of the crate, refused as :meth:`zenodo` refuses it.
 
         Example::
 
@@ -7786,20 +9215,24 @@ class AuthoringWorkspace:
         import shutil
         import tempfile
 
+        single_archive_name(bundle, archive_name)
+        extras = extra_deposit_files(extra_files, root=self._root)
         creators = self._deposit_creators(creators, required=False)
         contributors = _deposit_agents(contributors or [], "contributor")
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
 
-        plan = self._deposit_file_plan(records_dir)
+        plan = self._deposit_file_plan(records_dir, bundle=bundle, archive_name=archive_name)
+        _refuse_extra_file_conflicts(extras, plan)
+        _warn_zenodo_file_limit(plan, bundle, extras)
         tmpdir = Path(tempfile.mkdtemp(prefix="battinfo-rocrate-"))
         try:
             data_files = [*self._bundle_data_files(tmpdir, plan), *plan.kept_files()]
             # Write a placeholder linked-data file so contentSize is available
             placeholder = tmpdir / BATTINFO_LD_FILENAME
             placeholder.write_text("{}", encoding="utf-8")
-            self._build_rocrate(
+            crate = self._build_rocrate(
                 tmpdir,
                 data_files,
                 title=title,
@@ -7809,6 +9242,7 @@ class AuthoringWorkspace:
                 license=license,
                 zenodo_record_id=0,
                 prereserved_doi="10.5281/zenodo.RECORD_ID",
+                extra_files=extras,
             )
             src = tmpdir / _ROCRATE_FILENAME
             out = Path(output) if output else self._root / "ro-crate-metadata.preview.json"
@@ -7817,6 +9251,15 @@ class AuthoringWorkspace:
             remove_temp_tree(tmpdir)
 
         print(f"  Written: {out}")
+        problems, unread = _rocrate_check(crate)
+        if unread:
+            print(f"  RO-Crate check: partial, as {unread}")
+        if problems:
+            print(f"  RO-Crate check: {len(problems)} problem(s), which ws.zenodo() warns about and does not refuse:")
+            for problem in problems:
+                print(f"    warning {problem}")
+        elif not unread:
+            print("  RO-Crate check: PASS")
         return out
 
     def preview_jsonld(
@@ -7831,13 +9274,28 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        previous_version: str = "",
+        publisher: str | Mapping[str, str] | None = None,
+        bundle: str = "by_kind",
+        archive_name: str | None = None,
+        extra_files: Mapping[str | os.PathLike[str], str] | Iterable[str | os.PathLike[str]] | None = None,
+        bdf_version: str | None = None,
     ) -> Path:
         """Generate ``battinfo.json`` locally for review before uploading to Zenodo.
 
         Uses placeholder values for the Zenodo record URL and DOI so the
         structure can be inspected without creating a deposit.  Pass the same
         ``title``/``creators``/``license`` you would give :meth:`zenodo` to preview
-        the rights and attribution that will be embedded in the published record.
+        the rights and attribution that will be embedded in the published record,
+        and the same ``version``, ``publisher``, ``bundle``, ``archive_name``
+        and the same ``version``, ``publisher``, ``bundle``, ``archive_name``,
+        ``extra_files`` and ``bdf_version`` (see :meth:`zenodo`); the extra
+        files are read here, to state their sha256 and size. With no deposit to
+        read them from, the version links are given here: ``is_version_of`` is
+        the concept record, which groups every version
+        (``dcterms:isVersionOf``), and ``previous_version`` the version this
+        one follows
+        (``dcat:previousVersion``), each as a Zenodo record URL.
         Without a ``title`` the preview carries the automatic title
         :meth:`zenodo` would give the deposit, and without ``creators`` the
         creators it would find (see :meth:`zenodo`); with none, the checks
@@ -7865,6 +9323,10 @@ class AuthoringWorkspace:
         records_dir = self._ws.source_root
         if not records_dir.exists():
             raise RuntimeError("No records found — run ws.save() first.")
+        given_publisher = _deposit_publisher(publisher)
+        single_archive_name(bundle, archive_name)
+        bdf_version = _bdf_version(bdf_version)
+        extras = extra_deposit_files(extra_files, root=self._root)
 
         # Fall back to the workspace default license (ws.license) when none is
         # passed, so the preview reflects what publishing would embed. Left empty
@@ -7877,7 +9339,9 @@ class AuthoringWorkspace:
 
         # The data files and their deposit names, planned as ws.zenodo() plans
         # them. The graph needs only the names, so the files are not read.
-        plan = self._deposit_file_plan(records_dir, measure=False)
+        plan = self._deposit_file_plan(records_dir, measure=False, bundle=bundle, archive_name=archive_name)
+        _refuse_extra_file_conflicts(extras, plan)
+        _warn_zenodo_file_limit(plan, bundle, extras)
 
         # What the plan and the graph leave out is listed below as errors, since
         # ws.zenodo() refuses a deposit over any of it.
@@ -7895,10 +9359,15 @@ class AuthoringWorkspace:
             keywords=keywords or [],
             version=version or "",
             is_version_of=is_version_of or "",
+            previous_version=previous_version or "",
+            publisher=given_publisher,
             omissions=omissions,
+            extra_files=extras,
+            bdf_version=bdf_version,
         )
 
         out = Path(output) if output else self._root / "battinfo.preview.jsonld"
+        fidelity_count: int | None = None
 
         # Gold-standard review runs BEFORE the file is written, so a metadata-poor or
         # non-conformant record is surfaced up front rather than after an authoritative-looking
@@ -7907,11 +9376,14 @@ class AuthoringWorkspace:
         # The record check ws.zenodo() runs on the parameter sets before it deposits
         # counts here too.
         try:
-            from battinfo.validate import validate_publication_report  # noqa: PLC0415
+            from battinfo.validate import record_fidelity_report, validate_publication_report  # noqa: PLC0415
 
             report = validate_publication_report(jsonld, policy="publisher")
             deposit_records, replaced_legacy = _read_deposit_record_sets(records_dir)
             _print_replaced_legacy_parameter_sets(replaced_legacy)
+            # What the records hold and the graph does not carry (warnings).
+            fidelity = record_fidelity_report(jsonld, deposit_records, policy="publisher").warnings
+            fidelity_count = len(fidelity)
             errors = [f"left out of the deposit: {omission}" for omission in dict.fromkeys(omissions)]
             errors += [i.message for i in report.issues if i.severity == "error"] + [
                 f"parameter set {problem}" for problem in _parameter_set_publication_errors(deposit_records)
@@ -7919,16 +9391,20 @@ class AuthoringWorkspace:
             if not creators:
                 errors.append(f"no creators: ws.zenodo() refuses a deposit without them. {_CREATORS_HINT}")
             warnings = [i for i in report.issues if i.severity == "warning"]
-            if not errors and not warnings:
+            fidelity_lines = _record_fidelity_summary(fidelity)
+            if not errors and not warnings and not fidelity_lines:
                 print("  Gold-standard: PASS (no validation issues)")
             else:
                 print(
-                    f"  Gold-standard: {len(errors)} error(s), {len(warnings)} warning(s) -- address before publishing:"
+                    f"  Gold-standard: {len(errors)} error(s), {len(warnings) + len(fidelity)} warning(s). "
+                    "ws.zenodo() refuses a deposit with errors; warnings do not stop it."
                 )
                 for message in errors:
                     print(f"    ERROR   {message}")
                 for i in warnings:
                     print(f"    warning {i.message}")
+                for line in fidelity_lines:
+                    print(f"    warning {line}")
             # A record left out above has no node because it could not be
             # converted, not because it is missing locally.
             left_out = {omission.record for omission in omissions}
@@ -7940,8 +9416,11 @@ class AuthoringWorkspace:
 
         out.write_text(json.dumps(jsonld, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"  Written: {out}")
-        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}")
+        not_carried = "" if fidelity_count is None else f" ({fidelity_count} record field(s) not carried)"
+        print(f"  Graph nodes: {len(jsonld.get('@graph', []))}{not_carried}")
         print(f"  Data files:  {len(plan.deposited_names())}")
+        if extras:
+            print(f"  Extra files: {len(extras)}")
         return out
 
     def _assert_publishable(
@@ -7951,6 +9430,8 @@ class AuthoringWorkspace:
         omissions: Iterable[Omission] = (),
         nothing_sent: bool = False,
         draft: bool = False,
+        record_sets: dict[str, builtins.list[Any]] | None = None,
+        rocrate: Mapping[str, Any] | None = None,
     ) -> None:
         """Fail closed before minting an irreversible DOI: refuse to publish a record that has
         validation errors, or a distribution whose data file is missing from the deposit (R-7).
@@ -7962,7 +9443,15 @@ class AuthoringWorkspace:
         plan (:meth:`_deposit_file_plan`). ``nothing_sent`` says in the refusal that no
         deposit was made (the check :meth:`zenodo` runs before it contacts Zenodo).
         With ``draft`` the refusal is of the deposit itself: :meth:`zenodo` checks a
-        draft as it checks a publish, since a draft is one click from published."""
+        draft as it checks a publish, since a draft is one click from published.
+        With *record_sets* (the records the graph was built from), the record
+        fields the graph does not carry are printed as warnings; they never
+        refuse.
+
+        *rocrate* is the deposit's ``ro-crate-metadata.json``. When given, and
+        the deposit is not refused, the RO-Crate check runs on it and what it
+        finds is a warning only (:func:`_warn_rocrate_problems`), as is a
+        missing publish extra."""
         verb, doing = ("deposit", "depositing") if draft else ("publish", "publishing")
         sent_note = " Nothing was sent to Zenodo." if nothing_sent else ""
         left_out = list(dict.fromkeys(omissions))
@@ -7980,11 +9469,14 @@ class AuthoringWorkspace:
                 f"Fix the paths (or remove the distributions), then re-run.{sent_note}"
             )
         try:
-            from battinfo.validate import validate_publication_report  # noqa: PLC0415
+            from battinfo.validate import record_fidelity_report, validate_publication_report  # noqa: PLC0415
 
             report = validate_publication_report(jsonld, policy="publisher")
+            fidelity = record_fidelity_report(jsonld, record_sets, policy="publisher").warnings if record_sets else ()
         except Exception as exc:  # noqa: BLE001
             raise RuntimeError(f"Could not validate the record before {doing}: {exc}") from exc
+        for line in _record_fidelity_summary(fidelity):
+            print(f"  warning {line}")
         errors = [i for i in report.issues if i.severity == "error"]
         if errors:
             unresolved = _unresolved_record_references(jsonld)
@@ -7998,15 +9490,19 @@ class AuthoringWorkspace:
                 + (f" {_not_found_locally_note(unresolved)}" if unresolved else "")
                 + sent_note
             )
+        if rocrate is not None:
+            _warn_rocrate_problems(rocrate)
 
     def _bundle_data_files(self, tmpdir: Path, plan: DepositFilePlan) -> builtins.list[DepositFile]:
         """The data files to upload, each under its deposit name in *plan*.
 
-        A file is uploaded from where it is. When the deposit is zipped (more
-        than ``_ZENODO_ZIP_THRESHOLD`` files), the files of each test kind are
-        packed into one archive in *tmpdir*, each under its deposit name, so no
-        two members share a name, and the archives are uploaded instead. A
-        file the deposit keeps (``plan.kept_files()``) has nothing to upload.
+        A file is uploaded from where it is. When the deposit is zipped (with
+        ``bundle="by_kind"``, more than ``_ZENODO_ZIP_THRESHOLD`` files, one
+        archive per test kind; with ``bundle="single"``, one archive), the files
+        of each archive are packed into it in *tmpdir*, each under its deposit
+        name, so no two members share a name, and the archives are uploaded
+        instead. A file the deposit keeps (``plan.kept_files()``) has nothing
+        to upload.
         """
         import zipfile
 
@@ -8106,6 +9602,8 @@ class AuthoringWorkspace:
         report: bool = True,
         measure: bool = True,
         context: DepositContext | None = None,
+        bundle: str = "by_kind",
+        archive_name: str | None = None,
     ) -> DepositFilePlan:
         """The files a Zenodo deposit of this workspace carries, planned before anything is sent.
 
@@ -8144,7 +9642,8 @@ class AuthoringWorkspace:
         With *report* the missing data files and the artifact warnings are printed
         and kept for zenodo() and publish to act on; without it the files are only
         planned (the up-front count in publish()). Without *measure* the files are
-        not read.
+        not read. *bundle* and *archive_name* say how the files are zipped (see
+        :meth:`zenodo`).
 
         Nothing is skipped in silence. A record file that cannot be read, and a
         distribution entry that is not an object with a ``content_url``, become
@@ -8260,6 +9759,8 @@ class AuthoringWorkspace:
             remote=remote,
             unplaced=unplaced,
             held=context.held_files(),
+            bundle=bundle,
+            archive_name=archive_name,
         )
         if report:
             # Do NOT silently drop a distribution whose data file is missing: the
@@ -8267,6 +9768,19 @@ class AuthoringWorkspace:
             # file that was never uploaded). Warn now; block publish later (R-7).
             for path in plan.missing:
                 print(f"  WARNING: data file for a distribution is missing (not uploaded): {path}")
+            # A copy the deposit keeps is not read from this computer, so a local
+            # file that changed, or lies elsewhere now, would go unnoticed. Name
+            # each one, with the path that was looked for.
+            for entry in plan.kept_files():
+                sought = (
+                    f"no local file was found at {entry.path}"
+                    if entry.path.parts
+                    else "this workspace has no record of its local file"
+                )
+                print(
+                    f"  NOTE: {entry.name} is kept as the Zenodo record already holds it, not uploaded "
+                    f"again, because {sought}."
+                )
             for omission in plan.omissions:
                 print(f"  WARNING: left out of the deposit: {omission}")
             # Surfaced to zenodo()/publish so publishing can fail closed on an incomplete deposit.
@@ -8363,9 +9877,13 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        previous_version: str = "",
+        publisher: str | Mapping[str, Any] | None = None,
         referenced_records: dict[str, builtins.list[dict]] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        extra_files: Sequence[DepositFile] = (),
+        bdf_version: str | None = None,
     ) -> dict:
         """Assemble the consolidated battinfo JSON-LD from canonical record dicts.
 
@@ -8390,10 +9908,16 @@ class AuthoringWorkspace:
         A local file's download URL is ``{files_base_url}/{name}`` with the name
         percent-encoded. With ``file_plan`` (a workspace deposit) a distribution
         or artifact finds its file in the plan by resolved path, and takes the
-        file's deposit name and, in a zipped deposit, its archive. A
-        distribution of a file the plan measured states the plan's sha256 and
-        size, not the ones its record gives, which date from when the file was
-        added.
+        file's deposit name and, in a zipped deposit, its archive. The node of
+        a file inside an archive downloads from the archive's URL and has that
+        URL with the file's name there as the fragment for its ``@id``
+        (``.../files/data.zip#C01.csv``), so each file of an archive is a
+        node of its own. A distribution of a file the plan measured states the
+        plan's sha256 and size, not the ones its record gives, which date from
+        when the file was added. A dataset whose ``access_url`` names a copy
+        of a planned file, such as the one the version before holds, gets the
+        URL under which this deposit holds the file as its ``schema:url``; a
+        copy hosted elsewhere (``file_plan.hosted``) stays.
         ``data_filenames`` serves the package builders, whose staged files have
         unique names: a local file whose name is among them is deposited under
         that name, and otherwise its ``<kind>.zip`` when that is among them.
@@ -8404,15 +9928,35 @@ class AuthoringWorkspace:
         that a test or dataset points at gets a "defined elsewhere" stub,
         typed and named from its copy; nothing else is taken from it.
 
+        The catalog node states ``version`` as ``schema:version``,
+        ``is_version_of`` (the Zenodo concept record) as ``dcterms:isVersionOf``
+        and ``previous_version`` (the version before this one) as
+        ``dcat:previousVersion``, each when given. Its publisher is
+        ``publisher`` when given (see :func:`_deposit_publisher`), else the
+        first affiliation among the creators and contributors.
+
+        ``extra_files`` are files that document the deposit as a whole, such
+        as a README (``extra_files=`` of :meth:`zenodo`). They are not
+        distributions of a dataset: the catalog lists each under
+        ``schema:hasPart`` as a ``schema:DigitalDocument``
+        (:func:`_extra_file_document_node`), after the member datasets, and
+        ``dcat:dataset`` keeps the datasets alone.
+
         Cell specs use domain-battery OWL classes (``CylindricalBattery`` etc.)
         and EMMO's ``hasProperty`` / ``hasNumericalPart`` / ``hasMeasurementUnit``
         pattern for measurements.  DCAT and schema.org wrap the dataset level for
         broad discoverability.  The document is processable by OWL reasoners and
         any JSON-LD tool that resolves the embedded context.
         """
+        given_publisher = _deposit_publisher(publisher)
         from battinfo.jsonld import (
+            _schema_variable_measured,
+            as_run_condition_terms,
+            cell_measured_property_nodes,
             checksum_node,
+            dataset_is_based_on,
             dataset_series_edges,
+            dataset_to_jsonld,
             electrode_role_links,
             funding_to_jsonld,
             schema_checksum_terms,
@@ -8470,16 +10014,22 @@ class AuthoringWorkspace:
             already hosted; a workspace file that is being uploaded resolves to its
             hosted URL (like data files, the archive holding it in a zipped deposit);
             an un-uploaded local locator is kept as the relative literal (no hosted
-            copy exists)."""
+            copy exists). One that gives an absolute path, a ``file:`` URI or a path
+            that goes up a folder is written as its file name only, so that no path
+            on the depositor's computer reaches the published graph."""
             text = str(loc)
             if text.startswith(("http://", "https://")):
                 return {"@id": text}
             if file_plan is not None:
                 entry = file_plan.entry_for(text)
-                return {"@id": entry.url(files_base)} if entry is not None else text
-            fname = path_name(_file_uri_to_path(text))
-            if fname in named_files:
-                return {"@id": f"{files_base}/{url_segment(fname)}"}
+                if entry is not None:
+                    return {"@id": entry.url(files_base)}
+            else:
+                fname = path_name(_file_uri_to_path(text))
+                if fname in named_files:
+                    return {"@id": f"{files_base}/{url_segment(fname)}"}
+            if is_local_location(text) and (is_absolute_local_path(text) or has_parent_reference(text)):
+                return path_name(_file_uri_to_path(text))
             return text
 
         def _artifact_distribution(art: dict) -> dict:
@@ -8569,6 +10119,9 @@ class AuthoringWorkspace:
                 # The electrode records built into this cell, kept
                 # whole so the node builder can role-type them.
                 "cell_instance": ci,
+                # What was measured on this cell: a block of the record, beside
+                # cell_instance, keyed like a cell spec's properties.
+                "measured": raw.get("measured") if isinstance(raw, dict) else None,
             }
 
         # Published records this deposit may point at without carrying them:
@@ -8740,18 +10293,38 @@ class AuthoringWorkspace:
                             # reaches the cell; the spec is appended in _apply below.
                             "prov:used": [{"@id": cell_id}],
                         }
-                        # Human label so agents/consumers see more than an opaque IRI.
+                        # The name the test was given; a test without one, or with
+                        # the title BattINFO generates from its cell and protocol,
+                        # is labelled by its protocol and cell, so agents and
+                        # consumers see more than an opaque IRI.
                         _cell_nm = _cell_name(cell_id)
-                        _label = (protocol or test.get("kind", "")).strip()
-                        if _label and _cell_nm:
-                            _label = f"{_label} — {_cell_nm}"
+                        _given = given_test_name(
+                            test.get("name"),
+                            kind=test.get("kind"),
+                            protocol_name=protocol,
+                            cell_labels=_test_cell_labels(cell_id, _cell_nm, instances.get(cell_id)),
+                        )
+                        # The name as the record writes it: given_test_name only
+                        # decides, its normalised text is not the record's name.
+                        _label = str(test["name"]).strip() if _given is not None else ""
+                        if not _label:
+                            _label = (protocol or test.get("kind", "")).strip()
+                            if _label and _cell_nm:
+                                _label = f"{_label} — {_cell_nm}"
                         if _label:
                             tnode["schema:name"] = _label
                             tnode["rdfs:label"] = _label
+                        if test.get("description"):
+                            tnode["schema:description"] = test["description"]
                         if test.get("kind"):
                             tnode["schema:additionalType"] = test["kind"]
+                        if test.get("status"):
+                            tnode["schema:actionStatus"] = test["status"]
                         if protocol:
                             tnode["schema:measurementTechnique"] = protocol
+                        # As-run conditions (temperature, state of charge, pressure,
+                        # ...), built as the test record's own JSON-LD builds them.
+                        tnode.update(as_run_condition_terms(test.get("conditions")))
                         # Equipment provenance (EMMO-canonical; schema.org has no apt
                         # predicate — schema:instrument is an Action property and this
                         # node is an Activity, so it is intentionally omitted).
@@ -8899,7 +10472,7 @@ class AuthoringWorkspace:
                     {
                         "filename": fname,
                         "content_url": url,
-                        "format": dist.get("encoding_format", ""),
+                        "format": registered_media_type(str(dist.get("encoding_format") or "")),
                         "checksum": _checksum_block,
                         "role": dist.get("role", ""),
                         "description": dist.get("description", ""),
@@ -8960,17 +10533,32 @@ class AuthoringWorkspace:
             kind_zip = f"{kind}.zip"
             return f"{files_base}/{url_segment(kind_zip)}" if kind_zip in named_files else ""
 
+        def _distribution_id(dist: dict, kind: str) -> str:
+            """The ``@id`` of a distribution node: its download URL. A file inside
+            an archive takes the archive's URL with its own name there as the
+            fragment (``DepositFile.node_id``), so that the files of one archive
+            are a node each."""
+            cu = dist.get("content_url") or ""
+            url = _download_url(dist, kind)
+            if file_plan is not None:
+                entry = file_plan.entry_for(cu)
+                return entry.node_id(files_base) if entry is not None else url
+            fname = dist["filename"]
+            if url and not cu.startswith(("http://", "https://")) and fname not in named_files:
+                return f"{url}#{url_segment(fname)}"  # a file in <kind>.zip
+            return url
+
         for ds_id, meta in sorted(ds_meta.items()):
             dists = []
             schema_dists = []  # schema.org mirror of dcat:distribution (generated)
-            # The hosted URL of the raw (pre-conversion) file, so each processed file
+            # The node of the raw (pre-conversion) file, so each processed file
             # can declare prov:wasDerivedFrom it (the conversion provenance chain).
-            _raw_url = next((_download_url(d, meta["kind"]) for d in meta["dists"] if d.get("role") == "raw"), "")
+            _raw_id = next((_distribution_id(d, meta["kind"]) for d in meta["dists"] if d.get("role") == "raw"), "")
             for dist in meta["dists"]:
                 fname = dist["filename"]
                 dl_url = _download_url(dist, meta["kind"])
 
-                media_type = dist["format"] or "application/x-parquet"
+                media_type = dist["format"] or PARQUET_MEDIA_TYPE
                 # DCAT-AP: dcat:mediaType should be the IANA media-type IRI, not a bare
                 # string. schema:encodingFormat (below) keeps the MIME string for
                 # schema.org consumers.
@@ -8983,19 +10571,22 @@ class AuthoringWorkspace:
                 }
                 # Identify the distribution by its download URL so it is referenceable
                 # (e.g. as the source of a derivation), not an anonymous blank node.
-                if dl_url:
-                    dnode["@id"] = dl_url
+                # A file inside an archive is named by the archive's URL and its own
+                # name there, since the archive's URL is the same for every file in it.
+                dist_id = _distribution_id(dist, meta["kind"])
+                if dist_id:
+                    dnode["@id"] = dist_id
                 is_raw = dist.get("role") == "raw"
                 # A BDF data file (.bdf.csv / .bdf.parquet) conforms to the published
                 # BDF table schema; link it so the column/unit semantics are one
                 # dereference away. Raw instrument files (.ndax) are not BDF, so skip.
                 is_bdf = ".bdf." in fname and not is_raw
                 if is_bdf:
-                    dnode["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
+                    dnode["dcterms:conformsTo"] = {"@id": _bdf_table_schema_iri(bdf_version)}
                 # Conversion provenance: the processed file was derived from the raw
                 # instrument file (BDF CSV ← .ndax), so a consumer can trace the chain.
-                if not is_raw and _raw_url and _raw_url != dl_url:
-                    dnode["prov:wasDerivedFrom"] = {"@id": _raw_url}
+                if not is_raw and _raw_id and _raw_id != dist_id:
+                    dnode["prov:wasDerivedFrom"] = {"@id": _raw_id}
                 if dist.get("description"):
                     dnode["schema:description"] = dist["description"]
                 # wasGeneratedBy → BatteryTest (the Activity), not the cell (Entity).
@@ -9034,7 +10625,7 @@ class AuthoringWorkspace:
                 if _size.isdigit():
                     sdl["schema:contentSize"] = _size
                 if is_bdf:
-                    sdl["dcterms:conformsTo"] = {"@id": BDF_TABLE_SCHEMA_IRI}
+                    sdl["dcterms:conformsTo"] = {"@id": _bdf_table_schema_iri(bdf_version)}
                 schema_dists.append(sdl)
 
             cell_name = _cell_name(meta.get("cell_id", ""))
@@ -9073,7 +10664,17 @@ class AuthoringWorkspace:
             if isinstance(_ds.get("access_url"), str) and _ds["access_url"].startswith(("http://", "https://")):
                 # Only publish a web access URL here; a local file:// directory URL
                 # (local-publication case) is set by that path's adapter instead.
-                member["schema:url"] = _ds["access_url"]
+                # The record of a new version still names the copy the version
+                # before holds, since the records move only once the deposit is
+                # made. The graph names the file this deposit holds, as the
+                # download URLs do. A copy hosted elsewhere stays, as in the record.
+                _access_url = _ds["access_url"]
+                _held = (
+                    file_plan.entry_for(_access_url)
+                    if file_plan is not None and _access_url not in file_plan.hosted
+                    else None
+                )
+                member["schema:url"] = _held.url(files_base) if _held is not None else _access_url
             # Rights and attribution on each member: RDF has no inheritance, so a
             # dataset lifted out of the catalog would otherwise lose its licence and
             # creators. The dataset's own licence wins over the catalog's, and either
@@ -9084,11 +10685,20 @@ class AuthoringWorkspace:
                 _lic_value = _license_value(_member_license)
                 member["schema:license"] = _lic_value
                 member["dcterms:license"] = _lic_value
-            if creators:
+            # What the dataset record states about itself wins over the deposit, as
+            # its licence does above: its own creators, publisher, publication and
+            # DOI, read through the record's own JSON-LD writer.
+            _own = dataset_to_jsonld(
+                {"dataset": {k: _ds[k] for k in ("creators", "publisher", "citations", "same_as") if k in _ds}}
+            )
+            for _term in ("dcterms:publisher", "schema:citation", "schema:sameAs"):
+                if _term in _own:
+                    member[_term] = _own[_term]
+            if _own.get("dcterms:creator") or creators:
                 # Full creator nodes (not @id refs) so a member is self-describing even
                 # lifted out of the catalog, and so creators without an ORCID @id are
                 # still carried.
-                member["schema:creator"] = [_agent_node(c) for c in creators]
+                member["schema:creator"] = _own.get("dcterms:creator") or [_agent_node(c) for c in creators or []]
             if _ds.get("keywords"):
                 member["schema:keywords"] = list(_ds["keywords"])
             if _ds.get("version"):
@@ -9097,6 +10707,14 @@ class AuthoringWorkspace:
                 member["schema:measurementTechnique"] = list(_ds["measurement_techniques"])
             if _ds.get("measurement_methods"):
                 member["schema:measurementMethod"] = list(_ds["measurement_methods"])
+            # The columns and their units, and the datasets this one was derived
+            # from, in the shape the record's own JSON-LD gives them.
+            _variables = _schema_variable_measured(_ds.get("variable_measured"))
+            if _variables:
+                member["schema:variableMeasured"] = _variables
+            _based_on = dataset_is_based_on(_ds.get("is_based_on"))
+            if _based_on:
+                member["schema:isBasedOn"] = _based_on
             # Dates: Unix times as ISO 8601, ISO strings as they are. A time that
             # is no date (one in milliseconds) is left out with a warning.
             for _field, _term in (("created_at", "schema:dateCreated"), ("modified_at", "schema:dateModified")):
@@ -9125,9 +10743,23 @@ class AuthoringWorkspace:
 
         # ── Build cell instance nodes ──────────────────────────────────────────
         # Each instance is a physical battery whose type is described by its spec.
+        # A cell may name its spec by the other form of the spec's IRI, and the
+        # two forms are one record (namespace.same_record). Each cell links to
+        # the IRI this graph holds the spec under. That is the spec node's own
+        # when the deposit carries the spec, else the one the first cell to name
+        # it wrote.
+        _spec_iri_in_graph: dict[str, str] = {iri: iri for iri in spec_nodes}
+
+        def _graph_spec_iri(iri: str) -> str:
+            if iri not in _spec_iri_in_graph:
+                _spec_iri_in_graph[iri] = next(
+                    (held for held in _spec_iri_in_graph.values() if same_record(held, iri)), iri
+                )
+            return _spec_iri_in_graph[iri]
+
         instance_nodes: list[dict] = []
         for cell_iri, inst in sorted(instances.items()):
-            cell_spec_id = inst.get("cell_spec_id", "")
+            cell_spec_id = _graph_spec_iri(inst.get("cell_spec_id", ""))
             try:
                 spec_node = spec_nodes.get(cell_spec_id, {})
                 # Inherit the physical type from the spec's isDescriptionFor
@@ -9156,6 +10788,11 @@ class AuthoringWorkspace:
                     inode["schema:expires"] = _typed_date(inst["expires_at"])
                 if inst.get("batch_id"):
                     inode["schema:identifier"] = inst["batch_id"]
+                # Measured values (capacity, energy, ...) as typed quantities,
+                # each with the conditions it was measured under.
+                _measured = cell_measured_property_nodes(inst.get("measured"), context_label=cell_iri)
+                if _measured:
+                    inode["hasProperty"] = _measured
                 # Conformance assessment (vs the cell spec) as a DQV annotation; the
                 # instance-of link above already ties the cell to its spec.
                 _apply_conformance_jsonld(inode, cell_spec_id, inst.get("conformance"), add_spec_links=False)
@@ -9170,11 +10807,12 @@ class AuthoringWorkspace:
         # — copying its body here would risk drift against the authoritative source.
         # But a bare @id leaves a consumer stranded, so emit a minimal, non-drifting
         # stub: the stable @type plus an explicit "defined elsewhere" pointer. Only
-        # specs not already inlined locally (in spec_nodes) get a stub.
+        # specs not already inlined locally (in spec_nodes) get a stub, and a spec
+        # that cells name in both forms of its IRI gets one.
         external_spec_stubs: list[dict] = []
         _stub_iris = set(spec_nodes)
         for inst in instances.values():
-            tid = inst.get("cell_spec_id", "")
+            tid = _graph_spec_iri(inst.get("cell_spec_id", ""))
             if tid and tid not in _stub_iris:
                 _stub_iris.add(tid)
                 external_spec_stubs.append(_defined_elsewhere_stub(tid, "BatteryCellSpecification"))
@@ -9208,7 +10846,9 @@ class AuthoringWorkspace:
             "@id": record_url,
             "schema:url": record_url,
             "dcat:dataset": member_refs,  # DCAT: catalog → member datasets
-            "schema:hasPart": member_refs,  # schema.org equivalent
+            # schema.org equivalent, followed by the files that document the
+            # deposit (extra_files=), which are parts of it but no dataset.
+            "schema:hasPart": member_refs + [_extra_file_document_node(f, files_base) for f in extra_files],
             "rdfs:seeAlso": {"@id": "https://www.battery-genome.org/registry"},
         }
         if prereserved_doi:  # local publication packages have no DOI
@@ -9250,16 +10890,20 @@ class AuthoringWorkspace:
             catalog_node["schema:creator"] = [_agent_node(c) for c in creators]
         if contributors:
             catalog_node["schema:contributor"] = [_agent_node(c) for c in contributors]
-        # Data provider (publisher) modelled as an Agent/Organization and attributed.
-        # Prefer the organisation's ROR as its canonical @id; fall back to a local
-        # record-scoped fragment when no ROR is known.
+        # Data provider (publisher) modelled as an Agent/Organization and attributed:
+        # the publisher the caller names, else the first affiliation among the
+        # creators and contributors. Prefer the organisation's ROR as its canonical
+        # @id; fall back to a local record-scoped fragment when no ROR is known.
         provider_name, provider_ror = _provider(creators, contributors)
-        if provider_name:
+        if given_publisher is not None:
+            provider_node = _publisher_node(given_publisher, record_url)
+        elif provider_name:
             provider_node = {
                 "@type": ["schema:Organization", "prov:Agent"],
                 "@id": _ror_url(provider_ror) if provider_ror else f"{record_url}#provider",
                 "schema:name": provider_name,
             }
+        if provider_node is not None:
             catalog_node["schema:publisher"] = {"@id": provider_node["@id"]}
             catalog_node["dcterms:publisher"] = {"@id": provider_node["@id"]}  # DCAT mirror
             catalog_node["prov:wasAttributedTo"] = {"@id": provider_node["@id"]}
@@ -9267,10 +10911,14 @@ class AuthoringWorkspace:
             catalog_node["schema:about"] = [{"@id": iri} for iri in spec_nodes]
 
         # ── Versioning (living-record provenance) ─────────────────────────────
+        # dcterms:isVersionOf names the concept record every version belongs
+        # to; dcat:previousVersion (DCAT 3) the version this one follows.
         if version:
             catalog_node["schema:version"] = version
         if is_version_of:
             catalog_node["dcterms:isVersionOf"] = {"@id": is_version_of}
+        if previous_version:
+            catalog_node["dcat:previousVersion"] = {"@id": previous_version}
 
         # ── Keywords (FAIR Findable / Google Dataset Search) ──────────────────
         # Auto-derived from the cells, specs and test kinds so every record is
@@ -9438,8 +11086,12 @@ class AuthoringWorkspace:
         keywords: builtins.list[str] | None = None,
         version: str = "",
         is_version_of: str = "",
+        previous_version: str = "",
+        publisher: str | Mapping[str, Any] | None = None,
         file_plan: DepositFilePlan | None = None,
         omissions: builtins.list[Omission] | None = None,
+        extra_files: Sequence[DepositFile] = (),
+        bdf_version: str | None = None,
     ) -> dict:
         """Read this workspace's saved records and assemble the deposit JSON-LD.
 
@@ -9448,9 +11100,10 @@ class AuthoringWorkspace:
         and the copies of published records it references from
         ``.battinfo/references/`` (read for stub nodes, never deposited).
         :meth:`zenodo` and :meth:`preview_jsonld` pass the deposit's ``file_plan``
-        (:meth:`_deposit_file_plan`), which names every local file, and an
-        ``omissions`` list that collects the records the graph leaves out;
-        without one a record left out raises a ``ValueError``.
+        (:meth:`_deposit_file_plan`), which names every local file, the extra
+        files that document the deposit, and an ``omissions`` list that
+        collects the records the graph leaves out; without one a record left
+        out raises a ``ValueError``.
         """
         record_sets, _replaced = _read_deposit_record_sets(self._ws.source_root)
         return self._assemble_zenodo_jsonld(
@@ -9462,6 +11115,7 @@ class AuthoringWorkspace:
             data_filenames=data_filenames,
             file_plan=file_plan,
             omissions=omissions,
+            extra_files=extra_files,
             title=title,
             description=description,
             creators=creators,
@@ -9470,6 +11124,9 @@ class AuthoringWorkspace:
             keywords=keywords,
             version=version,
             is_version_of=is_version_of,
+            previous_version=previous_version,
+            publisher=publisher,
+            bdf_version=bdf_version,
         )
 
     def _build_rocrate(
@@ -9485,41 +11142,75 @@ class AuthoringWorkspace:
         zenodo_record_id: int,
         prereserved_doi: str,
         sandbox: bool = False,
-    ) -> None:
-        """Write a conforming ``ro-crate-metadata.json`` to *tmpdir*.
+        extra_files: Sequence[DepositFile] = (),
+    ) -> dict:
+        """Write a conforming ``ro-crate-metadata.json`` to *tmpdir*, and return what it holds.
 
-        Produces a minimal RO-Crate 1.1 that:
-        - Lists ``battinfo.json`` and all data files as ``hasPart``
+        Writes :meth:`_rocrate_metadata` for the arguments, with the size of
+        the ``battinfo.json`` in *tmpdir* when there is one.
+        """
+        jsonld_path = tmpdir / BATTINFO_LD_FILENAME
+        crate = self._rocrate_metadata(
+            data_files,
+            title=title,
+            description=description,
+            creators=creators,
+            contributors=contributors,
+            license=license,
+            zenodo_record_id=zenodo_record_id,
+            prereserved_doi=prereserved_doi,
+            sandbox=sandbox,
+            jsonld_size=jsonld_path.stat().st_size if jsonld_path.exists() else None,
+            extra_files=extra_files,
+        )
+        (tmpdir / _ROCRATE_FILENAME).write_text(
+            json.dumps(crate, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        return crate
+
+    @staticmethod
+    def _rocrate_metadata(
+        data_files: builtins.list[DepositFile],
+        *,
+        title: str,
+        description: str,
+        creators: builtins.list[dict],
+        contributors: builtins.list[dict],
+        license: str,
+        zenodo_record_id: int,
+        prereserved_doi: str,
+        sandbox: bool = False,
+        jsonld_size: int | None = None,
+        extra_files: Sequence[DepositFile] = (),
+    ) -> dict:
+        """The ``ro-crate-metadata.json`` of a deposit.
+
+        A minimal RO-Crate 1.1 that:
+        - Lists ``battinfo.json``, all data files and the extra files as ``hasPart``
         - References the Zenodo record URL and DOI
+        - Describes the creators and contributors, and their organisations, as
+          contextual entities the root references by ``@id`` (:func:`_rocrate_agents`)
         - Is processable by any RO-Crate-aware tool (EOSC portals, WorkflowHub, etc.)
 
         *data_files* are the data files the deposit holds: those
         :meth:`_bundle_data_files` uploads and those it keeps. A file's ``@id``
         is its deposit name percent-encoded, a relative URL, and its ``name``
-        the name itself; size and sha256 come from the plan.
+        the name itself; size and sha256 come from the plan. *jsonld_size* is
+        the size of ``battinfo.json`` in bytes, when known. *extra_files* are
+        the files that document the deposit (``extra_files=`` of
+        :meth:`zenodo`), each a ``File`` entity after the data files, with its
+        media type from its extension (:func:`_extra_file_media_type`), size
+        and sha256.
         """
         domain = "sandbox.zenodo.org" if sandbox else "zenodo.org"
         record_url = f"https://{domain}/records/{zenodo_record_id}"
 
-        def _creator_node(c: dict) -> dict:
-            node: dict = {"@type": "Person", "name": c.get("name", "")}
-            if c.get("affiliation"):
-                node["affiliation"] = {"@type": "Organization", "name": c["affiliation"]}
-            if c.get("orcid"):
-                node["@id"] = f"https://orcid.org/{c['orcid']}"
-            return node
-
-        def _contributor_node(c: dict) -> dict:
-            node = _creator_node(c)
-            if c.get("type"):
-                node["roleName"] = c["type"]
-            return node
-
-        creator_nodes = [_creator_node(c) for c in creators] if creators else []
-        contributor_nodes = [_contributor_node(c) for c in contributors] if contributors else []
+        creator_refs, contributor_refs, agent_entities = _rocrate_agents(creators or [], contributors or [])
 
         # Root Dataset
         parts = [{"@id": BATTINFO_LD_FILENAME}] + [{"@id": f.segment} for f in data_files]
+        parts += [{"@id": f.segment} for f in extra_files]
         root: dict = {
             "@type": "Dataset",
             "@id": "./",
@@ -9531,10 +11222,10 @@ class AuthoringWorkspace:
             "identifier": prereserved_doi,
             "hasPart": parts,
         }
-        if creator_nodes:
-            root["creator"] = creator_nodes if len(creator_nodes) > 1 else creator_nodes[0]
-        if contributor_nodes:
-            root["contributor"] = contributor_nodes if len(contributor_nodes) > 1 else contributor_nodes[0]
+        if creator_refs:
+            root["creator"] = creator_refs if len(creator_refs) > 1 else creator_refs[0]
+        if contributor_refs:
+            root["contributor"] = contributor_refs if len(contributor_refs) > 1 else contributor_refs[0]
 
         # linked-data file entity
         jsonld_entity: dict = {
@@ -9545,9 +11236,8 @@ class AuthoringWorkspace:
             "encodingFormat": "application/ld+json",
             "conformsTo": {"@id": "https://w3id.org/battinfo/"},
         }
-        jsonld_path = tmpdir / BATTINFO_LD_FILENAME
-        if jsonld_path.exists():
-            jsonld_entity["contentSize"] = str(jsonld_path.stat().st_size)
+        if jsonld_size is not None:
+            jsonld_entity["contentSize"] = str(jsonld_size)
 
         # Data file entities
         file_entities: list[dict] = []
@@ -9558,7 +11248,7 @@ class AuthoringWorkspace:
                 "@id": data_file.segment,
                 "name": fn,
                 "encodingFormat": (
-                    "application/x-parquet"
+                    PARQUET_MEDIA_TYPE
                     if fn.endswith(".parquet")
                     else "text/csv"
                     if fn.endswith(".csv")
@@ -9583,16 +11273,14 @@ class AuthoringWorkspace:
             root,
             jsonld_entity,
             *file_entities,
+            *_rocrate_extra_file_entities(extra_files),
+            *agent_entities,
         ]
 
-        crate = {
+        return {
             "@context": "https://w3id.org/ro/crate/1.1/context",
             "@graph": graph,
         }
-        (tmpdir / _ROCRATE_FILENAME).write_text(
-            json.dumps(crate, indent=2, ensure_ascii=False),
-            encoding="utf-8",
-        )
 
     def _deposit_spec_summaries(self) -> builtins.list[dict]:
         """Manufacturer, model, chemistry, format and IEC code of each saved cell spec, by file name."""
@@ -9638,7 +11326,33 @@ class AuthoringWorkspace:
         license: str,
         community: str | None,
         extra_keywords: builtins.list[str] | None,
+        access_right: str = "open",
+        embargo_date: Any = None,
+        access_conditions: str | None = None,
+        version: str | None = None,
+        related_identifiers: builtins.list[dict] | None = None,
+        publication_date: Any = None,
+        auto_keywords: bool = True,
     ) -> dict:
+        """The metadata :meth:`zenodo` puts on the deposit's Zenodo form.
+
+        Without a *description* the form gets one built from the first saved
+        cell spec; a description of two or more paragraphs of plain text goes
+        as one HTML paragraph each (:func:`_zenodo_description_html`). The
+        keywords are ``BattINFO``, ``battery``, ``electrochemistry`` and the
+        manufacturer, model, chemistry, format and IEC code of each saved cell
+        spec, then *extra_keywords*; with *auto_keywords* False only
+        *extra_keywords*. A keyword whose case-folded words an earlier one
+        already has is left out (:func:`_unique_keywords`). The access fields
+        come from :func:`_zenodo_access`. *related_identifiers* come first,
+        then the funding project's page when the workspace has one
+        (:meth:`project`) and none of them names it with the same relation.
+        *version* and *publication_date* are set only when given. Each
+        creator and contributor goes as :func:`_zenodo_person` builds it, and
+        the licence as its normalised id (:func:`_normalize_license`).
+        """
+        access = _zenodo_access(access_right, embargo_date, access_conditions)
+        related = _zenodo_related_identifiers(related_identifiers)
         specs = self._deposit_spec_summaries()
         _clean_meta = _clean_deposit_text
 
@@ -9660,28 +11374,35 @@ class AuthoringWorkspace:
         else:
             auto_desc = "Battery dataset published via BattINFO."
 
-        kw: list[str] = ["BattINFO", "battery", "electrochemistry"]
-        for s in specs:
-            for v in (s["manufacturer"], s["model"], s["chemistry"], s["format"], s["iec_code"]):
-                cv = _clean_meta(v)
-                if cv and cv not in kw:
-                    kw.append(cv)
-        for k in extra_keywords or []:
-            if k not in kw:
-                kw.append(k)
+        kw: list[str] = []
+        if auto_keywords:
+            kw = ["BattINFO", "battery", "electrochemistry"]
+            for s in specs:
+                for v in (s["manufacturer"], s["model"], s["chemistry"], s["format"], s["iec_code"]):
+                    cv = _clean_meta(v)
+                    if cv:
+                        kw.append(cv)
+        kw.extend(str(k) for k in extra_keywords or [])
+        kw = _unique_keywords(kw)
 
         meta: dict = {
             "upload_type": "dataset",
             "title": self._deposit_title(title, specs),
-            "description": description or auto_desc,
-            "creators": creators,
-            "access_right": "open",
-            "license": license,
-            "keywords": kw,
+            # Zenodo shows the description as HTML: plain-text paragraphs go as <p>s.
+            "description": _zenodo_description_html(description) if description else auto_desc,
+            "creators": [_zenodo_person(c, "creator") for c in creators],
+            **access,
+            # The licence id as ws.license() keeps it ("CC-BY-4.0" goes as "cc-by-4.0"); a blank one goes as given.
+            "license": _normalize_license(license)[0] if str(license).strip() else license,
         }
+        if kw:
+            meta["keywords"] = kw
+        if version:
+            meta["version"] = str(version)
+        if publication_date is not None:
+            meta["publication_date"] = _zenodo_date(publication_date, "publication_date")
         if contributors:
-            # Zenodo requires a "type" on each contributor; default to "ProjectMember"
-            meta["contributors"] = [{**c, "type": c.get("type", "ProjectMember")} for c in contributors]
+            meta["contributors"] = [_zenodo_person(c, "contributor") for c in contributors]
         if community:
             meta["communities"] = [{"identifier": community}]
         # Funding project (grant) → a related identifier pointing at the project's
@@ -9690,13 +11411,13 @@ class AuthoringWorkspace:
         # native `grants` field, which 400s on an id Zenodo doesn't recognise).
         ref = self._get_project()
         if ref is not None and ref.id:
-            meta.setdefault("related_identifiers", []).append(
-                {
-                    "identifier": ref.id,
-                    "relation": "isPartOf",
-                    "scheme": "url",
-                }
-            )
+            funding = {"identifier": ref.id, "relation": "isPartOf", "scheme": "url"}
+            if not any(
+                entry["identifier"].strip() == ref.id and entry["relation"].strip() == "isPartOf" for entry in related
+            ):
+                related.append(funding)
+        if related:
+            meta["related_identifiers"] = related
         return meta
 
     def _load_zenodo_state(self, environment: str = "production") -> dict:
@@ -9721,6 +11442,16 @@ class AuthoringWorkspace:
         files the draft holds count among those of the published versions in
         the deposit index (*index*, else the one on disk, when it can be
         read), and ``None`` is returned.
+
+        The dataset records the deposit holds get their ``published_at``
+        then, as after a publish by :meth:`zenodo`, and before the state is
+        saved, so a check that stops part-way dates them the next time.
+        Zenodo's answer carries a publication date, not a time
+        (:func:`_zenodo_publication_time`). A date before the day of the
+        check counts from midnight UTC, for a dataset created by then; the
+        day of the check, no date, or a dataset created later gives the time
+        of the check. A record that states one keeps it, and a sandbox
+        record dates nothing.
         """
         from battinfo.zenodo import deposit_is_published  # noqa: PLC0415
 
@@ -9730,6 +11461,12 @@ class AuthoringWorkspace:
             return deposit
         metadata = deposit.get("metadata") if isinstance(deposit.get("metadata"), dict) else {}
         doi = deposit.get("doi") or metadata.get("doi") or state.get("doi")
+        dated = 0
+        if str(state.get("environment") or "production") == "production":
+            checked_at = _now_unix()
+            dated = self._date_published_datasets(
+                state.get("records") or [], _zenodo_publication_time(deposit, checked_at), checked_at
+            )
         state.update(
             published=True,
             doi=str(doi or ""),
@@ -9750,6 +11487,8 @@ class AuthoringWorkspace:
             f"  The Zenodo draft {state['record_id']} has been published since this workspace "
             f"recorded it; {state_file(environment)} now says so."
         )
+        if dated:
+            print(f"  Dataset records given their publication time: {dated}")
         return None
 
     def _note_draft_published(
@@ -9938,8 +11677,12 @@ class AuthoringWorkspace:
                 f"recorded on them. {hint}"
             )
             return lambda iri: None
+        # A record adopted the old form of its IRI after the deposit recorded the
+        # other form (#483) is still one the deposit holds.
         held = frozenset(state["records"])
-        return lambda iri: stored if stored and isinstance(iri, str) and iri in held else None
+        return lambda iri: (
+            stored if stored and isinstance(iri, str) and any(iri == h or same_record(iri, h) for h in held) else None
+        )
 
     def _check_zenodo_draft(self, state: dict) -> bool:
         """For :meth:`submit`: ask Zenodo about the draft *state* records, if a token is set.
@@ -10317,7 +12060,13 @@ class AuthoringWorkspace:
         fields["source"] = _draft_source(fields, default_type="datasheet", path=path)
         # An explicit identity in the draft pins a published cell spec, so a
         # corrected manufacturer, model, format or chemistry does not mint a new IRI.
-        pinned = _draft_spec_iri(fields.pop("id", None), fields.pop("uid", None), path.name)
+        pinned = _draft_spec_iri(
+            fields.pop("id", None),
+            fields.pop("uid", None),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("cell-spec", iri),
+        )
         if pinned is not None:
             fields["id"] = pinned
         missing = [key for key in ("manufacturer", "model", "format", "chemistry") if key not in fields]
@@ -10362,7 +12111,7 @@ class AuthoringWorkspace:
         # Loading the same result again (a notebook cell re-run) reuses the cell
         # already referenced; a second object would make its serial ambiguous.
         iri = result.get("id")
-        known = next((cell for cell, _ in self._indexed_cells if iri and cell.id == iri), None)
+        known = self._indexed_cell_by_iri(iri)
         if known is not None:
             return known
         cell = Cell(
@@ -10372,10 +12121,20 @@ class AuthoringWorkspace:
             serial_number=result.get("serial_number"),
             batch_id=result.get("batch_id"),
         )
-        self._index_cell(cell, result.get("serial_number"), result.get("name"))
         if cell.id:
-            self._resolve_published_reference(cell.id, "cell")
+            # Referred to by the IRI the cell has here or in the registry, in either form.
+            cell.id = self._reference_iri(cell.id, "cell")
+        self._index_cell(cell, result.get("serial_number"), result.get("name"))
         return cell
+
+    def _indexed_cell_by_iri(self, iri: object) -> Any:
+        """The cell this session indexes under *iri*, in either form of it, or ``None``."""
+        if not isinstance(iri, str) or not iri:
+            return None
+        return next(
+            (cell for cell, _ in self._indexed_cells if cell.id == iri or same_record(cell.id, iri)),
+            None,
+        )
 
     # ── Published records referenced from this workspace ──────────────────────
 
@@ -10388,32 +12147,53 @@ class AuthoringWorkspace:
         """
         return self._root / ".battinfo" / "references"
 
-    def _knows_record(self, iri: str, entity_type: str) -> bool:
-        """True when *iri* is in this session, saved in this workspace, or kept as a copy."""
+    def _known_record_iri(self, iri: str, entity_type: str) -> str | None:
+        """The IRI this session, this workspace's records or a kept copy holds the record *iri* names under.
+
+        Records are compared by segment and uid (``namespace.same_record``), so
+        the old form and the ``/id/1001/`` form of one record find each other,
+        and the IRI returned is the one the record has here, which a
+        reference to it takes. ``None`` when none of them holds it.
+        """
         sessions: dict[str, builtins.list[Any]] = {
             "cell": self._ws.cells,
             "cell-spec": self._ws.cell_specs,
             "test-protocol": self._ws.test_specs,
         }
-        if any(getattr(obj, "id", None) == iri for obj in sessions.get(entity_type, [])):
-            return True
+        for obj in sessions.get(entity_type, []):
+            held = getattr(obj, "id", None)
+            if held == iri or (isinstance(held, str) and same_record(held, iri)):
+                return held
         uid = iri.rstrip("/").rsplit("/", 1)[-1]
         if not is_dashed_uid(uid):
-            return False  # no file is named after it
+            return None  # no file is named after it
         for root in (self._ws.source_root, self._references_root):
             path = save_entity_path(entity_type, uid, root)
             try:
-                if path.exists() and entity_id_from_doc(_read_json(path)) == iri:
-                    return True
+                held = entity_id_from_doc(_read_json(path)) if path.exists() else None
             except (OSError, ValueError):
                 continue
-        return False
+            if held is not None and (held == iri or same_record(held, iri)):
+                return held
+        return None
+
+    def _reference_iri(self, iri: str, entity_type: str) -> str:
+        """The IRI this workspace refers to the published record *iri* by, looked up as :meth:`_resolve_published_reference` does.
+
+        The IRI the session, the records folder or a kept copy holds the record
+        under, in either form; *iri* itself when the record is in none of them
+        (offline, or not found).
+        """
+        self._resolve_published_reference(iri, entity_type)
+        return self._known_record_iri(iri, entity_type) or iri
 
     def _fetch_registry_record(self, iri: str, entity_type: str) -> tuple[dict | None, str]:
         """GET the published record behind *iri*: ``(canonical record or None, outcome)``.
 
         The outcome is ``found``, ``not_found`` (the registry does not hold it),
         ``unreachable``, or ``unreadable`` (its entry carries no canonical record).
+        The registry matches on segment and uid, so the record may carry the
+        other form of *iri*; it is kept with the IRI it carries.
         """
         import urllib.error  # noqa: PLC0415
         import urllib.request  # noqa: PLC0415
@@ -10431,7 +12211,8 @@ class AuthoringWorkspace:
         except Exception:  # noqa: BLE001 - registry down or network blocked: degrade, never fail ws.add
             return None, "unreachable"
         record = _canonical_record_of(envelope, entity_type)
-        if record is None or entity_id_from_doc(record) != iri:
+        held = entity_id_from_doc(record) if record is not None else None
+        if record is None or held is None or not (held == iri or same_record(held, iri)):
             return None, "unreadable"
         return record, "found"
 
@@ -10467,7 +12248,7 @@ class AuthoringWorkspace:
         one per test. A record found under an IRI that does not end in a uid
         raises ``ValueError`` (see ``_keep_reference_copy``).
         """
-        if self._knows_record(iri, entity_type):
+        if self._known_record_iri(iri, entity_type) is not None:
             return "local"
         registry = self._registry_url
         if not registry:
@@ -10525,15 +12306,19 @@ class AuthoringWorkspace:
             properties=specs,
             source=ProvenanceInfo(type="registry"),
         )
-        ct.id = result.get("id") or product.get("id")
-        if ct.id:
-            # Keep the fetched published record as a reference copy, so cells
-            # authored against this spec resolve it when ws.save() validates them.
-            if result.get("source") == "api" and entity_id_from_doc(record) == ct.id:
-                if not self._knows_record(ct.id, "cell-spec"):
-                    self._keep_reference_copy(record, "cell-spec")
-            else:
-                self._resolve_published_reference(ct.id, "cell-spec")
+        iri = result.get("id") or product.get("id")
+        ct.id = iri
+        if iri:
+            # The spec is referred to by the IRI it has: the one this workspace
+            # holds it under, or the published record's, in either form. Keep the
+            # fetched published record as a reference copy, so cells authored
+            # against this spec resolve it when ws.save() validates them.
+            fetched = entity_id_from_doc(record) if result.get("source") == "api" else None
+            held = self._known_record_iri(iri, "cell-spec")
+            if held is None and fetched is not None and (fetched == iri or same_record(fetched, iri)):
+                self._keep_reference_copy(record, "cell-spec")
+                held = fetched
+            ct.id = held or self._reference_iri(iri, "cell-spec")
         return ct
 
     def _fetch_cell_spec_record(self, result: dict) -> dict:
@@ -10605,9 +12390,11 @@ class AuthoringWorkspace:
         """Create cell instances, and return the cells the call names.
 
         The cells come back in the order given. A serial number (or, for a
-        cell without one, a name) the workspace already holds a cell under
-        returns that cell instead of adding another, so running the same call
-        again returns the same cells and adds nothing.
+        cell without one, a name) the workspace already holds a cell of
+        *spec* under returns that cell instead of adding another, so running
+        the same call again returns the same cells and adds nothing. A cell of
+        another spec under the same label is another cell
+        (:meth:`_is_cell_of_spec`), so the label does not hold it back.
 
         * ``names`` — human labels (e.g. lab batch IDs); display text, which
           several cells of one batch may share.
@@ -10669,7 +12456,9 @@ class AuthoringWorkspace:
 
         # Drop cells already in this session, keyed on IDENTITY, so the same call
         # run twice (a notebook cell re-run) adds nothing. A from_file= map is
-        # keyed on its labels, the names its cells are indexed under.
+        # keyed on its labels, the names its cells are indexed under. The key
+        # counts within the spec the call adds for. A cell's IRI is seeded from
+        # its spec too, so another spec's cell under the same label is not held.
         #
         # A cell instance is identified by its serial number. The name is
         # display text: a batch may legitimately share one public label
@@ -10686,6 +12475,7 @@ class AuthoringWorkspace:
         # What the call returns, in input order: a cell the workspace already
         # holds, or the place of a cell about to be made in `deduped`.
         returned: list[Any] = []
+        coming_spec_iris: dict[int, str | None] = {}  # see _is_cell_of_spec
         for n, s, iri, h in entries:
             key = s or n or ""
             if key and key in seen:
@@ -10694,7 +12484,14 @@ class AuthoringWorkspace:
                 # merely indistinguishable (warn and keep the first).
                 (repeated_serials if s else repeated_names).append(key)
                 continue
-            held = next((cell for cell, labels in self._indexed_cells if key and key in labels), None)
+            held = next(
+                (
+                    cell
+                    for cell, labels in self._indexed_cells
+                    if key and key in labels and self._is_cell_of_spec(cell, spec, coming_spec_iris)
+                ),
+                None,
+            )
             if held is not None:
                 already.append(key)
                 returned.append(held)
@@ -10790,6 +12587,53 @@ class AuthoringWorkspace:
             print(f"  cell: {name or serial}  {iri or '(IRI auto-assigned)'}")
         return [cells[item] if isinstance(item, int) else item for item in returned]
 
+    def _is_cell_of_spec(self, cell: Any, spec: Any, coming: dict[int, str | None]) -> bool:
+        """Whether *cell*, which the workspace holds, is a cell of *spec*, the spec ``ws.add("cell")`` adds for.
+
+        A cell's IRI is seeded from its spec and its serial number (or its
+        name), so a label names a cell within one spec, and ``C01`` of another
+        spec is another cell. A cell holds its spec as the object until a save
+        and as its IRI afterwards, as does a cell read back from the saved
+        records. The same object is the same spec, and two IRIs are compared
+        in either form (``namespace.same_record``). Two spec objects that have
+        no IRI yet are two specs of this session. When only one side has an
+        IRI, the other is compared by the IRI the next save gives it (*coming*,
+        which holds those for the length of one call). When either side names
+        no spec, the label alone decides.
+        """
+        from battinfo.bundle import CellSpec  # noqa: PLC0415
+
+        held_spec = getattr(cell, "cell_spec", None)
+        held_iri = getattr(cell, "cell_spec_id", None) or getattr(held_spec, "id", None)
+        if not isinstance(spec, CellSpec) or (held_spec is None and held_iri is None):
+            return True
+        if held_spec is spec:
+            return True
+        if held_iri is None and spec.id is None:
+            return False
+        held_iri = held_iri or self._coming_cell_spec_iri(held_spec, coming)
+        iri = spec.id or self._coming_cell_spec_iri(spec, coming)
+        return held_iri == iri or same_record(held_iri, iri)
+
+    def _coming_cell_spec_iri(self, spec: Any, coming: dict[int, str | None]) -> str | None:
+        """The IRI the next save gives *spec*, a cell spec that has none yet (kept in *coming*).
+
+        Read off the save's own finalize pass, run on copies, as
+        :meth:`_unsaved_cell_iris` does. When that pass refuses the session as
+        it stands, or the session does not hold *spec*, it is the IRI of the
+        spec's natural key.
+        """
+        if id(spec) not in coming:
+            engine = self._ws
+            try:
+                finalized = engine._finalized_records()["cell_specs"]
+            except (TypeError, ValueError):
+                finalized = []
+            coming.update({id(original): item.id for original, item in zip(engine.cell_specs, finalized)})
+            if id(spec) not in coming:
+                coming[id(spec)] = engine._finalize_cell_spec(spec, record_roots=[engine.source_root]).id
+        return coming[id(spec)]
+
     def _refuse_shared_cell_iris(
         self, entries: builtins.list[tuple[str | None, str | None, str | None, str | None]]
     ) -> None:
@@ -10817,6 +12661,7 @@ class AuthoringWorkspace:
 
     def _load_test_spec(self, path: Path) -> Any:
         from battinfo.bundle import BatteryTestType, ProvenanceInfo  # noqa: PLC0415
+        from battinfo.testmethod import _cycles_count  # noqa: PLC0415
 
         raw = json.loads(path.read_text(encoding="utf-8"))
         # Keys starting with "_" are in-file comments written by ws.template()
@@ -10849,6 +12694,12 @@ class AuthoringWorkspace:
 
         conditions, condition_notes = _clean_template_conditions(raw.get("conditions"))
         steps = _clean_template_steps(raw.get("experiment") or raw.get("steps"))
+        cycles = raw.get("cycles")
+        if cycles is not None:
+            try:
+                cycles = _cycles_count(cycles)
+            except ValueError as exc:
+                raise ValueError(f"{path.name}: {exc}. Nothing was loaded.") from None
 
         # The protocol followed: the record keeps its URL (protocol_url) but has no
         # field for its name, so a named protocol is kept as a note.
@@ -10887,7 +12738,13 @@ class AuthoringWorkspace:
         source = ProvenanceInfo(**_draft_source(dict(raw), default_type="manual", path=path))
         # An explicit identity in the draft pins a published test spec, so a
         # corrected name does not mint a new IRI (the seed includes the name).
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        pinned = _draft_spec_iri(
+            raw.get("id"),
+            raw.get("uid"),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("test-protocol", iri),
+        )
 
         # Forward the authored method so it survives into the saved record (and
         # thence the published JSON-LD as an EMMO process graph). Humans author the
@@ -10898,7 +12755,7 @@ class AuthoringWorkspace:
             type=test_type,
             description=raw.get("description"),
             experiment=steps,
-            cycles=raw.get("cycles"),
+            cycles=cycles,
             method=raw.get("method"),
             version=raw.get("version"),
             protocol_url=protocol_info.get("url"),
@@ -10943,7 +12800,13 @@ class AuthoringWorkspace:
             raise ValueError(
                 f"{path.name} needs at least a name (or manufacturer/model) - fill in the template before loading it."
             )
-        pinned = _draft_spec_iri(raw.get("id"), raw.get("uid"), path.name)
+        pinned = _draft_spec_iri(
+            raw.get("id"),
+            raw.get("uid"),
+            path.name,
+            base=self._record_base,
+            held=lambda iri: self._held_iri("equipment-spec", iri),
+        )
         uid = (
             None
             if pinned
@@ -10983,7 +12846,10 @@ class AuthoringWorkspace:
             citation=raw.get("citation"),
             retrieved_at=raw.get("retrieved_at"),
             notes=_draft_text_list(raw.get("notes")) or None,
+            base=self._record_base,
         )
+        if not pinned:
+            record = self._with_saved_iri(record)
         body = record["equipment_spec"]
         print(f"  equipment-spec: {body['name']}  {body['id']}")
         return record
@@ -11039,7 +12905,7 @@ class AuthoringWorkspace:
             return self._load_equipment_spec(path), None, []
         raise TypeError(
             "spec= must be a canonical equipment-spec record dict, a path to one, "
-            "or its IRI (https://w3id.org/battinfo/spec/...)."
+            f"or its IRI ({record_iri_forms('spec')})."
         )
 
     def _add_equipment(
@@ -11105,7 +12971,7 @@ class AuthoringWorkspace:
                 self._added_paths.add(Path(path))
             return result
 
-        spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert"))
+        spec_result = _track(save_record(spec_record, source_root=source_root, mode="upsert", base=self._record_base))
         # Text read out of the spec is reported once. When spec= named the
         # saved copy itself (by IRI or path), the upsert finds that file
         # unchanged, rewrites it and warns with the same notes.
@@ -11124,28 +12990,34 @@ class AuthoringWorkspace:
         # unit instead of minting a duplicate. Chosen over random minting because
         # a physical unit's natural key IS its model + serial number.
         equipment_uid = stable_uid(f"equipment:{spec_uid}:{seed_text(serial_number)}")
-        equipment_record = create_equipment(
-            uid=equipment_uid,
-            equipment_spec_id=spec_id,
-            serial_number=serial_number,
-            name=name,
-            handle=handle,
-            location=location,
-            status=status,
-            commissioned_at=commissioned_at,
+        equipment_record = self._with_saved_iri(
+            create_equipment(
+                uid=equipment_uid,
+                equipment_spec_id=spec_id,
+                serial_number=serial_number,
+                name=name,
+                handle=handle,
+                location=location,
+                status=status,
+                commissioned_at=commissioned_at,
+                base=self._record_base,
+            )
         )
-        _track(save_record(equipment_record, source_root=source_root, mode="upsert"))
+        _track(save_record(equipment_record, source_root=source_root, mode="upsert", base=self._record_base))
         equipment_id = equipment_record["equipment"]["id"]
 
         unit_label = name or serial_number
         channel_records = []
         for index in range(1, n_channels + 1):
-            channel_record = create_channel(
-                equipment_id=equipment_id,
-                index=index,
-                label=f"{unit_label}/CH{index}",
+            channel_record = self._with_saved_iri(
+                create_channel(
+                    equipment_id=equipment_id,
+                    index=index,
+                    label=f"{unit_label}/CH{index}",
+                    base=self._record_base,
+                )
             )
-            _track(save_record(channel_record, source_root=source_root, mode="upsert"))
+            _track(save_record(channel_record, source_root=source_root, mode="upsert", base=self._record_base))
             self._register_channel_keys(channel_record["channel"], equipment_record["equipment"])
             channel_records.append(channel_record)
 
@@ -11176,7 +13048,9 @@ class AuthoringWorkspace:
                 "ws.add('material_spec', ...) needs name=... (and kind=...). "
                 "Example: ws.add('material_spec', name='LFP', kind='lfp')."
             )
-        record = create_material_spec(validate=False, name=name, **kwargs)
+        record = create_material_spec(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._material_specs = _dedupe_records_by_id(self._material_specs, record, "material_spec")
         body = record["material_spec"]
         self._register_material_spec_keys(body)
@@ -11202,7 +13076,8 @@ class AuthoringWorkspace:
             return body["id"]
         if isinstance(spec, str) and spec.strip():
             text = spec.strip()
-            if text.startswith("https://w3id.org/battinfo/"):
+            # A material spec record of either shape, or the shared thing of a material.
+            if parse_record_iri(text) is not None or parse_thing_iri(text) is not None:
                 return text
             found = self._material_specs_by_ref.get(text.lower())
             if found is not None:
@@ -11227,7 +13102,9 @@ class AuthoringWorkspace:
         from battinfo.api import create_material  # noqa: PLC0415
 
         spec_id = self._resolve_material_spec_arg(spec)
-        record = create_material(validate=False, material_spec_id=spec_id, lot=lot, **kwargs)
+        record = create_material(validate=False, material_spec_id=spec_id, lot=lot, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._materials = _dedupe_records_by_id(self._materials, record, "material")
         body = record["material"]
         label = body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
@@ -11300,7 +13177,9 @@ class AuthoringWorkspace:
                 kwargs["material_kind"] = kind
             else:
                 kwargs["material_spec_id"] = self._resolve_material_spec_arg(material)
-        built = create_parameter_set(validate=False, name=name, **kwargs)
+        built = create_parameter_set(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            built = self._with_saved_iri(built)
         return self._queue_parameter_set(built, name)
 
     def _queue_parameter_set(self, record: dict, name: str | None) -> builtins.list:
@@ -11343,7 +13222,9 @@ class AuthoringWorkspace:
                 "ws.add('electrode_spec', ...) needs name=... (and kind=...). Example: "
                 "ws.add('electrode_spec', name='Graphite anode', kind='graphite')."
             )
-        record = create_electrode_spec(validate=False, name=name, **kwargs)
+        record = create_electrode_spec(validate=False, name=name, base=self._record_base, **kwargs)
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._electrode_specs = _dedupe_records_by_id(self._electrode_specs, record, "electrode_spec")
         body = record["electrode_spec"]
         self._register_electrode_spec_keys(body)
@@ -11371,7 +13252,7 @@ class AuthoringWorkspace:
             return str(body["id"])
         if isinstance(spec, str) and spec.strip():
             text = spec.strip()
-            if text.startswith("https://w3id.org/battinfo/"):
+            if parse_record_iri(text) is not None:
                 return text
             found = self._electrode_specs_by_ref.get(text.lower())
             if found is not None:
@@ -11397,7 +13278,11 @@ class AuthoringWorkspace:
         from battinfo.api import create_electrode  # noqa: PLC0415
 
         spec_id = self._resolve_electrode_spec_arg(spec)
-        record = create_electrode(validate=False, electrode_spec_id=spec_id, batch=batch, **kwargs)
+        record = create_electrode(
+            validate=False, electrode_spec_id=spec_id, batch=batch, base=self._record_base, **kwargs
+        )
+        if kwargs.get("id") is None:
+            record = self._with_saved_iri(record)
         self._electrodes = _dedupe_records_by_id(self._electrodes, record, "electrode")
         body = record["electrode"]
         label = body.get("batch_id") or body.get("lot_id") or body.get("name") or body["id"].rsplit("/", 1)[-1]
@@ -11532,8 +13417,9 @@ class AuthoringWorkspace:
     def _resolve_test_protocol_ref(self, iri: str) -> tuple[str | None, str | None]:
         """Look up a saved test-protocol record by IRI → ``(name, test_kind)``.
 
-        Both are ``None`` when no record with that IRI exists in this workspace;
-        the IRI is still accepted as a reference to a protocol published elsewhere.
+        Both are ``None`` when no record with that IRI, in either form, exists
+        in this workspace; the IRI is still accepted as a reference to a
+        protocol published elsewhere.
         """
         proto_dir = self._ws.source_root / "test-protocol"
         for path in sorted(proto_dir.glob("*.json")) if proto_dir.exists() else []:
@@ -11541,7 +13427,7 @@ class AuthoringWorkspace:
                 body = _read_json(path).get("test_spec") or {}
             except (OSError, ValueError):
                 continue
-            if body.get("id") == iri:
+            if body.get("id") == iri or same_record(body.get("id"), iri):
                 return body.get("name"), (body.get("kind") or body.get("test_kind") or body.get("test_type"))
         return None, None
 
@@ -11657,13 +13543,15 @@ class AuthoringWorkspace:
                 # drop the protocol entirely and mint a test with protocol_id
                 # null, so require an IRI (resolved here) and reject anything else.
                 if test_spec.startswith(("http://", "https://")):
-                    protocol_id_ref = test_spec
                     protocol_name, resolved_kind = self._resolve_test_protocol_ref(test_spec)
                     if protocol_name is None and resolved_kind is None:
                         # Not saved here: a protocol published elsewhere, so make the
                         # reference resolvable at save time (its name and kind stay
                         # unread, so the test's identity does not change).
                         self._resolve_published_reference(test_spec, "test-protocol")
+                    # Referred to by the IRI the protocol has here or in the registry,
+                    # in either form. The test's uid is the same under both.
+                    protocol_id_ref = self._known_record_iri(test_spec, "test-protocol") or test_spec
                     if resolved_kind and not test_type:
                         test_type = resolved_kind
                 else:
@@ -11671,7 +13559,7 @@ class AuthoringWorkspace:
                         f"spec={test_spec!r} is not a test-protocol reference. Pass a "
                         "battinfo.TestSpec (authored inline or via ws.load(<draft file>)), "
                         "or the IRI of a test-protocol saved in this workspace "
-                        "(https://w3id.org/battinfo/spec/...). A plain string is "
+                        f"({record_iri_forms('spec')}). A plain string is "
                         "not accepted as a protocol name: it would leave the run unlinked "
                         "to any saved protocol."
                     )
@@ -11750,6 +13638,21 @@ class AuthoringWorkspace:
             _spans = [p for p in periods if p]
             run_start = given_start if given_start is not None else (min(s for s, _ in _spans) if _spans else None)
             run_end = given_end if given_end is not None else (max(e for _, e in _spans) if _spans else None)
+            _parquet = [_guess_format(f) == PARQUET_MEDIA_TYPE for f in files]
+            if any(_parquet) and _pyarrow_missing():
+                warnings.warn(
+                    "The measured period of a parquet data file is read with pyarrow, which is not installed, so "
+                    "this test and its parquet datasets get no start, end or temporal coverage. "
+                    'Run: pip install "battinfo[tabular]"',
+                    stacklevel=3,
+                )
+            # A parquet file used to give no period and the media type
+            # application/x-parquet. The seed a colliding record is re-minted
+            # from reads the whole record, so it takes those values, and no IRI
+            # moves (_workspace._with_seed_fields).
+            _then = [p for p, is_parquet in zip(periods, _parquet, strict=True) if p and not is_parquet]
+            seed_start = given_start if given_start is not None else (min(s for s, _ in _then) if _then else None)
+            seed_end = given_end if given_end is not None else (max(e for _, e in _then) if _then else None)
             test = self._ws.test(
                 resolved,
                 kind=test_type,
@@ -11764,6 +13667,8 @@ class AuthoringWorkspace:
                 started_at=run_start,
                 ended_at=run_end,
             )
+            if (seed_start, seed_end) != (run_start, run_end):
+                test._seed_fields = {"started_at": seed_start, "ended_at": seed_end}
             if pinned_test_id is not None:
                 test.id = pinned_test_id
             if handle is not None:
@@ -11796,6 +13701,8 @@ class AuthoringWorkspace:
                     format=_guess_format(f),
                     temporal_coverage=_tc,
                 )
+                if _parquet[i]:
+                    dataset_obj._seed_fields = {"data_format": PARQUET_MEDIA_TYPE_ALIAS, "temporal_coverage": None}
                 if pinned_dataset_ids is not None:
                     dataset_obj.id = pinned_dataset_ids[i]
                 if member_series_id is not None:
@@ -11885,15 +13792,13 @@ class AuthoringWorkspace:
         pinned: str | None = None
         if iri is not None:
             if not isinstance(iri, str) or not TEST_IRI_RE.fullmatch(iri.strip()):
-                raise ValueError(
-                    f"iri={iri!r} is not a test IRI; expected https://w3id.org/battinfo/test/xxxx-xxxx-xxxx-xxxx."
-                )
+                raise ValueError(f"iri={iri!r} is not a test IRI; expected {record_iri_forms('test')}.")
             pinned = iri.strip()
         if uid is not None:
-            from_uid = f"https://w3id.org/battinfo/test/{_normalized_dashed_uid(str(uid))}"
-            if pinned is not None and pinned != from_uid:
+            from_uid = record_iri("test", _normalized_dashed_uid(str(uid)), base_prefix(self._record_base))
+            if pinned is not None and not same_record(pinned, from_uid):
                 raise ValueError(f"iri={iri!r} and uid={uid!r} name different tests; pass one.")
-            pinned = from_uid
+            pinned = pinned or self._held_iri("test", from_uid)
         return pinned
 
     def _pinned_dataset_iris(
@@ -11919,8 +13824,7 @@ class AuthoringWorkspace:
         bad = [item for item in pinned if not DATASET_IRI_RE.fullmatch(item)]
         if bad:
             raise ValueError(
-                f"dataset_iris entries must be dataset IRIs "
-                f"(https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx); got {bad[:3]}."
+                f"dataset_iris entries must be dataset IRIs ({record_iri_forms('dataset')}); got {bad[:3]}."
             )
         if len(set(pinned)) != len(pinned):
             raise ValueError("dataset_iris must name distinct datasets not already used in this session.")
@@ -12012,7 +13916,7 @@ class AuthoringWorkspace:
         if not DATASET_IRI_RE.fullmatch(text):
             raise ValueError(
                 f"series_id={series_id!r} is not a dataset IRI; expected the collection's "
-                "IRI, https://w3id.org/battinfo/dataset/xxxx-xxxx-xxxx-xxxx."
+                f"IRI, {record_iri_forms('dataset')}."
             )
         return text
 
@@ -12049,9 +13953,10 @@ class AuthoringWorkspace:
         if isinstance(ref, str):
             s = ref.strip()
             if s.startswith("http"):  # an IRI
-                # A cell already found (by serial, a search hit or an earlier IRI) is
-                # reused, not referenced and looked up in the registry again.
-                known = next((cell for cell, _ in self._indexed_cells if getattr(cell, "id", None) == s), None)
+                # A cell already found (by serial, a search hit or an earlier IRI,
+                # in either form) is reused, not referenced and looked up in the
+                # registry again.
+                known = self._indexed_cell_by_iri(s)
                 if known is not None:
                     return known
                 return self._reference_cell({"id": s, "type": "cell"})
@@ -12069,7 +13974,7 @@ class AuthoringWorkspace:
                 listing = "\n".join(f"  {_describe_registry_cell(c)}" for c in found)
                 raise ValueError(
                     f"{s!r} matches {len(found)} cells in the registry, so it cannot pick one:\n{listing}\n"
-                    'Pass the one you mean by its IRI, cell="https://w3id.org/battinfo/cell/...", '
+                    'Pass the one you mean by its IRI as listed above, cell="<IRI>", '
                     f"or reference it first with ws.load(ws.search(type='cell', serial={s!r})[i])."
                 )
             if found:
@@ -12202,6 +14107,11 @@ class AuthoringWorkspace:
                 format=_guess_format(f),
                 source_path=self._resolve_raw_source(f),
             )
+            if _guess_format(f) == PARQUET_MEDIA_TYPE:
+                # As in the explicit mode: the seed reads the media type a parquet file used to get.
+                for made in self._ws.datasets:
+                    if made.test is test:
+                        made._seed_fields = {"data_format": PARQUET_MEDIA_TYPE_ALIAS}
             print(f"  matched   {f.name}  ->  {cell.name or cell.serial_number}  (by {how})")
             tests.append(test)
 
@@ -12326,7 +14236,7 @@ def _make_record_slug(manufacturer: str, model: str, year: int | str) -> str:
 def _guess_format(path: Path) -> str | None:
     name = path.name.lower()
     if name.endswith(".parquet") or ".bdf.parquet" in name:
-        return "application/x-parquet"
+        return PARQUET_MEDIA_TYPE
     if name.endswith(".csv") or ".bdf.csv" in name:
         return "text/csv"
     if name.endswith(".ndax") or name.endswith(".nda"):
@@ -12679,6 +14589,8 @@ def _journaled_submit(
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
     allow_local_files: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict:
     """Run one submission through the resume journal (no journal → plain submit)."""
     if journal is None:
@@ -12691,6 +14603,8 @@ def _journaled_submit(
             publication_mode=publication_mode,
             validation=validation,
             allow_local_files=allow_local_files,
+            checked_iris=checked_iris,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
     payload_hash = _journal_payload_hash(payload)
     previous = journal.previous_success(source_local_id, payload_hash, registry_url=url) if source_local_id else None
@@ -12715,6 +14629,8 @@ def _journaled_submit(
         publication_mode=publication_mode,
         validation=validation,
         allow_local_files=allow_local_files,
+        checked_iris=checked_iris,
+        allow_unchecked_iris=allow_unchecked_iris,
     )
     journal.record(outcome, payload_hash, registry_url=url)
     return outcome
@@ -12771,6 +14687,8 @@ def _do_submit(
     publication_mode: str = STAGED_PUBLICATION_MODE,
     validation: dict[str, Any] | None = None,
     allow_local_files: bool = False,
+    checked_iris: Mapping[str, str] | None = None,
+    allow_unchecked_iris: bool = False,
 ) -> dict:
     """Submit one record; return a structured outcome (never silently drop it).
 
@@ -12782,7 +14700,8 @@ def _do_submit(
     with ``ok`` (True for published/validated, False for failed/rejected/errored),
     ``status``, ``error`` (the message when not ok), ``iri`` and the raw
     ``result``. A failed record is reported in the outcome, never swallowed, so
-    the batch surfaces it.
+    the batch surfaces it. *checked_iris* are the IRIs :meth:`AuthoringWorkspace.submit`
+    already looked up in this registry (``submit_publication_package``).
     """
     import copy
 
@@ -12796,7 +14715,12 @@ def _do_submit(
     for attempt in range(2):
         try:
             result = submit_publication_package(
-                payload, registry_base_url=url, api_key=key, allow_local_files=allow_local_files
+                payload,
+                registry_base_url=url,
+                api_key=key,
+                allow_local_files=allow_local_files,
+                checked_iris=checked_iris,
+                allow_unchecked_iris=allow_unchecked_iris,
             )
             raw_response = result.get("response")
             response = raw_response if isinstance(raw_response, dict) else {}
@@ -13043,24 +14967,32 @@ def _test_kind_hint() -> str:
     return "Valid kinds: " + ", ".join(_test_kind_values()) + "."
 
 
-def _draft_spec_iri(draft_id: Any, draft_uid: Any, source: str) -> str | None:
-    """The spec IRI a draft file pins with ``"id"`` and/or ``"uid"``, or ``None``."""
+def _draft_spec_iri(
+    draft_id: Any,
+    draft_uid: Any,
+    source: str,
+    *,
+    base: str = DEFAULT_RECORD_BASE,
+    held: Callable[[str], str] | None = None,
+) -> str | None:
+    """The spec IRI a draft file pins with ``"id"`` and/or ``"uid"``, or ``None``.
+
+    A ``"uid"`` alone pins the IRI of that uid under *base*, the workspace's,
+    which *held* maps to the IRI the workspace already saved the record under.
+    """
     from battinfo.api._shared import SPEC_IRI_RE, _normalized_dashed_uid  # noqa: PLC0415
 
     pinned: str | None = None
     if draft_id:
         text = str(draft_id).strip()
         if not SPEC_IRI_RE.fullmatch(text):
-            raise ValueError(
-                f"{source}: 'id' {draft_id!r} is not a spec IRI; expected "
-                "https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx."
-            )
+            raise ValueError(f"{source}: 'id' {draft_id!r} is not a spec IRI; expected {record_iri_forms('spec')}.")
         pinned = text
     if draft_uid:
-        from_uid = f"https://w3id.org/battinfo/spec/{_normalized_dashed_uid(str(draft_uid))}"
-        if pinned is not None and pinned != from_uid:
+        from_uid = record_iri("spec", _normalized_dashed_uid(str(draft_uid)), base_prefix(base))
+        if pinned is not None and not same_record(pinned, from_uid):
             raise ValueError(f"{source}: 'id' and 'uid' name different specs; keep one.")
-        pinned = from_uid
+        pinned = pinned or (held(from_uid) if held is not None else from_uid)
     return pinned
 
 
@@ -13116,7 +15048,11 @@ def _import_test_kind_from_technique(technique: str) -> str:
 
 @dataclass
 class ZenodoResult:
-    """Result of ``ws.zenodo()``."""
+    """Result of ``ws.zenodo()``.
+
+    *adopted* maps each IRI minted under ``/id/1001/`` that the deposit took
+    in the old form the registry holds to that form.
+    """
 
     record_id: str
     doi: str
@@ -13124,6 +15060,7 @@ class ZenodoResult:
     draft_url: str
     published: bool
     is_new_version: bool
+    adopted: dict[str, str] = field(default_factory=dict)
 
 
 _DEFAULT_REGISTRY_URL = "https://battinfo-registry.onrender.com"
@@ -13133,6 +15070,8 @@ def workspace(
     root: str | Path = ".",
     records_repo: str | Path | None = None,
     registry_url: str | None = _UNSET,
+    *,
+    base: str | None = None,
 ) -> AuthoringWorkspace:
     """Open (or create) a BattINFO workspace for authoring records.
 
@@ -13164,5 +15103,13 @@ def workspace(
         Auto-detected from sibling directories or ``BATTINFO_RECORDS`` env var
         if not given.  Only used when the registry is unreachable or ``registry_url``
         is ``None``.
+    base:
+        The base the records of a new workspace mint under, recorded in
+        ``.battinfo/workspace.json`` when the workspace is created. Left out,
+        it is ``https://w3id.org/battinfo/id/1001/``; pass
+        ``"https://w3id.org/battinfo/"`` to mint in the old form. A workspace
+        that exists keeps the base it was created with, and one created
+        before 0.8.0 keeps the old form; a ``base`` that differs from it
+        raises ``ValueError``. ``ws.record_base`` shows it.
     """
-    return AuthoringWorkspace(root=root, records_repo=records_repo, registry_url=registry_url)
+    return AuthoringWorkspace(root=root, records_repo=records_repo, registry_url=registry_url, base=base)

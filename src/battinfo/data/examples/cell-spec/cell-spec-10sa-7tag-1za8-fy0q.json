@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.2.0",
+  "cell_spec": {
+    "id": "https://w3id.org/battinfo/spec/10sa-7tag-1za8-fy0q",
+    "name": "Empa graphite || Li coin half cell",
+    "manufacturer": {
+      "type": "Organization",
+      "id": "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv",
+      "name": "Empa",
+      "same_as": "http://www.wikidata.org/entity/Q683116"
+    },
+    "model": "R2032 graphite half cell",
+    "cell_format": "coin",
+    "chemistry": "Li-ion",
+    "cell_configuration": "half_cell",
+    "size_code": "R2032"
+  },
+  "working_electrode": {
+    "coating": {
+      "component": {
+        "active_material": [
+          {
+            "name": "Graphite"
+          }
+        ]
+      }
+    }
+  },
+  "counter_electrode": {
+    "material": {
+      "name": "Lithium metal"
+    }
+  },
+  "notes": [
+    "The negative electrode of https://w3id.org/battinfo/spec/5hy0-g0f7-bxzz-tmtm measured against lithium, as the Empa coin cell template records."
+  ],
+  "provenance": {
+    "source_type": "manual",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

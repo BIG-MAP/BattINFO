@@ -447,7 +447,7 @@ def snippet_dataset():
                 "name": "run.bdf.parquet",
                 "description": "Cycling time series in BDF column vocabulary.",
                 "content_url": "https://zenodo.org/records/1234567/files/run.bdf.parquet",
-                "encoding_format": "application/x-parquet",
+                "encoding_format": "application/vnd.apache.parquet",
                 "role": "processed",
                 "checksum": {"algorithm": "md5", "value": "9e107d9d372bb6826bd81d3542a419d6"},
             },

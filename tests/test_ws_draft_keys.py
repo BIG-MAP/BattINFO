@@ -193,7 +193,7 @@ def test_cell_spec_draft_reads_the_record_fields(ws, tmp_path: Path) -> None:
         "properties": {"nominal_voltage": {"value": 1.5, "unit": "V"}},
     }
     spec = ws.load(_write(tmp_path, "mn2400.cell-spec.json", draft))
-    assert spec.id == "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7x"
+    assert spec.id == "https://w3id.org/battinfo/id/1001/spec/1f8r-6v2k-9p4m-3t7x"  # the new workspace's base
     assert (spec.model, spec.datasheet_revision) == ("MN2400", "2019-03")
     assert spec.properties == {
         "nominal_voltage": {"value": 1.5, "unit": "V"},
@@ -275,7 +275,7 @@ def test_equipment_spec_draft_reads_the_builder_fields(ws, tmp_path: Path) -> No
         "retrieved_at": "2026-10-01",
     }
     record = ws.load(_write(tmp_path, "mc3000.equipment-spec.json", draft))
-    assert record["equipment_spec"]["id"] == "https://w3id.org/battinfo/spec/1f8r-6v2k-9p4m-3t7z"
+    assert record["equipment_spec"]["id"] == "https://w3id.org/battinfo/id/1001/spec/1f8r-6v2k-9p4m-3t7z"
     assert record["notes"] == ["Bought in 2024."]
     provenance = record["provenance"]
     assert (provenance["source_type"], provenance["source_name"], provenance["source_file"]) == (
@@ -287,8 +287,11 @@ def test_equipment_spec_draft_reads_the_builder_fields(ws, tmp_path: Path) -> No
 
 
 def test_equipment_spec_draft_keys_are_the_builder_fields() -> None:
-    """The equipment-spec record has no model class: its draft keys follow create_equipment_spec()."""
-    assert set(inspect.signature(_record_from_equipment_spec).parameters) == _EQUIPMENT_SPEC_DRAFT_KEYS
+    """The equipment-spec record has no model class: its draft keys follow create_equipment_spec().
+
+    All but ``base``: the base a record mints under is the workspace's, never a draft's.
+    """
+    assert set(inspect.signature(_record_from_equipment_spec).parameters) - {"base"} == _EQUIPMENT_SPEC_DRAFT_KEYS
 
 
 def test_api_authoring_drafts_load_with_every_key(ws, tmp_path: Path) -> None:

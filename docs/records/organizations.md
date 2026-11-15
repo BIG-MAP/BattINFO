@@ -41,7 +41,7 @@ record = create_organization(
 {
   "schema_version": "0.2.0",
   "organization": {
-    "id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/organization/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "Example Instruments",
     "type": "Manufacturer",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
   "@type": "schema:Organization",
-  "@id": "https://w3id.org/battinfo/organization/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/organization/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "Example Instruments",
   "schema:legalName": "Example Instruments GmbH",
   "schema:additionalType": "Manufacturer",
@@ -218,12 +218,12 @@ The `organization` block:
 | `foundingDate` | string |  | DEPRECATED alias of `founding_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `dissolutionDate` | string |  | DEPRECATED alias of `dissolution_date` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `description` | string |  | Short description of the organization. |
-| `parentOrganization` | → OrganizationIri or object |  | DEPRECATED alias of `parent_organization` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
+| `parentOrganization` | → OrganizationRefIri or object |  | DEPRECATED alias of `parent_organization` (pre-snake_case spelling): accepted forever, normalized on round-trip, never taught. |
 | `legal_name` | string |  | Full legal name, if different from name. |
 | `alternate_name` | string or array of string |  | Former names, abbreviations, or brand names (e.g. 'LG Chem' for LG Energy Solution). |
 | `founding_date` | string |  | Year or ISO 8601 date the organization was founded. |
 | `dissolution_date` | string |  | Year or ISO 8601 date the organization was dissolved, if applicable. |
-| `parent_organization` | → OrganizationIri or object |  | Parent organization, if this is a subsidiary or division. |
+| `parent_organization` | → OrganizationRefIri or object |  | Parent organization, if this is a subsidiary or division. |
 
 Top-level `editorial`: Internal editorial metadata — not forwarded to the registry semantic payload.
 

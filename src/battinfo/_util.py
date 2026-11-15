@@ -4,14 +4,15 @@ Single home for the tiny helpers that were previously copy-pasted across
 modules (``api``, ``bundle``, ``publication``, ``local_workspace``,
 ``workspace_state``, ``_workspace``, ``ingest``, ``runtime``, ``ws``,
 ``interop.battdat``, ``transform.json_to_jsonld``): path coercion, file
-URIs and URL segments, UTC timestamps, file hashing, and citation/DOI
-normalization.
+URIs and URL segments, UTC timestamps, file hashing, media types, and
+citation/DOI normalization.
 """
 
 from __future__ import annotations
 
 import hashlib
 import math
+import mimetypes
 import numbers
 import os
 import re
@@ -19,7 +20,7 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path, PureWindowsPath
 from typing import Any
-from urllib.parse import quote, unquote, urlparse
+from urllib.parse import quote, unquote, urlparse, urlsplit
 
 PathLike = str | Path
 
@@ -52,6 +53,10 @@ CONVERTER_INSTALL_HINT = 'Run: pip install "battinfo[processing]"'
 
 _DOI_URL_RE = re.compile(r"^https?://(?:dx\.)?doi\.org/(10\.\S+)$", re.IGNORECASE)
 _DOI_LITERAL_RE = re.compile(r"^(10\.\d{4,9}/[-._;()/:A-Za-z0-9]+)$")
+
+# An ORCID iD is four groups of four digits; the last character is a checksum, a digit or X.
+_ORCID_ID_RE = re.compile(r"[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]")
+_ORCID_HOSTS = frozenset({"orcid.org", "www.orcid.org"})
 
 
 def _as_path(path: PathLike) -> Path:
@@ -403,12 +408,97 @@ def is_dataset_series(additional_type: object) -> bool:
     return False
 
 
+# The parquet media type, as IANA registered it in 2024. Records written before
+# battinfo used it hold ``application/x-parquet``, which IANA lists as its
+# deprecated alias.
+PARQUET_MEDIA_TYPE = "application/vnd.apache.parquet"
+PARQUET_MEDIA_TYPE_ALIAS = "application/x-parquet"
+_MEDIA_TYPE_ALIASES = {PARQUET_MEDIA_TYPE_ALIAS: PARQUET_MEDIA_TYPE}
+
+# Media types by file suffix, ahead of the table Python ships. The module-level
+# :func:`mimetypes.guess_type` also reads the platform's own table (on Windows the
+# registry, which can give ``application/vnd.ms-excel`` for ``.csv``), so its
+# answers differ between computers; :data:`_PYTHON_MEDIA_TYPES` holds Python's alone.
+EXTENSION_MEDIA_TYPE_MAP = {
+    ".csv": "text/csv",
+    ".tsv": "text/tab-separated-values",
+    ".json": "application/json",
+    ".jsonld": "application/ld+json",
+    ".md": "text/markdown",
+    ".txt": "text/plain",
+    ".h5": "application/x-hdf5",
+    ".hdf5": "application/x-hdf5",
+    ".parquet": PARQUET_MEDIA_TYPE,
+}
+_PYTHON_MEDIA_TYPES = mimetypes.MimeTypes()
+
+
+def file_media_type(name: str | None) -> str | None:
+    """The media type of a file by its name: :data:`EXTENSION_MEDIA_TYPE_MAP`, else Python's table, else ``None``."""
+    if not name:
+        return None
+    suffix = Path(name).suffix.lower()
+    if suffix in EXTENSION_MEDIA_TYPE_MAP:
+        return EXTENSION_MEDIA_TYPE_MAP[suffix]
+    guessed, _ = _PYTHON_MEDIA_TYPES.guess_type(name)
+    return guessed
+
+
+def registered_media_type(media_type: str) -> str:
+    """*media_type* as a graph states it: a deprecated alias becomes the registered type.
+
+    A saved record keeps the media type it was saved with; every emitter writes
+    it through this, so no published graph carries ``application/x-parquet``, nor
+    an IANA IRI built from it.
+    """
+    return _MEDIA_TYPE_ALIASES.get(media_type.strip().lower(), media_type)
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def orcid_id(value: object) -> str | None:
+    """The ORCID iD that *value* names, such as ``0000-0002-1825-0097``, or ``None`` when it names none.
+
+    *value* is an iD or the URL of one. A URL counts when its scheme is http or https, its host is ``orcid.org`` or ``www.orcid.org`` and its path is one iD; ``orcid.org/0000-0002-1825-0097``, with no scheme, counts as well. The host is read by parsing the URL, never by looking for ``orcid.org`` in the text, so ``https://evil.example/orcid.org/0000-0002-1825-0097`` names no ORCID. Neither does a URL on any other host (``sandbox.orcid.org`` included) or one with a user name, a port, a query or a fragment.
+
+    Letter case, white space around the value and a closing slash do not matter. The iD comes back with a capital X.
+    """
+    if not isinstance(value, str):
+        return None
+    text = value.strip().rstrip("/")
+    if not text.isprintable() or any(mark in text for mark in " ?#"):
+        return None
+    candidate = text
+    if "/" in text:
+        try:
+            parts = urlsplit(text if "://" in text else f"https://{text}")
+        except ValueError:
+            return None
+        # The whole authority has to be the host, so a user name or a port never passes.
+        if parts.scheme not in ("http", "https") or parts.netloc.lower() not in _ORCID_HOSTS:
+            return None
+        candidate = parts.path.removeprefix("/")
+    match = _ORCID_ID_RE.fullmatch(candidate.upper())
+    return match[0] if match is not None else None
+
+
+def require_orcid_id(value: object) -> str:
+    """The ORCID iD that the text of *value* names (:func:`orcid_id`); ``ValueError`` when it names none.
+
+    ``ws.contributor()``, a deposit's ``creators=`` and the ``orcid`` of a dataset's person all refuse a value through this function, so the error reads the same wherever an ORCID is given.
+    """
+    orcid = orcid_id(str(value))
+    if orcid is None:
+        raise ValueError(
+            f"invalid ORCID iD: {value!r}. Expected 0000-0002-1825-0097 (or the full https://orcid.org/… URL)."
+        )
+    return orcid
 
 
 def _citation_doi_from_url(value: object) -> str | None:

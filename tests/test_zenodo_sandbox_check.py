@@ -1,23 +1,29 @@
 """scripts/zenodo_sandbox_check.py: the release checklist's Zenodo sandbox run, which never runs here.
 
 The script deposits to sandbox.zenodo.org with a real token, so it is run by
-hand. These tests check what keeps it safe and what it checks, without running
-a single step: it refuses to start under pytest or in CI, no workflow runs it,
-its network guard lets requests reach the sandbox only, and its check of a
-deposit's data files. Nothing here reaches the network.
+hand. These tests check what keeps it safe and what it checks: it refuses to
+start under pytest or in CI, no workflow runs it, its network guard lets
+requests reach the sandbox only, and its check of a deposit's data files. The
+last test runs its six steps with the real ``ws.zenodo()``, ``ws.submit()``
+and ``ZenodoClient`` against a sandbox answered in memory, so a change to the
+package that the script does not follow fails here. Nothing here reaches the
+network.
 """
 
 from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import urllib.error
 import urllib.request
+import warnings
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from test_zenodo_deposit_versions import _Zenodo  # Zenodo's deposit API, answered in memory
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -257,3 +263,58 @@ def test_a_new_version_that_renames_a_file_that_did_not_change_fails_the_step(tm
 
     with pytest.raises(check.CheckFailed, match="renamed in the new version: .*C01: cycling.csv -> ffff-cycling.csv"):
         run.new_version()
+
+
+# ── The six steps, against a sandbox answered in memory ──────────────────────
+
+
+def test_the_six_steps_pass_against_a_sandbox_answered_in_memory(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The steps as main() runs them, on the workspace the script builds, with no registry to ask.
+
+    The sandbox is answered in memory behind the script's own network guard,
+    so a request to any other host fails the step that made it, as it does
+    in a run by hand.
+    """
+    import battinfo
+    from battinfo import zenodo as zenodo_client
+
+    # A run by hand may start where a registry and a production token are set.
+    monkeypatch.setenv("BATTINFO_REGISTRY_URL", "https://registry.invalid")
+    monkeypatch.setenv("ZENODO_API_TOKEN", "not-a-token")
+    check.drop_settings()
+    monkeypatch.setattr("battinfo.config.USER_CONFIG_PATH", tmp_path / "home" / ".battinfo" / "config.yaml")
+    monkeypatch.setattr(zenodo_client.time, "sleep", lambda *_: None)
+    sandbox = _Zenodo()
+    network = check.Network(sandbox.urlopen)  # in front of urlopen, where guard_network() puts it
+    monkeypatch.setattr(urllib.request, "urlopen", network)
+    root = tmp_path / "workspace"
+    root.mkdir()
+
+    run = check.Run(battinfo, root, "not-a-token", network)
+    outcomes: dict[str, str] = {}
+    for title, method in check.STEPS:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # main() prints them under the step
+            outcomes[title] = getattr(run, method)()
+        assert not network.refused, f"{title}: requests to other hosts were refused: {network.refused}"
+
+    assert list(outcomes) == [title for title, _method in check.STEPS] and all(outcomes.values())
+    # Four sandbox records and nothing anywhere else, since step 6 stops the one request for zenodo.org.
+    assert [str(record_id) for record_id in sandbox.deposits["sandbox"]] == run.records and len(run.records) == 4
+    assert sandbox.deposits["production"] == {}
+    assert network.stopped == [("POST", "https://zenodo.org/api/deposit/depositions")]
+    assert all(line.startswith("sandbox ") for line in sandbox.requests)
+
+
+def test_the_run_drops_the_production_tokens_and_the_registry_from_its_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    for name in ("ZENODO_API_TOKEN", "ZENODO_TOKEN", "BATTINFO_REGISTRY_URL", "ZENODO_SANDBOX_TOKEN"):
+        monkeypatch.setenv(name, "set")
+
+    check.drop_settings()
+
+    assert [name for name in ("ZENODO_API_TOKEN", "ZENODO_TOKEN", "BATTINFO_REGISTRY_URL") if name in os.environ] == []
+    assert os.environ["ZENODO_SANDBOX_TOKEN"] == "set"

@@ -1,10 +1,6 @@
 # Workspace authoring
 
-`battinfo.workspace(".")` is the blessed authoring surface for the lab-log
-workflow — describe the cells you tested, attach tests and data, and publish,
-without touching the lower layers. It covers cells, tests, datasets, and
-equipment; materials and component specs are authored through `battinfo.api`
-(see the [coverage table](#what-each-surface-can-author-today) below).
+`battinfo.workspace(".")` is the blessed authoring surface for the lab-log workflow — describe the cells you tested, attach tests and data, and publish, without touching the lower layers. It covers cells, tests, datasets, equipment, materials and electrodes. Separators, current collectors, electrolytes and housings are authored through `battinfo.api` (see the [coverage table](#what-each-surface-can-author-today) below).
 
 ```python
 import battinfo
@@ -85,7 +81,7 @@ The registry URL is looked up the same way, each time it is used. `battinfo.work
 |---|---|---|
 | Describe cells/tests/datasets interactively and publish them (the common case) | **Authoring workspace** | `ws = battinfo.workspace(".")` — this page |
 | Create a single record in code and save or publish it | **Models + functions** | `CellSpec(...)` + `battinfo.publish(...)` for a cell spec; the other models with their `save_*` function. See the [Python API](pages/api-reference.rst) |
-| Register materials and component specs (electrodes, electrolytes, …) | **`battinfo.api` functions** | `create_*` / `save_*` — see the [how-to guides](pages/howto.md) |
+| Register separators, current collectors, electrolytes and housings, or materials and electrodes outside a workspace | **`battinfo.api` functions** | `create_*` / `save_*` — see the [how-to guides](pages/howto.md) |
 | Build or script the full object graph programmatically (ingest pipelines, batch tooling) | **Object-graph engine** | `battinfo._workspace.Workspace` |
 
 ## What each surface can author today
@@ -101,8 +97,9 @@ roadmap item, not an omission in your usage:
 | Test | yes — `add("test", cell=..., data=..., channel=...)` | yes — `Test` + `save_test` | yes — `save test` |
 | Dataset | yes — created by `add("test", data=...)` | yes — `Dataset` + `save_dataset` | yes — `save dataset` |
 | Equipment + channels | **yes — best path**: `add("equipment", ...)` ([how-to](howto/register-equipment.md)) | yes — `battinfo.api` equipment/channel functions | no |
-| Material spec / lot | no | **yes — the path**: `battinfo.api` `create`/`save_material_spec` ([how-to](howto/register-materials.md)) | partial — `save record --input file.json` |
-| Component specs (electrode, electrolyte, separator, current-collector, housing) | no | **yes — the path**: `battinfo.api` per-family `create`/`save` ([how-to](howto/build-a-cell-from-components.md)) | partial — `save record --input file.json` |
+| Material spec / lot | yes — `add("material_spec", name=..., kind=...)`, `add("material", spec=..., lot=...)` | yes — `battinfo.api` `create`/`save_material_spec` ([how-to](howto/register-materials.md)) | partial — `save record --input file.json` |
+| Electrode spec / electrode | yes — `add("electrode_spec", name=..., kind=...)`, `add("electrode", spec=..., batch=...)` | yes — `battinfo.api` `create`/`save_electrode_spec` ([how-to](howto/build-a-cell-from-components.md)) | partial — `save record --input file.json` |
+| Other component specs (electrolyte, separator, current-collector, housing) | no | **yes — the path**: `battinfo.api` per-family `create`/`save` ([how-to](howto/build-a-cell-from-components.md)) | partial — `save record --input file.json` |
 
 Two CLI caveats: `battinfo query` currently reads only the example records
 packaged with BattINFO (no directory option — use the Python `query_*`

@@ -48,6 +48,8 @@ from battinfo.transform.json_to_jsonld import (
     _FORMAT_CASE_TYPE,
     _FRACTION_PROPERTY_TERMS,
     _HARDWARE_PART_TYPE,
+    _MEASUREMENT_PARAMETER_TERMS,
+    _agent_text_node,
     _apply_specification_composition,
     _apply_specification_structure_and_refs,
     _cell_configuration_key,
@@ -238,7 +240,8 @@ def label_to_compact() -> dict[str, Any]:
     prefLabels, curated unit prefLabels, every ``entity_type_map.json``
     ``battery_types`` class resolvable in the bundled domain-battery context,
     the quantity-node structure terms (``RealData`` etc.), the classes of the
-    composition emitters' lookup tables and the ``emmo`` class of every
+    composition emitters' lookup tables and of the test-condition table
+    (``_MEASUREMENT_PARAMETER_TERMS``), and the ``emmo`` class of every
     material kind in ``material_kinds.json``.
 
     Used both to extend the inline publication context and as the "is this class
@@ -283,7 +286,8 @@ def label_to_compact() -> dict[str, Any]:
     # Composition-tree vocabulary: fixed relations/classes plus every class the
     # shared composition emitters can produce from their lookup maps (material
     # classes, case/hardware types, electrolyte families, collector forms and
-    # substrates, fraction/holder property classes).
+    # substrates, fraction/holder property classes) and the classes test
+    # conditions are typed with.
     for term in _COMPOSITION_CONTEXT_TERMS:
         _resolve(term)
     for mapping in (
@@ -297,6 +301,7 @@ def label_to_compact() -> dict[str, Any]:
         _DESCRIPTOR_PROPERTY_TERMS,
         _DESCRIPTOR_COATING_PROPERTY_TERMS,
         _ASSEMBLY_QUANTITY_TERMS,
+        _MEASUREMENT_PARAMETER_TERMS,
     ):
         for value in mapping.values():
             if isinstance(value, str):
@@ -545,10 +550,7 @@ def build_cell_spec_node(record: Mapping[str, Any]) -> dict[str, Any]:
     if cell.get("model"):
         node["schema:model"] = cell["model"]
     if manufacturer_name:
-        node["schema:manufacturer"] = {
-            "@type": "schema:Organization",
-            "schema:name": manufacturer_name,
-        }
+        node["schema:manufacturer"] = _agent_text_node(manufacturer)
     if tail:
         node["schema:url"] = f"{REGISTRY_SPEC_URL_BASE}{tail}"
     # isDescriptionFor links the spec (an information artifact) to the described

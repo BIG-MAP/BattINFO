@@ -8,6 +8,9 @@ finds its file by its resolved path, never by its name.
 - Two files that share a name, or whose names differ only in case or Unicode
   normalisation, are two files in the deposit, in each dataset's own links.
 - A file that two distributions name is uploaded once.
+- A file inside a zip archive is a node of its own in the deposit graph, named
+  by the archive's URL with the file's name there as the fragment, and it
+  downloads from the archive's URL.
 - A data file never takes the name of the deposit's own metadata files.
 - A file name with a space, ``#``, ``?``, ``%`` or a non-ASCII character is
   percent-encoded in every URL, and an upload the HTTP layer refuses is a
@@ -35,8 +38,11 @@ import pytest
 
 import battinfo
 from battinfo import zenodo as zmod
+from battinfo._util import url_segment
 from battinfo.ws import AuthoringWorkspace
 from battinfo.zenodo import ZenodoClient, ZenodoError
+
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
 
 CREATORS = [{"name": "Doe, Jane"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
@@ -218,6 +224,303 @@ def test_two_files_with_one_name_stay_apart_in_a_zipped_deposit(
     [entity] = zenodo.crate_files()
     assert entity["@id"] == "cycling.zip"
     assert entity["sha256"] == _sha256(zenodo.uploaded["cycling.zip"])
+
+
+# ── How the files are packed (bundle=) ───────────────────────────────────────
+
+
+def _two_kinds(root: Path) -> list[tuple[str, str]]:
+    """Three data files under *root*, two of one test kind and one of another, as plan locations."""
+    locations = []
+    for relative, kind in (("C01/cycling.csv", "cycling"), ("C02/cycling.csv", "cycling"), ("C03/pulse.csv", "hppc")):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"{CSV}# {relative}\n", encoding="utf-8")
+        locations.append((path.as_uri(), kind))
+    return locations
+
+
+@pytest.mark.parametrize(
+    ("bundle", "archive_name", "threshold", "archives"),
+    [
+        ("by_kind", None, 1, ["cycling.zip", "hppc.zip"]),
+        ("by_kind", None, 3, []),  # at the threshold nothing is zipped
+        ("single", None, 1, ["data.zip"]),
+        ("single", "study__data.zip", 1, ["study__data.zip"]),
+        ("single", "study__data.zip", 3, ["study__data.zip"]),  # one archive however few the files
+        ("none", None, 1, []),
+    ],
+)
+def test_the_plan_packs_the_files_as_bundle_says(
+    tmp_path: Path, bundle: str, archive_name: str | None, threshold: int, archives: list[str]
+) -> None:
+    from battinfo._deposit_files import build_deposit_file_plan
+
+    plan = build_deposit_file_plan(
+        _two_kinds(tmp_path),
+        root=tmp_path,
+        measure=False,
+        zip_threshold=threshold,
+        bundle=bundle,
+        archive_name=archive_name,
+    )
+    assert plan.zipped is bool(archives)
+    assert sorted(plan.archives()) == archives
+    if archives:
+        assert plan.deposited_names() == archives
+        assert sum(len(members) for members in plan.archives().values()) == 3
+    else:
+        assert plan.deposited_names() == [entry.name for entry in plan.files]
+        assert len(set(plan.deposited_names())) == 3
+        assert all(entry.archive == "" for entry in plan.files)
+
+
+@pytest.mark.parametrize(
+    ("bundle", "archive_name", "message"),
+    [
+        ("tar", None, "is not one of 'by_kind', 'single', 'none'"),
+        ("by_kind", "data.zip", "names the archive of bundle='single'"),
+        ("none", "data.zip", "names the archive of bundle='single'"),
+        ("single", "data.tar", "is not a file name ending in .zip"),
+        ("single", "data/all.zip", "is not a file name ending in .zip"),
+        ("single", ".zip", "is not a file name ending in .zip"),
+        ("single", 7, "is not a file name ending in .zip"),
+    ],
+)
+def test_a_bundle_the_plan_cannot_take_is_refused(
+    tmp_path: Path, bundle: str, archive_name: object, message: str
+) -> None:
+    from battinfo._deposit_files import build_deposit_file_plan
+
+    with pytest.raises(ValueError, match=re.escape(message)):
+        build_deposit_file_plan(
+            _two_kinds(tmp_path),
+            root=tmp_path,
+            measure=False,
+            bundle=bundle,
+            archive_name=archive_name,  # type: ignore[arg-type]
+        )
+
+
+def test_a_replaced_archive_name_still_names_the_archives_of_a_by_kind_deposit(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A caller that replaced battinfo._deposit_files._archive_name keeps its archive names."""
+    import battinfo._deposit_files as deposit_files
+
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)
+    monkeypatch.setattr(deposit_files, "_archive_name", lambda kind: "everything.zip")
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS)
+
+    assert zenodo.data_names() == ["everything.zip"]
+    for dists in _distributions(zenodo.graph()).values():
+        assert [dist["dcat:downloadURL"] for dist in dists] == [f"{RECORD_URL}/files/everything.zip"]
+
+
+def test_a_single_archive_deposit_holds_one_zip_of_every_file(tmp_path: Path, zenodo: _FakeZenodo) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv"})
+    local = _local_files(ws)
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle="single", archive_name="cells__data.zip")
+
+    assert zenodo.data_names() == ["cells__data.zip"]
+    with zipfile.ZipFile(io.BytesIO(zenodo.uploaded["cells__data.zip"])) as archive:
+        members = {info.filename: archive.read(info) for info in archive.infolist()}
+    assert sorted(members.values()) == sorted(p.read_bytes() for p in local.values())
+    for iri, path in local.items():
+        [dist] = _distributions(zenodo.graph())[iri]
+        assert dist["dcat:downloadURL"] == f"{RECORD_URL}/files/cells__data.zip"
+        assert members[dist["schema:name"]] == path.read_bytes()
+    [entity] = zenodo.crate_files()
+    assert entity["@id"] == "cells__data.zip"
+    assert entity["sha256"] == _sha256(zenodo.uploaded["cells__data.zip"])
+
+
+# ── The files of an archive in the deposit graph ─────────────────────────────
+
+_DCAT = "http://www.w3.org/ns/dcat#"
+_PROV = "http://www.w3.org/ns/prov#"
+_SPDX = "http://spdx.org/rdf/terms#"
+
+
+def _rdf(graph: dict):  # noqa: ANN202
+    """A deposit graph as an RDF reader holds it."""
+    from rdflib import Graph
+
+    return Graph().parse(data=json.dumps(graph), format="json-ld")
+
+
+def _distribution_nodes(rdf) -> set[str]:  # noqa: ANN001
+    from rdflib import RDF, URIRef
+
+    return {str(node) for node in rdf.subjects(RDF.type, URIRef(f"{_DCAT}Distribution"))}
+
+
+@pytest.mark.parametrize(("bundle", "archive"), [("single", "data.zip"), ("by_kind", "cycling.zip")])
+def test_each_file_in_an_archive_is_a_node_of_its_own(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch, bundle: str, archive: str
+) -> None:
+    """Every file of an archive downloads from the archive's URL, so that URL names none of them."""
+    from rdflib import URIRef
+
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # by_kind zips three files
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv", "C03": "C03/cell 03.csv"})
+    local = _local_files(ws)
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle=bundle)
+
+    archive_url = f"{RECORD_URL}/files/{archive}"
+    with zipfile.ZipFile(io.BytesIO(zenodo.uploaded[archive])) as packed:
+        members = {info.filename: packed.read(info) for info in packed.infolist()}
+    rdf = _rdf(zenodo.graph())
+
+    # One node per file: the archive's URL, then the file's name in the archive.
+    nodes = _distribution_nodes(rdf)
+    assert len(nodes) == 3 and all(node.startswith(f"{archive_url}#") for node in nodes)
+    assert {unquote(node.partition("#")[2]) for node in nodes} == set(members)
+    assert {f"{archive_url}#cycling.csv", f"{archive_url}#cell%2003.csv"} < nodes
+    # Two files called cycling.csv, in two folders, are two nodes.
+    assert sum(node.endswith("-cycling.csv") for node in nodes) == 1
+
+    # Each dataset has its own, which states that file's name, checksum, size and test.
+    tests = set()
+    for iri, path in local.items():
+        data = path.read_bytes()
+        [node] = rdf.objects(URIRef(iri), URIRef(f"{_DCAT}distribution"))
+        [name] = rdf.objects(node, URIRef("https://schema.org/name"))
+        assert str(node) in nodes and unquote(str(node).partition("#")[2]) == str(name)
+        assert members[str(name)] == data
+        assert [str(url) for url in rdf.objects(node, URIRef(f"{_DCAT}downloadURL"))] == [archive_url]
+        [checksum] = rdf.objects(node, URIRef(f"{_SPDX}checksum"))
+        assert [str(v) for v in rdf.objects(checksum, URIRef(f"{_SPDX}checksumValue"))] == [_sha256(data)]
+        assert [int(size) for size in rdf.objects(node, URIRef(f"{_DCAT}byteSize"))] == [len(data)]
+        [test] = rdf.objects(node, URIRef(f"{_PROV}wasGeneratedBy"))
+        tests.add(test)
+    assert len(tests) == 3
+    # The archive is what a reader downloads, and the graph describes it as no file.
+    assert not list(rdf.predicate_objects(URIRef(archive_url)))
+
+
+def test_a_file_deposited_as_itself_is_the_node_its_download_url_names(tmp_path: Path, zenodo: _FakeZenodo) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cycling.csv", "C03": "C03/cell 03.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS)
+
+    names = zenodo.data_names()
+    assert len(names) == 3  # under the threshold, so nothing is zipped
+    assert _distribution_nodes(_rdf(zenodo.graph())) == {f"{RECORD_URL}/files/{url_segment(name)}" for name in names}
+    for dists in _distributions(zenodo.graph()).values():
+        [dist] = dists
+        assert dist["@id"] == dist["dcat:downloadURL"] and "#" not in dist["@id"]
+
+
+def test_a_processed_file_in_an_archive_names_the_raw_file_it_was_derived_from(tmp_path: Path) -> None:
+    """Both files are in one archive, and the link goes from one file's node to the other's."""
+    from rdflib import URIRef
+
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv"})
+    raw = tmp_path / "C01" / "cycling.ndax"
+    raw.write_bytes(b"raw instrument file")
+    [saved] = (ws._ws.source_root / "dataset").glob("*.json")
+    record = json.loads(saved.read_text(encoding="utf-8"))
+    record["dataset"]["distributions"].append(
+        {"content_url": raw.as_uri(), "encoding_format": "application/octet-stream", "role": "raw"}
+    )
+    saved.write_text(json.dumps(record), encoding="utf-8")
+    preview = json.loads(ws.preview_jsonld(creators=CREATORS, bundle="single").read_text(encoding="utf-8"))
+
+    archive_url = "https://zenodo.org/records/RECORD_ID/files/data.zip"
+    rdf = _rdf(preview)
+    assert _distribution_nodes(rdf) == {f"{archive_url}#cycling.csv", f"{archive_url}#cycling.ndax"}
+    derived = URIRef(f"{_PROV}wasDerivedFrom")
+    assert list(rdf.subject_objects(derived)) == [
+        (URIRef(f"{archive_url}#cycling.csv"), URIRef(f"{archive_url}#cycling.ndax"))
+    ]
+
+
+def test_a_file_in_a_kind_archive_of_a_package_is_a_node_of_its_own(tmp_path: Path) -> None:
+    """Without a file plan, a file whose name is not deposited is in ``<kind>.zip`` when that is."""
+    from battinfo.ws import _read_deposit_record_sets
+
+    ws = _workspace(tmp_path, {"C01": "C01/first.csv", "C02": "C02/second 2.csv"})
+    record_sets, _replaced = _read_deposit_record_sets(ws._ws.source_root)
+    graph = AuthoringWorkspace._assemble_zenodo_jsonld(
+        record_sets,
+        zenodo_record_id=7,
+        prereserved_doi="10.5281/zenodo.7",
+        record_url=RECORD_URL,
+        data_filenames=["cycling.zip"],
+        title="Two cells",
+        creators=CREATORS,
+        license="cc-by-4.0",
+    )
+
+    archive_url = f"{RECORD_URL}/files/cycling.zip"
+    assert _distribution_nodes(_rdf(graph)) == {f"{archive_url}#first.csv", f"{archive_url}#second%202.csv"}
+    for dists in _distributions(graph).values():
+        [dist] = dists
+        assert dist["dcat:downloadURL"] == archive_url
+
+
+def test_the_preview_names_the_single_archive_the_deposit_holds(tmp_path: Path) -> None:
+    ws = _workspace(tmp_path, {"C01": "C01/cycling.csv", "C02": "C02/cell 02.csv"})
+    preview = json.loads(
+        ws.preview_jsonld(creators=CREATORS, bundle="single", archive_name="all data.zip").read_text(encoding="utf-8")
+    )
+    placeholder = "https://zenodo.org/records/RECORD_ID"
+    urls = {dist["dcat:downloadURL"] for dists in _distributions(preview).values() for dist in dists}
+    assert urls == {f"{placeholder}/files/all%20data.zip"}
+
+
+def test_an_unzipped_deposit_over_the_threshold_keeps_each_file(
+    tmp_path: Path, zenodo: _FakeZenodo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("battinfo.ws._ZENODO_ZIP_THRESHOLD", 1)  # by_kind would zip the two files
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv", "C02": "C02/b.csv"})
+    ws.zenodo(token="placeholder", creators=CREATORS, bundle="none")
+    assert zenodo.data_names() == ["a.csv", "b.csv"]
+
+
+def test_an_unzipped_deposit_over_the_zenodo_limit_warns_before_anything_is_sent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    def no_client(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Zenodo was contacted")
+
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", no_client)
+    monkeypatch.setattr("battinfo.ws._ZENODO_FILE_LIMIT", 3)  # two data files and the two metadata files
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv", "C02": "C02/b.csv"})
+    with (
+        pytest.warns(UserWarning, match=r"bundle='none' the deposit holds 4 files \(2 data files") as caught,
+        pytest.raises(AssertionError, match="Zenodo was contacted"),
+    ):
+        ws.zenodo(token="placeholder", creators=CREATORS, bundle="none")
+    [warning] = [w for w in caught if "bundle='none'" in str(w.message)]
+    assert "bundle='by_kind'" in str(warning.message) and "bundle='single'" in str(warning.message)
+    assert "at most 3 files in one record" in capsys.readouterr().out
+
+    # by_kind leaves two files unzipped too, so it warns, and names the packing that helps.
+    with pytest.warns(UserWarning, match=r"The deposit holds 4 files \(2 data files, .*Pass bundle='single'"):
+        ws.preview_jsonld(creators=CREATORS, bundle="by_kind")
+    capsys.readouterr()
+    # One archive, and a deposit within the limit, do not warn.
+    ws.preview_jsonld(creators=CREATORS, bundle="single")
+    monkeypatch.setattr("battinfo.ws._ZENODO_FILE_LIMIT", 100)
+    ws.preview_jsonld(creators=CREATORS, bundle="none")
+    assert "files in one record" not in capsys.readouterr().out
+
+
+def test_a_bundle_zenodo_cannot_take_is_refused_before_anything_is_sent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("battinfo.zenodo.ZenodoClient", lambda *a, **k: pytest.fail("Zenodo was contacted"))
+    ws = _workspace(tmp_path, {"C01": "C01/a.csv"})
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.zenodo(token="placeholder", creators=CREATORS, bundle="zip")
+    with pytest.raises(ValueError, match="archive_name="):
+        ws.zenodo(token="placeholder", creators=CREATORS, archive_name="data.zip")
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.preview_jsonld(creators=CREATORS, bundle="zip")
+    with pytest.raises(ValueError, match="bundle='zip'"):
+        ws.preview_rocrate(creators=CREATORS, bundle="zip")
 
 
 @pytest.mark.parametrize(

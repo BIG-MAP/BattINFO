@@ -1,0 +1,18 @@
+{
+  "schema_version": "0.2.0",
+  "test": {
+    "id": "https://w3id.org/battinfo/test/8h27-q3yg-43q8-qrv3",
+    "identifier": "test:8h27-q3yg-43q8-qrv3",
+    "cell_id": "https://w3id.org/battinfo/cell/sqkc-fwnm-n6ds-vsx1",
+    "name": "Negative electrode half-cell rated capacity",
+    "kind": "capacity_check",
+    "protocol_id": "https://w3id.org/battinfo/spec/gc8e-hqby-ve43-efza",
+    "status": "completed"
+  },
+  "provenance": {
+    "source_type": "measurement",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

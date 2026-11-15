@@ -98,12 +98,12 @@ export default function ExamplesPage() {
 
       <div className="mt-16 border-t border-border pt-8">
         <p className="max-w-prose text-sm text-ink-muted">
-          Want to build one of these yourself? The Playground starts you from a working template and
-          checks it as you type; Validate gives a finished record a pass/fail verdict.
+          Want to write one of these yourself? Create builds a form from the schemas and checks it as you
+          type; Validate gives a finished record a pass/fail verdict.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm">
           <Link href="/create" className="font-semibold text-brandtext hover:text-brandtext">
-            Build one in the Playground →
+            Write one in Create →
           </Link>
           <Link href="/validate" className="font-semibold text-brandtext hover:text-brandtext">
             Validate your own record →

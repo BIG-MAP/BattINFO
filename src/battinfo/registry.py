@@ -375,11 +375,11 @@ class Registry:
             time.sleep(1.5 * (attempt + 1))
         raise RuntimeError("unreachable")  # pragma: no cover
 
-    def _get_json(self, path: str, params: dict | None = None) -> Any:
+    def _get_json(self, path: str, params: dict | None = None, *, retries: int = 2) -> Any:
         url = f"{self.url}{path}"
         if params:
             url += "?" + urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
-        with self._open(url) as response:
+        with self._open(url, retries=retries) as response:
             return json.loads(response.read().decode("utf-8"))
 
     # -- Records ------------------------------------------------------------
@@ -421,7 +421,7 @@ class Registry:
             previous = page
             offset += _PAGE_LIMIT
 
-    def get(self, record: Any, *, record_type: str | None = None) -> dict:
+    def get(self, record: Any, *, record_type: str | None = None, retries: int = 2) -> dict:
         """The registry's entry for an IRI, an id, or a summary from :meth:`list`.
 
         The entry adds ``related_resources`` (links to the cell, test or spec)
@@ -442,12 +442,15 @@ class Registry:
         the entry's ``distributions`` and not in the record; a new version
         made from the record has to carry them over (see
         docs/howto/read-registry-data.md).
+
+        A request that times out, or that the registry answers with a server
+        error, is tried again *retries* times.
         """
         segment, uid = _record_ref(record)
         segment = record_type or segment
         if not segment:
             raise ValueError(f"record_type is required to look up a bare id: {record!r}")
-        return self._get_json(f"/resources/{segment}/{uid}")
+        return self._get_json(f"/resources/{segment}/{uid}", retries=retries)
 
     def links(self, record: Any) -> dict[str, builtins.list[str]]:
         """IRIs a record points at, grouped by the type of the target."""
@@ -485,16 +488,19 @@ class Registry:
     ) -> Path:
         """Fetch a dataset's data file and return the local path.
 
-        The file is kept under the cache directory (or *dest*) and reused on
-        the next call. The download is checked against the checksum the record
-        states, in any algorithm :mod:`hashlib` supports (SHA-256 and MD5 among
-        them), and a cached copy that no longer matches is fetched again. A file
-        whose record states no checksum that can be checked is used as it is,
-        with a warning the first time. ``verify=False`` skips the check.
+        The file is kept in a folder named after the dataset's uid, under
+        ``files`` in the cache directory or under *dest* when one is given
+        (``<dest>/<uid>/<file name>``), so files of two datasets never share a
+        path. It is reused on the next call. The download is checked against
+        the checksum the record states, in any algorithm :mod:`hashlib`
+        supports (SHA-256 and MD5 among them), and a kept copy that no longer
+        matches is fetched again. A file whose record states no checksum that
+        can be checked is used as it is, with a warning the first time.
+        ``verify=False`` skips the check.
 
-        The cache folder is named after the dataset's uid, so an entry whose
-        id is not a record uid (one with ``..`` or a slash in it) raises
-        ``ValueError`` before anything is fetched.
+        Because the folder is named after the uid, an entry whose id is not a
+        record uid (one with ``..`` or a slash in it) raises ``ValueError``
+        before anything is fetched.
         """
         uid = _record_ref(dataset)[1]
         if not is_dashed_uid(uid):
@@ -504,7 +510,7 @@ class Registry:
         if not (tabular or candidates):
             raise FileNotFoundError(f"dataset {uid} has no file with role {role!r}")
         chosen = (tabular or candidates)[0]
-        folder = Path(dest) if dest else self.cache_dir / "files" / uid
+        folder = (Path(dest) if dest else self.cache_dir / "files") / uid
         target = _cache_file(folder, chosen.name)
         expected = _stated_digest(chosen)
         algorithm = _hash_name(chosen.checksum_algorithm) if verify and expected else None

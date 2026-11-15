@@ -112,7 +112,7 @@ class FakeRegistry:
                 "semantic_payload": {"battinfo_records": {resource_type: copy.deepcopy(record)}},
             }
             return _Response(json.dumps(envelope).encode("utf-8"))
-        raise urllib.error.HTTPError(url, 404, "Not Found", None, None)  # type: ignore[arg-type]
+        raise urllib.error.HTTPError(url, 404, "Not Found", None, io.BytesIO(b'{"detail": "Resource not found."}'))  # type: ignore[arg-type]
 
 
 @pytest.fixture()
@@ -501,6 +501,7 @@ def zenodo(monkeypatch: pytest.MonkeyPatch) -> _FakeZenodo:
     return fake
 
 
+@pytest.mark.usefixtures("registry_holds_none")
 def test_a_refused_publish_leaves_nothing_on_zenodo(
     tmp_path: Path, registry: FakeRegistry, zenodo: _FakeZenodo
 ) -> None:

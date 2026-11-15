@@ -634,8 +634,7 @@ def cell_description(
     :meth:`Workspace.describe_cell`.
 
     Args:
-        id: Canonical BattINFO cell-spec IRI, e.g.
-            ``"https://w3id.org/battinfo/cell/xxxx-xxxx-xxxx-xxxx"``.
+        id: Canonical BattINFO cell-spec IRI, ``https://w3id.org/battinfo/spec/{uid}`` or ``https://w3id.org/battinfo/id/{prefix}/spec/{uid}``.
         manufacturer: Manufacturer name string.
         model: Model/product code string.
         format: Cell format: ``"coin"``, ``"cylindrical"``, ``"pouch"``,

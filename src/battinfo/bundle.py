@@ -8,13 +8,31 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Any, ClassVar, Mapping, Self
 
-from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 
 from battinfo._jsonio import read_record_json as _read_json
 from battinfo._jsonio import write_json as _write_json
-from battinfo._util import _as_path, _citation_doi_from_url, _citation_url_value, jsonld_literal, jsonld_text
+from battinfo._util import (
+    _as_path,
+    _citation_doi_from_url,
+    _citation_url_value,
+    jsonld_literal,
+    jsonld_text,
+    orcid_id,
+    require_orcid_id,
+)
 from battinfo.canonical_aliases import migrate_quantity_values, record_to_snake_aliases
-from battinfo.testmethod import Quantity, Step, compute_facets, parse_experiment
+from battinfo.namespace import BATTINFO_ROOT, parse_record_iri, record_iri_forms, record_iri_pattern
+from battinfo.testmethod import Quantity, Step, _cycles_count, compute_facets, parse_experiment
 
 PathLike = str | Path
 
@@ -756,7 +774,47 @@ def _copy_identifier(value: Any) -> Any:
     return None
 
 
-def _canonical_agent(value: Any) -> dict[str, Any] | None:
+# The OrganizationRefIri of the schemas, an organization record in either IRI form or a maker as a shared thing.
+_ORGANIZATION_REF_IRI = record_iri_pattern("organization", both_shapes=True, things=True)
+
+
+def _organization_ref_iri(value: Mapping[str, Any], name: str) -> str | None:
+    """The ``id`` of the organization object *value*, its BattINFO organization IRI, or ``None`` when it gives none.
+
+    Raises ``ValueError`` for an ``id`` the schemas would refuse, naming the accepted forms.
+    """
+    iri = value.get("id")
+    if iri is None or iri == "":
+        return None
+    if not isinstance(iri, str) or _ORGANIZATION_REF_IRI.fullmatch(iri) is None:
+        raise ValueError(
+            f"The id of the organization {name!r} must match {record_iri_forms('organization', things=True)}, "
+            f"and {iri!r} does not. An identifier from elsewhere, such as a ROR, goes in same_as."
+        )
+    return iri
+
+
+def _orcid_same_as(name: str, orcid: str, same_as: Any) -> str:
+    """The ``same_as`` of the person *name* who is given an ``orcid``, the link ``https://orcid.org/<iD>``.
+
+    A ``same_as`` that names the same iD is kept as written when it is a URL. Raises ``ValueError`` for an ``orcid`` that names no ORCID iD, with the error ``ws.contributor()`` gives, and for a ``same_as`` that names anything else, since a person has one ``same_as``.
+    """
+    link = f"https://orcid.org/{require_orcid_id(orcid)}"
+    if not isinstance(same_as, str) or not same_as.strip():
+        return link
+    if orcid_id(same_as) != orcid_id(link):
+        raise ValueError(
+            f"The person {name!r} has orcid {orcid!r} and same_as {same_as!r}, which is not that ORCID iD. "
+            "A person takes one same_as, so give the ORCID alone or leave orcid out."
+        )
+    return same_as if "://" in same_as else link
+
+
+def _canonical_agent(value: Any, *, organization_only: bool = False) -> dict[str, Any] | None:
+    """A person or an organization as a dataset record holds it, or ``None`` for a value without a name.
+
+    The type is the one the value states. Without one it is ``Organization`` where the field takes nothing else (*organization_only*, for a publisher and an affiliation), else ``Person`` when the value has a key only a person has, else ``Organization``. An organization keeps its ``id``, and a person's ``orcid`` is written as the ``same_as`` link. Raises ``ValueError`` for an organization given with an ``email``, which no schema's ``Organization`` takes, while a person keeps theirs.
+    """
     if not isinstance(value, Mapping):
         return None
     node_type = value.get("type") or value.get("@type")
@@ -770,6 +828,8 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     out: dict[str, Any] = {"name": name}
     if isinstance(node_type, str) and node_type in {"Person", "Organization"}:
         out["type"] = node_type
+    elif organization_only:
+        out["type"] = "Organization"
     elif any(
         key in value
         for key in (
@@ -787,11 +847,25 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
         out["type"] = "Person"
     else:
         out["type"] = "Organization"
+    if out["type"] == "Organization":
+        organization_id = _organization_ref_iri(value, name)
+        if organization_id is not None:
+            out["id"] = organization_id
+    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     orcid = value.get("orcid")
     if isinstance(orcid, str) and orcid.strip():
-        out["orcid"] = orcid
+        if out["type"] == "Person":
+            same_as = _orcid_same_as(name, orcid, same_as)
+        else:
+            out["orcid"] = orcid
     email = value.get("email") or value.get("schema:email")
     if isinstance(email, str):
+        if out["type"] == "Organization":
+            # Only a Person may carry an email in every schema; an Organization has none.
+            raise ValueError(
+                f"The organization {name!r} is given an email, and BattINFO records carry no email for an "
+                "organization. Leave the email out, or give the organization's web page as url."
+            )
         out["email"] = email
     given_name = value.get("given_name") or value.get("schema:givenName")
     if isinstance(given_name, str):
@@ -802,14 +876,16 @@ def _canonical_agent(value: Any) -> dict[str, Any] | None:
     url = value.get("url") or value.get("schema:url") or value.get("@id")
     if isinstance(url, str) and "://" in url:
         out["url"] = url
-    same_as = value.get("same_as") or value.get("sameAs") or value.get("schema:sameAs")
     if isinstance(same_as, str) and "://" in same_as:
         out["same_as"] = same_as
-    affiliation = value.get("affiliation") or value.get("schema:affiliation")
-    if isinstance(affiliation, Mapping):
-        nested = _canonical_agent(affiliation)
-        if nested is not None:
-            out["affiliation"] = nested
+    # One affiliation, or a list of them.
+    affiliations = value.get("affiliation") or value.get("schema:affiliation")
+    if isinstance(affiliations, Mapping):
+        affiliations = [affiliations]
+    if isinstance(affiliations, list):
+        nested = [org for item in affiliations if (org := _canonical_agent(item, organization_only=True)) is not None]
+        if nested:
+            out["affiliation"] = nested[0] if len(nested) == 1 else nested
     return out
 
 
@@ -916,7 +992,28 @@ def _canonical_distribution(value: Any) -> dict[str, Any] | None:
             out["checksum"] = {"algorithm": algorithm, "value": checksum_value}
     elif isinstance(value.get("schema:sha256"), str):
         out["checksum"] = {"algorithm": "sha256", "value": value["schema:sha256"]}
+    # Per-file measurement conditions (the SOC of one EIS file) are carried as they
+    # are given. Validation judges the keys.
+    conditions = value.get("conditions")
+    if isinstance(conditions, Mapping):
+        out["conditions"] = copy.deepcopy(dict(conditions))
     return out if ("content_url" in out or "encoding_format" in out or "checksum" in out) else None
+
+
+def _about_reference_kind(reference: str) -> str | None:
+    """What an entry of a dataset's ``about`` names: ``"cell"``, ``"test"``, or ``None`` for anything else.
+
+    A record IRI of either form is read by its segment (``battinfo.namespace.parse_record_iri``), so a cell spec or a material is neither. An IRI under the BattINFO root that is not a well-formed record IRI, one with a malformed uid for example, is still taken for a cell or a test by the ``/cell/`` or ``/test/`` in it, so that a save names it as the cell or test reference it fails to be. Every other entry is an external reference, a URL with ``/cell/`` in its path included.
+    """
+    parsed = parse_record_iri(reference)
+    if parsed is not None:
+        return parsed.segment if parsed.segment in ("cell", "test") else None
+    if reference.startswith(BATTINFO_ROOT):
+        if "/cell/" in reference:
+            return "cell"
+        if "/test/" in reference:
+            return "test"
+    return None
 
 
 def _canonical_table_column(value: Any) -> dict[str, Any] | None:
@@ -1057,13 +1154,18 @@ def _canonical_main_entity(value: Any) -> dict[str, Any] | None:
     return out
 
 
+# A component's manufacturer or supplier: a name, or an Organization object
+# ({name, id, url, same_as}) as modules/common/organization-ref.schema.json defines.
+OrgRef = str | dict[str, Any]
+
+
 class MaterialComponent(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
     material_spec_id: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     molecular_formula: str | None = None
     label: str | None = Field(
@@ -1096,8 +1198,8 @@ class Coating(BaseModel):
     # True when the current collector is coated on both sides, false for a
     # single-side coating.
     double_sided: bool | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1130,8 +1232,8 @@ class CurrentCollector(BaseModel):
         default=None,
         description="Optional canonical IRI of a standalone material-spec for the foil material — the same MaterialSpec -> component reference seam MaterialComponent carries.",
     )
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1148,8 +1250,8 @@ class CurrentCollectorTab(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, length, weld_width, tape_width
     comment: str | None = None
@@ -1199,8 +1301,8 @@ class Electrode(BaseModel):
     material: MaterialComponent | None = None
     current_collector: CurrentCollector | None = None
     tab: CurrentCollectorTab | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1215,8 +1317,8 @@ class SolventMixture(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     component: list[MaterialComponent] = Field(default_factory=list)
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1237,8 +1339,8 @@ class Salt(BaseModel):
     )
     cation: str | None = None
     anion: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     label: str | None = Field(
         default=None,
@@ -1273,8 +1375,8 @@ class Separator(BaseModel):
     material_spec_id: str | None = None
     structure: str | None = None  # monolayer | bilayer | trilayer | composite | other | unknown
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1293,10 +1395,11 @@ class Electrolyte(BaseModel):
     # is the deprecated wrapper spelling.
     solvent: MaterialComponent | list[MaterialComponent] | None = None
     solvent_mixture: SolventMixture | None = None
-    salt: Salt | None = None
+    # One salt, or a list for a multi-salt electrolyte.
+    salt: Salt | list[Salt] | None = None
     additive: list[MaterialComponent] = Field(default_factory=list)
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1324,8 +1427,8 @@ class Terminal(BaseModel):
     polarity: str | None = None  # "positive" | "negative"
     type: str | None = None  # tab | rivet | stud | threaded_post | other
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # width, thickness, weld_width, tape_width, length
     comment: str | None = None
@@ -1342,8 +1445,8 @@ class Seal(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     material: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # single_channel_thickness, top_corner_thickness
     comment: str | None = None
@@ -1362,8 +1465,8 @@ class Case(BaseModel):
     size_code: str | None = None
     material: str | None = None
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)  # wall_thickness, weight, available_volume, filling_ratio
     comment: str | None = None
@@ -1382,8 +1485,8 @@ class HardwarePart(BaseModel):
     type: str | None = None  # e.g. "cap", "lid", "can", "spring", "spacer"
     material: str | None = None
     coating: str | None = None
-    manufacturer: str | None = None
-    supplier: str | None = None
+    manufacturer: OrgRef | None = None
+    supplier: OrgRef | None = None
     product_id: str | None = None
     property: dict[str, Any] = Field(default_factory=dict)
     comment: str | None = None
@@ -1510,7 +1613,7 @@ class CellSpec(BundleJsonModel):
     kind: str = "CellSpec"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this cell-spec record (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this cell-spec record ({record_iri_forms('spec')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2194,7 +2297,7 @@ class Cell(BundleJsonModel):
     kind: str = "Cell"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this physical cell (https://w3id.org/battinfo/cell/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this physical cell ({record_iri_forms('cell')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2599,7 +2702,8 @@ class TestSpec(BundleJsonModel):
 
     Give the steps as PyBaMM-style strings with ``experiment=``
     (``["Charge at C/3 until 4.2 V", "Discharge at C/10 until 2.5 V"]``,
-    plus ``cycles=``) or as structured ``method`` steps, and the test type with
+    plus ``cycles=``, any whole number such as ``3`` or ``"3"``) or as
+    structured ``method`` steps, and the test type with
     ``kind=``. Each run of the procedure is a :class:`Test` that points at it:
     ``Test(protocol=spec, ...)`` or ``ws.add("test", spec=spec, ...)``.
     Save it with ``battinfo.save_test_spec``. A misspelled argument raises
@@ -2612,7 +2716,7 @@ class TestSpec(BundleJsonModel):
     __test__ = False
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this test spec (https://w3id.org/battinfo/spec/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this test spec ({record_iri_forms('spec')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2703,13 +2807,16 @@ class TestSpec(BundleJsonModel):
         if not isinstance(data, Mapping):
             return data
         out = dict(data)
+        # Any whole number counts ("100", 100.0, numpy.int64(100)); anything else raises.
+        cycles = out.get("cycles")
+        if cycles is not None:
+            cycles = _cycles_count(cycles)
         if not out.get("method"):
             source = out.get("experiment")
             if source is None:
                 source = out.get("steps")
             if source and all(isinstance(s, str) for s in source):
-                cycles = out.get("cycles")
-                out["method"] = parse_experiment(list(source), cycles if isinstance(cycles, int) else None)
+                out["method"] = parse_experiment(list(source), cycles)
         # Authoring-only keys are not model fields (extra="forbid").
         for key in ("experiment", "steps", "cycles"):
             out.pop(key, None)
@@ -2861,7 +2968,7 @@ class Test(BundleJsonModel):
     __test__ = False
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this test execution (https://w3id.org/battinfo/test/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this test execution ({record_iri_forms('test')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -2910,11 +3017,11 @@ class Test(BundleJsonModel):
     )
     equipment_id: str | None = Field(
         default=None,
-        description="IRI of the equipment unit the test ran on (https://w3id.org/battinfo/equipment/{uid}).",
+        description=f"IRI of the equipment unit the test ran on ({record_iri_forms('equipment')}).",
     )
     channel_id: str | None = Field(
         default=None,
-        description="IRI of the equipment channel the test ran on (https://w3id.org/battinfo/channel/{uid}).",
+        description=f"IRI of the equipment channel the test ran on ({record_iri_forms('channel')}).",
     )
     started_at: int | str | None = Field(
         default=None, description="When the test started: Unix seconds, ISO 8601 string, or datetime/date."
@@ -2922,6 +3029,11 @@ class Test(BundleJsonModel):
     ended_at: int | str | None = Field(
         default=None, description="When the test ended: Unix seconds, ISO 8601 string, or datetime/date."
     )
+    # Fields as an earlier release gave them, for the seed a colliding record is
+    # re-minted from (_workspace._content_seed); None leaves the field out. Set
+    # by ws.add() where it now fills a field that release left empty. Never
+    # written to a record.
+    _seed_fields: dict[str, Any] = PrivateAttr(default_factory=dict)
     dataset_ids: _StrList = Field(default_factory=list, description="IRIs of datasets produced by this test.")
     conformance: TestConformance | None = Field(
         default=None, description="Conformance of the execution against its test spec (status plus deviations)."
@@ -3175,6 +3287,8 @@ class Dataset(BundleJsonModel):
     members name it in ``series_id``. Save it with ``battinfo.save_dataset``.
     A misspelled argument raises ``TypeError`` with a did-you-mean; the
     fields below say what each holds.
+
+    Further cells and tests go in ``related_cell_ids`` and ``related_test_ids``, and whatever else the data is about, such as a cell spec, a material or an external URL, in ``related_ids``. A save writes them all to the record's ``about`` list, cells first, then tests, then the rest.
     """
 
     default_filename: ClassVar[str] = DATASET_FILENAME
@@ -3182,7 +3296,7 @@ class Dataset(BundleJsonModel):
     kind: str = "Dataset"
     id: str | None = Field(
         default=None,
-        description="Canonical IRI for this dataset (https://w3id.org/battinfo/dataset/{uid}); minted at save time when omitted.",
+        description=f"Canonical IRI for this dataset ({record_iri_forms('dataset')}); minted at save time when omitted.",
     )
     # Transient short id used only to mint the canonical IRI when no id is given; never serialized.
     uid: str | None = Field(
@@ -3217,15 +3331,16 @@ class Dataset(BundleJsonModel):
     creators: list[dict[str, Any]] = Field(
         default_factory=list,
         validation_alias=AliasChoices("creators", "creator"),
-        description="Creator agents; dicts with name and optionally orcid, given_name/family_name, affiliation.",
+        description="Creator agents; dicts with name and optionally orcid (saved as the person's same_as link), given_name/family_name, affiliation. An organization, an affiliation included, also takes id, its BattINFO organization IRI.",
     )
     publisher: dict[str, Any] | None = Field(
-        default=None, description="Publishing agent (name plus optional url/ROR sameAs)."
+        default=None,
+        description="Publishing organization (name plus optional id, its BattINFO organization IRI, url and ROR same_as).",
     )
     funders: list[dict[str, Any]] = Field(
         default_factory=list,
         validation_alias=AliasChoices("funders", "funder"),
-        description="Funding agents (name plus optional ROR sameAs).",
+        description="Funding agents (name plus optional ROR same_as; an organization also takes id, its BattINFO organization IRI).",
     )
     citations: list[dict[str, Any]] = Field(
         default_factory=list,
@@ -3290,8 +3405,14 @@ class Dataset(BundleJsonModel):
     published_at: int | str | None = Field(
         default=None,
         validation_alias=AliasChoices("published_at", "datePublished"),
-        description="Publication time; defaults to created_at.",
+        description="Publication time; empty until the dataset is published (ws.zenodo() sets it on publish).",
     )
+    # The published_at the 0.8.0 model gave a dataset that stated none: its created_at
+    # as validated (None without one). Not a publication time and never written to a
+    # record; only the content seed reads it (_workspace._content_seed).
+    _seed_published_at: int | str | None = PrivateAttr(default=None)
+    # Fields as an earlier release gave them, for the content seed (see Test._seed_fields).
+    _seed_fields: dict[str, Any] = PrivateAttr(default_factory=dict)
     temporal_coverage: str | None = Field(
         default=None,
         validation_alias=AliasChoices("temporal_coverage", "temporalCoverage"),
@@ -3344,6 +3465,10 @@ class Dataset(BundleJsonModel):
     )
     related_test_ids: _StrList = Field(
         default_factory=list, description="IRIs of additional related tests beyond the primary one."
+    )
+    related_ids: _StrList = Field(
+        default_factory=list,
+        description="IRIs of whatever else the dataset is about that is neither a cell nor a test, such as a cell spec, a material or an external URL (emitted after the cells and tests in the record's about list).",
     )
     test: Test | None = Field(
         default=None, exclude=True, repr=False, description="Linked test object (alternative to test_id)."
@@ -3436,7 +3561,7 @@ class Dataset(BundleJsonModel):
     @field_validator("publisher", mode="before")
     @classmethod
     def _coerce_publisher(cls, value: Any) -> dict[str, Any] | None:
-        return _canonical_agent(value)
+        return _canonical_agent(value, organization_only=True)
 
     @field_validator("funders", mode="before")
     @classmethod
@@ -3510,7 +3635,8 @@ class Dataset(BundleJsonModel):
         if self.modified_at is None:
             self.modified_at = self.created_at
         if self.published_at is None:
-            self.published_at = self.created_at
+            # Where 0.8.0 set published_at = created_at (see _seed_published_at).
+            self._seed_published_at = self.created_at
         if self.identifier is None and self.id is not None:
             self.identifier = _identifier("dataset", self.id)
         return self
@@ -3577,25 +3703,20 @@ class Dataset(BundleJsonModel):
         # to_record() emits the primary cell/test reference first (see there), so the
         # first id of each kind is the primary and the rest are related — reading the
         # FULL list back makes to_record→from_record→to_record a fixed point instead
-        # of silently dropping every reference after the first.
-        related_cell_id = None
-        related_test_id = None
-        related_cell_ids: list[str] = []
-        related_test_ids: list[str] = []
+        # of silently dropping every reference after the first. An entry that is
+        # neither a cell nor a test (a cell spec, a material, an external URL) is
+        # kept in related_ids, in the order given.
+        about_cell_ids: list[str] = []
+        about_test_ids: list[str] = []
+        related_ids: list[str] = []
         if isinstance(about, list):
             for item in about:
                 if not isinstance(item, str):
                     continue
-                if "/cell/" in item:
-                    if related_cell_id is None:
-                        related_cell_id = item
-                    elif item not in related_cell_ids:
-                        related_cell_ids.append(item)
-                elif "/test/" in item:
-                    if related_test_id is None:
-                        related_test_id = item
-                    elif item not in related_test_ids:
-                        related_test_ids.append(item)
+                kind = _about_reference_kind(item)
+                held = about_cell_ids if kind == "cell" else about_test_ids if kind == "test" else related_ids
+                if item not in held:
+                    held.append(item)
         distribution = dataset.get("distributions")
         checksum = ChecksumInfo()
         data_format = None
@@ -3626,7 +3747,7 @@ class Dataset(BundleJsonModel):
             version=dataset.get("version"),
             keywords=_string_list(dataset.get("keywords")),
             creators=_mapping_list(dataset.get("creators")),
-            publisher=_canonical_agent(dataset.get("publisher")),
+            publisher=_canonical_agent(dataset.get("publisher"), organization_only=True),
             funders=_mapping_list(dataset.get("funders")),
             citations=[
                 citation
@@ -3672,10 +3793,11 @@ class Dataset(BundleJsonModel):
                 dist for item in _mapping_list(distribution) if (dist := _canonical_distribution(item)) is not None
             ],
             checksum=checksum,
-            cell_instance_id=related_cell_id,
-            test_id=related_test_id,
-            related_cell_ids=related_cell_ids,
-            related_test_ids=related_test_ids,
+            cell_instance_id=about_cell_ids[0] if about_cell_ids else None,
+            test_id=about_test_ids[0] if about_test_ids else None,
+            related_cell_ids=about_cell_ids[1:],
+            related_test_ids=about_test_ids[1:],
+            related_ids=related_ids,
             source=_provenance_from_record(provenance),
             comment=[str(item) for item in notes],
         )
@@ -3744,14 +3866,13 @@ class Dataset(BundleJsonModel):
             dataset_obj["modified_at"] = self.created_at
         if self.published_at is not None:
             dataset_obj["published_at"] = self.published_at
-        elif self.created_at is not None:
-            dataset_obj["published_at"] = self.created_at
         if self.temporal_coverage is not None:
             dataset_obj["temporal_coverage"] = self.temporal_coverage
         if self.spatial_coverage is not None:
             dataset_obj["spatial_coverage"] = self.spatial_coverage
         # Primary references come FIRST so from_record() can recover the primary/related
         # split from the flat `about` list (first cell id = primary, rest = related).
+        # Cells, then tests, then every other reference, each written once.
         about = list(
             dict.fromkeys(
                 [
@@ -3759,6 +3880,7 @@ class Dataset(BundleJsonModel):
                     *self.related_cell_ids,
                     *([self.test_id] if self.test_id is not None else []),
                     *self.related_test_ids,
+                    *self.related_ids,
                 ]
             )
         )
@@ -4163,7 +4285,7 @@ class BattinfoBundle(BundleJsonModel):
                 )
                 if (agent := _canonical_agent(item)) is not None
             ],
-            publisher=_canonical_agent(dataset_node.get("schema:publisher")),
+            publisher=_canonical_agent(dataset_node.get("schema:publisher"), organization_only=True),
             funders=[
                 agent
                 for item in (

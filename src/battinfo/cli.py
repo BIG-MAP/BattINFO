@@ -126,6 +126,7 @@ from battinfo.demo import run_demo_pipeline, setup_demo_environment
 from battinfo.entities import ENTITY_KINDS
 from battinfo.ingest import build_ingest_workspace, inspect_ingest_root, publish_ingest_workspace, write_ingest_manifest
 from battinfo.local_workspace import LocalWorkspace
+from battinfo.namespace import DEFAULT_RECORD_BASE, record_iri_forms
 from battinfo.runtime import recover_notebook_runtime
 from battinfo.storage import build_uploader_from_env
 from battinfo.validate import get_validation_policy
@@ -3534,6 +3535,11 @@ def dataset_publish(
     ),
     community: str = typer.Option("battery-genome", "--community", help="Zenodo community identifier."),
     no_community: bool = typer.Option(False, "--no-community", help="Skip community submission."),
+    allow_unchecked_iris: bool = typer.Option(
+        False,
+        "--allow-unchecked-iris",
+        help="Deposit IRIs minted under /id/1001/ that the registry could not be asked about as they are.",
+    ),
 ) -> None:
     """Experimental: publish the processed contribution folder.
 
@@ -3582,6 +3588,7 @@ def dataset_publish(
             token=resolved_token,
             sandbox=sandbox,
             community=resolved_community,
+            allow_unchecked_iris=allow_unchecked_iris,
         )
     except FileNotFoundError as exc:
         console.print(f"[red]Error:[/red] {exc}")
@@ -3591,6 +3598,8 @@ def dataset_publish(
         raise typer.Exit(code=1) from exc
 
     console.print("[green]Deposit created (draft).[/green]")
+    for minted, held in sorted((result.get("adopted") or {}).items()):
+        console.print(f"  Adopted: {minted} -> {held}")
     console.print(f"  DOI:     {result.get('doi') or '(assigned on publication)'}")
     console.print(f"  Files:   {result['files_uploaded']} uploaded")
     console.print("  Review and publish at:")
@@ -3610,7 +3619,7 @@ def batch_init(
         ...,
         "--cell-spec",
         "-t",
-        help='Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. "Energizer CR2032".',
+        help=f'Cell spec: its IRI ({record_iri_forms("spec")}) or its manufacturer and model, e.g. "Energizer CR2032".',
     ),
     count: int = typer.Option(..., "--count", "-n", help="Number of cells received."),
     batch_id: str | None = typer.Option(None, "--batch-id", help="Batch / lot identifier."),
@@ -3632,6 +3641,12 @@ def batch_init(
         False,
         "--force",
         help="Write into an existing batch directory; its cell folders keep the IRIs their battinfo.yaml records.",
+    ),
+    base: str | None = typer.Option(
+        None,
+        "--base",
+        help="The base a new batch's records mint under (default https://w3id.org/battinfo/id/1001/; "
+        "https://w3id.org/battinfo/ for the old form). An existing batch keeps its own.",
     ),
 ) -> None:
     """Scaffold a multi-cell batch directory.
@@ -3675,6 +3690,7 @@ def batch_init(
             cell_iris=cell_iris_list,
             serial_numbers=serial_list,
             overwrite=overwrite,
+            base=base,
         )
     except (FileExistsError, ValueError) as exc:
         typer.echo(f"Error: {exc}", err=True)
@@ -4097,7 +4113,7 @@ def push(
         None,
         "--cell-spec",
         "-t",
-        help="Cell spec: its IRI (https://w3id.org/battinfo/spec/...) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders.",
+        help=f"Cell spec: its IRI ({record_iri_forms('spec')}) or its manufacturer and model, e.g. 'Energizer CR2032'. Required for unstructured folders.",
     ),
     cells: int | None = typer.Option(
         None, "--cells", "-n", help="Number of cells (auto-detected from filenames if omitted)."
@@ -4510,6 +4526,11 @@ def import_protocol(
     out: Path | None = typer.Option(
         None, "--out", help="Write the canonical test-protocol record here (default: stdout)."
     ),
+    base: str = typer.Option(
+        DEFAULT_RECORD_BASE,
+        "--base",
+        help="The base the record's IRI mints under; https://w3id.org/battinfo/ for the old form.",
+    ),
 ) -> None:
     """One-liner protocol import: executable file in, canonical record out.
 
@@ -4517,16 +4538,27 @@ def import_protocol(
     computational stays with the source file, which is linked back as the
     record's source_protocol artifact (with its sha256). Warnings list what
     did not carry over.
+
+    The IRI mints under --base. When --out already holds the record under
+    the other form of its IRI, the record keeps the IRI it has there.
     """
     import hashlib
 
-    from battinfo.entities import stable_uid
+    from battinfo.entities import is_dashed_uid, stable_uid
     from battinfo.interop import (
         import_aurora_unicycler,
         import_bmgen_jsonld,
         import_pybamm_experiment,
         import_ucp,
     )
+    from battinfo.namespace import base_prefix, record_iri, same_record
+
+    if uid is not None and not is_dashed_uid(uid):
+        raise typer.BadParameter("uid must be a dashed uid, xxxx-xxxx-xxxx-xxxx.", param_hint="--uid")
+    try:
+        prefix = base_prefix(base)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc), param_hint="--base") from exc
 
     raw = input_path.read_bytes()
     sha256 = hashlib.sha256(raw).hexdigest()
@@ -4576,7 +4608,15 @@ def import_protocol(
 
     # Deterministic identity: the same file imports to the same IRI.
     dashed = uid or stable_uid(f"test-protocol-import::{sha256}")
-    spec.id = f"https://w3id.org/battinfo/spec/{dashed}"
+    spec.id = record_iri("spec", dashed, prefix)
+    if out is not None and out.is_file():
+        # A file that already holds the record keeps the IRI it has there.
+        try:
+            held = json.loads(out.read_text(encoding="utf-8")).get("test_spec", {}).get("id")
+        except (OSError, ValueError, AttributeError):
+            held = None
+        if isinstance(held, str) and same_record(held, spec.id):
+            spec.id = held
     record = spec.to_record()
 
     for note in spec.comment or []:

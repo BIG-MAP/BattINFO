@@ -1,0 +1,24 @@
+{
+  "description": "Path segments under https://w3id.org/battinfo/ that are never record segments (IDENTIFIER_POLICY.md 6.1). Code that builds or serves these IRIs reads this file instead of keeping a list of its own.",
+  "segments": [
+    {"segment": "id", "reason": "Branch for records under a publisher prefix, id/{prefix}/{segment}/{uid}, and curated shared things, id/{uid}."},
+    {"segment": "def", "reason": "Branch for publishers' definitions, def/{prefix}/."},
+    {"segment": "ontology", "reason": "Held for the ontology's own documents."},
+    {"segment": "vocab", "reason": "The records vocabulary's own ontology IRI, vocab/records."},
+    {"segment": "doc", "reason": "Held for documentation pages."},
+    {"segment": "context", "reason": "The JSON-LD contexts, such as context/records/v1.json."},
+    {"segment": "resolver", "reason": "Held for the resolver's own endpoints."},
+    {"segment": "schema", "reason": "The JSON Schemas, such as schema/cell-spec.schema.json."},
+    {"segment": "shapes", "reason": "The namespace of the SHACL shapes shipped in battinfo/data/shapes."},
+    {"segment": "profile", "reason": "Profile IRIs, such as profile/cell-spec."},
+    {"segment": "ns", "reason": "The vocabulary's former address, ns and ns#; it answers with the vocabulary document."},
+    {"segment": "twin", "reason": "Held for registered twin instances."},
+    {"segment": "w3id", "reason": "The path under which the registry receives the requests w3id forwards to it."},
+    {"segment": "raw", "reason": "Files in the BattINFO repository, routed by the w3id rules."},
+    {"segment": "inferred", "reason": "The ontology with inferred axioms, routed by the w3id rules."},
+    {"segment": "turtle", "reason": "The ontology as Turtle, routed by the w3id rules."},
+    {"segment": "latest", "reason": "The newest ontology source, routed by the w3id rules."},
+    {"segment": "source", "reason": "The newest ontology source, routed by the w3id rules."},
+    {"segment": "versions", "reason": "The folder on GitHub Pages that holds each ontology release."}
+  ]
+}

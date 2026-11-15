@@ -1,0 +1,26 @@
+{
+  "schema_version": "0.2.0",
+  "cell_instance": {
+    "id": "https://w3id.org/battinfo/cell/cfdv-7qzr-ne91-2y8x",
+    "cell_spec_id": "https://w3id.org/battinfo/spec/5hy0-g0f7-bxzz-tmtm",
+    "name": "240616_bco_gr-NMC_01",
+    "serial_number": "empa__ccid_123456",
+    "manufactured_at": "2024-06-16"
+  },
+  "contributor": [
+    {
+      "type": "Person",
+      "name": "Corsin Battaglia",
+      "same_as": "https://orcid.org/0000-0002-5003-1134"
+    }
+  ],
+  "notes": [
+    "Assembled manually."
+  ],
+  "provenance": {
+    "source_type": "lab",
+    "source_name": "CatINFO converter coin cell template, filled example",
+    "workflow_version": "CoinCellSchema 2.0.0",
+    "retrieved_at": 1791936000
+  }
+}

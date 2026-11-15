@@ -76,9 +76,9 @@ def test_method_emits_emmo_process_graph() -> None:
 
     # Protocol-level ambient condition attaches as hasProperty on the procedure.
     prop = node["hasProperty"]
-    assert prop[0]["@type"] == "ConventionalProperty"
+    assert prop[0]["@type"] == "CelsiusTemperature"
     assert prop[0]["hasNumericalPart"]["hasNumberValue"] == 20
-    assert prop[0]["rdfs:label"] == "temperature"  # generic class → human label
+    assert prop[0]["skos:prefLabel"] == "temperature"  # the key, as on a test's condition
     assert "@id" in prop[0]["hasMeasurementUnit"]  # degC resolves
 
     # The method vocabulary must resolve in the document's own (inlined) context.
@@ -90,7 +90,7 @@ def test_method_emits_emmo_process_graph() -> None:
         "CRate",
         "LowerVoltageLimit",
         "ConstantCurrentDischarging",
-        "ConventionalProperty",
+        "CelsiusTemperature",
     ):
         assert term_name in ctx
     # Mapped conditions are NOT duplicated as schema:PropertyValue.

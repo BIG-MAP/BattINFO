@@ -39,7 +39,7 @@ record = create_current_collector_spec(
 {
   "schema_version": "0.2.0",
   "current_collector_spec": {
-    "id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
     "short_id": "7d9k2m",
     "name": "Aluminium foil",
     "material": "Al",
@@ -99,9 +99,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "hasMeasurementUnit": "https://w3id.org/emmo#MicroMetre"
     },
     "skos:prefLabel": "Aluminium foil",
-    "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5",
   "schema:name": "Aluminium foil"
 }
 ```
@@ -131,7 +131,7 @@ record = create_current_collector(
 {
   "schema_version": "0.2.0",
   "current_collector": {
-    "id": "https://w3id.org/battinfo/current-collector/7d9k-2m4p-8t3x-6nq5",
+    "id": "https://w3id.org/battinfo/id/1001/current-collector/7d9k-2m4p-8t3x-6nq5",
     "current_collector_spec_id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7",
     "short_id": "7d9k2m",
     "lot_id": "AL15-2026-031"
@@ -159,7 +159,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": "CurrentCollector",
-  "@id": "https://w3id.org/battinfo/current-collector/7d9k-2m4p-8t3x-6nq5",
+  "@id": "https://w3id.org/battinfo/id/1001/current-collector/7d9k-2m4p-8t3x-6nq5",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/y9xy-kr0v-y5tn-dfj7"
   }

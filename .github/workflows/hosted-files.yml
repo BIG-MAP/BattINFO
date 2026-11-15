@@ -8,9 +8,11 @@
 #   release.yml compares every hosted file with the tag's copies before an
 #   upload; this keeps watching afterwards.
 # - ontology: https://w3id.org/battinfo declares the last release's versionIRI
-#   and imports, and https://w3id.org/battinfo/X.Y.Z and the versionIRI serve
-#   its battinfo.ttl. The tag's docs deploy publishes those files, so this is
-#   checked after the release and never gates the upload.
+#   and imports, https://w3id.org/battinfo/X.Y.Z and the versionIRI serve its
+#   battinfo.ttl, /inferred and /X.Y.Z/inferred serve its battinfo-inferred.ttl
+#   or, when the deploy made none, a 404, and the 0.8.0-beta IRIs serve the
+#   2024 file. The tag's docs deploy publishes those files, so this is checked
+#   after the release and never gates the upload.
 name: Hosted files
 
 on:

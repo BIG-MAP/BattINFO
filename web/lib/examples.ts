@@ -52,7 +52,7 @@ result = publish(
     destination="local",
 )
 print(result.canonical_iri)
-# https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`;
+# https://w3id.org/battinfo/id/1001/spec/3hyc-t4vk-5fd4-shea`;
 
 export const installSnippet = `python -m venv .venv
 # macOS / Linux:

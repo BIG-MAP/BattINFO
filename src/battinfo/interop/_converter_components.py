@@ -21,6 +21,8 @@ from typing import Any
 
 from battinfo.api import UID_ALPHABET, _normalized_dashed_uid
 from battinfo.api._components import create_component_spec, create_material_spec
+from battinfo.entities import seed_iri
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 # EMMO / QUDT unit token (any prefix) → canonical BattINFO unit text.
 _UNIT = {
@@ -168,9 +170,11 @@ def _substance_type(node: Mapping[str, Any], roles: set[str]) -> str | None:
 
 
 class _Extractor:
-    def __init__(self, seed: str, validate: bool) -> None:
-        self.seed = seed
+    def __init__(self, seed: str, validate: bool, base: str = DEFAULT_RECORD_BASE) -> None:
+        # The seed is often the cell spec's IRI; it enters in the old form (entities.seed_iri).
+        self.seed = seed_iri(seed)
         self.validate = validate
+        self.base = base
         self._materials: dict[str, dict[str, Any]] = {}
         self.out = ComponentExtraction()
 
@@ -182,6 +186,7 @@ class _Extractor:
         if name not in self._materials:
             rec = create_material_spec(
                 validate=self.validate,
+                base=self.base,
                 uid=_uid(self.seed, "material", name, material_class),
                 name=name,
                 material_class=material_class,
@@ -244,6 +249,7 @@ class _Extractor:
         rec = create_component_spec(
             "electrode",
             validate=self.validate,
+            base=self.base,
             uid=_uid(self.seed, "electrode", polarity),
             name=f"{active_name} {polarity} electrode",
             polarity=polarity,
@@ -274,6 +280,7 @@ class _Extractor:
         rec = create_component_spec(
             "electrolyte",
             validate=self.validate,
+            base=self.base,
             uid=_uid(self.seed, "electrolyte"),
             name="Electrolyte",
             body=body,
@@ -294,6 +301,7 @@ class _Extractor:
         rec = create_component_spec(
             "separator",
             validate=self.validate,
+            base=self.base,
             uid=_uid(self.seed, "separator"),
             name="Separator",
             body=body,
@@ -302,9 +310,11 @@ class _Extractor:
         self.out.separator_specs.append(rec)
 
 
-def extract_component_specs(coin_cell: Mapping[str, Any], *, seed: str, validate: bool = True) -> ComponentExtraction:
-    """Walk a converter CoinCell node into deduplicated canonical component specs."""
-    ex = _Extractor(seed, validate)
+def extract_component_specs(
+    coin_cell: Mapping[str, Any], *, seed: str, validate: bool = True, base: str = DEFAULT_RECORD_BASE
+) -> ComponentExtraction:
+    """Walk a converter CoinCell node into deduplicated canonical component specs, minted under *base*."""
+    ex = _Extractor(seed, validate, base)
     for relation, polarity, setter in (
         ("hasPositiveElectrode", "positive", "positive_electrode_spec_id"),
         ("hasNegativeElectrode", "negative", "negative_electrode_spec_id"),

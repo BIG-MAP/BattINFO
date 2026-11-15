@@ -1,0 +1,106 @@
+# Battery Data Commons vocabulary, release 1.0.0
+#
+# Publisher: Battery Data Commons, prefix 1002 in src/battinfo/data/namespace/prefixes.json.
+# A released folder is never edited; a change is a new release in a new folder.
+#
+# Ported from the vocabulary Battery Data Commons used before it took prefix 1002. The six
+# concepts, their labels, definitions, scope notes and matches are unchanged; their IRIs moved
+# from https://w3id.org/battery-data-commons/vocab/ to https://w3id.org/battinfo/def/1002/,
+# and the scheme is now def/1002/DatasetKind, titled "Dataset kinds". Added: the ontology header
+# and rdfs:isDefinedBy.
+# The labels of the EMMO classes named in skos:relatedMatch are comments here, not statements
+# about those classes.
+#
+# Licence of this file: CC BY 4.0, whatever the licence of the repository that holds it.
+
+@prefix bdcv:    <https://w3id.org/battinfo/def/1002/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix emmo:    <https://w3id.org/emmo#> .
+@prefix echem:   <https://w3id.org/emmo/domain/electrochemistry#> .
+@prefix battery: <https://w3id.org/emmo/domain/battery#> .
+
+<https://w3id.org/battinfo/def/1002> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/battinfo/def/1002/1.0.0> ;
+    owl:versionInfo "1.0.0" ;
+    dcterms:issued "2026-10-28"^^xsd:date ;
+    dcterms:title "Battery Data Commons vocabulary"@en ;
+    dcterms:description "Terms defined by Battery Data Commons under its publisher prefix 1002. Release 1.0.0 holds one concept scheme: the kinds of dataset the catalogue records."@en ;
+    dcterms:publisher [ a foaf:Organization ;
+        foaf:name "Battery Data Commons" ;
+        foaf:homepage <https://batterydatacommons.org/> ] ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+bdcv:DatasetKind a skos:ConceptScheme ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    dcterms:title "Dataset kinds"@en ;
+    skos:definition "The kinds of dataset catalogued by Battery Data Commons. A dataset record carries one primary kind (data_group) and may carry further kinds (categories); all are expressed as dcat:theme on the dataset."@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    skos:hasTopConcept bdcv:PerformanceData, bdcv:DurabilityData, bdcv:SafetyData, bdcv:FieldData, bdcv:ModelingData .
+
+bdcv:PerformanceData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:topConceptOf bdcv:DatasetKind ;
+    skos:notation "PerformanceData" ;
+    skos:prefLabel "Performance data"@en ;
+    skos:altLabel "performance"@en ;
+    skos:definition "Datasets from laboratory tests that characterise how a cell performs at a given point in its life: capacity, internal resistance, impedance, open-circuit voltage, and their dependence on rate, temperature and state of charge."@en ;
+    skos:scopeNote "Typically reference performance tests at one or a few states of health. A dataset that follows the same quantities through ageing is durability data."@en ;
+    skos:relatedMatch echem:electrochemistry_c7e37e88_ed86_4acd_99ee_b6a2a5fcbd24 .    # ReferencePerformanceTest
+
+bdcv:DurabilityData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:topConceptOf bdcv:DatasetKind ;
+    skos:notation "DurabilityData" ;
+    skos:prefLabel "Durability data"@en ;
+    skos:altLabel "durability"@en ;
+    skos:definition "Datasets that follow cells through ageing: cycling or calendar-ageing campaigns, usually with periodic check-ups, so that the change of performance over life can be studied."@en ;
+    skos:scopeNote "Includes the check-up measurements taken during the campaign. The ageing protocol is described in the record's durability block."@en ;
+    skos:relatedMatch echem:electrochemistry_435b22d4_c441_45ea_8c79_0cbec11fd287 .    # CyclingTest
+
+bdcv:SafetyData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:topConceptOf bdcv:DatasetKind ;
+    skos:notation "SafetyData" ;
+    skos:prefLabel "Safety data"@en ;
+    skos:altLabel "safety"@en ;
+    skos:definition "Datasets from abuse and safety testing: thermal, mechanical or electrical abuse, thermal runaway, and the heat, gas and venting behaviour observed."@en ;
+    skos:relatedMatch battery:battery_0415f8c5_ac75_4020_b339_bba5a4f5aef4 .    # ThermalRunawayTest
+
+bdcv:FieldData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:topConceptOf bdcv:DatasetKind ;
+    skos:notation "FieldData" ;
+    skos:prefLabel "Field data"@en ;
+    skos:altLabel "field"@en ;
+    skos:definition "Datasets recorded from cells, modules or packs in service outside the laboratory, such as vehicles and stationary storage, including drive-cycle and usage logs."@en ;
+    skos:scopeNote "Field data says where the data came from, not what it measures; a field dataset often also carries performance or durability information and may be classified under those kinds as well."@en .
+
+bdcv:ModelingData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:topConceptOf bdcv:DatasetKind ;
+    skos:notation "ModelingData" ;
+    skos:prefLabel "Modelling data"@en ;
+    skos:altLabel "modelling"@en ;
+    skos:definition "Datasets produced by or for models: parameter sets, simulation inputs and outputs, and the measurements used to fit or validate a model."@en ;
+    skos:narrower bdcv:SyntheticData ;
+    skos:relatedMatch emmo:EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b .    # Simulation
+
+bdcv:SyntheticData a skos:Concept ;
+    rdfs:isDefinedBy <https://w3id.org/battinfo/def/1002> ;
+    skos:inScheme bdcv:DatasetKind ;
+    skos:notation "SyntheticData" ;
+    skos:prefLabel "Synthetic data"@en ;
+    skos:definition "Datasets generated by simulation or generative methods rather than measured on physical cells."@en ;
+    skos:scopeNote "A kind of modelling data. Assigned when a modelling record describes its data as synthetic."@en ;
+    skos:broader bdcv:ModelingData ;
+    skos:relatedMatch emmo:EMMO_9335cf09_431f_4613_9dab_ce4ceaca965b .    # Simulation

@@ -43,6 +43,8 @@ from battinfo._util import file_uri_to_path, lexical_key, local_file_references,
 from battinfo.publication import check_artifact_conformance, plan_artifact_inclusion
 from battinfo.ws import AuthoringWorkspace, _import_resolve_source
 
+pytestmark = pytest.mark.usefixtures("registry_holds_none")  # deposits ask the registry first (#483)
+
 CREATORS = [{"name": "Doe, Jane"}]
 CSV = "test_time_second,voltage_volt,current_ampere\n0,3.0,0\n60,3.5,0.001\n"
 RECORD_URL = "https://zenodo.org/records/1"

@@ -1,0 +1,37 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <https://w3id.org/battinfo/def/1000/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# A test fixture, laid out as def/README.md describes a release. It is never
+# published.
+
+<https://w3id.org/battinfo/def/1000> a owl:Ontology ;
+    owl:versionIRI <https://w3id.org/battinfo/def/1000/1.1.0-beta.1> ;
+    owl:versionInfo "1.1.0-beta.1" ;
+    owl:priorVersion <https://w3id.org/battinfo/def/1000/1.0.0> ;
+    dcterms:title "Example vocabulary"@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> .
+
+ex:Sample a owl:Class ;
+    rdfs:label "sample"@en ;
+    skos:definition "A piece of material taken for a measurement."@en .
+
+ex:hasHolder a owl:ObjectProperty ;
+    rdfs:label "has holder"@en ;
+    rdfs:comment "Links a sample to the thing that holds it."@en .
+
+ex:OldName a owl:Class ;
+    rdfs:label "old name"@en ;
+    skos:definition "A class that a later release replaces."@en ;
+    owl:deprecated true ;
+    dcterms:isReplacedBy ex:NewName .
+
+ex:NewName a owl:Class ;
+    rdfs:label "new name"@en ;
+    skos:definition "The class that replaces old name."@en .
+
+ex:Dry a skos:Concept ;
+    skos:prefLabel "dry"@en, "trocken"@de ;
+    skos:definition "Held below 1 % relative humidity."@en .

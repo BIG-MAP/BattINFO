@@ -52,12 +52,13 @@ WAIVERS: dict[str, str] = {
     "src/battinfo/interop/discovery.py": "reads Discovery-Benchmark RO-Crates (external shape)",
     # Web surfaces taught the described-side location.
     "web/lib/jsonld-workbench.ts": "reads described side first with top-level fallback",
-    "web/lib/create-model.ts": "teaching emitter (writes the described-side shape)",
     "web/components/jsonld-graph.tsx": "generic graph walker (shape-agnostic, depth covers the extra level)",
-    "web/scripts/check-create-model-terms.ts": "shape guard for the create-model emitter",
     "web/scripts/check-jsonld-workbench.ts": "CI check exercising the canonical (described-side) example",
     # Vocabulary tables, not graph readers.
     "src/battinfo/electrodes.py": "role -> relation vocabulary table (no graph access)",
+    # Reads instance nodes only: a cell instance is the physical individual, so its
+    # properties and electrode roles sit on the node, with no description to walk.
+    "src/battinfo/validate/publication.py": "record fidelity check reads cell-instance nodes (physical, no description)",
 }
 
 

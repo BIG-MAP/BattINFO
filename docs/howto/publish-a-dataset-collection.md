@@ -115,7 +115,7 @@ for issue in report.issues:
 assert not report.issues
 ```
 
-A clean run prints `Gold-standard: PASS (no validation issues)`. The checks that matter for a collection:
+A clean run prints `Gold-standard: PASS (no validation issues)`. Errors make `ws.zenodo()` refuse the deposit; warnings do not. The preview also compares each test, cell and dataset node with the record it came from and warns, as `publication.record_field_not_emitted`, about a field the record fills and the node does not carry; the count is printed next to the node count. `battinfo.validate.record_fidelity_report(graph, record_sets)` runs that comparison on its own. The checks that matter for a collection:
 
 - every member needs a non-empty `schema:about` and at least one distribution; the collection is exempt from both;
 - a member's `dcat:inSeries` must point at a node typed `dcat:DatasetSeries` when that node is in the graph (`publication.series_target_not_series` otherwise);
@@ -174,14 +174,17 @@ Once the preview is clean, publish as usual. The deposit carries the collection 
 result = ws.zenodo(
     title="Graphite half-cell pOCV",
     creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    allow_unchecked_iris=True,
 )
 ```
 
+Before it sends anything, `ws.zenodo()` asks the workspace's registry whether it already holds any of these records under the older form of its IRI; the workspace on this page was opened with `registry_url=None`, so there is no registry to ask, and `allow_unchecked_iris=True` tells the call to deposit the IRIs as they are, with a warning, instead of stopping.
+
 `ws.zenodo()` leaves a draft unless you pass `publish=True`. To send the records to the registry instead, use `ws.submit(submit_all=True)`. The `submit_all` flag matters here: `ws.submit()` normally sends only the records this session wrote with `ws.save()` or `ws.add("equipment")`, and datasets written with `save_dataset` are not among them.
 
-The registry route refuses any record that still points at a file on your computer: a `file:///` or plain path in an access URL, a distribution's content URL, a download URL or `provenance.source_url`, or an absolute path in a `source_file` or an artifact `locator`. The registry would publish that path as the download link, and nobody else can follow it. `ws.submit()` lists each such record and field and sends nothing. The members in this example already point at Zenodo, so they pass. For datasets made from local files, run `ws.zenodo()` first: it uploads the files and points each record at its deposited copy, a draft's as well as a published one's, and `ws.submit()` then sends https URLs. A draft's URLs work once it is published. `ws.submit()` records the deposit's DOI as `provenance.citation_doi` only on the records the deposit holds, and only once it is published on zenodo.org; it checks a draft with Zenodo first, when `ZENODO_API_TOKEN` is set, in case you published it on the website. A sandbox deposit (`sandbox=True`) is a dry run: it leaves the records pointing at their local files, and `ws.submit()` still refuses them. Only for a local test registry, `ws.submit(allow_local_files=True)` lifts the check.
+The registry route refuses any record that still points at a file on your computer: a `file:///` or plain path in an access URL, a distribution's content URL, a download URL or `provenance.source_url`, or an absolute path in a `source_file` or an artifact `locator`. The registry would publish that path as the download link, and nobody else can follow it. `ws.submit()` lists each such record and field and sends nothing. The members in this example already point at Zenodo, so they pass. For datasets made from local files, run `ws.zenodo()` first: it uploads the files and points each record at its deposited copy, a draft's as well as a published one's, and `ws.submit()` then sends https URLs. A draft's URLs work once it is published. `ws.submit()` records the deposit's DOI as `provenance.citation_doi` only on the records the deposit holds, and only once it is published on zenodo.org; it checks a draft with Zenodo first, when `ZENODO_API_TOKEN` is set, in case you published it on the website, and the datasets of a draft it finds published get their `published_at` then. A sandbox deposit (`sandbox=True`) is a dry run: it leaves the records pointing at their local files, and `ws.submit()` still refuses them. Only for a local test registry, `ws.submit(allow_local_files=True)` lifts the check.
 
-`.battinfo/zenodo.json` names the Zenodo record the workspace continues on zenodo.org, and `.battinfo/zenodo-sandbox.json` the one on the sandbox, so a sandbox record and a production one never mix, and nothing needs deleting between a dry run and the real deposit. `.battinfo/deposit-files.json` keeps the local file behind each deposited copy. A record that points at its copy therefore keeps its data in the next deposit, whether that is a new version, a retry after a failed run or a new record, and when its local file is gone, a new version keeps the copy it takes over from the one before. A draft of a new version leaves a record on the published copy until the draft is published, since that URL works meanwhile. A data file that changed since it was added is deposited as it is now, and the deposit graph and the record state its new sha256. A dataset that points at a Zenodo copy the workspace cannot account for, such as a file in a draft that was never published, or a copy that the record a new deposit starts from does not hold, stops `ws.zenodo()` before anything is created, and the message names the dataset. Run the `ws.add("test", ..., data=...)` call that added its file again, then `ws.save()`, to point it at the local file.
+`.battinfo/zenodo.json` names the Zenodo record the workspace continues on zenodo.org, and `.battinfo/zenodo-sandbox.json` the one on the sandbox, so a sandbox record and a production one never mix, and nothing needs deleting between a dry run and the real deposit. `.battinfo/deposit-files.json` keeps the local file behind each deposited copy. A record that points at its copy therefore keeps its data in the next deposit, whether that is a new version, a retry after a failed run or a new record, and when its local file is gone, a new version keeps the copy it takes over from the one before, and the run prints a line that names the file and the path it looked for. A file in the workspace folder is listed there by its path inside the folder, so a workspace whose records point at their deposited copies can be renamed, moved or copied to another computer between deposits. A draft of a new version leaves a record on the published copy until the draft is published, since that URL works meanwhile. A data file that changed since it was added is deposited as it is now, and the deposit graph and the record state its new sha256. A dataset that points at a Zenodo copy the workspace cannot account for, such as a file in a draft that was never published, or a copy that the record a new deposit starts from does not hold, stops `ws.zenodo()` before anything is created, and the message names the dataset. Run the `ws.add("test", ..., data=...)` call that added its file again, then `ws.save()`, to point it at the local file.
 
 A deposit archives data files that `ws.upload()` put in R2 storage only when you ask for it. When the records point at such files, `ws.zenodo()` and `ws.publish(zenodo=True)` stop before anything is sent, and the message names the files. With R2 storage configured, `ws.publish(zenodo=True)` stops the same way before it uploads, since it puts the files in R2 first. Pass `archive_hosted_files=True` to archive them from their local files. The records keep their R2 URLs, and a warning names each file from the private bucket (`ws.upload(public=False)`), since the deposit makes it public.
 
@@ -200,3 +203,90 @@ ws.save()
 ```
 
 `series_id` takes the collection's IRI and nothing else. A value that is not a `https://w3id.org/battinfo/dataset/...` IRI is refused before any record is created, and so is `series_id` without `data=`. Membership is not part of a record's identity, so adding or dropping `series_id` never moves the IRI of the test or its datasets. The collection itself is still saved with `Dataset` and `save_dataset`, before its members, as in step 2. `ws.zenodo()` uploads the data file with the deposit and points the dataset's distribution at its copy there.
+
+## Deposit options
+
+`ws.zenodo()` fills in the Zenodo form from the workspace, and a few keywords change what it sends. Without them the deposit is the one described above.
+
+<!-- doc-snippet: skip -->
+```python
+result = ws.zenodo(
+    title="Graphite half-cell pOCV",
+    description="Pseudo-OCV curves of four graphite coin half cells.\n\nOne dataset per cell.",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    keywords=["graphite", "pseudo-OCV"],
+    auto_keywords=False,
+    access_right="embargoed",
+    embargo_date="2027-06-30",
+    related_identifiers=[{"identifier": "10.1234/example", "relation": "isSupplementTo"}],
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
+    allow_unchecked_iris=True,
+)
+```
+
+- `access_right` is `"open"` unless you pass `"embargoed"`, `"restricted"` or `"closed"`. An embargo needs `embargo_date`, the day the files open, which has to be after today, and restricted access needs `access_conditions`.
+- `version` goes on the form and into the deposit graph as `schema:version`. Without `publication_date`, Zenodo dates the record the day it is published.
+- Zenodo's related identifiers go in `related_identifiers`; the page of a funding project set with `ws.project()` is added after them.
+- Zenodo shows the description as HTML, so a description of several paragraphs, separated by blank lines, goes to the form as HTML paragraphs. The deposit graph keeps the text as you wrote it.
+- The form's keywords start with `BattINFO`, `battery`, `electrochemistry` and the manufacturer, model, chemistry, format and IEC code of each saved cell spec. With `auto_keywords=False` only `keywords` are sent. A keyword that differs from an earlier one only in case, spaces, hyphens, underscores or slashes is sent once, but synonyms such as `li-ion` and `lithium-ion battery` are both kept.
+- `publisher` is the organisation the deposit graph names as its publisher, by name, by ROR (`"ror"`) or by registry organization IRI (`"id"`). Without it the graph takes the first affiliation among the creators and contributors. Zenodo's form does not get it.
+- `bdf_version` is the Battery Data Format version your BDF data files follow, such as `"1.3.0"`. Each of them then names that version's table schema (`dcterms:conformsTo`). Without it they name the unversioned schema, because a data file does not record the version it was written in.
+- The deposit joins the `battery-knowledge-base` community unless you pass another one as `community`, or `None`.
+
+Zenodo takes at most 100 files in one record by default. A deposit of more than 90 data files is therefore zipped one archive per test kind, which is `bundle="by_kind"`, the default. `bundle="single"` zips every data file into one archive, named by `archive_name` (`data.zip` when not given), however few there are. `bundle="none"` deposits each file as itself, and `ws.zenodo()` warns before it sends anything when the deposit would then hold more than 100 files. A dataset whose file is in an archive links to the archive and names its own file, in a node whose `@id` is the archive's URL with the file's name as the fragment (`.../files/data.zip#C01.csv`). `ws.publish(zenodo=True)` has no `bundle` option, and without R2 storage it refuses a deposit of more than 90 data files, since the registry cannot yet point a record at a file inside an archive.
+
+The deposit graph names the concept record, the Zenodo record that groups every version, as `dcterms:isVersionOf`, and the version a new version follows as `dcat:previousVersion`. `ws.zenodo()` takes both from Zenodo. `ws.preview_jsonld()` has no deposit to ask, so give them there as `is_version_of` and `previous_version`, with the other options that reach the graph:
+
+```python
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    version="2.0.0",
+    is_version_of="https://zenodo.org/records/1234566",
+    previous_version="https://zenodo.org/records/1234567",
+    publisher={"name": "Example Lab", "ror": "https://ror.org/01abcde23"},
+    bundle="single",
+    archive_name="ocv-study__data.zip",
+    bdf_version="1.3.0",
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print(catalog["dcterms:isVersionOf"], catalog["dcat:previousVersion"])
+```
+
+`ws.preview_rocrate()` takes `bundle`, `archive_name` and `extra_files` as well.
+
+## What the deposit holds
+
+A deposit made with `ws.zenodo()` holds the files below and no others.
+
+- The data files the dataset records name, with the test and protocol files the records point at, each under its own name. When the deposit is zipped (more than 90 such files under `bundle="by_kind"`, or `bundle="single"`), the zip archives take their place.
+- `battinfo.json`, the deposit graph, which describes every record of the deposit. `ws.import_()` rebuilds a workspace from it.
+- `ro-crate-metadata.json`, an RO-Crate that lists `battinfo.json` and every other file, the data files and extra files with their size and sha256.
+- Any extra files you pass in `extra_files`.
+
+`battinfo.bundle.json` is never part of a workspace deposit. Only `build_zenodo_package()`, which `battinfo batch package` runs, writes that file.
+
+Extra files, such as a README or a list of checksums, document the deposit as a whole. They belong to no dataset and are not distributions. Each goes up as itself, never zipped. The RO-Crate lists it as a `File`, and the catalog of the deposit graph lists it under `schema:hasPart`, after the member datasets, as a `schema:DigitalDocument` with its media type, size and sha256. `dcat:dataset` still names the datasets alone.
+
+```python
+Path("ocv-study", "README.md").write_text(
+    "# Graphite half-cell pOCV\n\nOne dataset per cell, one file per dataset.\n", encoding="utf-8"
+)
+preview = ws.preview_jsonld(
+    title="Graphite half-cell pOCV",
+    creators=[{"name": "Doe, Jane", "orcid": "0000-0002-1825-0097"}],
+    extra_files=["README.md"],
+)
+catalog = next(node for node in json.loads(preview.read_text(encoding="utf-8"))["@graph"]
+               if "dcat:Catalog" in node["@type"])
+print([part["schema:name"] for part in catalog["schema:hasPart"] if "schema:name" in part])  # ['README.md']
+```
+
+A relative path is read from the workspace folder, and each file keeps its own name. To give one another name in the deposit, pass a mapping of path to name instead of a list, such as `{"notes/readme-v2.md": "README.md"}`. Before anything is sent, `ws.zenodo()` refuses a path that is not a file, and a name the deposit already gives a data file, an archive, `battinfo.json`, `ro-crate-metadata.json` (or the names `battinfo.jsonld` and `ro-crate-metadata.jsonld`, which readers also look for) or another extra file, whatever its case. Extra files count toward the 100 files Zenodo takes in one record.
+
+`.battinfo/zenodo.json` (`.battinfo/zenodo-sandbox.json` on the sandbox) records the names of the extra files. Each run describes the whole deposit, so pass the same `extra_files` every time. A file that has not changed stays on the draft as it is and a changed one is replaced. One that a draft run leaves out is removed from the draft, and the run warns, naming it. A publish that would leave one out of the published record is refused before anything is sent, unless you pass `extra_files=[]`. `ws.publish(zenodo=True)` passes no extra files, so publish a draft that holds them with `ws.zenodo(publish=True, extra_files=[...])`.

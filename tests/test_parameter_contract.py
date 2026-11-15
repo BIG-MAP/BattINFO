@@ -49,7 +49,10 @@ from battinfo.parameters import (
 )
 from battinfo.validate.record import validate_record_report
 
-DATASET_IRI = re.compile(r"^https://w3id\.org/battinfo/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$")
+# A new parameter set mints under /id/1001/ (IRI ruling, decision 5).
+DATASET_IRI = re.compile(
+    r"^https://w3id\.org/battinfo/id/1001/dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+)
 LEGACY_IRI = "https://w3id.org/battinfo/spec/8qqs-rh43-wt8d-172n"
 CELL_SPEC_IRI = "https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd"
 MATERIAL_SPEC_IRI = "https://w3id.org/battinfo/spec/cccc-dddd-eeee-ffff"
@@ -108,8 +111,8 @@ def test_claim_batch_seed_is_the_registry_contract() -> None:
     # and their replacements rely on the seed, so the literal uids are pinned.
     body = _record(name="  Chen 2020 - Graphite ")["parameter_set"]
     seed = "parameter-claims:graphite:material:chen 2020 - graphite"
-    assert body["id"] == f"https://w3id.org/battinfo/dataset/{stable_uid(seed)}"
-    assert body["id"] == "https://w3id.org/battinfo/dataset/xm4e-fr60-10y6-ajqh"
+    assert body["id"] == f"https://w3id.org/battinfo/id/1001/dataset/{stable_uid(seed)}"
+    assert body["id"] == "https://w3id.org/battinfo/id/1001/dataset/xm4e-fr60-10y6-ajqh"
     assert body["short_id"] == "xm4efr"
     electrode = _record(
         material_kind=None,
@@ -118,7 +121,7 @@ def test_claim_batch_seed_is_the_registry_contract() -> None:
         electrode_polarity="negative",
         name="Fit - cell",
     )["parameter_set"]
-    assert electrode["id"] == "https://w3id.org/battinfo/dataset/" + stable_uid(
+    assert electrode["id"] == "https://w3id.org/battinfo/id/1001/dataset/" + stable_uid(
         f"parameter-claims:{CELL_SPEC_IRI}:electrode:negative:fit - cell"
     )
 
@@ -126,7 +129,7 @@ def test_claim_batch_seed_is_the_registry_contract() -> None:
 def test_explicit_id_must_be_a_dataset_iri() -> None:
     pinned = "https://w3id.org/battinfo/dataset/aaaa-bbbb-cccc-dddd"
     assert _record(id=pinned)["parameter_set"]["id"] == pinned
-    assert _record(uid="aaaa-bbbb-cccc-dddd")["parameter_set"]["id"] == pinned
+    assert _record(uid="aaaa-bbbb-cccc-dddd")["parameter_set"]["id"] == pinned.replace("battinfo/", "battinfo/id/1001/")
     with pytest.raises(ValueError, match="dataset/"):
         _record(id="https://w3id.org/battinfo/spec/aaaa-bbbb-cccc-dddd")
 

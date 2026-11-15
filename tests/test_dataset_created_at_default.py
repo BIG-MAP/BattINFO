@@ -108,7 +108,8 @@ def test_without_either_date_created_at_is_the_save_time(tmp_path: Path) -> None
         tmp_path,
     )
     assert before <= record["dataset"]["created_at"] <= int(time.time()) + 1
-    assert record["dataset"]["published_at"] == record["dataset"]["created_at"]
+    # Saving does not publish: published_at stays empty (tests/test_dataset_published_at.py).
+    assert "published_at" not in record["dataset"]
 
 
 def test_the_ordering_rule_still_holds(tmp_path: Path) -> None:

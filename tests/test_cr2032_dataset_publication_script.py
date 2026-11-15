@@ -318,7 +318,7 @@ def test_publish_object_first_api(tmp_path: Path) -> None:
     assert Path(result["publish_path"]).exists()
     assert Path(result["bundle_dir"]).exists()
     assert Path(result["html_path"]).exists()
-    assert result["cell_spec_id"].startswith("https://w3id.org/battinfo/spec/")
+    assert result["cell_spec_id"].startswith("https://w3id.org/battinfo/id/1001/spec/")
 
     loaded = load_publication(dataset_dir / "battinfo.publish.jsonld")
     assert loaded.cell_spec.id == result["cell_spec_id"]

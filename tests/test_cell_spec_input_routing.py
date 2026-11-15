@@ -50,7 +50,7 @@ def test_routed_builder_mints_id_short_id_and_identifier_from_uid() -> None:
         )
     )
     cs = rec["cell_spec"]
-    assert cs["id"] == "https://w3id.org/battinfo/spec/1c4m-7p9q-2k6t-8v3r"
+    assert cs["id"] == "https://w3id.org/battinfo/id/1001/spec/1c4m-7p9q-2k6t-8v3r"
     assert cs["short_id"] == "1c4m7p"
     assert cs["identifier"] == "cell-spec:1c4m-7p9q-2k6t-8v3r"
     assert cs["name"] == "Acme X"

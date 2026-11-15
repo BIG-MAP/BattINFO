@@ -12,7 +12,11 @@ from battinfo.validate.core import (
     get_validation_policy,
 )
 from battinfo.validate.jsonld import validate_jsonld, validate_jsonld_report
-from battinfo.validate.publication import validate_publication, validate_publication_report
+from battinfo.validate.publication import (
+    record_fidelity_report,
+    validate_publication,
+    validate_publication_report,
+)
 from battinfo.validate.pydantic import validate_json, validate_json_report
 from battinfo.validate.record import validate_record, validate_record_report
 from battinfo.validate.references import validate_references, validate_references_report
@@ -31,6 +35,7 @@ __all__ = [
     "ValidationResult",
     "combine_reports",
     "get_validation_policy",
+    "record_fidelity_report",
     "validate_json",
     "validate_json_report",
     "validate_jsonld",

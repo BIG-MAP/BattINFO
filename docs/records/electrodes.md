@@ -44,7 +44,7 @@ record = create_electrode_spec(
 {
   "schema_version": "0.2.0",
   "electrode_spec": {
-    "id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+    "id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch",
     "short_id": "kxwy5f",
     "name": "NMC811 cathode design A",
     "active_material_kind": "nmc811",
@@ -188,9 +188,9 @@ Emitted by `record_to_jsonld`, hosted-context mode.
       "@type": "ActiveMaterial"
     },
     "skos:prefLabel": "NMC811 cathode design A",
-    "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch#described"
+    "@id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch#described"
   },
-  "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
+  "@id": "https://w3id.org/battinfo/id/1001/spec/kxwy-5f5f-f682-hhch",
   "schema:name": "NMC811 cathode design A"
 }
 ```
@@ -229,7 +229,7 @@ record = create_electrode(
 {
   "schema_version": "0.2.0",
   "electrode": {
-    "id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
+    "id": "https://w3id.org/battinfo/id/1001/electrode/3w87-0ddf-ryjg-evxe",
     "electrode_spec_id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch",
     "short_id": "3w870d",
     "name": "Cathode disc 07, cell LAB-2026-0001",
@@ -259,7 +259,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     }
   ],
   "@type": "Electrode",
-  "@id": "https://w3id.org/battinfo/electrode/3w87-0ddf-ryjg-evxe",
+  "@id": "https://w3id.org/battinfo/id/1001/electrode/3w87-0ddf-ryjg-evxe",
   "schema:name": "Cathode disc 07, cell LAB-2026-0001",
   "schema:isVariantOf": {
     "@id": "https://w3id.org/battinfo/spec/kxwy-5f5f-f682-hhch"
@@ -1140,7 +1140,7 @@ Schema: [`electrode-spec.schema.json`](https://w3id.org/battinfo/schema/electrod
 | `kind` | string |  | Deprecated alias of active_material_kind; accepted so existing records keep validating, normalized to active_material_kind on round-trip. |
 | `polarity` | `positive` \| `negative` \| `unknown` |  | Electrode polarity, authored when the design has a side to state. Never derived from the kind: which side an active material sits on is system-relative (graphite is the positive electrode of a lithium-counter half cell). Role-based cells (half / three-electrode) name electrodes by role instead. |
 | `grade` | string |  | Producer grade / design version (e.g. 'v2', 'rev B'). Part of spec identity together with the producer and the electrode name. |
-| `active_material_spec_id` | → MaterialSpecIri |  | Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry. |
+| `active_material_spec_id` | → MaterialSpecRefIri |  | Optional canonical IRI of the material-spec for this electrode's active material, present when the powder is known and authored. Absent for a purchased electrode of known chemistry but unknown powder — 'kind' still carries the chemistry. |
 | `material` | → material-component |  | The electrode body as a single monolithic material - an uncoated metal foil or disc (lithium metal counter, zinc foil). States the material directly; there is no coating and no separate current collector, the foil is both. Alternative to `coating` for uncoated electrodes. |
 | `coating` | → electrode-coating |  | Coating composition and coating-level design values. 'component.active_material / binder / additive' each carry a weight fraction under property.mass_fraction — the same shape a cell-spec's inline electrode coating uses, so a composition authored here is the composition a cell reads. |
 | `current_collector` | → current-collector |  | Current-collector foil: material (name and/or material_spec_id) and its thickness under property. |

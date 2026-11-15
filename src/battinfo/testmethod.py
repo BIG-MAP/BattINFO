@@ -34,6 +34,7 @@ PyBaMM's own grammar has no per-area current.
 
 from __future__ import annotations
 
+import numbers
 import re
 import warnings
 from decimal import Decimal
@@ -681,6 +682,23 @@ def parse_experiment(steps: Sequence[str], cycles: int | None = None) -> list[St
     if cycles is not None and cycles > 1:
         return [Step(mode="group", count=int(cycles), steps=parsed)]
     return parsed
+
+
+def _cycles_count(value: Any) -> int:
+    """Read an authored ``cycles`` value as an ``int``.
+
+    A Python or NumPy integer, a float with no fractional part (``100.0``) and a
+    string of digits with white space around it (``" 100 "``) are whole numbers.
+    ``True``, ``False`` and anything else raise ``ValueError``.
+    """
+    if not isinstance(value, bool):
+        if isinstance(value, numbers.Integral):
+            return int(value)
+        if isinstance(value, numbers.Real) and float(value).is_integer():
+            return int(float(value))
+        if isinstance(value, str) and re.fullmatch(r"[0-9]+", value.strip()):
+            return int(value.strip())
+    raise ValueError(f"'cycles' must be a whole number, such as 3, not {value!r}")
 
 
 # ── Rendering (inverse of parsing) ──────────────────────────────────────────

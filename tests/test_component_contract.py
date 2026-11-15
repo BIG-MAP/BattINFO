@@ -225,7 +225,7 @@ def test_superseded_spec_namespaces_still_load(tmp_path) -> None:
         lot_id="L1",
     )
     # New instance minted under the canonical noun namespace; legacy reference kept.
-    assert inst["separator"]["id"].startswith("https://w3id.org/battinfo/separator/")
+    assert inst["separator"]["id"].startswith("https://w3id.org/battinfo/id/1001/separator/")
     assert inst["separator"]["separator_spec_id"].startswith("https://w3id.org/battinfo/separator-spec/")
 
 
@@ -233,4 +233,4 @@ def test_new_specs_mint_under_shared_spec_namespace() -> None:
     from battinfo.api import create_electrolyte_spec
 
     spec = create_electrolyte_spec(uid="elya23456789abcd", name="LP30", body={"family": "organic"})
-    assert spec["electrolyte_spec"]["id"].startswith("https://w3id.org/battinfo/spec/")
+    assert spec["electrolyte_spec"]["id"].startswith("https://w3id.org/battinfo/id/1001/spec/")

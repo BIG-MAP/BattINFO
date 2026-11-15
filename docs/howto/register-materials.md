@@ -8,7 +8,7 @@ from battinfo.api import create_material_spec, save_material_spec
 nmc = create_material_spec(name="NMC811", kind="nmc811",
                            formula="LiNi0.8Mn0.1Co0.1O2")
 saved = save_material_spec(nmc, source_root="my-library", mode="upsert")
-NMC811_IRI = saved["id"]   # e.g. https://w3id.org/battinfo/spec/3ypr-gngx-x28c-rarf
+NMC811_IRI = saved["id"]   # e.g. https://w3id.org/battinfo/id/1001/spec/8x8j-0d1r-wvgs-99e4
 ```
 
 `source_root` is the folder that holds your record library (records land in
@@ -74,7 +74,7 @@ save_material(lot, source_root="my-library", mode="upsert")
 ## What just happened
 
 Each save wrote one plain-JSON record into your library and minted it a
-permanent `https://w3id.org/battinfo/spec/` IRI. That IRI is how everything
+permanent `https://w3id.org/battinfo/id/1001/spec/` IRI. That IRI is how everything
 else refers to the material: electrode recipes reference it
 (see [Build a cell from components](build-a-cell-from-components.md)), and the
 saved record validates against the material-spec schema before it lands.

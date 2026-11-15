@@ -181,7 +181,8 @@ def test_graphite_full_cells_sit_below_their_positive_material_against_lithium()
     checked = 0
     for path in sorted((EXAMPLES / "cell-spec").glob("cell-spec-*.json")):
         doc = _load(path)
-        if doc["cell_spec"].get("negative_electrode_basis") != "graphite":
+        # A spec that describes its electrodes inline names no positive material record.
+        if doc["cell_spec"].get("negative_electrode_basis") != "graphite" or "positive_electrode_spec_id" not in doc:
             continue
         positive = electrodes[doc["positive_electrode_spec_id"]]["electrode_spec"]
         material = materials[positive["active_material_spec_id"]]

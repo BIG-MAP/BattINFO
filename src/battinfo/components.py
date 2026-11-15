@@ -19,6 +19,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 
 from battinfo.entities import seed_text, stable_uid
+from battinfo.namespace import DEFAULT_RECORD_BASE
 
 # Holder fields the electrode-spec builder takes as its own arguments: the ones
 # its identity seed reads (manufacturer, product, grade, processing route) and the
@@ -39,7 +40,12 @@ _HOLDER_FAMILIES = (
 
 
 def component_spec_from_holder(
-    family: str, holder: Mapping[str, Any], *, name: str, uid_seed: str | None = None
+    family: str,
+    holder: Mapping[str, Any],
+    *,
+    name: str,
+    uid_seed: str | None = None,
+    base: str = DEFAULT_RECORD_BASE,
 ) -> dict[str, Any]:
     """Lift an inline component holder to a standalone component-spec record.
 
@@ -50,9 +56,10 @@ def component_spec_from_holder(
     it. Any other family's IRI is minted deterministically from *uid_seed* (or
     the name), so the same holder lifts to the same spec IRI across cells and
     the specs de-duplicate. *uid_seed* also pins an electrode's IRI when given.
+    The IRI is minted under *base*.
     """
     if family == "electrode":
-        return _electrode_spec_from_holder(holder, name=name, uid_seed=uid_seed)
+        return _electrode_spec_from_holder(holder, name=name, uid_seed=uid_seed, base=base)
 
     from battinfo.api import create_component_spec
 
@@ -63,6 +70,7 @@ def component_spec_from_holder(
         body=body,
         uid=stable_uid(uid_seed or f"{family}-spec:{seed_text(name).lower()}"),
         validate=False,
+        base=base,
     )
 
 
@@ -78,7 +86,9 @@ def _first_active_material_kind(holder: Mapping[str, Any]) -> str | None:
     return resolve_electrode_kind(name) if isinstance(name, str) else None
 
 
-def _electrode_spec_from_holder(holder: Mapping[str, Any], *, name: str, uid_seed: str | None) -> dict[str, Any]:
+def _electrode_spec_from_holder(
+    holder: Mapping[str, Any], *, name: str, uid_seed: str | None, base: str = DEFAULT_RECORD_BASE
+) -> dict[str, Any]:
     from battinfo.api import create_electrode_spec
 
     fields: dict[str, Any] = {key: holder[key] for key in _ELECTRODE_SPEC_FIELDS if holder.get(key) is not None}
@@ -87,6 +97,7 @@ def _electrode_spec_from_holder(holder: Mapping[str, Any], *, name: str, uid_see
         fields["uid"] = stable_uid(uid_seed)
     return create_electrode_spec(
         validate=False,
+        base=base,
         name=name,
         active_material_kind=_first_active_material_kind(holder),
         body=body or None,
@@ -94,21 +105,25 @@ def _electrode_spec_from_holder(holder: Mapping[str, Any], *, name: str, uid_see
     )
 
 
-def extract_component_specs(cell_spec_record: Mapping[str, Any]) -> list[dict[str, Any]]:
+def extract_component_specs(
+    cell_spec_record: Mapping[str, Any], *, base: str = DEFAULT_RECORD_BASE
+) -> list[dict[str, Any]]:
     """Extract standalone component-spec records from a cell-spec's inline holders.
 
     Returns one component-spec per inline holder present
-    (positive/negative electrode, electrolyte, separator, housing).
+    (positive/negative electrode, electrolyte, separator, housing), each
+    minted under *base* (``https://w3id.org/battinfo/id/1001/`` unless
+    another is given).
     """
     cell = cell_spec_record.get("cell_spec", {})
-    base = cell.get("name") or cell.get("model") or "cell" if isinstance(cell, Mapping) else "cell"
+    cell_label = cell.get("name") or cell.get("model") or "cell" if isinstance(cell, Mapping) else "cell"
     out: list[dict[str, Any]] = []
     for holder_key, family, label in _HOLDER_FAMILIES:
         holder = cell_spec_record.get(holder_key)
         if isinstance(holder, Mapping) and holder:
-            name = holder.get("name") or f"{base} {label}"
+            name = holder.get("name") or f"{cell_label} {label}"
             # An electrode mints through its builder's identity; the other
             # families from the cell and the holder's place in it.
-            uid_seed = None if family == "electrode" else f"{family}-spec:{seed_text(base)}:{label}"
-            out.append(component_spec_from_holder(family, holder, name=name, uid_seed=uid_seed))
+            uid_seed = None if family == "electrode" else f"{family}-spec:{seed_text(cell_label)}:{label}"
+            out.append(component_spec_from_holder(family, holder, name=name, uid_seed=uid_seed, base=base))
     return out

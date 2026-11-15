@@ -3,13 +3,17 @@
 Every BattINFO record has one canonical identifier — an IRI of the form:
 
 ```text
-https://w3id.org/battinfo/<namespace>/<uid>
-└──────┬──────┘ └──┬───┘ └───┬────┘ └─┬─┘
-   PURL host     project   record     16-char UID
-                           namespace  (Crockford Base32)
+https://w3id.org/battinfo/id/1001/<namespace>/<uid>
+└──────┬───────┘ └──┬───┘ └──┬──┘ └────┬────┘ └─┬─┘
+   PURL host     project publisher  record    16-char UID
+                          prefix   namespace  (Crockford Base32)
 ```
 
-Example: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
+1001 is the prefix of Battery Genome, under which BattINFO mints new records. Records minted before 0.8.0 have the older form without the prefix, `https://w3id.org/battinfo/<namespace>/<uid>`, and keep it, as does every record of a workspace created before 0.8.0. The two forms of one namespace and uid name one record.
+
+A new workspace can describe a record that already exists in the older form, such as a published cell spec: the uid is the same, only the form differs. Before `ws.submit()`, `ws.zenodo()` or `ws.publish()` sends anything, each IRI minted under `/id/1001/` is looked up in the registry, and one the registry holds in the older form is adopted: every record that names it is rewritten to that form and saved, and the call lists what it adopted. A record the registry holds as superseded or withdrawn is not adopted: the call stops before anything is changed and names what replaced it. Refer to the replacement, or, if the record is new, give it identifying fields of its own. If the registry cannot be reached, the call stops and names the IRIs it could not check; pass `allow_unchecked_iris=True` to go on without the check.
+
+Example of an existing record, in the older form: `https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0`
 
 ## The three promises
 
@@ -51,11 +55,11 @@ More segment rules keep old links alive and new ones honest:
   (`/material-spec/`, `/electrode-spec/`, the older `/cell-type/` forms, ...)
   keep resolving forever — anything ever minted stays dereferenceable.
 - **Parameter sets minted under `/spec/` before 2026-10-11 keep their IRIs.** Each resolves as a superseded record that points at its replacement, a new `/dataset/` record with a uid of its own. A uid is never reused under another namespace.
-- **Reserved segments** (`id`, `ontology`, `vocab`, `doc`, `context`,
-  `resolver`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`,
-  `source`) can never become record namespaces — they are claimed by the
-  resolver and ontology infrastructure
-  (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
+- **Reserved segments** (`id`, `def`, `ontology`, `vocab`, `doc`, `context`, `resolver`, `schema`, `shapes`, `profile`, `ns`, `twin`, `w3id`, `raw`, `inferred`, `turtle`, `latest`, `source`, `versions`) can never become record namespaces. The standard, the resolver and the publisher branches use them. The list, with a reason for each, is `src/battinfo/data/namespace/reserved-segments.json` (`battinfo.entities.RESERVED_NAMESPACE_SEGMENTS`).
+
+## Definitions under def/
+
+Publishers define their own terms under `https://w3id.org/battinfo/def/{prefix}/`, where the prefix is their number in the [prefix register](https://github.com/BIG-MAP/BattINFO/blob/main/src/battinfo/data/namespace/prefixes.json). Each vocabulary is kept in the [`def/` folder](https://github.com/BIG-MAP/BattINFO/tree/main/def) of the repository, released by pull request, and served with a page for each release at [big-map.github.io/BattINFO/def/](https://big-map.github.io/BattINFO/def/). The rules for adding a vocabulary or a release are in [def/README.md](https://github.com/BIG-MAP/BattINFO/blob/main/def/README.md), and section 6.6 of the identifier policy governs them.
 
 ## Why w3id.org (the PURL layer)
 

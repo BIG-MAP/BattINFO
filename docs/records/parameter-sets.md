@@ -42,7 +42,7 @@ record = create_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
+    "id": "https://w3id.org/battinfo/id/1001/dataset/qqf7-w7e0-zrpj-vy7q",
     "short_id": "qqf7w7",
     "name": "Graphite density claims, Smith 2026",
     "material_kind": "graphite",
@@ -73,7 +73,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/qqf7-w7e0-zrpj-vy7q",
+  "@id": "https://w3id.org/battinfo/id/1001/dataset/qqf7-w7e0-zrpj-vy7q",
   "@type": "schema:Dataset",
   "schema:name": "Graphite density claims, Smith 2026",
   "schema:about": {
@@ -161,7 +161,7 @@ record = result.to_parameter_set(
 {
   "schema_version": "0.2.0",
   "parameter_set": {
-    "id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
+    "id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc",
     "short_id": "j6a4h1",
     "name": "Example pouch cell",
     "virtual_cell": true,
@@ -264,7 +264,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
 ```json
 {
   "@context": "https://w3id.org/battinfo/context/records/v1.json",
-  "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc",
+  "@id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc",
   "@type": "schema:Dataset",
   "schema:name": "Example pouch cell",
   "schema:identifier": {
@@ -434,7 +434,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "dcat:byteSize": 418,
     "schema:sha256": "c0dc1d775e8e0322f39bc9add2bd975cc70d60c7733dbbca9a45088e77745c11",
     "schema:isPartOf": {
-      "@id": "https://w3id.org/battinfo/dataset/j6a4-h1cs-bmyh-07qc"
+      "@id": "https://w3id.org/battinfo/id/1001/dataset/j6a4-h1cs-bmyh-07qc"
     }
   }
 }
@@ -5237,8 +5237,8 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `name` | string | yes | Human-readable label. A claim batch is conventionally named '<source> - <target>' (e.g. 'Chen 2020 - graphite'); a parameter file by its source (the BPX Header.Title). |
 | `handle` | → Handle |  | Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity. |
 | `material_kind` | string |  | Claim-batch target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind. |
-| `material_spec_id` | → MaterialSpecIri |  | Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry. |
-| `cell_spec_id` | → SpecIri |  | The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises. |
+| `material_spec_id` | → MaterialSpecRefIri |  | Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry. |
+| `cell_spec_id` | → CellSpecRefIri |  | The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises. |
 | `cell_instance_id` | → CellIri |  | Parameter files only: the physical cell the file was fitted on, when the fit describes one cell rather than a cell design. |
 | `virtual_cell` | const `True` |  | Parameter files only: the file describes no real cell (a virtual or example cell), so the record links to none. |
 | `scope` | `material` \| `electrode` \| `separator` \| `electrolyte` … (5 values) |  | Claim batches only. Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder. |

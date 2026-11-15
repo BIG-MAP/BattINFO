@@ -323,6 +323,16 @@ def test_housing_parts_landed_in_electrochemistry_0_36_are_typed() -> None:
 # ── Item 6: close the audited silent drops ──────────────────────────────────────
 
 
+def test_electrode_and_electrolyte_manufacturer_and_product_id_are_emitted() -> None:
+    from battinfo.jsonld import record_to_jsonld
+
+    record = json.loads((ROOT / "examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json").read_text(encoding="utf-8"))
+    cell = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]
+    assert cell["hasPositiveElectrode"]["schema:productID"] == "100000030"
+    assert cell["hasNegativeElectrode"]["schema:manufacturer"]["schema:name"] == "Customcells"
+    assert cell["hasElectrolyte"]["schema:manufacturer"]["schema:name"] == "Solvionic"
+
+
 def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     from battinfo.transform.json_to_jsonld import _descriptor_separator_to_jsonld
 
@@ -330,6 +340,168 @@ def test_separator_manufacturer_and_product_id_are_emitted() -> None:
     blob = json.dumps(node)
     assert "Celgard" in blob  # supplier traceability, previously dropped
     assert node["schema:productID"] == "2500"
+
+
+def test_case_coating_is_emitted() -> None:
+    from battinfo.transform.json_to_jsonld import _descriptor_housing_to_jsonld
+
+    relations = _descriptor_housing_to_jsonld({"case": {"material": "Stainless steel", "coating": "Aluminium"}}, "coin")
+    assert relations["hasCase"]["hasCoating"] == {"schema:material": "Aluminium"}
+
+
+def test_cell_instance_name_is_emitted() -> None:
+    from battinfo.jsonld import cell_instance_to_jsonld
+
+    node = cell_instance_to_jsonld({"cell_instance": {"id": "x", "name": "240616_bco_gr-NMC_01"}})
+    assert node["schema:name"] == "240616_bco_gr-NMC_01"
+
+
+def test_cell_spec_manufacturer_keeps_its_organization_link() -> None:
+    from battinfo.transform.cell_spec_node import build_cell_spec_node
+
+    org = "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    node = build_cell_spec_node({"cell_spec": {"manufacturer": {"type": "Organization", "id": org, "name": "Empa"}}})
+    assert node["schema:manufacturer"]["@id"] == org
+
+
+def test_dataset_creators_publisher_and_same_as_are_emitted() -> None:
+    from battinfo.jsonld import dataset_to_jsonld
+
+    empa = {"type": "Organization", "name": "Empa", "same_as": "http://www.wikidata.org/entity/Q683116"}
+    person = {
+        "type": "Person",
+        "name": "C. B.",
+        "same_as": "https://orcid.org/0000-0002-5003-1134",
+        "affiliation": empa,
+    }
+    doi = "https://doi.org/10.5281/zenodo.15481956"
+    node = dataset_to_jsonld(
+        {"dataset": {"id": "x", "name": "d", "creators": [person, empa], "publisher": empa, "same_as": [doi]}}
+    )
+    assert [c["@id"] for c in node["dcterms:creator"]] == [person["same_as"], empa["same_as"]]
+    assert node["dcterms:creator"][0]["schema:affiliation"]["@id"] == empa["same_as"]
+    assert node["dcterms:publisher"]["@id"] == empa["same_as"]
+    assert node["schema:sameAs"] == [{"@id": doi}]
+
+
+def test_a_person_may_have_several_affiliations() -> None:
+    from battinfo.jsonld import dataset_to_jsonld
+    from battinfo.validate import validate_record_report
+
+    examples = ROOT / "examples"
+    record = json.loads((examples / "dataset/dataset-tfzq-e0gq-f8xd-m6h2.json").read_text(encoding="utf-8"))
+    assert validate_record_report(record, source_root=examples, policy="strict").ok
+    creators = {c.get("schema:name"): c for c in dataset_to_jsonld(record)["dcterms:creator"]}
+    assert [a["schema:name"] for a in creators["Corsin Battaglia"]["schema:affiliation"]] == [
+        "Empa",
+        "ETH Zurich",
+        "EPFL",
+    ]
+
+
+def _author_with_several_affiliations() -> dict:
+    """The Empa dataset example's creator who has three affiliations."""
+    record = json.loads((ROOT / "examples/dataset/dataset-tfzq-e0gq-f8xd-m6h2.json").read_text(encoding="utf-8"))
+    return next(c for c in record["dataset"]["creators"] if isinstance(c.get("affiliation"), list))
+
+
+def _schema_org(org: dict) -> dict:
+    return {"@type": "schema:Organization", "schema:name": org["name"], "schema:sameAs": org["same_as"]}
+
+
+def test_several_affiliations_reach_the_deposit_graph() -> None:
+    author = _author_with_several_affiliations()
+    rs = {
+        "cell-spec": [],
+        "cell-instance": [
+            {"cell_instance": {"id": "https://w3id.org/battinfo/cell/c1", "name": "c1"}, "contributor": [author]}
+        ],
+        "test": [],
+        "test-protocol": [],
+        "dataset": [],
+    }
+    doc = AuthoringWorkspace._assemble_zenodo_jsonld(
+        rs,
+        zenodo_record_id=0,
+        prereserved_doi="10.5281/zenodo.1",
+        record_url="https://zenodo.org/records/1",
+        title="t",
+        description="d",
+    )
+    catalog = next(n for n in doc["@graph"] if "dcat:Catalog" in (n.get("@type") or []))
+    person = next(p for p in catalog["schema:contributor"] if p.get("@id") == author["same_as"])
+    assert person["schema:affiliation"] == [
+        {"@type": "schema:Organization", "schema:name": name} for name in ("Empa", "ETH Zurich", "EPFL")
+    ]
+    provider = next(n for n in doc["@graph"] if {"prov:Agent", "schema:Organization"} <= set(n.get("@type") or []))
+    assert provider["schema:name"] == "Empa"
+
+
+def test_record_contributor_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.ws import _agent_from_record_contributor, _agent_node, _provider
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+
+    agent = _agent_from_record_contributor(one)
+    assert agent["affiliation"] == "Empa"
+    assert _agent_node(agent)["schema:affiliation"] == {"@type": "schema:Organization", "schema:name": "Empa"}
+
+    agent = _agent_from_record_contributor(many)
+    assert agent["affiliation"] == ["Empa", "ETH Zurich", "EPFL"]
+    assert _agent_node(agent)["schema:affiliation"] == [
+        {"@type": "schema:Organization", "schema:name": name} for name in ("Empa", "ETH Zurich", "EPFL")
+    ]
+    assert _provider([agent], None) == ("Empa", "")
+
+
+def test_canonical_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.bundle import _canonical_agent
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _canonical_agent(one)["affiliation"] == many["affiliation"][0]
+    assert _canonical_agent(many)["affiliation"] == many["affiliation"]
+
+
+def test_publication_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.publication import _schema_agent_node
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _schema_agent_node(one)["schema:affiliation"] == _schema_org(many["affiliation"][0])
+    assert _schema_agent_node(many)["schema:affiliation"] == [_schema_org(org) for org in many["affiliation"]]
+
+
+def test_resolver_agent_takes_one_or_several_affiliations() -> None:
+    from battinfo.api._resolver import _schema_agent_value
+
+    many = _author_with_several_affiliations()
+    one = {**many, "affiliation": many["affiliation"][0]}
+    assert _schema_agent_value(one)["schema:affiliation"] == _schema_org(many["affiliation"][0])
+    assert _schema_agent_value(many)["schema:affiliation"] == [_schema_org(org) for org in many["affiliation"]]
+
+
+def test_a_component_manufacturer_carries_its_external_iri() -> None:
+    from battinfo.jsonld import record_to_jsonld
+    from battinfo.validate import validate_record_report
+
+    record = json.loads((ROOT / "examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json").read_text(encoding="utf-8"))
+    assert validate_record_report(record, policy="strict").ok
+    maker = record_to_jsonld(record, "cell-spec")["isDescriptionFor"]["hasElectrolyte"]["schema:manufacturer"]
+    assert maker == {
+        "@id": "http://www.wikidata.org/entity/Q30285492",
+        "@type": "schema:Organization",
+        "schema:name": "Solvionic",
+    }
+
+
+def test_a_component_manufacturer_may_name_its_organization_record() -> None:
+    from battinfo.validate import validate_record_report
+
+    record = json.loads((ROOT / "examples/cell-spec/cell-spec-5hy0-g0f7-bxzz-tmtm.json").read_text(encoding="utf-8"))
+    record["electrolyte"]["manufacturer"]["id"] = "https://w3id.org/battinfo/organization/mtf8-84d1-addg-nnvv"
+    assert validate_record_report(record, policy="strict").ok
 
 
 def test_record_notes_reach_publication_graph(tmp_path: Path) -> None:

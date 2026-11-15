@@ -16,10 +16,12 @@ copy-pasted across ``api.py``, ``validate/record.py``, ``validate/references.py`
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import unicodedata
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from importlib import resources
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping, Optional
@@ -92,6 +94,32 @@ def seed_text(value: object) -> str:
         return ""
     text = value if isinstance(value, str) else str(value)
     return " ".join(unicodedata.normalize("NFC", text).split())
+
+
+def seed_iri(value: str) -> str:
+    """A record IRI as it enters an identity seed: in the old form, whatever base it was minted under.
+
+    The one rewrite every seed applies to the IRI of another record it names
+    (a cell's spec, a test's cell and protocol, a dataset's cell and test, a
+    material lot's spec, an electrode's spec and parent, a claim batch's
+    target, and every IRI in a content seed). An IRI of the prefixed form,
+    ``https://w3id.org/battinfo/id/{prefix}/{segment}/{uid}``, enters as
+    ``https://w3id.org/battinfo/{segment}/{uid}``, so a record's uid never
+    depends on the base its parent was minted under (IRI ruling of 22 October
+    2026, decision 5): a cell of the ``/id/1001/`` form of a spec gets the uid
+    the same cell gets under the old form, and adopting either form of the
+    spec never moves the cell. Any other value, an IRI of the old form
+    included, is returned as it is; callers strip it first where the seed
+    strips it.
+    """
+    if "/id/" not in value:
+        return value
+    from battinfo.namespace import parse_record_iri, record_iri  # noqa: PLC0415
+
+    parsed = parse_record_iri(value)
+    if parsed is None or parsed.prefix is None:
+        return value
+    return record_iri(parsed.segment, parsed.uid)
 
 
 def _nfc(text: str) -> str:
@@ -256,7 +284,9 @@ def keep_legacy_uid(
     differs from *uid*, nothing is saved under *uid*, and the record saved
     under *legacy_uid* has the same identity (*same_identity* of its body),
     that record keeps its IRI and *legacy_uid* is returned. Otherwise *uid*.
-    *saved* returns the body of the record saved under a uid, or ``None``.
+    *saved* returns the body of the record saved under a uid, or ``None``;
+    either form of the record's IRI counts (:func:`saved_record_document`), so
+    the IRI to keep is the one that body carries.
     """
     if legacy_uid == uid or saved(uid) is not None:
         return uid
@@ -269,13 +299,15 @@ def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path
 
     Looks at the file a save writes (:func:`save_entity_path`) in each root
     and returns the whole document (its body and the sections beside it, such
-    as a cell spec's ``properties``) only when the body carries the IRI *uid*
-    names.
+    as a cell spec's ``properties``) only when the body carries an IRI of the
+    record *uid* names, in whichever form it was saved: the old form or the
+    ``/id/1001/`` form (``namespace.same_record``). That IRI is the one the
+    record keeps.
     """
     from battinfo._jsonio import read_record_json  # noqa: PLC0415
+    from battinfo.namespace import record_iri, same_record  # noqa: PLC0415
 
     kind = ENTITY_BY_TYPE[entity_type]
-    iri = f"https://w3id.org/battinfo/{kind.iri_namespace}/{uid}"
     for root in roots:
         path = save_entity_path(entity_type, uid, Path(root))
         if not path.is_file():
@@ -285,7 +317,7 @@ def saved_record_document(entity_type: str, uid: str, roots: Iterable[str | Path
         except (OSError, ValueError):
             continue
         body = doc.get(kind.record_key) if isinstance(doc, Mapping) else None
-        if isinstance(body, Mapping) and body.get("id") == iri:
+        if isinstance(body, Mapping) and same_record(body.get("id"), record_iri(kind.iri_namespace, uid)):
             return doc
     return None
 
@@ -297,6 +329,26 @@ def saved_record_body(entity_type: str, uid: str, roots: Iterable[str | Path]) -
     """
     doc = saved_record_document(entity_type, uid, roots)
     return None if doc is None else doc[ENTITY_BY_TYPE[entity_type].record_key]
+
+
+def held_record_iri(entity_type: str, iri: str, roots: Iterable[str | Path]) -> str:
+    """*iri*, the IRI of an *entity_type* record just minted, or the IRI the record is already saved under.
+
+    A folder that already holds a record keeps that record's IRI (IRI ruling
+    of 22 October 2026, decision 5). When one of *roots* holds the record
+    *iri* names under the other form of *iri* (``namespace.same_record``),
+    such as the old form where *iri* is of the ``/id/1001/`` form, that saved
+    IRI is returned, so a save updates the record instead of moving it.
+    Otherwise *iri*.
+    """
+    from battinfo.namespace import parse_record_iri, same_record  # noqa: PLC0415
+
+    parsed = parse_record_iri(iri)
+    if parsed is None:
+        return iri
+    body = saved_record_body(entity_type, parsed.uid, roots)
+    saved = body.get("id") if body is not None else None
+    return saved if isinstance(saved, str) and same_record(saved, iri) else iri
 
 
 def cell_spec_uid(
@@ -358,7 +410,7 @@ def cell_instance_identity_seed(
     name, then its batch.
 
     The serial, batch and name enter as :func:`seed_text`, so ``"C01 "`` and
-    ``"C01"`` are one cell.
+    ``"C01"`` are one cell, and the spec IRI in the old form (:func:`seed_iri`).
 
     Returns ``None`` when the instance carries no distinguishing identity at all
     (no name, serial, or batch) — callers must then fall back to their own
@@ -371,7 +423,7 @@ def cell_instance_identity_seed(
         return None
     return "::".join(
         [
-            (cell_spec_id or "").strip() or "unknown-cell-spec",
+            seed_iri((cell_spec_id or "").strip()) or "unknown-cell-spec",
             serial,
             batch,
             label,
@@ -467,11 +519,13 @@ def test_identity_seed(
     a converter upgrade, and one run would get two IRIs. A caller that has
     data files therefore gives their locator, and *started_at* only when
     there is none.
+
+    The cell's and the protocol's IRIs enter in the old form (:func:`seed_iri`).
     """
     kind_text = _stripped(kind)
     return "::".join(
         [
-            _stripped(cell_id) or "unknown-cell",
+            seed_iri(_stripped(cell_id)) or "unknown-cell",
             kind_text or "other",
             _test_protocol_seed(protocol_id, protocol_name, kind_text),
             _test_run_seed(data_locator, started_at, name),
@@ -485,7 +539,7 @@ test_identity_seed.__test__ = False  # type: ignore[attr-defined]
 
 def _test_protocol_seed(protocol_id: object, protocol_name: object, kind: str) -> str:
     """The protocol part of a test seed: its IRI, else its name unless that only restates *kind*."""
-    iri = _stripped(protocol_id)
+    iri = seed_iri(_stripped(protocol_id))
     if iri:
         return iri
     name = seed_text(protocol_name)
@@ -539,12 +593,13 @@ def legacy_test_identity_seed(*, cell_id: object, kind: object, protocol_name: o
     ``cell IRI :: kind :: protocol name :: name``: the protocol name as
     written (``test`` without one), the cell, kind and name stripped, and
     ``test`` for a missing name. Hash it with :func:`legacy_stable_uid`;
-    nothing new is minted from it.
+    nothing new is minted from it. Every cell of before 0.8.0 had the old
+    form, so the cell's IRI enters in it (:func:`seed_iri`).
     """
     protocol = protocol_name if isinstance(protocol_name, str) and protocol_name else "test"
     return "::".join(
         [
-            _stripped(cell_id) or "unknown-cell",
+            seed_iri(_stripped(cell_id)) or "unknown-cell",
             _stripped(kind) or "other",
             protocol,
             _stripped(name) or "test",
@@ -579,8 +634,11 @@ def material_spec_identity_seed(
 
 
 def material_identity_seed(*, material_spec_id: str | None, lot: object) -> str:
-    """Identity seed for a material lot: ``material :: spec IRI :: lot``, the lot as :func:`seed_text`."""
-    return "::".join(["material", (material_spec_id or "").strip(), seed_text(lot)])
+    """Identity seed for a material lot: ``material :: spec IRI :: lot``.
+
+    The lot enters as :func:`seed_text` and the spec IRI in the old form (:func:`seed_iri`).
+    """
+    return "::".join(["material", seed_iri((material_spec_id or "").strip()), seed_text(lot)])
 
 
 def electrode_spec_identity_seed(
@@ -631,15 +689,16 @@ def electrode_identity_seed(
     piece label, so disc-07 of one roll and disc-07 of another mint distinct
     IRIs — appended only when present, which keeps every pre-genealogy seed
     (and therefore every existing record IRI) byte-identical. The batch and
-    piece labels enter as :func:`seed_text`.
+    piece labels enter as :func:`seed_text`, the spec and parent IRIs in the
+    old form (:func:`seed_iri`).
     """
     parts = [
         "electrode",
-        (electrode_spec_id or "").strip(),
+        seed_iri((electrode_spec_id or "").strip()),
         seed_text(batch),
     ]
     if parent_id and parent_id.strip():
-        parts.append(parent_id.strip())
+        parts.append(seed_iri(parent_id.strip()))
     piece = seed_text(piece_id)
     if piece:
         parts.append(piece)
@@ -657,8 +716,7 @@ class EntityKind:
             ``"cell_spec"``, ``"material"``.
         schema_file: Path (relative to ``data/schemas``) of the JSON Schema.
         subdir: Directory name under a ``source_root`` where records live.
-        iri_namespace: Path segment in the canonical IRI
-            ``https://w3id.org/battinfo/<iri_namespace>/<uid>``.
+        iri_namespace: Path segment in the canonical IRI, ``https://w3id.org/battinfo/<iri_namespace>/<uid>`` or ``https://w3id.org/battinfo/id/<prefix>/<iri_namespace>/<uid>``.
         spec_ref_field: For an instance kind, the body field that links to its
             spec (e.g. ``"cell_spec_id"``); ``None`` for spec kinds.
         spec_entity_type: The ``entity_type`` that ``spec_ref_field`` points to.
@@ -841,26 +899,25 @@ def record_set_dirs() -> tuple[str, ...]:
     return tuple(kind.subdir for kind in ENTITY_KINDS)
 
 
+def _namespace_file(name: str) -> Any:
+    """The JSON file *name* in ``battinfo/data/namespace``, parsed.
+
+    The folder holds the lists that the SDK and the registry share: the
+    reserved segments (``reserved-segments.json``) and the publisher prefix
+    register (``prefixes.json``).
+    """
+    return json.loads(resources.files("battinfo").joinpath("data", "namespace", name).read_text(encoding="utf-8"))
+
+
+#: Path segments under ``https://w3id.org/battinfo/`` that are never record
+#: segments (IDENTIFIER_POLICY.md 6.1), read from
+#: ``data/namespace/reserved-segments.json``, where each has its reason.
 RESERVED_NAMESPACE_SEGMENTS = frozenset(
-    {
-        "id",
-        "ontology",
-        "vocab",
-        "doc",
-        "context",
-        "resolver",
-        "twin",
-        "w3id",
-        # Claimed by the ontology block in the upstream w3id.org .htaccess —
-        # requests to these paths can never reach the record resolver.
-        "raw",
-        "inferred",
-        "turtle",
-        "latest",
-        "source",
-    }
+    entry["segment"] for entry in _namespace_file("reserved-segments.json")["segments"]
 )
-_reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {k.iri_namespace for k in ENTITY_KINDS}
+_reserved_clash = RESERVED_NAMESPACE_SEGMENTS & {
+    namespace for kind in ENTITY_KINDS for namespace in (kind.iri_namespace, *kind.legacy_iri_namespaces)
+}
 if _reserved_clash:  # fail at import: a reserved segment can never become an entity namespace
     raise RuntimeError(f"reserved namespace segment(s) used by ENTITY_KINDS: {sorted(_reserved_clash)}")
 

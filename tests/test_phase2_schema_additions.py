@@ -9,6 +9,7 @@ test.conditions as quantities).
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -303,7 +304,9 @@ def test_construction_module_types_quantities() -> None:
 def test_specification_module_aligns_with_cell_spec_identity() -> None:
     spec = json.loads((SCHEMAS / "modules" / "components" / "specification.schema.json").read_text(encoding="utf-8"))
     assert spec["required"] == ["id", "name", "model", "manufacturer", "cell_format", "chemistry"]
-    assert "/battinfo/spec/" in spec["properties"]["id"]["pattern"]
+    id_pattern = re.compile(spec["properties"]["id"]["pattern"])
+    assert id_pattern.search("https://w3id.org/battinfo/spec/pge5-wer6-2q82-v9k0")
+    assert not id_pattern.search("https://w3id.org/battinfo/cell/pge5-wer6-2q82-v9k0")
     assert spec["properties"]["housing"]["$ref"] == "housing.schema.json"
     assert spec["properties"]["construction"]["$ref"] == "construction.schema.json"
 

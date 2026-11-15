@@ -26,7 +26,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable
 
-from battinfo._util import is_dataset_series, is_real_number
+from battinfo._util import is_dataset_series, is_real_number, registered_media_type
 from battinfo.entities import kind_for_doc
 from battinfo.testmethod import _is_current_density_unit, _other_quantity_of_unit
 
@@ -284,8 +284,9 @@ TEST_CONDITION_GROUP_RELATION: dict[str, str] = {
 }
 TEST_CONDITION_GROUPS = tuple(TEST_CONDITION_GROUP_RELATION)
 # Authoring condition key → EMMO quantity-class prefLabel (resolved by the context).
-# Temperature has no dedicated quantity class, so it is a generic ConventionalProperty
-# (an assigned-by-convention value, e.g. "room temperature" = 20 degC) carrying a label.
+# A temperature takes the class an as-run condition of the same key takes
+# (transform.json_to_jsonld._MEASUREMENT_PARAMETER_TERMS), or ThermodynamicTemperature
+# when it is given in kelvin (:func:`temperature_class`).
 TEST_CONDITION_CLASS: dict[str, str] = {
     "c_rate": "CRate",
     "crate": "CRate",
@@ -300,12 +301,17 @@ TEST_CONDITION_CLASS: dict[str, str] = {
     "duration": "Duration",
     "number_of_iterations": "NumberOfIterations",
     "cycles": "NumberOfIterations",
-    "temperature": "ConventionalProperty",
-    "ambient_temperature": "ConventionalProperty",
-    "room_temperature": "ConventionalProperty",
+    "temperature": "CelsiusTemperature",
+    "ambient_temperature": "AmbientCelsiusTemperature",
+    "room_temperature": "AmbientCelsiusTemperature",
+    "state_of_charge": "StateOfCharge",
+    "initial_state_of_charge": "StateOfCharge",
+    "applied_pressure": "Pressure",
 }
-# Quantity classes whose @type is generic and so should carry a human rdfs:label.
-TEST_CONDITION_GENERIC_CLASSES = frozenset({"ConventionalProperty"})
+# The temperature classes whose unit is the degree Celsius.
+_CELSIUS_TEMPERATURE_CLASSES = frozenset({"CelsiusTemperature", "AmbientCelsiusTemperature"})
+# The class of a C-rate, the one quantity the unit "C" belongs to.
+_C_RATE_CLASS = "CRate"
 # Unit symbol -> EMMO unit IRI: the unit terms the records context defines (V, Ah,
 # MWh, ...). scripts/assemble_context.py writes them into the context, and the
 # JSON-LD validator reads them so a unit is never accepted as a node's @type.
@@ -366,6 +372,11 @@ TEST_CONDITION_UNIT_IRI: dict[str, str] = {
     "Ah/Ah": "electrochemistry:AmperePerAmpereHour",
     "C": "electrochemistry:AmperePerAmpereHour",
 }
+# The symbols of that table that are a unit on a C-rate only. "C" is how a
+# C-rate is written (0.5 C). On any other quantity it is no unit the tables
+# map, so it is kept as text, and never read as the coulomb or the degree
+# Celsius.
+_C_RATE_ONLY_UNIT_SYMBOLS = frozenset({"C"})
 # Context terms the test-protocol model needs that the records context lacks.
 # Relations are @id-typed; classes/units map a prefLabel to a compact IRI.
 TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
@@ -384,6 +395,8 @@ TEST_PROTOCOL_CONTEXT_TERMS: dict[str, Any] = {
     "ElectricCurrent": "emmo:EMMO_c995ae70_3b84_4ebb_bcfc_69e6a281bb88",
     "Duration": "emmo:EMMO_0adabf6f_7404_44cb_9f65_32d83d8101a3",
     "NumberOfIterations": "electrochemistry:electrochemistry_88dd2bce_fb17_4705_905d_892681812290",
+    "StateOfCharge": "electrochemistry:electrochemistry_8b2aaa50_bbe1_45da_8778_8898326246a2",
+    "Pressure": "emmo:EMMO_50a44256_9dc5_434b_bad4_74a4d9a29989",
     "AmperePerAmpereHour": "electrochemistry:AmperePerAmpereHour",
 }
 
@@ -411,7 +424,7 @@ def _unit_pref_labels() -> dict[str, tuple[str, str]]:
 _UNIT_PREF_LABELS = _unit_pref_labels()
 
 
-def _resolve_unit_symbol(unit_symbol: str) -> str | None:
+def _resolve_unit_symbol(unit_symbol: str, c_rate: bool) -> str | None:
     labelled = _UNIT_PREF_LABELS.get(unit_symbol)
     if labelled:
         return _compact_iri(labelled[0])
@@ -420,25 +433,47 @@ def _resolve_unit_symbol(unit_symbol: str) -> str | None:
     ctx_val = _CONTEXT_INLINE.get(unit_symbol)
     if isinstance(ctx_val, str) and (":" in ctx_val or ctx_val.startswith("http")):
         return ctx_val
+    if unit_symbol in _C_RATE_ONLY_UNIT_SYMBOLS and not c_rate:
+        return None
     return TEST_CONDITION_UNIT_IRI.get(unit_symbol)
 
 
-def resolve_unit_iri(unit_symbol: str) -> str | None:
+def resolve_unit_iri(unit_symbol: str, *, c_rate: bool = False) -> str | None:
     """Unit symbol -> compact unit IRI, across the curated maps, the records
     context (V, mA, degC, ...) and the test-condition extras (A/Ah for C-rate).
     The symbol as written is tried first, then its normalised spelling, so
-    ``mA/cm^2`` and ``mA cm-2`` resolve like ``mA/cm2``."""
+    ``mA/cm^2`` and ``mA cm-2`` resolve like ``mA/cm2``. ``C`` is a unit on a
+    C-rate only, so it resolves, to the C-rate unit, when *c_rate* says the
+    quantity is a C-rate, and to nothing on any other quantity."""
     if not unit_symbol:
         return None
     from battinfo.transform.json_to_jsonld import normalize_unit_symbol  # noqa: PLC0415
 
-    iri = _resolve_unit_symbol(unit_symbol)
+    iri = _resolve_unit_symbol(unit_symbol, c_rate)
     if iri:
         return iri
     normalized = normalize_unit_symbol(unit_symbol)
     if normalized and normalized != unit_symbol:
-        return _resolve_unit_symbol(normalized)
+        return _resolve_unit_symbol(normalized, c_rate)
     return None
+
+
+def c_rate_unit_reason(unit_symbol: Any, *, c_rate: bool) -> str | None:
+    """Why *unit_symbol* gets no unit IRI on a quantity that is not a C-rate, or ``None`` when it does or has none to get.
+
+    The reason is given for a unit that resolves on a C-rate only (``C``)
+    when *c_rate* is false. The export then keeps the unit as text, as it
+    does any unit the tables do not map, and the emitter and the validator
+    both warn ``semantic.unit_unmapped`` with this reason.
+    """
+    if c_rate or not isinstance(unit_symbol, str):
+        return None
+    if resolve_unit_iri(unit_symbol) is not None or resolve_unit_iri(unit_symbol, c_rate=True) is None:
+        return None
+    return (
+        f"'{unit_symbol.strip()}' is a unit on a C-rate only. On this quantity it gets no EMMO unit IRI, "
+        "so the JSON-LD export keeps it as text (schema:unitText) only."
+    )
 
 
 # Where the unit tables give an IRI more than one symbol, the one it reads back
@@ -515,18 +550,23 @@ def unit_symbol_for_iri(unit: Any) -> str | None:
     return _unit_symbols_by_iri().get(_expand_unit_iri(unit.strip()))
 
 
-def _attach_unit(node: dict, unit_symbol: Any) -> None:
+def _attach_unit(node: dict, unit_symbol: Any, *, c_rate: bool = False) -> None:
     """Put the unit on a quantity node: its IRI when one is mapped, otherwise
     the symbol as ``schema:unitText``. A value never loses its unit.
     (``hasMeasurementUnit`` is @id-typed, so a bare symbol there would become a
-    relative IRI.)"""
+    relative IRI.) *c_rate* says the quantity is a C-rate, the one quantity
+    ``C`` is a unit on (:func:`resolve_unit_iri`). On any other it is kept
+    as text, with a ``semantic.unit_unmapped`` warning."""
     if not unit_symbol:
         return
-    unit_iri = resolve_unit_iri(str(unit_symbol))
+    unit_iri = resolve_unit_iri(str(unit_symbol), c_rate=c_rate)
     if unit_iri:
         node["hasMeasurementUnit"] = {"@id": unit_iri}
-    else:
-        node["schema:unitText"] = str(unit_symbol)
+        return
+    node["schema:unitText"] = str(unit_symbol)
+    reason = c_rate_unit_reason(unit_symbol, c_rate=c_rate)
+    if reason:
+        warnings.warn(f"semantic.unit_unmapped: {reason}", UserWarning, stacklevel=2)
 
 
 def _value_part(value: Any) -> dict:
@@ -541,32 +581,45 @@ def _value_part(value: Any) -> dict:
     return {}
 
 
+def temperature_class(cls: str, unit_symbol: Any) -> str:
+    """*cls*, or ``ThermodynamicTemperature`` when *cls* is a Celsius
+    temperature class and the value is given in kelvin."""
+    if cls not in _CELSIUS_TEMPERATURE_CLASSES or not unit_symbol:
+        return cls
+    unit = str(unit_symbol).strip()
+    if unit.lower() == "kelvin" or resolve_unit_iri(unit) == CONTEXT_UNIT_SYMBOLS["K"]:
+        return "ThermodynamicTemperature"
+    return cls
+
+
 def condition_quantity_node(key: str, value: Any, unit_symbol: str) -> dict | None:
     """A test condition -> EMMO quantity node (the ``@type`` comes from the
     controlled vocabulary), or ``None`` if the key is unmapped or the value is
     neither a number nor text — the caller then falls back to
-    ``schema:PropertyValue``."""
+    ``schema:PropertyValue``. The key rides ``skos:prefLabel``, as on an
+    as-run condition, since keys share a class: charging and discharging
+    current, state of charge and initial state of charge."""
     cls = TEST_CONDITION_CLASS.get(str(key).lower())
     part = _value_part(value)
     if not cls or not part:
         return None
-    node: dict = {"@type": cls, **part}
-    # A generic class (e.g. ConventionalProperty for temperature) needs a human
-    # label to say *which* property it is.
-    if cls in TEST_CONDITION_GENERIC_CLASSES:
-        node["rdfs:label"] = str(key).replace("_", " ")
+    node: dict = {"@type": temperature_class(cls, unit_symbol), "skos:prefLabel": str(key), **part}
     if unit_symbol:
-        _attach_unit(node, unit_symbol)
-    elif cls == "CRate":
+        _attach_unit(node, unit_symbol, c_rate=cls == _C_RATE_CLASS)
+    elif cls == _C_RATE_CLASS:
         # C-rate is dimensionless-by-symbol; default to AmperePerAmpereHour.
         node["hasMeasurementUnit"] = {"@id": TEST_CONDITION_UNIT_IRI["A/Ah"]}
     return node
 
 
-def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str) -> dict:
-    """An EMMO quantity node with an explicit ``@type`` (used for method steps)."""
+def typed_quantity_node(emmo_class: str, value: Any, unit_symbol: str, *, c_rate: bool = False) -> dict:
+    """An EMMO quantity node with an explicit ``@type`` (used for method steps).
+
+    The quantity is a C-rate, which the unit ``C`` belongs to, when
+    *emmo_class* is ``CRate`` or *c_rate* says so, as it does for a C-rate
+    cutoff, whose class is the generic termination quantity."""
     node: dict = {"@type": emmo_class, **_value_part(value)}
-    _attach_unit(node, unit_symbol)
+    _attach_unit(node, unit_symbol, c_rate=c_rate or emmo_class == _C_RATE_CLASS)
     return node
 
 
@@ -576,7 +629,7 @@ def _setpoint_class(key: str, unit: Any) -> str | None:
     qcls = setpoint_emmo_class(key) or TEST_CONDITION_CLASS.get(key.lower())
     if qcls == "ElectricCurrent" and _is_current_density_unit(unit):
         return setpoint_emmo_class("current_density")
-    return qcls
+    return temperature_class(qcls, unit) if qcls else None
 
 
 def _termination_class(term: Mapping[str, Any]) -> str | None:
@@ -593,6 +646,69 @@ def _termination_class(term: Mapping[str, Any]) -> str | None:
         elif isinstance(unit, str) and _other_quantity_of_unit(unit) is not None:
             return _METHOD_VOCAB["termination_generic"]["emmo_class"]
     return termination_emmo_class(quantity, term.get("direction"))
+
+
+def _is_c_rate_cutoff(term: Mapping[str, Any]) -> bool:
+    """True when a step cutoff is on a C-rate. One named ``c_rate`` is, and so
+    is a ``current`` cutoff written in a C-rate unit, which the step model reads
+    as a C-rate and :func:`_termination_class` gives the generic class."""
+    quantity = term.get("quantity")
+    if quantity == "c_rate":
+        return True
+    unit = term.get("unit")
+    other = _other_quantity_of_unit(unit) if quantity == "current" and isinstance(unit, str) else None
+    return other is not None and other[1] == "c_rate"
+
+
+def misplaced_c_rate_units(record: Mapping[str, Any]) -> list[tuple[str, str]]:
+    """Where a test protocol states a C-rate unit on a quantity that is not a C-rate.
+
+    Returns ``(path, reason)`` for each (:func:`c_rate_unit_reason`). It
+    reads the quantities :func:`test_protocol_node` gives a unit, which are
+    the conditions the vocabulary types and each step's setpoints, cutoffs,
+    duration and temperature, the steps of a group included. The validator
+    warns ``semantic.unit_unmapped`` at each path.
+    """
+    found: list[tuple[str, str]] = []
+
+    def check(path: str, quantity: Any, c_rate: bool, *, condition: bool = False) -> None:
+        # A condition is a node only with a value the export can carry.
+        value = quantity.get("value") if isinstance(quantity, Mapping) else None
+        if value is None or (condition and not _value_part(value)):
+            return
+        reason = c_rate_unit_reason(quantity.get("unit"), c_rate=c_rate)
+        if reason:
+            found.append((path, reason))
+
+    def walk(steps: Any, prefix: str) -> None:
+        if not isinstance(steps, list):
+            return
+        for idx, step in enumerate(steps):
+            if not isinstance(step, Mapping):
+                continue
+            path = f"{prefix}[{idx}]"
+            if step.get("mode") == "group":
+                walk(step.get("steps"), f"{path}.steps")
+                continue
+            setpoints = step.get("setpoints")
+            for key, qty in setpoints.items() if isinstance(setpoints, Mapping) else ():
+                qcls = _setpoint_class(str(key), qty.get("unit")) if isinstance(qty, Mapping) else None
+                if qcls:
+                    check(f"{path}.setpoints.{key}", qty, qcls == _C_RATE_CLASS)
+            termination = step.get("termination")
+            for tidx, term in enumerate(termination if isinstance(termination, list) else ()):
+                if isinstance(term, Mapping) and _termination_class(term):
+                    check(f"{path}.termination[{tidx}]", term, _is_c_rate_cutoff(term))
+            check(f"{path}.duration", step.get("duration"), False)
+            check(f"{path}.temperature", step.get("temperature"), False, condition=True)
+
+    conditions = record.get("conditions")
+    for key, qty in conditions.items() if isinstance(conditions, Mapping) else ():
+        cls = TEST_CONDITION_CLASS.get(str(key).lower())
+        if cls:
+            check(f"conditions.{key}", qty, cls == _C_RATE_CLASS, condition=True)
+    walk(record.get("method"), "method")
+    return found
 
 
 def method_step_node(step: Mapping[str, Any]) -> dict:
@@ -637,7 +753,9 @@ def method_step_node(step: Mapping[str, Any]) -> dict:
             continue
         tcls = _termination_class(term)
         if tcls and term.get("value") is not None:
-            terminations.append(typed_quantity_node(tcls, term["value"], term.get("unit", "")))
+            terminations.append(
+                typed_quantity_node(tcls, term["value"], term.get("unit", ""), c_rate=_is_c_rate_cutoff(term))
+            )
     duration = step.get("duration")
     if isinstance(duration, Mapping) and duration.get("value") is not None:
         dcls = termination_emmo_class("duration", "elapsed") or "Duration"
@@ -863,7 +981,7 @@ def artifact_distribution_node(art: Mapping[str, Any], *, locator_url: Callable[
         else:
             node["dcat:downloadURL"] = {"@id": str(loc)} if str(loc).startswith(("http://", "https://")) else str(loc)
     if art.get("media_type"):
-        node["dcat:mediaType"] = art["media_type"]
+        node["dcat:mediaType"] = registered_media_type(str(art["media_type"]))
     ct = art.get("conforms_to")
     if ct:
         node["dcterms:conformsTo"] = {"@id": ct} if str(ct).startswith(("http://", "https://")) else ct
@@ -1164,6 +1282,7 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
         "@context": context,
         "@type": ["BatteryCell", "schema:IndividualProduct"],
         "@id": ci.get("id", ""),
+        "schema:name": ci.get("name"),
         "schema:serialNumber": ci.get("serial_number"),
     }
     if ci.get("cell_spec_id"):
@@ -1180,12 +1299,52 @@ def cell_instance_to_jsonld(record: dict, *, cell_spec: Mapping | None = None) -
         node["schema:productionDate"] = ci["manufactured_at"]
     if ci.get("expires_at"):
         node["schema:expires"] = ci["expires_at"]
+    measured = cell_measured_property_nodes(record.get("measured"), context_label=str(ci.get("id") or "cell"))
+    if measured:
+        node["hasProperty"] = measured
     if datasets:
         node["schema:workExample"] = [{"@id": d["id"]} for d in datasets if d.get("id")]
     if prov:
         node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def cell_measured_property_nodes(measured: Any, *, context_label: str = "") -> list[dict]:
+    """``hasProperty`` quantity nodes for a cell's ``measured`` block.
+
+    The block uses the keys of a cell spec's ``properties``, each read as the
+    value measured on this cell, so its nodes take the shape the cell-spec
+    node gives its properties. A quantity that states no ``value_basis`` is
+    a MeasuredProperty rather than the key's declared basis, so its
+    conditions emit as the parameters of the measurement it is the output of.
+    Shared by :func:`cell_instance_to_jsonld` and the deposit graph that
+    ``ws.zenodo()`` builds.
+    """
+    if not isinstance(measured, Mapping) or not measured:
+        return []
+    from battinfo.transform.cell_spec_node import cell_spec_property_nodes  # noqa: PLC0415
+
+    quantities = {
+        key: {**quantity, "value_basis": quantity.get("value_basis") or quantity.get("co_type") or "Measured"}
+        for key, quantity in measured.items()
+        if isinstance(quantity, Mapping)
+    }
+    return cell_spec_property_nodes(quantities, context_label=context_label)
+
+
+def dataset_is_based_on(values: Any) -> list[dict]:
+    """A dataset's ``is_based_on`` IRIs as ``schema:isBasedOn`` references.
+
+    The shape the resolver writes, shared by :func:`dataset_to_jsonld` and the
+    deposit graph that ``ws.zenodo()`` builds. Entries that are not strings
+    are skipped.
+    """
+    if isinstance(values, str):
+        values = [values]
+    if not isinstance(values, list):
+        return []
+    return [{"@id": item} for item in values if isinstance(item, str) and item]
 
 
 def test_to_jsonld(record: dict) -> dict:
@@ -1231,70 +1390,82 @@ def test_to_jsonld(record: dict) -> dict:
         # Skip None / non-string entries so a partial record never emits {"@id": null}
         # (invalid JSON-LD — @id must be a string IRI).
         node["schema:result"] = [{"@id": d} for d in test["dataset_ids"] if isinstance(d, str) and d]
-    conditions = test.get("conditions")
-    if isinstance(conditions, Mapping) and conditions:
-        # Per-execution conditions are an open snake_case map (temperature,
-        # voltage window, C-rate, ...); values may be scalars, strings, or
-        # {value, unit} quantities. The test IS the measurement activity, so
-        # each condition also emits as a typed hasMeasurementParameter node on
-        # this node — the same shape quantity-level conditions take on their
-        # isOutputOf measurement node, so one query reads both rungs. The
-        # schema:PropertyValue copy stays as the standards-legible layer.
-        # voltage_reference is a datum, not a parameter: it emits as a
-        # PropertyValue whose valueReference carries the class-typed couple
-        # (never hasMetrologicalReference — that slot belongs to units on
-        # Quantity nodes, and a test activity is not a Quantity).
-        from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
-            _MEASUREMENT_PARAMETER_TERMS,
-            _descriptor_quantity_node,
-            _voltage_reference_node,
-            schema_quantity_fields,
-        )
-
-        props: list[dict] = []
-        params: list[dict] = []
-        for name in sorted(conditions):
-            value = conditions[name]
-            if name == "voltage_reference":
-                ref = _voltage_reference_node(value)
-                if ref is not None:
-                    if ref.get("@type") == "schema:PropertyValue":
-                        ref_pv: dict = {**ref, "schema:name": name}
-                    else:
-                        ref_pv = {
-                            "@type": "schema:PropertyValue",
-                            "schema:name": name,
-                            "schema:value": ref.get("skos:prefLabel"),
-                            "schema:valueReference": ref,
-                        }
-                    props.append(ref_pv)
-                    continue
-            pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
-            if isinstance(value, Mapping):
-                pv.update(schema_quantity_fields(value))
-            else:
-                pv["schema:value"] = value
-            props.append(pv)
-            if isinstance(value, Mapping):
-                quantity = dict(value)
-            elif isinstance(value, str):
-                quantity = {"value_text": value}
-            elif isinstance(value, (int, float)) and not isinstance(value, bool):
-                quantity = {"value": value}
-            else:
-                continue
-            pnode = _descriptor_quantity_node(name, quantity, term=_MEASUREMENT_PARAMETER_TERMS.get(name))
-            if pnode is not None:
-                pnode["skos:prefLabel"] = name
-                params.append(pnode)
-        if props:
-            node["schema:additionalProperty"] = props
-        if params:
-            node["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
+    node.update(as_run_condition_terms(test.get("conditions")))
     if prov:
         node["dcterms:source"] = _provenance(prov)
 
     return {k: v for k, v in node.items() if v is not None and v != [] and v != {}}
+
+
+def as_run_condition_terms(conditions: Any) -> dict:
+    """The terms a test's as-run ``conditions`` add to its node, or ``{}``.
+
+    Shared by :func:`test_to_jsonld` and the deposit graph that ``ws.zenodo()``
+    builds, so a test reads the same as a record and in a deposit.
+
+    Per-execution conditions are an open snake_case map (temperature, voltage
+    window, C-rate, ...); values may be scalars, strings, or {value, unit}
+    quantities. The test IS the measurement activity, so each condition also
+    emits as a typed hasMeasurementParameter node on the test node — the same
+    shape quantity-level conditions take on their isOutputOf measurement node,
+    so one query reads both rungs. The schema:PropertyValue copy stays as the
+    standards-legible layer. voltage_reference is a datum, not a parameter: it
+    emits as a PropertyValue whose valueReference carries the class-typed
+    couple (never hasMetrologicalReference; that slot belongs to units on
+    Quantity nodes, and a test activity is not a Quantity).
+    """
+    if not isinstance(conditions, Mapping) or not conditions:
+        return {}
+    from battinfo.transform.json_to_jsonld import (  # noqa: PLC0415
+        _MEASUREMENT_PARAMETER_TERMS,
+        _descriptor_quantity_node,
+        _voltage_reference_node,
+        schema_quantity_fields,
+    )
+
+    props: list[dict] = []
+    params: list[dict] = []
+    for name in sorted(conditions):
+        value = conditions[name]
+        if name == "voltage_reference":
+            ref = _voltage_reference_node(value)
+            if ref is not None:
+                if ref.get("@type") == "schema:PropertyValue":
+                    ref_pv: dict = {**ref, "schema:name": name}
+                else:
+                    ref_pv = {
+                        "@type": "schema:PropertyValue",
+                        "schema:name": name,
+                        "schema:value": ref.get("skos:prefLabel"),
+                        "schema:valueReference": ref,
+                    }
+                props.append(ref_pv)
+                continue
+        pv: dict = {"@type": "schema:PropertyValue", "schema:name": name}
+        if isinstance(value, Mapping):
+            pv.update(schema_quantity_fields(value))
+        else:
+            pv["schema:value"] = value
+        props.append(pv)
+        if isinstance(value, Mapping):
+            quantity = dict(value)
+        elif isinstance(value, str):
+            quantity = {"value_text": value}
+        elif isinstance(value, (int, float)) and not isinstance(value, bool):
+            quantity = {"value": value}
+        else:
+            continue
+        term = _MEASUREMENT_PARAMETER_TERMS.get(name)
+        pnode = _descriptor_quantity_node(name, quantity, term=term and temperature_class(term, quantity.get("unit")))
+        if pnode is not None:
+            pnode["skos:prefLabel"] = name
+            params.append(pnode)
+    terms: dict = {}
+    if props:
+        terms["schema:additionalProperty"] = props
+    if params:
+        terms["hasMeasurementParameter"] = params[0] if len(params) == 1 else params
+    return terms
 
 
 def _schema_variable_measured(values: Any) -> list[dict]:
@@ -1432,9 +1603,24 @@ def dataset_to_jsonld(record: dict) -> dict:
     variables = _schema_variable_measured(ds.get("variable_measured"))
     if variables:
         node["schema:variableMeasured"] = variables
+    based_on = dataset_is_based_on(ds.get("is_based_on"))
+    if based_on:
+        node["schema:isBasedOn"] = based_on
     citations = _schema_citations(ds.get("citations"))
     if citations:
         node["schema:citation"] = citations
+    creators = [agent for c in (ds.get("creators") or []) if (agent := _agent_to_jsonld(c))]
+    if creators:
+        node["dcterms:creator"] = creators
+    publisher = _agent_to_jsonld(ds.get("publisher"))
+    if publisher:
+        node["dcterms:publisher"] = publisher
+    funders = [agent for f in (ds.get("funders") or []) if (agent := _agent_to_jsonld(f))]
+    if funders:
+        node["schema:funder"] = funders
+    same_as = [{"@id": iri} for iri in (ds.get("same_as") or []) if isinstance(iri, str) and iri]
+    if same_as:
+        node["schema:sameAs"] = same_as
     about = ds.get("about")
     if about:
         # Tolerate a single IRI string (wrap it) instead of iterating it
@@ -1457,7 +1643,7 @@ def dataset_to_jsonld(record: dict) -> dict:
             if d.get("content_url"):
                 dist["dcat:downloadURL"] = {"@id": d["content_url"]}
             if d.get("encoding_format"):
-                dist["dcat:mediaType"] = d["encoding_format"]
+                dist["dcat:mediaType"] = registered_media_type(str(d["encoding_format"]))
             # File size: dcat:byteSize is an integer, schema:contentSize is text;
             # the record stores the string form, so only a digit string casts.
             size = str(d.get("content_size") or "")
@@ -1595,12 +1781,28 @@ def contributor_to_jsonld(contributor: Any) -> list[dict] | None:
         name = person.get("name")
         if isinstance(name, str) and name.strip():
             node["schema:name"] = name
-        aff = person.get("affiliation")
-        if isinstance(aff, dict) and aff.get("name"):
-            node["schema:affiliation"] = {"@type": "schema:Organization", "schema:name": aff["name"]}
+        # One affiliation, or a list of them.
+        affs = person.get("affiliation")
+        affs = [affs] if isinstance(affs, dict) else affs if isinstance(affs, list) else []
+        orgs = [o for a in affs if isinstance(a, dict) if (o := _agent_to_jsonld({**a, "type": "Organization"}))]
+        if orgs:
+            node["schema:affiliation"] = orgs[0] if len(orgs) == 1 else orgs
         if len(node) > 1:  # more than the bare @type
             out.append(node)
     return out or None
+
+
+def _agent_to_jsonld(agent: Any) -> dict | None:
+    """A ``Person`` or ``Organization`` object as a schema.org node; its ``same_as``
+    (ORCID, ROR, Wikidata) becomes the node's ``@id``."""
+    if not isinstance(agent, dict) or not agent.get("name"):
+        return None
+    if agent.get("type") != "Organization":
+        people = contributor_to_jsonld([agent])
+        return people[0] if people else None
+    from battinfo.transform.json_to_jsonld import organization_ref_node  # noqa: PLC0415
+
+    return organization_ref_node(agent)
 
 
 def _material_to_jsonld(record: dict) -> dict:

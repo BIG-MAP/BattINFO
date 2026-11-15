@@ -239,6 +239,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
     "schema:IndividualProduct"
   ],
   "@id": "https://w3id.org/battinfo/cell/y9xy-kr0v-y5tn-dfj7",
+  "schema:name": "LAB-2026-0001",
   "schema:serialNumber": "LAB-2026-0001",
   "hasDescription": {
     "@id": "https://w3id.org/battinfo/spec/7d9k-2m4p-8t3x-6nq5"
@@ -313,6 +314,7 @@ Emitted by `record_to_jsonld`, hosted-context mode.
   "schema:name": "A123 ANR26650M1-B",
   "schema:model": "ANR26650M1-B",
   "schema:manufacturer": {
+    "@id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7",
     "@type": "schema:Organization",
     "schema:name": "A123"
   },
@@ -2453,7 +2455,7 @@ The `cell_instance` block:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `id` | → CellIri | yes | Canonical IRI of this cell instance. |
-| `cell_spec_id` | → SpecIri | yes | IRI of the cell spec this physical cell realizes. |
+| `cell_spec_id` | → CellSpecRefIri | yes | IRI of the cell spec this physical cell realizes. |
 | `working_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record (the physical batch or disc) built into this cell as its working electrode. The cell spec says which electrode design the cell uses; this says which built electrode went into this individual cell. |
 | `counter_electrode_id` | → ElectrodeIri |  | Canonical IRI of the electrode record built into this cell as its counter electrode. In a half cell that electrode is also the reference electrode, so it is emitted with both role classes. |
 | `name` | string |  | Human-readable name / label for this cell (e.g. a lab batch ID). The primary identifier; usually present even without a manufacturer serial number. |

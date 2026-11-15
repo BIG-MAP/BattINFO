@@ -64,7 +64,7 @@ def test_https_access_url_seeds_as_before(tmp_path: Path) -> None:
     cell = "https://w3id.org/battinfo/cell/2435-kc9w-g9q0-1xsm"
     test = "https://w3id.org/battinfo/test/y4gj-dvk5-e8x4-3y3t"
     name = "C1 data"
-    expected = f"https://w3id.org/battinfo/dataset/{stable_uid('::'.join([cell, test, URL, name]))}"
+    expected = f"https://w3id.org/battinfo/id/1001/dataset/{stable_uid('::'.join([cell, test, URL, name]))}"
 
     saved = battinfo.save_dataset(
         battinfo.Dataset(
@@ -93,7 +93,7 @@ def test_https_access_url_seeds_as_before(tmp_path: Path) -> None:
 def test_collection_iri_from_https_access_url_is_unchanged(tmp_path: Path) -> None:
     """A collection has no cell or test, so its IRI comes from the access URL and name alone."""
     name = "Graphite half-cell pOCV collection"
-    expected = f"https://w3id.org/battinfo/dataset/{stable_uid('::'.join(['unknown-cell', '', URL, name]))}"
+    expected = f"https://w3id.org/battinfo/id/1001/dataset/{stable_uid('::'.join(['unknown-cell', '', URL, name]))}"
     saved = battinfo.save_dataset(
         battinfo.Dataset(
             name=name,

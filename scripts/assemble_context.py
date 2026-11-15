@@ -427,7 +427,9 @@ def extract_slot_iris(schema_dir: Path) -> dict[str, str]:
     all_local_prefixes: dict[str, str] = {}
     all_slots: dict[str, str] = {}
 
-    yaml_files = list(schema_dir.glob("*.yaml"))
+    # Sorted: the order the files are read in decides the order of the keys,
+    # and glob order differs between filesystems.
+    yaml_files = sorted(schema_dir.glob("*.yaml"))
 
     # First pass: collect all prefix declarations.
     for path in yaml_files:

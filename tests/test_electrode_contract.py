@@ -114,7 +114,7 @@ def test_electrode_spec_and_batch_roundtrip(tmp_path: Path) -> None:
         property={"loading": {"value": 21, "unit": "mg/cm2"}},
     )
     spec_id = spec["electrode_spec"]["id"]
-    assert spec_id.startswith("https://w3id.org/battinfo/spec/")
+    assert spec_id.startswith("https://w3id.org/battinfo/id/1001/spec/")
 
     saved_spec = api.save_electrode_spec(spec, source_root=tmp_path)
     assert saved_spec["status"] == "created"

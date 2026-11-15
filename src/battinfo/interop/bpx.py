@@ -51,6 +51,7 @@ from battinfo._bpx_layout import (
 )
 from battinfo._jcs import _from_numpy, canonical_json_bytes
 from battinfo._jcs import loads as _loads_json
+from battinfo.namespace import parse_record_iri, parse_thing_iri, record_iri_forms
 
 PathLike = str | Path
 
@@ -1846,8 +1847,8 @@ class BpxParameterImportResult:
         record with a new IRI that points back at the old one.
 
         ``record_kwargs`` (description, citation, citation_doi, source_url,
-        notes, license, retrieved_at, ...) pass to
-        :func:`battinfo.api.create_parameter_set`. The header's
+        notes, license, retrieved_at, ``base`` for the base the IRI mints
+        under, ...) pass to :func:`battinfo.api.create_parameter_set`. The header's
         ``Description`` and ``References`` fill description and citation
         (or a note) unless given. The record validates against the
         parameter-set schema.
@@ -2146,11 +2147,11 @@ def _material_target(value: Any, side: str) -> dict[str, str]:
     kind = resolve_material_kind(value) if isinstance(value, str) else None
     if kind is not None:
         return {"material_kind": kind}
-    if isinstance(value, str) and value.startswith("https://w3id.org/battinfo/"):
+    if isinstance(value, str) and (parse_record_iri(value) is not None or parse_thing_iri(value) is not None):
         return {"material_spec_id": value}
     raise ValueError(
         f"materials[{side!r}] is {value!r}, which is neither a curated material kind nor a "
-        "material-spec IRI (https://w3id.org/battinfo/spec/<uid>). "
+        f"material-spec IRI ({record_iri_forms('spec', things=True)}). "
         "battinfo.materials.material_kind_keys() lists the material kinds."
     )
 

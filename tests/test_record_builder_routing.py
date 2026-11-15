@@ -68,7 +68,9 @@ def test_cell_instance_save_path_now_matches_the_object_first_path() -> None:
 
 def test_cell_instance_mints_id_from_uid() -> None:
     rec = _record_from_cell_instance(CellInstance(uid="3m6k-9t2p-7x4h-9nq8", cell_spec_id=_SPEC))
-    assert rec["cell_instance"]["id"] == "https://w3id.org/battinfo/cell/3m6k-9t2p-7x4h-9nq8"
+    assert (
+        rec["cell_instance"]["id"] == "https://w3id.org/battinfo/id/1001/cell/3m6k-9t2p-7x4h-9nq8"
+    )  # a uid mints under /id/1001/
     assert rec["cell_instance"]["short_id"] == "3m6k9t"
 
 
@@ -168,7 +170,9 @@ def test_dataset_mints_id_from_uid() -> None:
             access_url="https://example.org/datasets/x",
         )
     )
-    assert rec["dataset"]["id"] == _DS_IRI
+    assert (
+        rec["dataset"]["id"] == "https://w3id.org/battinfo/id/1001/dataset/8c1h-8pk6-8034-vav6"
+    )  # a uid mints under /id/1001/
     assert rec["dataset"]["short_id"] == "8c1h8p"
 
 
@@ -199,7 +203,9 @@ def test_test_spec_parses_experiment_into_method_and_facets() -> None:
 
 def test_test_spec_defaults_provenance_and_mints_id() -> None:
     rec = _record_from_test_protocol(TestSpec(uid="7d9k-2m4p-8t3x-6nq5", name="X", kind="other"))
-    assert rec["test_spec"]["id"] == _SPEC_IRI
+    assert (
+        rec["test_spec"]["id"] == "https://w3id.org/battinfo/id/1001/spec/7d9k-2m4p-8t3x-6nq5"
+    )  # a uid mints under /id/1001/
     assert rec["test_spec"]["short_id"] == "7d9k2m"
     assert rec["provenance"]["source_type"] == "manual"  # schema-required category default
     assert isinstance(rec["provenance"]["retrieved_at"], int)  # defaulted to now

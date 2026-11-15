@@ -218,6 +218,7 @@ export const jsonldGallery: {
       "schema:name": "A123 ANR26650M1-B",
       "schema:model": "ANR26650M1-B",
       "schema:manufacturer": {
+        "@id": "https://w3id.org/battinfo/organization/8z6j-n7vw-e73w-smh7",
         "@type": "schema:Organization",
         "schema:name": "A123"
       },
@@ -696,6 +697,21 @@ export const jsonldGallery: {
           "schema:additionalType": "dataset",
           "bibo:doi": "10.5281/zenodo.1234567",
           "schema:identifier": "example_dataset_2026"
+        }
+      ],
+      "dcterms:creator": [
+        {
+          "@type": "schema:Organization",
+          "schema:name": "BattINFO Maintainers"
+        }
+      ],
+      "dcterms:publisher": {
+        "@type": "schema:Organization",
+        "schema:name": "BattINFO"
+      },
+      "schema:sameAs": [
+        {
+          "@id": "https://doi.org/10.5281/zenodo.1234567"
         }
       ],
       "dcterms:subject": [
