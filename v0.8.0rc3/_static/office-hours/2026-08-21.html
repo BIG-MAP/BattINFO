@@ -1,0 +1,292 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Office Hours, August 2026</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#102A43; --ink2:#2E4257; --muted:#5A6570; --paper:#F3F2EE; --surface:#FFFFFF;
+  --border:#E7E5DF; --teal:#0C7A6E; --teal-fill:#12A394; --tint:#E4F4F1;
+  --warn:#946007; --warn-tint:#FBF0DA; --ok:#178050; --ok-tint:#E4F4EC;
+  --font:"Plus Jakarta Sans",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#EEF2F5; --ink2:#C5CFD8; --muted:#8E9BA8; --paper:#0B1C2C; --surface:#132B40;
+    --border:#244257; --teal:#3CC9B6; --teal-fill:#12A394; --tint:#123F3B;
+    --warn:#E2B35B; --warn-tint:#3A2D10; --ok:#5CC98A; --ok-tint:#113322;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#EEF2F5; --ink2:#C5CFD8; --muted:#8E9BA8; --paper:#0B1C2C; --surface:#132B40;
+  --border:#244257; --teal:#3CC9B6; --teal-fill:#12A394; --tint:#123F3B;
+  --warn:#E2B35B; --warn-tint:#3A2D10; --ok:#5CC98A; --ok-tint:#113322;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-weight:500;line-height:1.5}
+.deck{display:flex;flex-direction:column;align-items:center;gap:32px;padding:32px 16px 80px}
+.slide{width:min(1120px,100%);aspect-ratio:16/9;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 20px rgba(20,30,40,.10);padding:48px 56px 40px;display:grid;grid-template-rows:auto 1fr auto;gap:20px;position:relative;overflow:hidden;scroll-margin-top:24px}
+.slide.current{outline:2px solid var(--teal);outline-offset:3px}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);display:flex;justify-content:space-between;gap:16px}
+.eyebrow span:last-child{color:var(--muted)}
+h1,h2{margin:0;text-wrap:balance;letter-spacing:-.02em;line-height:1.1}
+h1{font-size:clamp(2rem,4.5vw,3.4rem);font-weight:800}
+h2{font-size:clamp(1.5rem,2.8vw,2.2rem);font-weight:700}
+.body{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-content:start;min-height:0}
+.body.one{grid-template-columns:1fr}
+.lead{font-size:1.2rem;color:var(--ink2);max-width:36ch;margin:0 0 12px}
+ul{margin:0;padding-left:1.1em}
+li{margin:.35em 0;font-size:1.02rem;color:var(--ink2)}
+li strong{color:var(--ink);font-weight:700}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;align-self:start}
+.kpi{background:var(--tint);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font-family:var(--mono);font-weight:500;font-size:1.9rem;letter-spacing:-.03em;color:var(--teal);font-variant-numeric:tabular-nums;line-height:1}
+.kpi span{font-size:.8rem;color:var(--ink2);display:block;margin-top:6px}
+.prompt{border-top:1px solid var(--border);padding-top:14px;display:flex;gap:14px;align-items:baseline;font-size:.98rem;color:var(--ink2)}
+.prompt .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--warn);background:var(--warn-tint);padding:3px 8px;border-radius:6px;white-space:nowrap}
+code{font-family:var(--mono);font-size:.88em;background:var(--tint);padding:1px 5px;border-radius:4px;color:var(--ink)}
+.pr{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-self:start}
+.three div{background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:20px}
+.three h3{margin:0 0 8px;font-size:1.15rem;font-weight:700;letter-spacing:-.01em}
+.three p{margin:0;color:var(--ink2);font-size:.95rem}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--mono);font-size:.8rem;color:var(--ink2);margin-top:14px}
+.chain span{background:var(--paper);border:1px solid var(--border);border-radius:6px;padding:4px 8px}
+.chain i{color:var(--teal);font-style:normal}
+.title .body{align-content:end}
+.title .meta{font-family:var(--mono);font-size:.85rem;color:var(--muted);display:flex;gap:24px;flex-wrap:wrap}
+.status{display:inline-block;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle}
+.live{background:var(--ok-tint);color:var(--ok)} .open{background:var(--warn-tint);color:var(--warn)}
+.next li{margin:.5em 0}
+.help{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.72rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 12px}
+@media (max-width:760px){.slide{aspect-ratio:auto;padding:28px 22px}.body,.three{grid-template-columns:1fr}.help{display:none}}
+@media print{.help{display:none}.slide{break-after:page;box-shadow:none;outline:none}}
+</style></head><body>
+
+<div class="deck">
+
+<section class="slide title current">
+  <div class="eyebrow"><span>BattINFO + Battery Genome office hours</span><span>21 August 2026</span></div>
+  <div class="body one">
+    <h1>What changed since July</h1>
+    <p class="lead">One real dataset fully described as linked records, a new record type for parameter claims, and three ontology releases with the duplicate cleanup.</p>
+  </div>
+  <div class="meta"><span>battinfo.org</span><span>battery-genome.org</span><span>BIG-MAP/BattINFO · battery-genome/*</span></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>The month in three moves</span><span>2 / 11</span></div>
+  <div class="body one">
+    <h2>Records moved from schema to substance</h2>
+    <div class="three">
+      <div><h3>A 10 GB dataset, described</h3><p>The SINTEF half-cell OCV deposit on Zenodo is now 424 BattINFO records, from material lot to per-test dataset. Data stays on Zenodo.</p></div>
+      <div><h3>Parameter claims</h3><p>A citable record type for OCP curves, densities, BPX expressions, each claim with provenance. 17 live, resolvable by material kind.</p></div>
+      <div><h3>Ontology release wave</h3><p>chemical-substance 0.15.0, electrochemistry 0.37.2, domain-battery 0.20.2. 17 duplicate labels resolved, electrode chemistry classes un-deprecated.</p></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Which of these touches your own work first?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Flores half-cell OCV · Zenodo 20086298</span><span>3 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>The 0.8 readiness test: a real dataset end to end</h2>
+      <ul>
+        <li>95 BDF parquet files, IntelLiGent 101069765, CC-BY-4.0, six contributors by ORCID</li>
+        <li>Datasets point at the existing Zenodo files; md5 verified 95/95</li>
+        <li>The 11 known issues from the metadata sheet are encoded as <strong>conformance</strong> on the tests</li>
+        <li>Every material spec now carries a lot; silicon-graphite blends are three distinct records</li>
+        <li>Half-cell: working electrode + Li counter, typed <code>HalfCellDevice</code></li>
+      </ul>
+      <div class="chain"><span>material lot</span><i>→</i><span>electrode</span><i>→</i><span>R2032 spec</span><i>→</i><span>cell</span><i>→</i><span>test</span><i>→</i><span>dataset</span></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>424</b><span>records</span></div>
+      <div class="kpi"><b>95</b><span>cells, one protocol each</span></div>
+      <div class="kpi"><b>9</b><span>half-cell specs</span></div>
+      <div class="kpi"><b>4</b><span>structured protocols</span></div>
+      <div class="kpi"><b>0</b><span>strict-validation errors</span></div>
+      <div class="kpi"><b>11</b><span>known issues as conformance</span></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Per-test datasets, or one dataset per deposit? We chose per-test plus a collection record. Does that match how you'd cite it?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Parameter claims · BattINFO #347–349, registry #51–53, platform #76/#78</span><span>4 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Parameter sets are records now <span class="status live">live</span></h2>
+      <ul>
+        <li>Each claim is exactly one of <strong>quantity</strong>, <strong>curve</strong> (OCP with hysteresis branch) or <strong>expression</strong> (BPX)</li>
+        <li>Per-claim provenance class: measured › fitted › literature › derived › assumed</li>
+        <li>Deterministic id from (target, scope, name), so re-import is idempotent</li>
+        <li><code>GET /parameters/resolve?material_kind=graphite</code> cascades spec › kind and reports what's missing</li>
+        <li>The cell design tool now draws its OCPs from these records, DOI and license attached</li>
+      </ul>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>17</b><span>records on prod</span></div>
+      <div class="kpi"><b>6</b><span>material kinds covered</span></div>
+      <div class="kpi"><b>15</b><span>literature OCP curves</span></div>
+      <div class="kpi"><b>1</b><span>JSON-LD node per set, <code>schema:Dataset</code></span></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Who has fitted parameter sets (PyBaMM, BPX, BattMo) they'd publish this way? What provenance tier would you claim?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Materials and electrodes · BattINFO #330, #334, #342–346</span><span>5 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Materials and electrodes became first-class</h2>
+      <ul>
+        <li><strong>Material kind</strong> is a curated vocabulary (key, family, formula, EMMO IRI, aliases), not a record</li>
+        <li><strong>Material spec</strong> is a record with deterministic id, contributor, license, funding</li>
+        <li><strong>Electrode</strong> has a kind, design values and its own emission; a cell links to its electrodes, a value links to the sample behind it</li>
+        <li>Half-cell electrodes are named by role (working, counter), never by polarity</li>
+        <li>Kind vocabulary topped up; <code>cell_configuration</code> added; test protocols emitted</li>
+      </ul>
+    </div>
+    <div>
+      <p class="lead" style="font-size:1rem">Why it mattered: authoring the OCV set exposed that <code>create_material_spec</code> minted a random id per call, so re-runs silently accumulated duplicates. That was the H1 blocker for 0.8.</p>
+      <p class="pr">Proposal: BattINFO-viewer docs/internal/MATERIALS-MODEL-PROPOSAL-2026-08-03.md</p>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Multi-anchor ids on material kinds (Wikidata QID, InChIKey, PubChem CID, MP id): which do you actually look things up by?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Dataset series · BattINFO #351/#352, registry #58</span><span>6 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Collections: one citable thing over many datasets</h2>
+      <ul>
+        <li><code>series_id</code> on a dataset; emitted as <code>dcat:inSeries</code> and <code>schema:isPartOf</code>, type gains <code>dcat:DatasetSeries</code></li>
+        <li>Series-flavored datasets are exempt from the missing-cell-link rule</li>
+        <li>Registry renders the forward "Series" link and the reverse "Used by datasets" panel with no new code (generic <code>*_id</code> rule)</li>
+        <li>Next: mint the Flores collection record anchored on the deposit DOI, then corpus v5</li>
+      </ul>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>1</b><span>collection record per deposit</span></div>
+      <div class="kpi"><b>95</b><span>member datasets</span></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Should the collection carry the Zenodo concept DOI or the version DOI?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Ontology releases · BattINFO consumes 0.20.2 in #338</span><span>7 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Three releases and the duplicate cleanup</h2>
+      <ul>
+        <li><strong>chemical-substance 0.15.0</strong>, <strong>electrochemistry 0.37.2</strong>, <strong>domain-battery 0.20.2</strong></li>
+        <li>17 duplicate labels resolved. Rule: foundational domain wins cross-domain, best-documented wins same-domain</li>
+        <li>9 quantity classes fleshed out (ChargeRecovery pairs with ChargeRetention, IEV 482-03-35)</li>
+        <li>Electrode chemistry classes un-deprecated: they were defined classes still doing inference work, deprecation only removed query vocabulary</li>
+        <li>6578 BattINFO references re-verified against the new closure</li>
+      </ul>
+    </div>
+    <div>
+      <p class="lead" style="font-size:1rem">Open defect worth saying out loud: <code>ElectrochemicalHalfCell</code> is a subclass of <code>ElectrochemicalCell</code>, but the parent is elucidated as two electrodes. We type half-cells as <code>HalfCellDevice</code> until that's fixed.</p>
+      <p class="pr">Also: electrode roles Working/Counter/Reference are not disjoint, so a dual-role Li counter-reference is expressible.</p>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Anyone blocked by a deprecation or a label change in this wave?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>JSON-LD hygiene · BattINFO #294/#307/#290, #355 · registry #59</span><span>8 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Every predicate a record carries is now defined</h2>
+      <ul>
+        <li>Hosted, generated, versioned records context; records can reference it by URL instead of inlining</li>
+        <li>Audit: 121 of 168 distinct predicates in emitted artifacts had no defining subject (43% of occurrences)</li>
+        <li>Retiring the served <code>ns#</code> namespace: every canonical key mapped; 426 preview artifacts re-rendered with zero <code>ns#</code> IRIs <span class="status open">PRs open</span></li>
+        <li>battinfo.org/validate: JSON-LD workbench with summary, table, tree and graph views plus three validation layers, fully offline</li>
+      </ul>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>168</b><span>distinct predicates served</span></div>
+      <div class="kpi"><b>121</b><span>were undefined before</span></div>
+      <div class="kpi"><b>0</b><span><code>ns#</code> IRIs after retirement</span></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Does anyone consume our JSON-LD with a reasoner or a triple store? We'd like a second pair of eyes on the expanded graph.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Platform and registry · battery-genome.org</span><span>9 / 11</span></div>
+  <div class="body">
+    <div>
+      <h2>Hardening, browsing by kind, richer record pages</h2>
+      <ul>
+        <li>Two review rounds (red-team 28 Jul, blind five-persona 31 Jul) came back green; fixes to silent-loss packaging, 409 identity conflicts, rehydration, record-level license, long path names</li>
+        <li><strong>Kind pages</strong> and linked-resource panels: browse a material kind and see its parameter sets and cells</li>
+        <li><strong>Record dossier</strong> merged on the registry; platform record console (KPIs, QR, related records, ORCID contributors, print-to-datasheet) still in PR</li>
+        <li><strong>Equipment</strong>: MC3000 chargers published as spec + units + channels, BLE MAC as identity</li>
+      </ul>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b>11</b><span>equipment records</span></div>
+      <div class="kpi"><b>2</b><span>review rounds, both green</span></div>
+      <div class="kpi"><b>13/15</b><span>prior blockers verified fixed</span></div>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>What equipment would you register next, and what is its natural identity?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Next</span><span>10 / 11</span></div>
+  <div class="body">
+    <div class="next">
+      <h2>What's queued</h2>
+      <ul>
+        <li><strong>Record corrections and versioning</strong>: propose › approve › apply-as-version, with a corrections overlay for pipeline-born records. Design done, two rulings open.</li>
+        <li><strong>Flores collection record</strong> and the Zenodo version update with the JSON-LD bundle.</li>
+        <li><strong>BattINFO 0.8</strong> once <code>ns#</code> retirement and the material-spec dedupe land.</li>
+        <li><strong>Parameter claims phases 3–5</strong>: BPX/PyBaMM export of resolved sets, tier badges.</li>
+        <li>PWA/Android plan drafted, not started.</li>
+      </ul>
+    </div>
+    <div>
+      <p class="lead" style="font-size:1rem">Two rulings we want input on today: who may propose a correction (any verified ORCID on the record?), and whether a maintainer self-edit should still create a visible change record.</p>
+    </div>
+  </div>
+  <div class="prompt"><span class="tag">Ask</span>Rank these. What would you use next week?</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>Discussion</span><span>11 / 11</span></div>
+  <div class="body one">
+    <h2>Open questions</h2>
+    <ul style="font-size:1.1rem;max-width:60ch">
+      <li>Who has a dataset ready to go through the same path as the OCV set?</li>
+      <li>Parameter sets: what would make you publish a fitted set rather than keep it in a notebook?</li>
+      <li>Material ids: which external anchor do you trust?</li>
+      <li>Corrections: contributors propose, maintainers approve. Does that match your lab?</li>
+      <li>Ontology: any term you needed this month and couldn't find?</li>
+    </ul>
+  </div>
+  <div class="prompt"><span class="tag">Links</span>battinfo.org/validate · battery-genome.org/parameter-sets · zenodo.org/records/20086298</div>
+</section>
+
+</div>
+<div class="help">← → or space to move · P to print</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide')),i=0;
+  function go(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach(function(s,k){s.classList.toggle('current',k===i)});slides[i].scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();go(i+1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();go(i-1);}
+    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(slides.length-1);}
+    else if(e.key==='p'||e.key==='P'){window.print();}
+  });
+  slides.forEach(function(s,k){s.addEventListener('click',function(){i=k;slides.forEach(function(x,j){x.classList.toggle('current',j===k)})})});
+})();
+</script>
+</body></html>

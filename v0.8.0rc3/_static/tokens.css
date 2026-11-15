@@ -1,0 +1,197 @@
+/* ============================================================================
+   BattINFO — Design Tokens  (v1.1, dual-mode)
+   ----------------------------------------------------------------------------
+   ONE contract, TWO value sets. Build every UI surface from the SEMANTIC
+   tokens below (--bi-bg-*, --bi-text-*, --bi-brand-*, …).
+   NEVER hard-code a raw hex in a component, and NEVER reference a --raw-*
+   primitive directly — those exist only to feed the semantic layer.
+
+   Theme switch:  <html data-theme="light">  or  <html data-theme="dark">
+   (Also works with a `.dark` class — both selectors are wired.)
+   ========================================================================== */
+
+/* ---- 1. PRIMITIVES (raw palette — do NOT use directly in components) ---- */
+:root {
+  --raw-ink-900:   #0B1622;  /* deepest navy-black (dark base)  */
+  --raw-ink-800:   #102A43;  /* brand ink (light text, dark UI) */
+  --raw-ink-700:   #1D3A57;
+  --raw-ink-600:   #2E4257;
+
+  --raw-paper:     #F3F2EE;  /* warm light base                 */
+  --raw-white:     #FFFFFF;
+  --raw-cloud:     #ECEAE4;  /* light inset                     */
+
+  --raw-slate-500: #5A6570;
+  --raw-slate-400: #6B7580;
+
+  /* Teal ramp — brand shifts BRIGHTER as background darkens */
+  --raw-teal-700:  #0C7A6E;  /* teal TEXT on light  (AA 5.2)    */
+  --raw-teal-500:  #12A394;  /* brand fill (light), large only  */
+  --raw-teal-400:  #2DCAB6;  /* teal TEXT on dark   (AA 8.9)    */
+  --raw-teal-300:  #2DD4BF;  /* brand fill (dark)               */
+
+  /* Semantic-state ramps (light / dark tuned) */
+  --raw-success-l: #178050;  --raw-success-d: #4ADE9E;
+  --raw-warning-l: #946007;  --raw-warning-d: #F0B429;
+  --raw-error-l:   #C8372D;  --raw-error-d:   #F87171;
+  --raw-info-l:    #2563B8;  --raw-info-d:    #6BA8F5;
+}
+
+/* ---- 2. SEMANTIC TOKENS — LIGHT (default) ---- */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces — base is the page; elevate by getting LIGHTER */
+  --bi-bg-base:      var(--raw-paper);
+  --bi-bg-surface:   var(--raw-white);   /* cards, panels        */
+  --bi-bg-raised:    var(--raw-white);   /* popovers, menus      */
+  --bi-bg-inset:     var(--raw-cloud);   /* code blocks, wells   */
+  --bi-bg-brand-subtle: #E4F4F1;         /* tag / badge wash     */
+
+  /* Text — never the brand fill color */
+  --bi-text-primary:   var(--raw-ink-800);
+  --bi-text-secondary: var(--raw-ink-600);
+  --bi-text-muted:     var(--raw-slate-500);
+  --bi-text-on-brand:  var(--raw-white); /* text on a teal fill  */
+  --bi-text-inverse:   var(--raw-white);
+
+  /* Borders / lines */
+  --bi-border:         #E2E0D9;
+  --bi-border-strong:  #CBD3DA;
+
+  /* Brand */
+  --bi-brand:        var(--raw-teal-500); /* fills, ≥24px display */
+  --bi-brand-text:   var(--raw-teal-700); /* links, teal text, small labels */
+  --bi-brand-strong: var(--raw-ink-800);  /* primary button bg    */
+
+  /* Focus */
+  --bi-focus-ring:   var(--raw-teal-700);
+
+  /* States */
+  --bi-success: var(--raw-success-l); --bi-success-bg: #E4F4EC;
+  --bi-warning: var(--raw-warning-l); --bi-warning-bg: #FBF0DA;
+  --bi-error:   var(--raw-error-l);   --bi-error-bg:   #FBE7E4;
+  --bi-info:    var(--raw-info-l);    --bi-info-bg:    #E5EEFA;
+
+  /* Elevation — soft, colored-shadow on light */
+  --bi-shadow-sm: 0 1px 3px rgba(16,42,67,0.06);
+  --bi-shadow-md: 0 4px 16px rgba(16,42,67,0.08);
+  --bi-shadow-lg: 0 12px 32px rgba(16,42,67,0.12);
+}
+
+/* ---- 3. SEMANTIC TOKENS — DARK (override same names) ---- */
+:root[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces — base is DARKEST; elevate by getting LIGHTER (not darker!) */
+  --bi-bg-base:      var(--raw-ink-900);  /* #0B1622 page         */
+  --bi-bg-surface:   #13212F;             /* cards sit ABOVE base  */
+  --bi-bg-raised:    #1A2A3A;             /* popovers, higher      */
+  --bi-bg-inset:     #0E1B27;             /* code wells sink BELOW */
+  --bi-bg-brand-subtle: rgba(45,212,191,0.12);
+
+  /* Text — near-white, NEVER ink navy (that was the invisible-hero bug) */
+  --bi-text-primary:   #EAF1F6;
+  --bi-text-secondary: #AEBDC9;
+  --bi-text-muted:     #7A8996;
+  --bi-text-on-brand:  #06231E;           /* dark ink on bright teal fill */
+  --bi-text-inverse:   var(--raw-ink-800);
+
+  /* Borders */
+  --bi-border:         #23323F;
+  --bi-border-strong:  #33475A;
+
+  /* Brand — brighter ramp; mid-teal is muddy on dark */
+  --bi-brand:        var(--raw-teal-300); /* #2DD4BF fills        */
+  --bi-brand-text:   var(--raw-teal-400); /* #2DCAB6 links/text   */
+  --bi-brand-strong: var(--raw-teal-300); /* primary btn = teal, NOT dark ink */
+
+  /* Focus — brighter ring for dark */
+  --bi-focus-ring:   var(--raw-teal-300);
+
+  /* States — brighter tints, low-alpha backgrounds */
+  --bi-success: var(--raw-success-d); --bi-success-bg: rgba(74,222,158,0.14);
+  --bi-warning: var(--raw-warning-d); --bi-warning-bg: rgba(240,180,41,0.14);
+  --bi-error:   var(--raw-error-d);   --bi-error-bg:   rgba(248,113,113,0.15);
+  --bi-info:    var(--raw-info-d);    --bi-info-bg:    rgba(107,168,245,0.15);
+
+  /* Elevation — shadows barely read on dark; lean on surface lightness + border */
+  --bi-shadow-sm: 0 1px 2px rgba(0,0,0,0.40);
+  --bi-shadow-md: 0 6px 20px rgba(0,0,0,0.45);
+  --bi-shadow-lg: 0 16px 40px rgba(0,0,0,0.55);
+}
+
+/* ---- 4. GLOBAL BASE (safe defaults so nothing renders unstyled) ---- */
+html { background: var(--bi-bg-base); }
+body {
+  margin: 0;
+  background: var(--bi-bg-base);
+  color: var(--bi-text-primary);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--bi-brand-text); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; }
+code, pre, kbd, samp { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+:focus-visible { outline: 2px solid var(--bi-focus-ring); outline-offset: 2px; }
+
+/* ---- 5. COMPONENT RECIPES (all mode-agnostic — they read semantic tokens) ---- */
+
+/* Card / panel */
+.bi-card {
+  background: var(--bi-bg-surface);
+  border: 1px solid var(--bi-border);
+  border-radius: 14px;
+  box-shadow: var(--bi-shadow-sm);
+}
+
+/* Code block — sits in an inset well, distinct from cards */
+.bi-code {
+  background: var(--bi-bg-inset);
+  border: 1px solid var(--bi-border);
+  border-radius: 12px;
+  color: var(--bi-text-primary);
+}
+
+/* Buttons */
+.bi-btn { font: 700 15px/1 'Plus Jakarta Sans', sans-serif; border-radius: 10px;
+  padding: 12px 22px; cursor: pointer; border: 1px solid transparent; transition: .15s; }
+
+.bi-btn-primary { background: var(--bi-brand-strong); color: var(--bi-text-on-brand); }
+:root[data-theme="light"] .bi-btn-primary { color: #fff; }            /* ink bg → white text */
+.bi-btn-primary:hover { filter: brightness(1.08); }
+.bi-btn-primary:active { filter: brightness(0.94); }
+
+/* Secondary / ghost — MUST carry a visible border in BOTH modes
+   (the disappearing dark-on-dark "Validate a record" button) */
+.bi-btn-secondary {
+  background: transparent;
+  color: var(--bi-text-primary);
+  border-color: var(--bi-border-strong);
+}
+.bi-btn-secondary:hover { background: var(--bi-bg-inset); }
+
+.bi-btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+
+/* Badge / pill */
+.bi-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bi-bg-brand-subtle);
+  color: var(--bi-brand-text);
+  border: 1px solid transparent;
+  border-radius: 999px; padding: 5px 12px;
+  font: 600 13px 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Inputs */
+.bi-input {
+  background: var(--bi-bg-surface);
+  border: 1px solid var(--bi-border-strong);
+  color: var(--bi-text-primary);
+  border-radius: 8px; padding: 10px 12px;
+  font: 500 15px 'Plus Jakarta Sans', sans-serif;
+}
+.bi-input::placeholder { color: var(--bi-text-muted); }
+.bi-input:focus-visible { border-color: var(--bi-brand-text); outline: 2px solid var(--bi-focus-ring); outline-offset: 1px; }
