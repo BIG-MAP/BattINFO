@@ -884,6 +884,9 @@
     "CubicMilliMetre": "emmo:CubicMilliMetre",
     "Day": "emmo:Day",
     "MicroLitre": "emmo:MicroLitre",
-    "TrisTrimethylsilyPhosphite": "https://w3id.org/emmo/domain/chemical-substance#substance_69ce48e4_23e3_4758_84ae_f00ed3f79518"
+    "TrisTrimethylsilyPhosphite": "https://w3id.org/emmo/domain/chemical-substance#substance_69ce48e4_23e3_4758_84ae_f00ed3f79518",
+    "Pascal": "emmo:Pascal",
+    "AmbientCelsiusTemperature": "electrochemistry:electrochemistry_abd08921_6f3b_4a48_811e_7685c58aec0b",
+    "Pressure": "emmo:EMMO_50a44256_9dc5_434b_bad4_74a4d9a29989"
   }
 }
