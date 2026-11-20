@@ -809,7 +809,6 @@
 <section id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">#</a></h3>
 <ul class="simple">
-<li><p>The <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra requires <code class="docutils literal notranslate"><span class="pre">batterydf[nda,excel,mat]&gt;=0.2.0rc2,&lt;0.3</span></code>, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pyshacl</span></code>, which runs the SHACL shapes and is a core dependency, requires <code class="docutils literal notranslate"><span class="pre">rdflib</span></code> below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.</p></li>
 <li><p>Python 3.15 is not supported yet. <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.</p></li>
 <li><p>The <code class="docutils literal notranslate"><span class="pre">tabular</span></code> extra requires pandas 3.0.5 or later and pyarrow 25 or later, so it cannot be installed into an environment held to pandas 2.</p></li>
