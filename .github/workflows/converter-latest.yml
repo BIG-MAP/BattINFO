@@ -1,9 +1,9 @@
 # Catches a new batterydf release that breaks the converter before users meet
-# it. The processing extra accepts any batterydf 0.2 release, candidates
-# included, so a new one on PyPI reaches users with no change in this
-# repository, while CI keeps testing the version in uv.lock. Once a week this
-# job installs the newest batterydf below 0.3 from PyPI, release candidates
-# included, and runs the converter tests against it.
+# it. The processing extra accepts any batterydf 0.2 release, so a new one on
+# PyPI reaches users with no change in this repository, while CI keeps testing
+# the version in uv.lock. Once a week this job installs the newest batterydf
+# below 0.3 from PyPI, release candidates included, so a candidate is tested
+# before its final release, and runs the converter tests against it.
 name: converter-latest
 
 on:

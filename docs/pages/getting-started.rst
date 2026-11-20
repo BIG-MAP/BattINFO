@@ -23,10 +23,6 @@ BattINFO supports Python 3.11–3.14. Until 0.8.0, its first working release on 
    pip install "battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git"     # CSV/Parquet/XLSX readers
    pip install "battinfo[publish] @ git+https://github.com/BIG-MAP/BattINFO.git"     # RO-Crate validation for publishing
 
-.. note::
-
-   The ``processing`` extra requires ``batterydf[nda,excel,mat]>=0.2.0rc2,<0.3``, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.
-
 A hosted notebook such as Colab starts without BattINFO. Install it in a cell before you import it; the second line adds the ``processing`` extra, which tutorial 6 needs:
 
 .. code-block:: text

@@ -65,8 +65,6 @@ Each missing optional dependency raises an error naming its extra. The map:
 | RO-Crate validation when publishing | `pip install "battinfo[publish]"` |
 | QR codes for cell labels | `pip install segno` (not a BattINFO extra) |
 
-The `processing` extra currently installs the batterydf 0.2 release candidate from PyPI.
-
 ## My record's IRI opens a sign-in page
 
 Content negotiation is doing its job. A `https://w3id.org/battinfo/...` IRI
