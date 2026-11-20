@@ -90,8 +90,6 @@ Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert(
 pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"
 ```
 
-The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so pip installs the batterydf 0.2.0 release candidate until 0.2.0 itself is published.
-
 Working on BattINFO itself? See [Contributing](#contributing).
 
 ## Quickstart

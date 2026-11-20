@@ -171,7 +171,6 @@ These paths mint IRIs that no other path reproduces. The [identifier policy](htt
 
 ### Dependencies
 
-- The `processing` extra requires `batterydf[nda,excel,mat]>=0.2.0rc2,<0.3`, so it installs the batterydf 0.2.0 release candidate until batterydf 0.2.0 is published.
 - `pyshacl`, which runs the SHACL shapes and is a core dependency, requires `rdflib` below 8 in its release 0.40.1, so battinfo can only be installed next to rdflib 7 until a pyshacl release allows rdflib 8.
 - Python 3.15 is not supported yet. `requires-python` has no upper bound, so pip will still try to install battinfo on 3.15, and on Windows without a C compiler that install fails while building PyYAML, which has no wheels for Python 3.15 yet; the error asks for Microsoft Visual C++ 14.0 or greater. Use Python 3.11–3.14.
 - The `tabular` extra requires pandas 3.0.5 or later and pyarrow 25 or later, so it cannot be installed into an environment held to pandas 2.
