@@ -3,5 +3,11 @@
     "name": "dev (main)",
     "version": "dev",
     "url": "https://big-map.github.io/BattINFO/dev/"
+  },
+  {
+    "name": "v0.8.0 (stable)",
+    "version": "v0.8.0",
+    "url": "https://big-map.github.io/BattINFO/v0.8.0/",
+    "preferred": true
   }
 ]
