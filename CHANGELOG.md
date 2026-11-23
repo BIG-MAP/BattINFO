@@ -7,7 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.8.0] - 2026-10-13
+## [0.8.0] - 2026-11-23
 
 0.8.0 is the first release of `battinfo` on PyPI. It describes battery data as records that validate against JSON Schema, convert to JSON-LD typed with EMMO classes, and carry stable `https://w3id.org/battinfo/` IRIs, and it publishes them to Zenodo and to the BattINFO registry. Its 22 record types run from materials, electrodes and the other cell components to cells, test specs, tests, equipment, datasets and parameter sets. The workspace (`battinfo.workspace()`) takes raw cycler files to validated records, a Zenodo deposit and the registry review queue, and `battinfo.registry.Registry` reads published records and data files back. Version 0.7.0 was never tagged or uploaded, so 0.7.x users installed it from a Git checkout; the notes below are written for them.
 

@@ -19,18 +19,18 @@ If in doubt, start with `battinfo.workspace(".")` for cells, tests, datasets, eq
 - Python 3.11–3.14
 - A terminal
 
-Install BattINFO from GitHub into a virtual environment. 0.8.0 will be its first working release on PyPI.
+Install BattINFO from PyPI into a virtual environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
+pip install battinfo
 ```
 
 > Converting raw cycler files (`ws.convert()`) needs the BDF converter, distributed as `batterydf`. The `processing` extra brings it, along with the plotting libraries:
 >
 > ```bash
-> pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"
+> pip install "battinfo[processing]"
 > ```
 
 ---
