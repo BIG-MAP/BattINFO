@@ -14,6 +14,7 @@ and resolvable through persistent `https://w3id.org/battinfo/` identifiers.
 <!-- Badges · status -->
 [![CI](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FBIG-MAP%2FBattINFO%2Fmain%2Fpyproject.toml&logo=python&logoColor=white)](https://github.com/BIG-MAP/BattINFO/blob/main/pyproject.toml)
+[![PyPI](https://img.shields.io/pypi/v/battinfo?label=PyPI)](https://pypi.org/project/battinfo/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](https://github.com/BIG-MAP/BattINFO/blob/main/LICENSE)
 <br/>
 <!-- Badges · activity & quality -->
@@ -76,21 +77,21 @@ JSON. BattINFO turns that into a single, semantically-grounded record model:
 
 ## Installation
 
-Supports **Python 3.11–3.14**. 0.8.0 will be the first working release of battinfo on PyPI. Until then, install it from GitHub into a virtual environment:
+Supports **Python 3.11–3.14**. Install it from PyPI into a virtual environment:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\activate
-pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
+pip install battinfo
 ```
 
 Optional extras: `battinfo[processing]` (cycler-file conversion via `ws.convert()` + plotting), `battinfo[tabular]` (CSV/Parquet/XLSX readers), `battinfo[publish]` (RO-Crate validation), `battinfo[storage]` (S3), `battinfo[docs]` (Sphinx), and `battinfo[dev]` (full test/lint/build toolchain). To convert raw cycler files, install the converter and the plotting libraries with:
 
 ```bash
-pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"
+pip install "battinfo[processing]"
 ```
 
-Working on BattINFO itself? See [Contributing](#contributing).
+To try the development version from GitHub instead: `pip install "git+https://github.com/BIG-MAP/BattINFO.git"`. Working on BattINFO itself? See [Contributing](#contributing).
 
 ## Quickstart
 
