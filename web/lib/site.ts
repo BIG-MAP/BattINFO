@@ -17,9 +17,8 @@ export const site = {
   reference: "https://big-map.github.io/BattINFO/dev",
   github: "https://github.com/BIG-MAP/BattINFO",
   pypi: "https://pypi.org/project/battinfo/",
-  // false until 0.8.0 is on PyPI (release.yml publishes each v* tag). The
-  // release commit sets it back to true, which shows the PyPI badge.
-  pypiLive: false,
+  // Shows the PyPI badge. battinfo is on PyPI from 0.8.0.
+  pypiLive: true,
   genome: "https://www.battery-genome.org",
   ciBadge: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml/badge.svg?branch=main",
   ciRuns: "https://github.com/BIG-MAP/BattINFO/actions/workflows/ci.yml",
