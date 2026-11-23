@@ -548,16 +548,16 @@
 <p>Working at the bench? The <a class="reference internal" href="howto.html"><span class="doc">how-to guides</span></a> map lab tasks, such as registering materials, building a cell from components, labelling cells and publishing, to short runnable recipes, and the <a class="reference internal" href="glossary.html"><span class="doc">glossary</span></a> decodes the vocabulary in plain language.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
-<p>BattINFO supports Python 3.11–3.14. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">              </span><span class="c1"># core</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">  </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">     </span><span class="c1"># CSV/Parquet/XLSX readers</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;</span><span class="w">     </span><span class="c1"># RO-Crate validation for publishing</span>
+<p>BattINFO supports Python 3.11–3.14. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>battinfo<span class="w">                </span><span class="c1"># core</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[processing]&quot;</span><span class="w">  </span><span class="c1"># cycler-file conversion (ws.convert) + plotting</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[tabular]&quot;</span><span class="w">     </span><span class="c1"># CSV/Parquet/XLSX readers</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;battinfo[publish]&quot;</span><span class="w">     </span><span class="c1"># RO-Crate validation for publishing</span>
 </pre></div>
 </div>
 <p>A hosted notebook such as Colab starts without BattINFO. Install it in a cell before you import it; the second line adds the <code class="docutils literal notranslate"><span class="pre">processing</span></code> extra, which tutorial 6 needs:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%pip install &quot;battinfo @ git+https://github.com/BIG-MAP/BattINFO.git&quot;
-%pip install &quot;battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git&quot;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>%pip install battinfo
+%pip install &quot;battinfo[processing]&quot;
 </pre></div>
 </div>
 <p>To work on BattINFO itself, clone the repository and follow the <a class="reference external" href="https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md">contributing guide</a>.</p>

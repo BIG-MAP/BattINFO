@@ -14,21 +14,21 @@ Working at the bench? The :doc:`how-to guides <howto>` map lab tasks, such as re
 Installation
 ------------
 
-BattINFO supports Python 3.11–3.14. Until 0.8.0, its first working release on PyPI, install it from GitHub. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
+BattINFO supports Python 3.11–3.14. Install it from PyPI. The optional extras add features as you need them, and a feature whose dependency is missing raises an error that names the extra to install:
 
 .. code-block:: bash
 
-   pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"              # core
-   pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"  # cycler-file conversion (ws.convert) + plotting
-   pip install "battinfo[tabular] @ git+https://github.com/BIG-MAP/BattINFO.git"     # CSV/Parquet/XLSX readers
-   pip install "battinfo[publish] @ git+https://github.com/BIG-MAP/BattINFO.git"     # RO-Crate validation for publishing
+   pip install battinfo                # core
+   pip install "battinfo[processing]"  # cycler-file conversion (ws.convert) + plotting
+   pip install "battinfo[tabular]"     # CSV/Parquet/XLSX readers
+   pip install "battinfo[publish]"     # RO-Crate validation for publishing
 
 A hosted notebook such as Colab starts without BattINFO. Install it in a cell before you import it; the second line adds the ``processing`` extra, which tutorial 6 needs:
 
 .. code-block:: text
 
-   %pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
-   %pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"
+   %pip install battinfo
+   %pip install "battinfo[processing]"
 
 To work on BattINFO itself, clone the repository and follow the `contributing guide <https://github.com/BIG-MAP/BattINFO/blob/main/CONTRIBUTING.md>`_.
 
