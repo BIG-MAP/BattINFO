@@ -10,7 +10,7 @@ from typing import Any, Mapping
 from battinfo._util import is_dataset_series
 from battinfo.canonical_aliases import record_to_snake_aliases
 from battinfo.entities import kind_for_doc
-from battinfo.namespace import parse_record_iri, parse_thing_iri, record_iri
+from battinfo.namespace import parse_record_iri, parse_thing_iri, record_iri, same_record
 from battinfo.naming import is_valid_handle, kind_word
 from battinfo.validate.core import (
     DEFAULT_POLICY,
@@ -1805,6 +1805,57 @@ def _validate_parameter_set_identity(
         )
 
 
+def _validate_parameter_set_based_on(
+    body: Mapping[str, Any],
+    issues: list[ValidationIssue],
+    resource_type: str | None,
+    severity: str,
+) -> None:
+    """A parameter set, or one of its claims, that names the record itself in ``is_based_on``.
+
+    A parameter set is never built from itself, and a value computed from
+    other values of the same set says so with ``provenance_class``
+    ``derived``. Either IRI form of the record counts (``same_record``).
+    """
+    record_id = body.get("id")
+    if parse_record_iri(record_id) is None:
+        return  # the schema reports a malformed id
+    lists: list[tuple[str, Any, bool]] = [("parameter_set.is_based_on", body.get("is_based_on"), False)]
+    for idx, claim in enumerate(_list_or_empty(body.get("claims"))):
+        if isinstance(claim, Mapping):
+            lists.append((f"parameter_set.claims[{idx}].is_based_on", claim.get("is_based_on"), True))
+    for part_idx, part in enumerate(_list_or_empty(body.get("parts"))):
+        if not isinstance(part, Mapping):
+            continue
+        for idx, claim in enumerate(_list_or_empty(part.get("claims"))):
+            if isinstance(claim, Mapping):
+                path = f"parameter_set.parts[{part_idx}].claims[{idx}].is_based_on"
+                lists.append((path, claim.get("is_based_on"), True))
+    for path, values, on_claim in lists:
+        for index, value in enumerate(_list_or_empty(values)):
+            if not isinstance(value, str) or not (value == record_id or same_record(value, record_id)):
+                continue
+            if on_claim:
+                message = (
+                    f"is_based_on names the parameter set this claim belongs to ({value}); it lists what "
+                    "the value was computed from. A value derived from other values of the same set says "
+                    "so with provenance_class 'derived'."
+                )
+            else:
+                message = (
+                    f"is_based_on names this record's own IRI ({value}); it lists the resources the "
+                    "parameter set was built from, never the set itself."
+                )
+            _append_issue(
+                issues,
+                code="semantic.parameter_set_based_on_itself",
+                severity=severity,
+                path=f"{path}[{index}]",
+                message=message,
+                resource_type=resource_type,
+            )
+
+
 def _validate_parameter_set_semantics(
     body: Mapping[str, Any],
     issues: list[ValidationIssue],
@@ -1819,9 +1870,14 @@ def _validate_parameter_set_semantics(
     under every policy. A parameter file with no source file is fine for
     local work and an error for publishing (ruling 2026-10-11): nothing
     under the default policy, a warning under strict, an error under the
-    publisher policy.
+    publisher policy. A record or claim that names the record itself in
+    ``is_based_on`` is a warning under the default policy and an error under
+    strict and publisher.
     """
     _validate_parameter_set_identity(body, issues, resource_type, policy_name)
+    _validate_parameter_set_based_on(
+        body, issues, resource_type, "error" if policy_name in ("strict", "publisher") else "warning"
+    )
     # Parameter-set claims emit through the same quantity nodes as properties,
     # so an unmapped parameter key gets the same warning. Fraction keys resolve
     # through the emitter's own table, as they do for properties.

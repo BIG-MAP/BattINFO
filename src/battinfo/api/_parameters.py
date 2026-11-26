@@ -35,6 +35,7 @@ import math
 import re
 from pathlib import Path
 from typing import Any, Callable, Mapping
+from urllib.parse import urlparse
 
 from battinfo._jsonio import read_record_json as _load_json
 from battinfo._util import _as_path, _citation_url_value
@@ -75,6 +76,32 @@ _TARGET_FIELDS = ("material_kind", "material_spec_id", "cell_spec_id")
 _PARAMETER_SET_SEGMENT = "dataset"
 
 
+def _based_on_list(value: Any, where: str) -> list[str] | None:
+    """``is_based_on`` as the list of URIs the schema takes, or ``None`` when it names none.
+
+    A bare string is one URI, never a sequence of characters, as the record
+    models treat a string given to a list field (``bundle._StrList``). Each
+    entry must be an absolute URI, a record IRI or an outside one such as a
+    DOI URL. A URI given twice is kept once, in its first place.
+    """
+    if value is None:
+        return None
+    items = [value] if isinstance(value, str) else value
+    if not isinstance(items, (list, tuple)):
+        raise TypeError(f"{where} is a URI or a list of URIs, not {type(value).__name__}.")
+    uris: list[str] = []
+    for item in items:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(f"{where} takes URIs (non-empty strings); got {item!r}.")
+        uri = item.strip()
+        parsed = urlparse(uri)
+        if not parsed.scheme or not (parsed.netloc or parsed.path):
+            raise ValueError(f"{where} takes absolute URIs, such as a record IRI or https://doi.org/...; got {item!r}.")
+        if uri not in uris:
+            uris.append(uri)
+    return uris or None
+
+
 def _checked_claim(
     claim: Any, index: int, default_provenance_class: str | None, where: str = "claims"
 ) -> dict[str, Any]:
@@ -82,6 +109,12 @@ def _checked_claim(
     if not isinstance(claim, Mapping):
         raise ValueError(f"{where}[{index}] must be a mapping, got {type(claim).__name__}.")
     out = dict(claim)
+    if "is_based_on" in out:
+        based_on = _based_on_list(out["is_based_on"], f"{where}[{index}].is_based_on")
+        if based_on is None:
+            del out["is_based_on"]
+        else:
+            out["is_based_on"] = based_on
     parameter = out.get("parameter")
     if not isinstance(parameter, str) or not _PARAMETER_KEY_RE.fullmatch(parameter):
         raise ValueError(
@@ -560,6 +593,7 @@ def _record_from_parameter_set(
     not_imported: list[str] | None = None,
     distributions: list[Mapping[str, Any]] | None = None,
     supersedes: str | None = None,
+    is_based_on: str | list[str] | None = None,
     default_provenance_class: str | None = None,
     description: str | None = None,
     comment: str | None = None,
@@ -669,6 +703,10 @@ def _record_from_parameter_set(
                 "leave id and uid out so the record mints its own."
             )
         body["supersedes"] = str(supersedes)
+    based_on = _based_on_list(is_based_on, "is_based_on")
+    if based_on is not None:
+        # What the whole set was built from; a claim names its own sources.
+        body["is_based_on"] = based_on
     if distributions is not None and not isinstance(distributions, list):
         raise TypeError(
             "distributions is a list of parameter-file dicts (entries from "
@@ -901,6 +939,11 @@ def create_parameter_set(*, validate: bool = True, **fields: Any) -> dict[str, A
     Each claim carries exactly one of ``quantity`` / ``curve`` /
     ``expression`` plus its ``provenance_class`` (``default_provenance_class=``
     fills claims that omit it).
+
+    ``is_based_on=`` lists the URIs the whole set was built from (other
+    parameter sets, datasets, tests, or an outside resource such as a DOI
+    URL), and a claim's own ``is_based_on`` lists what that one value was
+    computed from. A bare string counts as one URI. Neither enters the IRI.
     """
     record = _record_from_parameter_set(**fields)
     if validate:
@@ -962,7 +1005,7 @@ def supersede_parameter_set(
     for key, value in body.items():
         if key in ("id", "short_id", "supersedes"):
             continue
-        if key in ("distributions", "description", "comment"):
+        if key in ("is_based_on", "distributions", "description", "comment"):
             new_body.setdefault("supersedes", old_id)  # where the builder puts it
         new_body[key] = value
     new_body.setdefault("supersedes", old_id)

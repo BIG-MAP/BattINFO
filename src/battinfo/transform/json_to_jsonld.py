@@ -3158,6 +3158,8 @@ def _parameter_target_node(body: dict[str, Any]) -> dict[str, Any] | None:
 
 def _parameter_claim_annotations(claim: dict[str, Any]) -> dict[str, Any]:
     """Per-claim decorations shared by both claim emissions."""
+    from battinfo.jsonld import dataset_is_based_on  # noqa: PLC0415
+
     out: dict[str, Any] = {}
     if isinstance(claim.get("method"), str) and claim["method"]:
         out["schema:measurementTechnique"] = claim["method"]
@@ -3174,6 +3176,11 @@ def _parameter_claim_annotations(claim: dict[str, Any]) -> dict[str, Any]:
         if doi is not None:
             citation["bibo:doi"] = doi
         out["schema:citation"] = citation
+    # What this one value was computed from (the datasets of the measurements
+    # behind it, say), in the shape a dataset's is_based_on takes.
+    based_on = dataset_is_based_on(claim.get("is_based_on"))
+    if based_on:
+        out["schema:isBasedOn"] = based_on
     return out
 
 
@@ -3306,8 +3313,12 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
     fingerprint is a ``schema:identifier`` and the file itself rides
     ``schema:distribution``. On either flavour, the record it replaces (an
     earlier file's, or a parameter set minted under spec/ before 2026-10-11)
-    is ``dcterms:replaces``.
+    is ``dcterms:replaces``, and what the set was built from (``is_based_on``)
+    is ``schema:isBasedOn``, on this node for the whole set and on each claim
+    node for that one value.
     """
+    from battinfo.jsonld import dataset_is_based_on  # noqa: PLC0415
+
     body = data.get("parameter_set") if isinstance(data.get("parameter_set"), dict) else {}
     node: dict[str, Any] = {}
     if isinstance(body.get("id"), str):
@@ -3333,6 +3344,10 @@ def _to_domain_battery_jsonld_parameter_set(data: dict[str, Any]) -> dict[str, A
         # A corrected file, or a dataset/ republication of a spec/ record, is a
         # new record that names the one it replaces.
         node["dcterms:replaces"] = {"@id": body["supersedes"]}
+    # What the whole set was built from; each claim node carries its own.
+    based_on = dataset_is_based_on(body.get("is_based_on"))
+    if based_on:
+        node["schema:isBasedOn"] = based_on
 
     scope_values = [
         {"@type": "schema:PropertyValue", "schema:name": key, "schema:value": body[key]}
