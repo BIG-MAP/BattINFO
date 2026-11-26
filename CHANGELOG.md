@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-26
+
+0.8.1 is a patch release. A BPX file's top-level `Metadata` and `@context` no longer enter a parameter file's fingerprint (IDENTIFIER_POLICY 6.3, policy v1.2), and no published IRI moves.
+
 ### Changed
 
 - A parameter file's fingerprint (`parameters_sha256`, and so its IRI) leaves out a top-level `Metadata` node and `@context` in the file, because they describe the parameters and are not part of them (IDENTIFIER_POLICY 6.3, revised 26 November 2026). Adding or correcting a file's metadata keeps its IRI. No published parameter file and no file in this repository has either key, so no IRI moves. A record that 0.8.0 saved from a file that has them keeps its IRI when a record of the same source bytes is saved into that folder again; a 0.8.0 record without a source entry, or a copy of the file in other bytes, is not matched. `battinfo.interop.legacy_bpx_content_digest` gives the fingerprint 0.8.0 took, from which its IRI derives. The registry keeps the first copy of a file, so a copy that changes only its metadata resolves to the bytes first published.
