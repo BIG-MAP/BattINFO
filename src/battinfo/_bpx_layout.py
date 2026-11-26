@@ -30,6 +30,12 @@ added here too, and named in the list of changes:
 
 The initial electrolyte concentration moves when the file has one and is
 never invented.
+
+The module also says which part of a file is the parameter set, which is
+everything except a top-level ``Metadata`` and ``@context``
+(:func:`without_file_metadata`). A parameter file's fingerprint is taken over
+that part (IDENTIFIER_POLICY 6.3), and the registry recomputes it with the
+same function.
 """
 
 from __future__ import annotations
@@ -40,6 +46,7 @@ from typing import Any, Mapping
 
 __all__ = [
     "DEFAULT_TARGET_VERSION",
+    "FILE_METADATA_KEYS",
     "THERMAL_CONDUCTIVITY",
     "V1_STATE_MOVES",
     "is_v0_layout",
@@ -47,7 +54,12 @@ __all__ = [
     "uses_v1_layout",
     "v0_layout_fields",
     "version_tuple",
+    "without_file_metadata",
 ]
+
+#: The top-level keys of a BPX file that describe its parameter set and are
+#: not part of it: the metadata, and a JSON-LD context for the metadata.
+FILE_METADATA_KEYS: tuple[str, ...] = ("Metadata", "@context")
 
 #: ``Header.BPX`` a conversion writes unless asked for another 1.x version.
 DEFAULT_TARGET_VERSION = "1.1.0"
@@ -96,6 +108,19 @@ def version_tuple(version: Any) -> tuple[int, ...]:
             break
         parts.append(int(piece))
     return tuple(parts)
+
+
+def without_file_metadata(document: Mapping[str, Any]) -> dict[str, Any]:
+    """``document`` without its top-level ``Metadata`` and ``@context``: the parameter set it holds.
+
+    Adding or correcting a file's metadata never changes which parameter set
+    it holds, so the fingerprint is taken over what this returns. Only the top
+    level is read: a key of the same name inside a block stays. A shallow
+    copy; the input is never mutated.
+    """
+    if not isinstance(document, Mapping):
+        raise ValueError(f"a BPX document is a JSON object, not {_json_kind(document)}.")
+    return {key: value for key, value in document.items() if key not in FILE_METADATA_KEYS}
 
 
 def uses_v1_layout(version: Any) -> bool:
@@ -185,8 +210,10 @@ def to_v1_layout(
     in Electrolyte, a thermal conductivity in Cell), whatever version it
     declares. Such a document comes back with those fields moved into State
     (thermal conductivity into User-defined), the State values the bpx
-    package's migration adds when absent added, and ``Header.BPX`` set to
-    ``target_version`` (a 1.x version). Every move, every added value and the
+    package's migration adds when absent added, and ``Header.BPX`` raised to
+    ``target_version`` (a 1.x version) when it declares an earlier one. A
+    later 1.x version is kept: the conversion only moves fields, so it never
+    lowers the version a file declares. Every move, every added value and the
     header change is one entry in ``changes``.
 
     A document already in the v1 layout comes back unchanged with no
@@ -286,7 +313,7 @@ def to_v1_layout(
         )
     out["State"] = _ordered_state(state)
 
-    if header.get("BPX") != target:
+    if declared_parts < version_tuple(target):
         changes.append(f"Header.BPX {json.dumps(declared)} -> {json.dumps(target)}")
         header["BPX"] = target
     return out, changes

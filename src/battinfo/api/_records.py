@@ -1930,6 +1930,10 @@ def save_record(
     doc = _load_json(_as_path(record)) if isinstance(record, (str, Path)) else record
     doc = _with_minted_id(doc, source_root=source_root_path, base=base)
     doc = _with_held_iris(doc, source_root_path)
+    # A parameter file 0.8.0 saved under the whole-file fingerprint keeps its IRI (IDENTIFIER_POLICY 6.3).
+    from battinfo.api._parameters import _with_saved_parameter_file  # noqa: PLC0415 - it imports this module
+
+    doc = _with_saved_parameter_file(doc, source_root_path)
     if validate:
         _validate_canonical_record(doc, policy=validation_policy)
 

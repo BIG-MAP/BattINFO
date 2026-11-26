@@ -496,7 +496,8 @@ def parameter_file_issues(body: Mapping[str, Any]) -> list[tuple[str, str, str, 
                 "warning",
                 f"parameter_set.distributions[{runnables[0][0]}]",
                 "the source carries a passing bpx_parse check, so the official parser reads it as "
-                "published: a runnable copy is made only when the parser rejects the source.",
+                "published (its top-level Metadata and @context left out): a runnable copy "
+                "is made only when the parser rejects the source.",
             )
         )
     for index, entry in entries:
@@ -1046,6 +1047,126 @@ def save_parameter_set(
         stamp=stamp,
         base=base,
     )
+
+
+def _source_checksum(body: Mapping[str, Any]) -> str | None:
+    """The sha256 of a parameter file's one source copy, or ``None``."""
+    sources = [
+        entry
+        for entry in body.get("distributions") or []
+        if isinstance(entry, Mapping) and entry.get("role") == "source"
+    ]
+    if len(sources) != 1 or not isinstance(sources[0].get("checksum"), Mapping):
+        return None
+    checksum = sources[0]["checksum"]
+    value = checksum.get("value")
+    if checksum.get("algorithm") != "sha256" or not isinstance(value, str) or not _SHA256_HEX_RE.fullmatch(value):
+        return None
+    return value
+
+
+#: The first battinfo release whose parameter-file fingerprint leaves out the
+#: file's top-level Metadata and @context (IDENTIFIER_POLICY 6.3).
+_FINGERPRINT_WITHOUT_FILE_METADATA_SINCE = (0, 8, 1)
+
+
+def _written_before_fingerprint_change(doc: Mapping[str, Any]) -> bool:
+    """Whether the battinfo build that wrote *doc* took a parameter file's fingerprint over the whole document.
+
+    Read from the version stamped in the record's provenance. A record
+    without a stamp counts as written before.
+    """
+    provenance = doc.get("provenance")
+    version = provenance.get("battinfo_version") if isinstance(provenance, Mapping) else None
+    found = re.match(r"(\d+)\.(\d+)\.(\d+)", str(version or ""))
+    if found is None:
+        return True
+    return tuple(int(part) for part in found.groups()) < _FINGERPRINT_WITHOUT_FILE_METADATA_SINCE
+
+
+def _named(value: Any) -> set[str]:
+    """The IRIs a reference field names, whether it holds one or a list."""
+    items = value if isinstance(value, list) else [value]
+    return {item for item in items if isinstance(item, str)}
+
+
+def _with_saved_parameter_file(record: dict[str, Any], source_root: PathLike | None) -> dict[str, Any]:
+    """*record* with the IRI and fingerprint of the parameter file *source_root* holds for the same source bytes.
+
+    battinfo 0.8.0 took a parameter file's fingerprint over the whole
+    document. A file that carries a top-level ``Metadata`` or ``@context``
+    therefore had another ``parameters_sha256``, and another IRI,
+    than it gets now that the fingerprint leaves them out (IDENTIFIER_POLICY
+    6.3). A folder that holds such a record keeps it. Saving a record of the
+    same source bytes takes the saved record's IRI and fingerprint instead of
+    minting a second record (5.5), and so does every later save of it.
+
+    The source bytes decide, not the fingerprint, because the fingerprint is
+    what changed. Two records of the same bytes whose IRIs derive from
+    different fingerprints are the record of each rule, and only *record* has
+    to be known to carry the new one, by the battinfo version stamped in its
+    provenance (0.8.1 or later): an old record saved into a folder never takes
+    a new IRI. A folder that holds *record* under its own fingerprint keeps
+    that one, and a record that supersedes the saved one is left alone.
+
+    Not matched, so saved as a second record: a 0.8.0 record without a source
+    entry, and a copy of the file in other bytes (a CRLF checkout, say).
+    :func:`battinfo.interop.legacy_bpx_content_digest` gives the fingerprint
+    0.8.0 gave a file, from which its IRI derives.
+    """
+    body = record.get("parameter_set")
+    if source_root is None or not isinstance(body, Mapping) or _written_before_fingerprint_change(record):
+        return record
+    fingerprint = body.get("parameters_sha256")
+    checksum = _source_checksum(body)
+    own = parse_record_iri(body.get("id"))
+    if (
+        checksum is None
+        or not isinstance(fingerprint, str)
+        or own is None
+        or (own.segment, own.uid) != (_PARAMETER_SET_SEGMENT, parameter_file_uid(fingerprint))
+    ):
+        return record
+    match: Mapping[str, Any] | None = None
+    for path, _origin in _query_record_files(
+        "parameter-set", source_root=source_root, directory=None, include_packaged_examples=False
+    ):
+        try:
+            saved_doc = _load_json(path)
+        except (OSError, ValueError):
+            continue
+        saved = saved_doc.get("parameter_set") if isinstance(saved_doc, Mapping) else None
+        if not isinstance(saved, Mapping) or _source_checksum(saved) != checksum:
+            continue
+        saved_fingerprint = saved.get("parameters_sha256")
+        if saved_fingerprint == fingerprint:
+            return record  # the folder already holds this record under today's fingerprint
+        held = parse_record_iri(saved.get("id"))
+        if (
+            match is None
+            and isinstance(saved_fingerprint, str)
+            and _SHA256_HEX_RE.fullmatch(saved_fingerprint)
+            and held is not None
+            and (held.segment, held.uid) == (_PARAMETER_SET_SEGMENT, parameter_file_uid(saved_fingerprint))
+        ):
+            match = saved
+    if match is None:
+        return record
+    held = parse_record_iri(match["id"])
+    if any(
+        (named := parse_record_iri(iri)) is not None and named.uid == held.uid  # type: ignore[union-attr]
+        for iri in _named(body.get("supersedes"))
+    ):
+        return record  # a correction of the saved record is a record of its own
+    return {
+        **record,
+        "parameter_set": {
+            **body,
+            "id": match["id"],
+            "short_id": match.get("short_id") or held.uid.replace("-", "")[:6],  # type: ignore[union-attr]
+            "parameters_sha256": match["parameters_sha256"],
+        },
+    }
 
 
 def query_parameter_sets(

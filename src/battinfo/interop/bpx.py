@@ -41,6 +41,7 @@ from typing import Any, Mapping
 
 from battinfo._bpx_layout import (
     DEFAULT_TARGET_VERSION,
+    FILE_METADATA_KEYS,
     THERMAL_CONDUCTIVITY,
     V1_STATE_MOVES,
     is_v0_layout,
@@ -48,6 +49,7 @@ from battinfo._bpx_layout import (
     uses_v1_layout,
     v0_layout_fields,
     version_tuple,
+    without_file_metadata,
 )
 from battinfo._jcs import _from_numpy, canonical_json_bytes
 from battinfo._jcs import loads as _loads_json
@@ -1287,6 +1289,12 @@ def _parameter_file_to_bpx(
     added: set[str] = set()
     if target_v1 and v0_source:
         document, changes = to_v1_layout(document, target_version)
+        written = document["Header"].get("BPX")
+        if bpx_version is not None and written != target_version:
+            # A version asked for is written as asked, even below the one the
+            # source declares, which the layout conversion keeps.
+            changes.append(f"Header.BPX {json.dumps(written)} -> {json.dumps(target_version)}")
+            document["Header"]["BPX"] = target_version
         _report_layout_changes(changes, target_version, warnings)
         added = {change.removeprefix("added ").split(" = ")[0] for change in changes if change.startswith("added ")}
     elif not target_v1:
@@ -1443,12 +1451,34 @@ def bpx_content_digest(source: Mapping[str, Any] | str | Path | bytes) -> str:
     from the file stores it as ``parameters_sha256`` and mints its uid from it
     (IDENTIFIER_POLICY 6.3).
 
+    A top-level ``Metadata`` and ``@context`` in the file are left out. They
+    describe the parameter set and are not part of it, so adding or
+    correcting them never changes the digest. Everything else counts, the
+    ``Header`` included.
+
     numpy scalars and arrays in a dict input count as the values they hold.
     NaN and infinities have no JSON form, so they raise ``ValueError`` naming
     where they are.
     """
     data, _ = _load_bpx(source)
+    return _parameters_digest(data)
+
+
+def legacy_bpx_content_digest(source: Mapping[str, Any] | str | Path | bytes) -> str:
+    """The fingerprint battinfo 0.8.0 took of a BPX document: RFC 8785 over the whole document.
+
+    It differs from :func:`bpx_content_digest` only for a file that carries a
+    top-level ``Metadata`` or ``@context``. ``stable_uid("parameter-file:" +
+    digest)`` gives the uid 0.8.0 minted for such a file, so a record
+    published from it can be found from the file (IDENTIFIER_POLICY 5.5, 6.3).
+    """
+    data, _ = _load_bpx(source)
     return hashlib.sha256(canonical_json_bytes(data)).hexdigest()
+
+
+def _parameters_digest(document: Mapping[str, Any]) -> str:
+    """The fingerprint of a parsed document (see :func:`bpx_content_digest`); the one place it is computed."""
+    return hashlib.sha256(canonical_json_bytes(without_file_metadata(document))).hexdigest()
 
 
 @dataclass
@@ -1512,7 +1542,8 @@ def upgrade_bpx(
     1.0 rejects a file that declares 1.0 or later but keeps those fields in
     the old places, and some exporters write exactly that (the BattMo export
     of Schmitt et al. 2026 declares ``"BPX": 1.0``). This moves those fields,
-    sets ``Header.BPX`` to ``target_version``, and adds the State values the
+    raises ``Header.BPX`` to ``target_version`` (a later version the file
+    declares is kept), and adds the State values the
     v0.x layout has no field for, as the bpx package's own migration
     (``bpx.convert_v0_to_v1``) adds them: initial state of charge 1, the
     ambient temperature from the reference temperature (else 298.15 K) and
@@ -1534,7 +1565,10 @@ def upgrade_bpx(
     declared = data["Header"].get("BPX")
     document, changes = to_v1_layout(data, target_version)
     source_label = None if declared is None else str(declared)
-    target = target_version if changes else (source_label or target_version)
+    # What the rewritten file declares: target_version, or a later version
+    # the file already declared, which the conversion never lowers.
+    written = document["Header"].get("BPX")
+    target = target_version if written is None else str(written)
     return BpxUpgradeResult(document, source_label, target, changes)
 
 
@@ -1552,6 +1586,12 @@ def check_bpx(source: Mapping[str, Any] | str | Path | bytes) -> dict[str, Any]:
     ``pip install bpx``. A passing check means the parser accepts the file,
     not that a solver runs it: that is what a ``simulation_smoke`` check
     records.
+
+    A top-level ``Metadata`` and ``@context`` are not
+    parameters. A parser that does not know them (bpx 1.1 and earlier
+    refuses both) gets the file without them, and the detail says so: such a
+    parser refuses the file as published, and a tool that hands it the file
+    has to leave the two keys out. Their content is not checked.
     """
     try:
         import bpx as bpx_lib  # noqa: PLC0415
@@ -1579,6 +1619,10 @@ def _parse_with_official_parser(data: dict[str, Any], bpx_lib: Any) -> tuple[boo
     bpx_dir = Path(bpx_lib.__file__).resolve().parent
     notes: set[str] = set()
     missing: list[str] = []
+    known = _parser_top_level_keys(bpx_lib)
+    set_aside = [key for key in FILE_METADATA_KEYS if key in data and (known is None or key not in known)]
+    if set_aside:
+        data = {key: value for key, value in data.items() if key not in set_aside}
 
     def _keep_parser_warnings(message: Any, category: Any, filename: str, *_: Any, **__: Any) -> None:
         # Kept by where the warning was raised, not by what it says: the
@@ -1610,7 +1654,27 @@ def _parse_with_official_parser(data: dict[str, Any], bpx_lib: Any) -> tuple[boo
     if notes:
         # Every warning, in full: a truncated list hides the rest.
         detail = f"Parser warnings: {' | '.join(sorted(notes)).rstrip('.')}. {detail}"
+    if set_aside:
+        detail = (
+            f"{detail} Checked without the file's top-level {' and '.join(set_aside)}, which describe "
+            "the parameter set and are not parameters. This parser refuses a file that has them, so a "
+            "tool that hands it the file has to leave them out."
+        )
     return passed, detail, missing
+
+
+def _parser_top_level_keys(bpx_lib: Any) -> frozenset[str] | None:
+    """The top-level keys the installed bpx schema accepts, or ``None`` when it cannot be told."""
+    fields = getattr(getattr(bpx_lib, "BPX", None), "model_fields", None)
+    if not isinstance(fields, Mapping):
+        return None
+    keys: set[str] = set()
+    for name, info in fields.items():
+        keys.add(str(getattr(info, "alias", None) or name))
+        validation_alias = getattr(info, "validation_alias", None)
+        if isinstance(validation_alias, str):
+            keys.add(validation_alias)
+    return frozenset(keys)
 
 
 # Modules that make up the warnings machinery itself (Python 3.14 moved the
@@ -1708,7 +1772,7 @@ def bpx_file_distribution(
             "checksum": {"algorithm": "sha256", "value": hashlib.sha256(raw).hexdigest()},
         }
     )
-    entry.parameters_sha256 = hashlib.sha256(canonical_json_bytes(document)).hexdigest()
+    entry.parameters_sha256 = _parameters_digest(document)
     if description:
         entry["description"] = description
     if role == "runnable":
@@ -1759,8 +1823,9 @@ class BpxParameterImportResult:
         the record's ``not_imported``, so a reader of the record knows what
         only the source file holds.
     content_digest:
-        SHA-256 of the file's RFC 8785 canonical JSON (:func:`bpx_content_digest`):
-        the record's ``parameters_sha256``, from which its IRI derives.
+        SHA-256 of the file's RFC 8785 canonical JSON without its top-level
+        ``Metadata`` and ``@context`` (:func:`bpx_content_digest`): the
+        record's ``parameters_sha256``, from which its IRI derives.
     source_sha256:
         SHA-256 of the exact bytes read, for a path or bytes input (``None``
         for a dict): the checksum the source distribution must carry.
@@ -1784,7 +1849,9 @@ class BpxParameterImportResult:
         """The uid of the record this file becomes (IDENTIFIER_POLICY 6.3).
 
         Known before the record is built, so the file can be uploaded under
-        its record's uid first. ``None`` when the import has no digest.
+        its record's uid first. ``None`` when the import has no digest. A
+        folder that holds the record 0.8.0 saved from the same bytes keeps
+        that record's uid instead (see :func:`legacy_bpx_content_digest`).
         """
         if self.content_digest is None:
             return None
@@ -2535,6 +2602,15 @@ def _parse_bpx_parameters(
     # source file, and belong in a dataset record.
     for section, value in data.items():
         if section in _BPX_PARAMETER_SECTIONS:
+            continue
+        if section in FILE_METADATA_KEYS:
+            # Not part of the parameters nor of the
+            # digest, so not a value the record leaves out either.
+            if section == "Metadata":
+                warnings.append(
+                    "The file's Metadata describes the parameter set and is not part of it. It stays in "
+                    "the source file; this version of battinfo does not read it into the record."
+                )
             continue
         if section == "Validation" and isinstance(value, Mapping):
             series = [str(k) for k in value]

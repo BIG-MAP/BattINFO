@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- A parameter file's fingerprint (`parameters_sha256`, and so its IRI) leaves out a top-level `Metadata` node and `@context` in the file, because they describe the parameters and are not part of them (IDENTIFIER_POLICY 6.3, revised 26 November 2026). Adding or correcting a file's metadata keeps its IRI. No published parameter file and no file in this repository has either key, so no IRI moves. A record that 0.8.0 saved from a file that has them keeps its IRI when a record of the same source bytes is saved into that folder again; a 0.8.0 record without a source entry, or a copy of the file in other bytes, is not matched. `battinfo.interop.legacy_bpx_content_digest` gives the fingerprint 0.8.0 took, from which its IRI derives. The registry keeps the first copy of a file, so a copy that changes only its metadata resolves to the bytes first published.
+- The BPX import no longer lists `Metadata` and `@context` under `not_imported`. It warns that the metadata stays in the source file and is not read into the record.
+- `check_bpx` gives the official parser the file without `Metadata` and `@context` when that parser does not know them (bpx 1.1 and earlier refuses both), and says so in the check's detail. A runnable copy is compared with the conversion of its source by fingerprint, so its own `Metadata` and `@context` do not count.
+
+### Fixed
+
+- A layout conversion (`upgrade_bpx`, `battinfo._bpx_layout.to_v1_layout`) no longer lowers the version a file declares. A v0.x-layout file that declares BPX 1.2.0, say, keeps 1.2.0, where it came out as 1.1.0. `to_bpx` still writes the version given as `bpx_version=`, a lower one included.
+
 ## [0.8.0] - 2026-11-23
 
 0.8.0 is the first release of `battinfo` on PyPI. It describes battery data as records that validate against JSON Schema, convert to JSON-LD typed with EMMO classes, and carry stable `https://w3id.org/battinfo/` IRIs, and it publishes them to Zenodo and to the BattINFO registry. Its 22 record types run from materials, electrodes and the other cell components to cells, test specs, tests, equipment, datasets and parameter sets. The workspace (`battinfo.workspace()`) takes raw cycler files to validated records, a Zenodo deposit and the registry review queue, and `battinfo.registry.Registry` reads published records and data files back. Version 0.7.0 was never tagged or uploaded, so 0.7.x users installed it from a Git checkout; the notes below are written for them.
