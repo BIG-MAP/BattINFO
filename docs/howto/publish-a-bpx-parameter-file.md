@@ -48,7 +48,7 @@ for warning in result.warnings:
     print("-", warning)
 ```
 
-The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record's IRI is `https://w3id.org/battinfo/dataset/<uid>`: a parameter set is a dataset, one piece of data from one source, so it shares the `dataset/` namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
+The uid comes from the SHA-256 of the file's canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. A top-level `Metadata` node and `@context` in the file are left out, because they describe the parameters and are not part of them, so adding or correcting a file's metadata keeps its uid. Everything else counts, the `Header` included. The record's IRI is `https://w3id.org/battinfo/dataset/<uid>`: a parameter set is a dataset, one piece of data from one source, so it shares the `dataset/` namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.
 
 Some values have no home in a record yet: the `Particle` blocks of a blended electrode, the initial hysteresis state, `Degradation` and `Validation`. They are named in the warnings and listed in `not_imported`, which the record keeps, so a reader knows what only the file holds. `to_bpx(record)` says so too, and sets `complete=False` on its result.
 
@@ -109,7 +109,7 @@ source = bpx_file_distribution(
 print(source["checksum"]["value"], source["checks"][0]["passed"])
 ```
 
-A passing `bpx_parse` check means the parser accepts the file, not that a solver runs it. If you ran a simulation, say a 1C discharge in PyBaMM, record it as a second check named `simulation_smoke`.
+A passing `bpx_parse` check means the parser accepts the file, not that a solver runs it. bpx 1.1 and earlier refuse a file with a top-level `Metadata` or `@context`, so `check_bpx` checks such a file without them and says so, and a tool that hands the file to that parser has to leave them out. If you ran a simulation, say a 1C discharge in PyBaMM, record it as a second check named `simulation_smoke`.
 
 Some files need software beyond BPX itself. About:Energy's files made with AEPyBaMM keep functions in their `User-defined` block that only that package evaluates, so their entry says `software_requirements=["aepybamm>=0.2.3"]`.
 
@@ -195,6 +195,8 @@ record = from_bpx_parameters("corrected.bpx.json").to_parameter_set(
 
 Only the publisher of the old record can supersede it. The registry refuses a `supersedes` from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.
 
+A copy whose only change is in its top-level `Metadata` or `@context` holds the same parameters, so it keeps the IRI and is not a correction. The registry keeps the first copy of a file it is given, so for now it goes on serving the bytes first published, metadata included.
+
 ## Records published under spec/
 
 Parameter sets published before 2026-10-11 have `spec/` IRIs, and they keep them: the old IRI keeps resolving, and a local copy still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI of its replacement. Nothing is published under `spec/` any more, though, so the `publisher` policy makes that warning an error, and `ws.submit()` and `ws.zenodo()` refuse the record. Its new version is a new `dataset/` record that supersedes it, and `supersede_parameter_set` builds it. The IRI is minted from the current seeds (a file's from its `parameters_sha256`, a claim batch's from its target, scope and name), `supersedes` names the old IRI, and everything else is copied as it is, the file entries included, since a file's URL is not its identity. For the Schmitt et al. 2026 file:
@@ -219,7 +221,7 @@ The first publisher to submit a file owns its IRI. Another publisher submitting 
 
 ## From the IRI to PyBaMM
 
-The `battery-genome` client reads the record, downloads its BPX file (the runnable copy when there is one), checks the bytes against the record's SHA-256 and returns the JSON, which PyBaMM takes as it is:
+The `battery-genome` client reads the record, downloads its BPX file (the runnable copy when there is one), checks the bytes against the record's SHA-256 and returns the JSON without any top-level `Metadata` and `@context`, which PyBaMM then takes as it is:
 
 <!-- doc-snippet: skip -->
 ```python

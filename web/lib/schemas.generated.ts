@@ -9576,7 +9576,7 @@ export const schemaFiles: { path: string; schema: Record<string, unknown> }[] = 
             "parameters_sha256": {
               "type": "string",
               "pattern": "^[0-9a-f]{64}$",
-              "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file, the fingerprint the record's IRI derives from (stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it."
+              "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file without its top-level Metadata and @context, which describe the parameters and are not part of them, the fingerprint the record's IRI derives from (stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it. A record battinfo 0.8.0 built from a file that carries those keys holds the digest of the whole file instead."
             },
             "model_context": {
               "type": "object",
