@@ -53,7 +53,7 @@
     <script>
         DOCUMENTATION_OPTIONS.theme_version = '0.24.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://big-map.github.io/BattINFO/switcher.json';
-        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.0';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'v0.8.1';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
@@ -603,7 +603,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">warning</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The uid comes from the SHA-256 of the file’s canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. The record’s IRI is <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/dataset/&lt;uid&gt;</span></code>: a parameter set is a dataset, one piece of data from one source, so it shares the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.</p>
+<p>The uid comes from the SHA-256 of the file’s canonical JSON (RFC 8785), so a re-indented copy, a CRLF checkout or a copy written by another JSON library has the same uid, and any changed value gives a new one. A top-level <code class="docutils literal notranslate"><span class="pre">Metadata</span></code> node and <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> in the file are left out, because they describe the parameters and are not part of them, so adding or correcting a file’s metadata keeps its uid. Everything else counts, the <code class="docutils literal notranslate"><span class="pre">Header</span></code> included. The record’s IRI is <code class="docutils literal notranslate"><span class="pre">https://w3id.org/battinfo/dataset/&lt;uid&gt;</span></code>: a parameter set is a dataset, one piece of data from one source, so it shares the <code class="docutils literal notranslate"><span class="pre">dataset/</span></code> namespace with dataset records (IDENTIFIER_POLICY 6.3). A file that repeats a key inside an object is refused, because JSON parsers disagree on which of the two values counts.</p>
 <p>Some values have no home in a record yet: the <code class="docutils literal notranslate"><span class="pre">Particle</span></code> blocks of a blended electrode, the initial hysteresis state, <code class="docutils literal notranslate"><span class="pre">Degradation</span></code> and <code class="docutils literal notranslate"><span class="pre">Validation</span></code>. They are named in the warnings and listed in <code class="docutils literal notranslate"><span class="pre">not_imported</span></code>, which the record keeps, so a reader knows what only the file holds. <code class="docutils literal notranslate"><span class="pre">to_bpx(record)</span></code> says so too, and sets <code class="docutils literal notranslate"><span class="pre">complete=False</span></code> on its result.</p>
 <p>A transport value of zero or less (an ionic conductivity, a diffusivity, a transference number) cannot drive a physics model, and in published files it usually marks a placeholder for a model kept elsewhere, such as in <code class="docutils literal notranslate"><span class="pre">User-defined</span></code>. Such a value is read as the file states it, so the record still says exactly what the file says, and a warning names its BPX path and value. The claim gets no provenance class, and validating the record warns about it every time (<code class="docutils literal notranslate"><span class="pre">semantic.parameter_transport_not_positive</span></code>).</p>
 </section>
@@ -657,7 +657,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s2">&quot;checksum&quot;</span><span class="p">][</span><span class="s2">&quot;value&quot;</span><span class="p">],</span> <span class="n">source</span><span class="p">[</span><span class="s2">&quot;checks&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;passed&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>A passing <code class="docutils literal notranslate"><span class="pre">bpx_parse</span></code> check means the parser accepts the file, not that a solver runs it. If you ran a simulation, say a 1C discharge in PyBaMM, record it as a second check named <code class="docutils literal notranslate"><span class="pre">simulation_smoke</span></code>.</p>
+<p>A passing <code class="docutils literal notranslate"><span class="pre">bpx_parse</span></code> check means the parser accepts the file, not that a solver runs it. bpx 1.1 and earlier refuse a file with a top-level <code class="docutils literal notranslate"><span class="pre">Metadata</span></code> or <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code>, so <code class="docutils literal notranslate"><span class="pre">check_bpx</span></code> checks such a file without them and says so, and a tool that hands the file to that parser has to leave them out. If you ran a simulation, say a 1C discharge in PyBaMM, record it as a second check named <code class="docutils literal notranslate"><span class="pre">simulation_smoke</span></code>.</p>
 <p>Some files need software beyond BPX itself. About:Energy’s files made with AEPyBaMM keep functions in their <code class="docutils literal notranslate"><span class="pre">User-defined</span></code> block that only that package evaluates, so their entry says <code class="docutils literal notranslate"><span class="pre">software_requirements=[&quot;aepybamm&gt;=0.2.3&quot;]</span></code>.</p>
 <section id="a-runnable-copy-when-the-parser-rejects-the-file">
 <h3>A runnable copy, when the parser rejects the file<a class="headerlink" href="#a-runnable-copy-when-the-parser-rejects-the-file" title="Link to this heading">#</a></h3>
@@ -730,6 +730,7 @@
 </pre></div>
 </div>
 <p>Only the publisher of the old record can supersede it. The registry refuses a <code class="docutils literal notranslate"><span class="pre">supersedes</span></code> from anyone else; when it accepts the new record, it marks the old one superseded and points it at the new one.</p>
+<p>A copy whose only change is in its top-level <code class="docutils literal notranslate"><span class="pre">Metadata</span></code> or <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code> holds the same parameters, so it keeps the IRI and is not a correction. The registry keeps the first copy of a file it is given, so for now it goes on serving the bytes first published, metadata included.</p>
 </section>
 <section id="records-published-under-spec">
 <h2>Records published under spec/<a class="headerlink" href="#records-published-under-spec" title="Link to this heading">#</a></h2>
@@ -753,7 +754,7 @@
 </section>
 <section id="from-the-iri-to-pybamm">
 <h2>From the IRI to PyBaMM<a class="headerlink" href="#from-the-iri-to-pybamm" title="Link to this heading">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">battery-genome</span></code> client reads the record, downloads its BPX file (the runnable copy when there is one), checks the bytes against the record’s SHA-256 and returns the JSON, which PyBaMM takes as it is:</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">battery-genome</span></code> client reads the record, downloads its BPX file (the runnable copy when there is one), checks the bytes against the record’s SHA-256 and returns the JSON without any top-level <code class="docutils literal notranslate"><span class="pre">Metadata</span></code> and <code class="docutils literal notranslate"><span class="pre">&#64;context</span></code>, which PyBaMM then takes as it is:</p>
 <!-- doc-snippet: skip -->
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">battery_genome</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">bg</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pybamm</span>
