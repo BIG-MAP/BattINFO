@@ -55,6 +55,11 @@ def _schema_patterns() -> list[tuple[str, tuple[str, ...], str]]:
 PATTERNS = _schema_patterns()
 
 
+def _versioned(rel: str) -> bool:
+    """Whether *rel* is a later version of a schema (``v2/<name>``), published after 0.8.0 (IDENTIFIER_POLICY 11.1)."""
+    return re.match(r"v[0-9]+/", rel) is not None
+
+
 def test_every_pattern_is_the_one_the_namespace_module_builds() -> None:
     stale = []
     for tree in SYNC.TREES:
@@ -66,9 +71,14 @@ def test_every_pattern_is_the_one_the_namespace_module_builds() -> None:
 
 def test_the_schemas_carry_the_patterns_of_the_erratum() -> None:
     """84 record IRI patterns in 32 files, the three reference $defs split from an own-id one, and the OrganizationRefIri of the four schemas whose Organization gained an id."""
-    assert len(PATTERNS) == 91
-    assert len({rel for rel, _, _ in PATTERNS}) == 32
-    assert sum(SYNC._takes_things(where) for _, where, _ in PATTERNS) == 35
+    erratum = [pattern for pattern in PATTERNS if not _versioned(pattern[0])]
+    assert len(erratum) == 91
+    assert len({rel for rel, _, _ in erratum}) == 32
+    assert sum(SYNC._takes_things(where) for _, where, _ in erratum) == 35
+    # A later version of a schema carries the patterns of the schema it versions.
+    for rel in {rel for rel, _, _ in PATTERNS if _versioned(rel)}:
+        name = rel.split("/", 1)[1]
+        assert [(w, p) for r, w, p in PATTERNS if r == rel] == [(w, p) for r, w, p in PATTERNS if r == name], rel
 
 
 def test_a_description_that_shows_a_record_iri_names_both_forms() -> None:
@@ -91,7 +101,7 @@ def test_a_description_that_shows_a_record_iri_names_both_forms() -> None:
 
 
 def test_every_schema_that_defines_an_organization_gives_it_the_same_id() -> None:
-    """21 schemas define an Organization, and in each its id is an OrganizationRefIri of one pattern."""
+    """21 schemas of 0.8.0 define an Organization, and in each, a later version included, its id is an OrganizationRefIri of one pattern."""
     reference = schema_for_rel_path("cell-spec.schema.json")["$defs"]["OrganizationRefIri"]
     defining = []
     for path in sorted(SCHEMAS.rglob("*.json")):
@@ -103,7 +113,7 @@ def test_every_schema_that_defines_an_organization_gives_it_the_same_id() -> Non
         assert defs["Organization"]["properties"]["id"]["$ref"] == "#/$defs/OrganizationRefIri", rel
         assert defs["Organization"]["additionalProperties"] is False, rel
         assert defs["OrganizationRefIri"] == reference, rel
-    assert len(defining) == 21
+    assert len([rel for rel in defining if not _versioned(rel)]) == 21
     assert {"dataset.schema.json", "cell-instance.schema.json", "test.schema.json", "test-protocol.schema.json"} <= set(
         defining
     )

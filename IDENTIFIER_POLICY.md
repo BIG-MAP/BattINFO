@@ -1,4 +1,6 @@
-# BattINFO Identifier Policy (v1.2)
+# BattINFO Identifier Policy (v1.3)
+
+Version 1.3, 2026-11-27, publishes a schema whose accepted documents change at `schema/v2/<name>.schema.json`, the parameter-set schema first (11.1). No schema URL changes what it accepts, and no IRI changes.
 
 Version 1.2, 2026-11-26, leaves a BPX file's top-level `Metadata` and `@context` out of a parameter file's fingerprint (6.3, 5.5). No IRI already on disk or published changes.
 
@@ -430,7 +432,9 @@ The 0.8.0 schemas are frozen from the same tag. Each schema served under `https:
 
 `tests/test_schema_freeze.py` compares each schema with its copy at every release tag from `v0.8.0` on that the commit contains, setting those four annotations aside. CI fetches the tags for both tests.
 
-So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descriptions, but it cannot correct a `v1` term or change what a 0.8.0 schema accepts at its URL. How versioned schema URLs are laid out, and what a record's `schema_version` then says about the schemas it was written against, are to be defined in 0.9. Existing versioned URLs remain served and unchanged, so records that reference them keep resolving to the exact document they were written against.
+So a 0.8.1 or later release can add terms to `v1`, add schemas and reword descriptions, but it cannot correct a `v1` term or change what a 0.8.0 schema accepts at its URL. Apart from the ruling below, how versioned schema URLs are laid out, and what a record's `schema_version` then says about the schemas it was written against, are to be defined in 0.9. Existing versioned URLs remain served and unchanged, so records that reference them keep resolving to the exact document they were written against.
+
+**Ruling, 2026-11-27: where a changed schema goes.** A schema whose accepted documents change is published at `https://w3id.org/battinfo/schema/v2/<name>.schema.json`, and its old URL keeps serving its old content. Only a schema that changes appears under `v2/`. The shared modules under `schema/modules/` keep their URLs, and a `v2` schema reaches them with a relative `$ref` (`../modules/...`). The parameter-set schema is the first such schema (0.8.2): `v2/parameter-set.schema.json` takes every document the 0.8.0 schema takes, and `is_based_on` on the parameter set and on each claim, and battinfo validates parameter sets against it. The freeze test holds a `v2` schema to its content from the first release tag that contains it. The rest of the layout and what `schema_version` promises are still defined in 0.9.
 
 #### Erratum: changes made in place before 0.8.0
 

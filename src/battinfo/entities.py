@@ -844,10 +844,12 @@ ENTITY_KINDS: tuple[EntityKind, ...] = (
     # record body; a claim batch's uid derives from (target, scope, name), a
     # parameter file's from its parameters_sha256. Parameter sets minted
     # before 2026-10-11 keep their spec/ IRIs (they are superseded, not moved).
+    # They validate against v2 of the schema, which takes every record the
+    # 0.8.0 schema takes and is_based_on besides (IDENTIFIER_POLICY 11.1).
     EntityKind(
         "parameter-set",
         "parameter_set",
-        "parameter-set.schema.json",
+        "v2/parameter-set.schema.json",
         "parameter-set",
         "dataset",
         legacy_iri_namespaces=("spec",),

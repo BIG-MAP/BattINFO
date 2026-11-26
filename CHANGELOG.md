@@ -7,6 +7,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Version 2 of the parameter-set schema, at `https://w3id.org/battinfo/schema/v2/parameter-set.schema.json`, and parameter sets now validate against it (IDENTIFIER_POLICY 11.1, v1.3, ruling of 27 November 2026). It takes every record the 0.8.0 schema takes, and `is_based_on` besides. A schema whose accepted documents change is published under `schema/v2/` with the same file name, only a changed schema appears there, and the shared modules keep their URLs. The 0.8.0 schema keeps serving unchanged at `schema/parameter-set.schema.json`, so no schema URL changes what it accepts.
+- Parameter-set records take `is_based_on`, the list of URIs a dataset record already has, at two levels. On the parameter set it names what the whole set was built from, and on a claim (in `claims` or in a part's `claims`) what that one value was computed from. Entries are genome record IRIs or outside URIs such as a DOI URL. `create_parameter_set`, `save_parameter_set`, `ws.add("parameter_set", ...)` and a BPX import's `to_parameter_set` take it, a bare string counts as one URI, and the field never enters the IRI. The JSON-LD gives each entry as a `schema:isBasedOn` reference on the parameter-set node or on the claim's node. A record that names itself in `is_based_on` gets `semantic.parameter_set_based_on_itself`, a warning under the default policy and an error under strict and publisher.
+
 ## [0.8.1] - 2026-11-26
 
 0.8.1 is a patch release. A BPX file's top-level `Metadata` and `@context` no longer enter a parameter file's fingerprint (IDENTIFIER_POLICY 6.3, policy v1.2), and no published IRI moves.
