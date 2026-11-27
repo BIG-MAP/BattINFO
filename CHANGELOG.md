@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A registry submission of a cell spec or a parameter set, from `ws.submit()` or the curated cell-spec path, carries the record's own JSON-LD (`record_to_jsonld` with its default context) as `resource.record_jsonld`, beside `semantic_payload`, so the registry can serve the record's statements at its IRI. An IRI the registry holds in the old form is sent in that form there too. `ws.submit()` refuses a record that cannot be exported before anything is sent. Other resource types are unchanged, and the registry intake package that the `battinfo push` batch path writes does not carry the export.
+
 ## [0.8.1] - 2026-11-26
 
 0.8.1 is a patch release. A BPX file's top-level `Metadata` and `@context` no longer enter a parameter file's fingerprint (IDENTIFIER_POLICY 6.3, policy v1.2), and no published IRI moves.

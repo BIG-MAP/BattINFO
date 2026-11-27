@@ -282,6 +282,7 @@ from battinfo.api._staging import (
     _staging_cell_spec_input,
     _staging_dataset_identity,
     _staging_dataset_input,
+    _submission_record_jsonld,
     build_curated_cell_spec_submission,
     build_submission_envelope,
     promote_staging_cell_spec,
