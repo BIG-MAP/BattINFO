@@ -61,7 +61,7 @@ record = create_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
@@ -114,6 +114,146 @@ What to notice:
 
 - The claim batch emits as one `schema:Dataset` node: scalar claims as EMMO-typed quantities, the target on `schema:about`.
 - No claim batch ships among the packaged examples, which are all BPX files. Build one with `create_parameter_set`, as above, or in a workspace with `ws.add("parameter_set", name=..., material=..., claims=[...])`.
+
+
+### What a claim batch was derived from
+
+::::{tab-set}
+
+:::{tab-item} Python
+```python
+from battinfo.api import create_parameter_set
+
+# is_based_on on the set: what the whole set was built from.
+# is_based_on on a claim: what that one value was computed from.
+record = create_parameter_set(
+    name="Graphite OCP from pseudo-OCV measurements, Smith 2026",
+    material_kind="graphite",
+    is_based_on=["https://doi.org/10.5281/zenodo.1234567"],
+    claims=[
+        {
+            "parameter": "ocp",
+            "curve": {
+                "x_quantity": "stoichiometry",
+                "x": [0.05, 0.5, 0.95],
+                "y": [0.6, 0.12, 0.08],
+                "y_unit": "V",
+            },
+            "provenance_class": "derived",
+            "is_based_on": [
+                "https://w3id.org/battinfo/id/1001/dataset/6nec-h262-tthy-4rnt",
+                "https://w3id.org/battinfo/id/1001/dataset/fm9p-sqkk-tbx3-rr66",
+            ],
+        }
+    ],
+)
+```
+:::
+
+:::{tab-item} Canonical record
+```json
+{
+  "schema_version": "0.2.0",
+  "parameter_set": {
+    "id": "https://w3id.org/battinfo/id/1001/dataset/h8rp-0c5f-hpec-z0qd",
+    "short_id": "h8rp0c",
+    "name": "Graphite OCP from pseudo-OCV measurements, Smith 2026",
+    "material_kind": "graphite",
+    "scope": "material",
+    "claims": [
+      {
+        "parameter": "ocp",
+        "curve": {
+          "x_quantity": "stoichiometry",
+          "x": [
+            0.05,
+            0.5,
+            0.95
+          ],
+          "y": [
+            0.6,
+            0.12,
+            0.08
+          ],
+          "y_unit": "V"
+        },
+        "provenance_class": "derived",
+        "is_based_on": [
+          "https://w3id.org/battinfo/id/1001/dataset/6nec-h262-tthy-4rnt",
+          "https://w3id.org/battinfo/id/1001/dataset/fm9p-sqkk-tbx3-rr66"
+        ]
+      }
+    ],
+    "is_based_on": [
+      "https://doi.org/10.5281/zenodo.1234567"
+    ]
+  },
+  "provenance": {
+    "source_type": "literature",
+    "retrieved_at": 1750000000,
+    "battinfo_version": "0.8.2"
+  }
+}
+```
+:::
+
+:::{tab-item} JSON-LD
+Emitted by `record_to_jsonld`, hosted-context mode.
+
+```json
+{
+  "@context": "https://w3id.org/battinfo/context/records/v1.json",
+  "@id": "https://w3id.org/battinfo/id/1001/dataset/h8rp-0c5f-hpec-z0qd",
+  "@type": "schema:Dataset",
+  "schema:name": "Graphite OCP from pseudo-OCV measurements, Smith 2026",
+  "schema:about": {
+    "@type": "Graphite",
+    "@id": "https://w3id.org/emmo/domain/chemical-substance#substance_d53259a7_0d9c_48b9_a6c1_4418169df303",
+    "schema:name": "Graphite"
+  },
+  "schema:isBasedOn": [
+    {
+      "@id": "https://doi.org/10.5281/zenodo.1234567"
+    }
+  ],
+  "schema:additionalProperty": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "scope",
+    "schema:value": "material"
+  },
+  "schema:variableMeasured": {
+    "@type": "schema:PropertyValue",
+    "schema:name": "ocp",
+    "schema:propertyID": "ocp",
+    "schema:description": "tabulated curve vs stoichiometry, 3 points",
+    "schema:unitText": "V",
+    "schema:unitCode": {
+      "@id": "https://w3id.org/emmo#Volt"
+    },
+    "schema:additionalProperty": {
+      "@type": "schema:PropertyValue",
+      "schema:name": "provenance_class",
+      "schema:value": "derived"
+    },
+    "schema:isBasedOn": [
+      {
+        "@id": "https://w3id.org/battinfo/id/1001/dataset/6nec-h262-tthy-4rnt"
+      },
+      {
+        "@id": "https://w3id.org/battinfo/id/1001/dataset/fm9p-sqkk-tbx3-rr66"
+      }
+    ]
+  }
+}
+```
+:::
+
+::::
+
+What to notice:
+
+- `is_based_on` on the record becomes `schema:isBasedOn` on the parameter-set node, and on a claim it becomes `schema:isBasedOn` on that claim's node (here the curve's `schema:PropertyValue`; a scalar claim's quantity node carries it the same way).
+- Each entry is an `@id` reference, a genome record IRI or an outside URI such as a DOI URL. A bare string counts as one URI, and the field never enters the IRI.
 
 
 ### One BPX file as one record
@@ -252,7 +392,7 @@ record = result.to_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
@@ -5228,7 +5368,7 @@ Generated from the packaged JSON Schemas — the same files `battinfo validate` 
 
 ### parameter-set fields
 
-Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter-set.schema.json) · required at top level: `schema_version`, `parameter_set`, `provenance`
+Schema: [`v2/parameter-set.schema.json`](https://w3id.org/battinfo/schema/v2/parameter-set.schema.json) · required at top level: `schema_version`, `parameter_set`, `provenance`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
@@ -5252,6 +5392,7 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 | `annex` | object |  | Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost. |
 | `not_imported` | array of string |  | Parameter files only: the values of the source file the record does not hold, as BPX paths ('Parameterisation/Negative electrode/Particle', 'State/Degradation', 'Validation'). They stay in the source file; a document rebuilt from the record lacks them. |
 | `supersedes` | → SupersededParameterSetIri |  | The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. Only the publisher of the earlier record may supersede it (the registry refuses anyone else), and the registry then marks it superseded. This record never reuses the earlier record's uid. |
+| `is_based_on` | array of string |  | URIs of the resources this parameter set as a whole was built from, such as other parameter sets, datasets or tests (by their https://w3id.org/battinfo/ IRIs) or outside resources like a DOI URL. The same field, with the same meaning, as a dataset's is_based_on. It never enters the record's IRI. What one value was computed from goes in that claim's is_based_on. |
 | `distributions` | array of → ParameterFile |  | Parameter files only: the file itself. Exactly one 'source' entry (the file exactly as its authors published it), at most one 'runnable' entry (a declared, checksummed conversion for solvers that cannot read the source, made only when the official parser rejects it) and any number of 'mirror' entries (the same bytes served elsewhere). Claims extracted from the file are an index for search and collation; a solver reads the file. |
 
 
@@ -5261,6 +5402,8 @@ Schema: [`parameter-set.schema.json`](https://w3id.org/battinfo/schema/parameter
 **Why claims, not properties.** It is tempting to say a diffusivity of graphite is a property of graphite and file it on a material record. Four facts break that model. Most claims target a *kind* (graphite as such), and kinds are vocabulary, not records — there is no bearer to carry the property. Sources disagree — five published graphite OCPs, fitted diffusivities an order of magnitude apart — and a record's properties presuppose one adjudicated value, while the spread *is* the data. Many parameters are not properties of the material at all but of a model fit — a reaction rate constant fitted under DFN belongs to (material × model × calibration), and asserting it on the material would poison the record with model artifacts. And a calibration is a joint estimate: values fitted together are only valid together, so the set is the unit of self-consistency. Hence one record per source, `provenance_class` per claim, resolution downstream. The describer's own declarations (a datasheet density) stay properties of the description; third-party and model-bound assertions are claims about the target — the same epistemics rule as spec vs instance.
 
 **A parameter set is a dataset.** Both flavours are one particular piece of data from one source, produced by one calibration or extraction, and nothing is ever an instance of one, so they are datasets in the sense of IDENTIFIER_POLICY 6.1 rather than specs. They mint under `https://w3id.org/battinfo/dataset/`, next to dataset records, and emit as `schema:Dataset`; read the record, not the namespace, to tell the two apart. A claim batch's uid derives from its target, scope, electrode polarity and name under the seed `parameter-claims`, a parameter file's from its `parameters_sha256` under the seed `parameter-file`. Either flavour may name the record it replaces in `supersedes`, and only the publisher of that record can supersede it.
+
+**What a set or a value was derived from.** `is_based_on` is the field a dataset record has, with the same meaning, and a parameter set carries it at two levels. On the parameter set it lists what the whole set was built from, such as the published parameter file a new file was adapted from and the claim batches whose values it took. On a claim it lists what that one value was computed from, such as the datasets of the measurements an OCP curve was extracted from. Entries are URIs, either genome record IRIs (datasets, tests, other parameter sets) or outside resources such as a DOI URL, and the JSON-LD gives each as a `schema:isBasedOn` reference on the parameter-set node or on the claim's node. A value computed from other values of the same set needs no entry, because its `provenance_class` is `derived`. A record that names itself, on the set or on a claim, gets `semantic.parameter_set_based_on_itself`, a warning under the default policy and an error under strict and publisher. The field never enters the IRI, so adding sources to a record later does not change its IRI. It came with version 2 of the schema, `https://w3id.org/battinfo/schema/v2/parameter-set.schema.json`, which takes every record the 0.8.0 schema takes; the 0.8.0 schema at `https://w3id.org/battinfo/schema/parameter-set.schema.json` is unchanged and refuses the field.
 
 **Records published under `spec/`.** The 18 parameter sets published before 2026-10-11 (17 claim batches and one BPX file) keep their `spec/` IRIs, which resolve as superseded records that point at their `dataset/` replacements. A record with a `spec/` id still loads, validates and is found by its IRI, with the warning `semantic.parameter_set_legacy_namespace`, which names the `dataset/` IRI of its replacement. The `publisher` policy makes that warning an error, so `ws.submit()` refuses the record and nothing is published under `spec/` again. `ws.zenodo()` refuses it too, unless another record in the same workspace supersedes it: then the deposit leaves it out and says so. `supersede_parameter_set(record)` builds the replacement: a `dataset/` record minted from the current seeds, with `supersedes` naming the old IRI and everything else unchanged. The replacement never keeps the old uid, because a uid is never reused, not even under another namespace: a `dataset/` record with the uid its fields had under `spec/` is invalid under every policy. A query or a collation that finds both a record and its replacement returns the replacement only (`include_superseded=True` returns both), so no source is counted twice.
 

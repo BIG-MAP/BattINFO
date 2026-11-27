@@ -55,7 +55,7 @@ record = protocol.to_record()
   "provenance": {
     "source_type": "manual",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   },
   "method": [
     {
@@ -367,7 +367,7 @@ record = test.to_record()
   "provenance": {
     "source_type": "measurement",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
