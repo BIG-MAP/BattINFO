@@ -129,7 +129,7 @@ Homepage = "https://battinfo.org"
 Repository = "https://github.com/BIG-MAP/BattINFO"
 Documentation = "https://big-map.github.io/BattINFO/"
 Issues = "https://github.com/BIG-MAP/BattINFO/issues"
-Changelog = "https://github.com/BIG-MAP/BattINFO/blob/v0.8.1/CHANGELOG.md"
+Changelog = "https://github.com/BIG-MAP/BattINFO/blob/v0.8.2/CHANGELOG.md"
 
 [project.scripts]
 battinfo = "battinfo.cli:app"

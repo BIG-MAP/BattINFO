@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-11-27
+
+0.8.2 lets a parameter set and each of its claims name what they are based on, in version 2 of the parameter-set schema at its own URL, and a registry submission of a cell spec or a parameter set now carries the record's own JSON-LD. The 0.8.0 schemas keep serving unchanged at their URLs, and no published IRI moves.
+
 ### Added
 
 - A registry submission of a cell spec or a parameter set, from `ws.submit()` or the curated cell-spec path, carries the record's own JSON-LD (`record_to_jsonld` with its default context) as `resource.record_jsonld`, beside `semantic_payload`, so the registry can serve the record's statements at its IRI. An IRI the registry holds in the old form is sent in that form there too. `ws.submit()` refuses a record that cannot be exported before anything is sent. Other resource types are unchanged, and the registry intake package that the `battinfo push` batch path writes does not carry the export.

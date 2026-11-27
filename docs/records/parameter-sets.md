@@ -61,7 +61,7 @@ record = create_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
@@ -191,7 +191,7 @@ record = create_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
@@ -392,7 +392,7 @@ record = result.to_parameter_set(
   "provenance": {
     "source_type": "literature",
     "retrieved_at": 1750000000,
-    "battinfo_version": "0.8.1"
+    "battinfo_version": "0.8.2"
   }
 }
 ```
