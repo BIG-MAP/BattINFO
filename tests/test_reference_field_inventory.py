@@ -98,7 +98,9 @@ EXEMPT: dict[tuple[str, str], str] = {
 
 def _schema_link_fields() -> set[tuple[str, str]]:
     found: set[tuple[str, str]] = set()
-    for schema_file in sorted(SCHEMAS.glob("*.schema.json")):
+    # A versioned schema (v2/<name>) is a version of the schema of that name:
+    # its links take the same decisions, so they are keyed by the name.
+    for schema_file in sorted([*SCHEMAS.glob("*.schema.json"), *SCHEMAS.glob("v*/*.schema.json")]):
         doc = json.loads(schema_file.read_text(encoding="utf-8"))
 
         def walk(node, field: str | None):

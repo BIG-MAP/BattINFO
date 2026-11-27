@@ -58,7 +58,7 @@ export const DISCRIMINATORS: Record<string, string> = {
   equipment_spec: "equipment-spec.schema.json",
   equipment: "equipment.schema.json",
   channel: "channel.schema.json",
-  parameter_set: "parameter-set.schema.json",
+  parameter_set: "v2/parameter-set.schema.json",
   organization: "organization.schema.json",
 };
 

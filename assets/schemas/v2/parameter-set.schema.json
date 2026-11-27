@@ -1,0 +1,1182 @@
+{
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://w3id.org/battinfo/schema/v2/parameter-set.schema.json",
+  "$comment": "Version 2 of the parameter-set schema (IDENTIFIER_POLICY 11.1). It takes every document https://w3id.org/battinfo/schema/parameter-set.schema.json takes, and is_based_on on the parameter set and on each claim. That URL keeps serving the 0.8.0 schema unchanged.",
+  "title": "BattINFO Parameter Set",
+  "description": "Parameter claims from one source. Two flavours. A claim batch states claims about one target (a material kind, a material spec, or a cell spec): many batches may state values for the same parameter of the same material, and the spread is the point. A parameter file is one published parameter file (a BPX file): every value in it, grouped by part (cell, materials, electrodes, separator, electrolyte, state), on one record whose IRI derives from the file's parameters, linked to the cell it describes or marked as a virtual cell, and carrying the file itself. The record-level provenance block carries the source; each claim carries its own provenance class (measured/fitted/literature/assumed/derived).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "parameter_set",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[A-Za-z0-9.-]+)?$"
+    },
+    "parameter_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "description": "The record's IRI. Parameter sets of both flavours are datasets and mint under dataset/ (IDENTIFIER_POLICY 6.3): a claim batch's uid is stable_uid('parameter-claims:<target>:<scope>[:<electrode_polarity>]:<name>'), the name stripped and lowercased, and a parameter file's is stable_uid('parameter-file:' + parameters_sha256). A spec/ IRI is accepted only for a record minted before 2026-10-11.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DatasetIri",
+              "description": "Every parameter set minted since 2026-10-11, and every new one."
+            },
+            {
+              "$ref": "#/$defs/SpecIri",
+              "description": "Only a parameter set minted under spec/ before 2026-10-11. It stays readable and validates with a warning (an error under the publisher policy); a new version is a dataset/ record that supersedes it (battinfo.api.supersede_parameter_set). Nothing mints under spec/ any more."
+            }
+          ]
+        },
+        "short_id": {
+          "$ref": "#/$defs/ShortId"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label. A claim batch is conventionally named '<source> - <target>' (e.g. 'Chen 2020 - graphite'); a parameter file by its source (the BPX Header.Title)."
+        },
+        "handle": {
+          "$ref": "#/$defs/Handle",
+          "description": "Short readable slug, unique within one registry workspace (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Display text, never part of the identity."
+        },
+        "material_kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Claim-batch target: a generic material kind key from the curated material_kinds vocabulary (e.g. 'graphite', 'nmc811'). Claims about the generic chemistry collate here; resolution falls back from a product-specific material spec to its kind."
+        },
+        "material_spec_id": {
+          "$ref": "#/$defs/MaterialSpecRefIri",
+          "description": "Claim-batch target: a specific material spec (a vendor product/grade). Use for claims measured on a particular product rather than the generic chemistry."
+        },
+        "cell_spec_id": {
+          "$ref": "#/$defs/CellSpecRefIri",
+          "description": "The cell spec the claims describe. On a claim batch, the target: cell-level fitted sets (full-cell parameterizations, ECM fits) and electrode/separator/electrolyte claims that describe this cell's build. On a parameter file, the cell design the file parameterises."
+        },
+        "cell_instance_id": {
+          "$ref": "#/$defs/CellIri",
+          "description": "Parameter files only: the physical cell the file was fitted on, when the fit describes one cell rather than a cell design."
+        },
+        "virtual_cell": {
+          "const": true,
+          "description": "Parameter files only: the file describes no real cell (a virtual or example cell), so the record links to none."
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "material",
+            "electrode",
+            "separator",
+            "electrolyte",
+            "cell"
+          ],
+          "description": "Claim batches only. Physical scope the claims describe. Defaults (in the builder) to 'material' for material targets and 'cell' for cell-spec targets. Electrode/separator/electrolyte scopes carry manufactured-build parameters (thickness, porosity, transport) that belong to a cell design, not to a powder."
+        },
+        "electrode_polarity": {
+          "type": "string",
+          "enum": [
+            "positive",
+            "negative"
+          ],
+          "description": "Claim batches only. For electrode-scope claims on a cell-spec target: which electrode the claims describe."
+        },
+        "parameters_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Parameter files only: the SHA-256 (lowercase hex) of the RFC 8785 canonical form of the source file without its top-level Metadata and @context, which describe the parameters and are not part of them, the fingerprint the record's IRI derives from (stable_uid('parameter-file:' + parameters_sha256), IDENTIFIER_POLICY 6.3). Anyone can check a file against the IRI with it. A record battinfo 0.8.0 built from a file that carries those keys holds the digest of the whole file instead."
+        },
+        "model_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The digital artifact these claims came from, when they were imported from a modelling parameter set (BPX file, PyBaMM parameter set, ...).",
+          "properties": {
+            "tool": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Source tool/format (e.g. 'BPX', 'PyBaMM', 'BattMo')."
+            },
+            "name": {
+              "type": "string",
+              "description": "Name of the parameter set in the source tool (e.g. 'Chen2020')."
+            },
+            "model": {
+              "type": "string",
+              "description": "Model type the source parameterises (e.g. 'DFN', 'SPMe')."
+            },
+            "version": {
+              "type": "string",
+              "description": "Source format/schema version (e.g. the BPX version)."
+            },
+            "layout": {
+              "type": "string",
+              "enum": [
+                "v0",
+                "v1"
+              ],
+              "description": "BPX files: the layout the source file actually uses, which a declared version does not always tell. 'v0': the temperatures in Cell and the initial electrolyte concentration in Electrolyte (every 0.x file, and some files declaring 1.0 or later); 'v1': the State block BPX 1.0 introduced. A v1 export of a 'v0' record makes the layout conversion upgrade_bpx makes."
+            }
+          }
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Claim"
+          },
+          "description": "Claim batches only: the claims about the target."
+        },
+        "parts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Part"
+          },
+          "description": "Parameter files only: every claim the file makes, grouped by part. Each (part, phase) pair appears at most once (builder- and validator-enforced)."
+        },
+        "description": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "annex": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Source-file extension entries carried verbatim (e.g. a BPX User-defined block): original key -> raw value. No standard semantics are claimed for these; they exist so a re-export reproduces the source file and nothing is silently lost."
+        },
+        "not_imported": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Parameter files only: the values of the source file the record does not hold, as BPX paths ('Parameterisation/Negative electrode/Particle', 'State/Degradation', 'Validation'). They stay in the source file; a document rebuilt from the record lacks them."
+        },
+        "supersedes": {
+          "$ref": "#/$defs/SupersededParameterSetIri",
+          "description": "The parameter-set record this one replaces, of either flavour: the record of an earlier file a corrected file replaces (a corrected file has other parameters and so a new IRI), or a parameter set minted under spec/ before 2026-10-11 that this dataset/ record republishes. Only the publisher of the earlier record may supersede it (the registry refuses anyone else), and the registry then marks it superseded. This record never reuses the earlier record's uid."
+        },
+        "is_based_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "uniqueItems": true,
+          "description": "URIs of the resources this parameter set as a whole was built from, such as other parameter sets, datasets or tests (by their https://w3id.org/battinfo/ IRIs) or outside resources like a DOI URL. The same field, with the same meaning, as a dataset's is_based_on. It never enters the record's IRI. What one value was computed from goes in that claim's is_based_on."
+        },
+        "distributions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ParameterFile"
+          },
+          "contains": {
+            "required": [
+              "role"
+            ],
+            "properties": {
+              "role": {
+                "const": "source"
+              }
+            }
+          },
+          "minContains": 1,
+          "maxContains": 1,
+          "allOf": [
+            {
+              "contains": {
+                "required": [
+                  "role"
+                ],
+                "properties": {
+                  "role": {
+                    "const": "runnable"
+                  }
+                }
+              },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          ],
+          "description": "Parameter files only: the file itself. Exactly one 'source' entry (the file exactly as its authors published it), at most one 'runnable' entry (a declared, checksummed conversion for solvers that cannot read the source, made only when the official parser rejects it) and any number of 'mirror' entries (the same bytes served elsewhere). Claims extracted from the file are an index for search and collation; a solver reads the file."
+        }
+      },
+      "oneOf": [
+        {
+          "title": "Claim batch",
+          "description": "One source's claims about exactly one target.",
+          "required": [
+            "claims"
+          ],
+          "oneOf": [
+            {
+              "required": [
+                "material_kind"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "material_spec_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "cell_spec_id"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "material_spec_id"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "material_kind"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "cell_spec_id"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "cell_spec_id"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "material_kind"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "material_spec_id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "parts"
+                ]
+              },
+              {
+                "required": [
+                  "parameters_sha256"
+                ]
+              },
+              {
+                "required": [
+                  "virtual_cell"
+                ]
+              },
+              {
+                "required": [
+                  "cell_instance_id"
+                ]
+              },
+              {
+                "required": [
+                  "distributions"
+                ]
+              },
+              {
+                "required": [
+                  "not_imported"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "title": "Parameter file",
+          "description": "One parameter file: its claims grouped by part, its fingerprint, exactly one cell link (a cell spec, one physical cell, or virtual_cell).",
+          "required": [
+            "parts",
+            "parameters_sha256"
+          ],
+          "oneOf": [
+            {
+              "required": [
+                "cell_spec_id"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "cell_instance_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "virtual_cell"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "cell_instance_id"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "cell_spec_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "virtual_cell"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "virtual_cell"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "cell_spec_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "cell_instance_id"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "claims"
+                ]
+              },
+              {
+                "required": [
+                  "material_kind"
+                ]
+              },
+              {
+                "required": [
+                  "material_spec_id"
+                ]
+              },
+              {
+                "required": [
+                  "scope"
+                ]
+              },
+              {
+                "required": [
+                  "electrode_polarity"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "funding": {
+      "$ref": "#/$defs/Funding"
+    },
+    "contributor": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      },
+      "minItems": 1,
+      "description": "People who contributed this record to the platform (attribution/provenance). Each is a schema:Person; an ORCID may be given in same_as. Stamped by ws.save."
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1,
+      "description": "License under which this record is released, as an SPDX identifier (e.g. \"cc-by-4.0\") or a URL. Stamped from the workspace default (ws.license)."
+    }
+  },
+  "$defs": {
+    "SpecIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?spec/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "CellSpecRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?spec/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a cell spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a product model as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "DatasetIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?dataset/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$"
+    },
+    "SupersededParameterSetIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?(?:dataset|spec)/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "A parameter-set IRI: under dataset/, or under spec/ for one minted before 2026-10-11."
+    },
+    "MaterialSpecRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?(?:spec|material-spec)/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of a material spec record (https://w3id.org/battinfo/spec/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a material as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "CellIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:id/[1-9][0-9]{3,}/)?cell/[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "A physical cell (cell instance) IRI."
+    },
+    "ShortId": {
+      "type": "string",
+      "pattern": "^[0-9a-hjkmnp-tv-z]{6,16}$"
+    },
+    "Handle": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*(?:/[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+      "maxLength": 120,
+      "description": "Short readable slug for this record, unique within one registry workspace and shown as <workspace>/<handle> (e.g. 'flores-ocv/graphite-aq-1-063b77-cell'). Lowercase ASCII segments joined by '/', each made of letters and digits separated by single hyphens; at most 120 characters. Display text only: the record's identity is its IRI, and a handle may be corrected without moving it. Build one with battinfo.naming.handle_for()."
+    },
+    "UnixTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "parameter"
+      ],
+      "properties": {
+        "parameter": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Canonical snake_case parameter key. Known keys come from the shipped parameters vocabulary (battinfo.parameters.parameter_keys()); unknown keys are allowed (tolerant import) but do not count toward model-tier completeness."
+        },
+        "quantity": {
+          "$ref": "../modules/common/quantity.schema.json",
+          "description": "Scalar value (with unit, optional min/max/std/conditions). Exactly one of quantity, curve, expression must be present."
+        },
+        "curve": {
+          "$ref": "#/$defs/Curve"
+        },
+        "expression": {
+          "$ref": "#/$defs/Expression"
+        },
+        "provenance_class": {
+          "type": "string",
+          "enum": [
+            "measured",
+            "fitted",
+            "literature",
+            "assumed",
+            "derived"
+          ],
+          "description": "How this value was obtained: directly measured, fitted to data, taken from literature, assumed/engineering judgement, or derived from other parameters."
+        },
+        "method": {
+          "type": "string",
+          "description": "Measurement or fitting method behind the value (e.g. 'GITT', 'EIS', 'fit to 0.1C discharge')."
+        },
+        "conditions": {
+          "type": "object",
+          "description": "Conditions under which the claim holds (e.g. temperature, soc_window). Each entry is a quantity. For scalar claims, conditions may equivalently live inside quantity.conditions.",
+          "patternProperties": {
+            "^[a-z][a-z0-9_]*$": {
+              "$ref": "../modules/common/quantity.schema.json"
+            }
+          },
+          "additionalProperties": false
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri",
+          "description": "Per-claim source override when it differs from the record-level provenance citation."
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "is_based_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "uniqueItems": true,
+          "description": "URIs of the resources this one value was computed from, such as the datasets of the measurements behind it (by their https://w3id.org/battinfo/ IRIs) or outside resources like a DOI URL. What the parameter set as a whole was built from goes in the parameter set's is_based_on."
+        },
+        "comment": {
+          "type": "string"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "quantity"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "curve"
+                ]
+              },
+              {
+                "required": [
+                  "expression"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "curve"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "quantity"
+                ]
+              },
+              {
+                "required": [
+                  "expression"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "required": [
+            "expression"
+          ],
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "quantity"
+                ]
+              },
+              {
+                "required": [
+                  "curve"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "Part": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "part",
+        "claims"
+      ],
+      "properties": {
+        "part": {
+          "type": "string",
+          "enum": [
+            "cell",
+            "negative_material",
+            "negative_electrode",
+            "positive_material",
+            "positive_electrode",
+            "separator",
+            "electrolyte",
+            "state"
+          ],
+          "description": "Which part of the cell the claims describe. An electrode's intrinsic material values (OCP, diffusivity, stoichiometry window) form its material part, its build (thickness, porosity) its electrode part; 'state' holds the initial and environmental conditions."
+        },
+        "phase": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Reserved for blended electrodes, on material parts only: the particle phase the claims describe (e.g. 'Primary')."
+        },
+        "material_kind": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Material parts only: the curated material kind the claims are about."
+        },
+        "material_spec_id": {
+          "$ref": "#/$defs/MaterialSpecRefIri",
+          "description": "Material parts only: the material spec the claims are about."
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Claim"
+          }
+        }
+      },
+      "not": {
+        "required": [
+          "material_kind",
+          "material_spec_id"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "required": [
+                  "material_kind"
+                ]
+              },
+              {
+                "required": [
+                  "material_spec_id"
+                ]
+              },
+              {
+                "required": [
+                  "phase"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "part": {
+                "enum": [
+                  "negative_material",
+                  "positive_material"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "One part of a parameter file and the claims the file makes about it."
+    },
+    "Curve": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x_quantity",
+        "x",
+        "y",
+        "y_unit"
+      ],
+      "description": "Tabulated functional parameter y(x), e.g. an OCP curve vs stoichiometry or conductivity vs salt concentration. x and y must have the same length (builder-enforced).",
+      "properties": {
+        "x_quantity": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What x is (e.g. 'stoichiometry', 'concentration', 'temperature')."
+        },
+        "x_unit": {
+          "type": "string",
+          "description": "Unit of x; omit for dimensionless (e.g. stoichiometry)."
+        },
+        "x": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "y": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "y_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "interpolation": {
+          "type": "string",
+          "enum": [
+            "linear",
+            "cubic"
+          ]
+        },
+        "branch": {
+          "type": "string",
+          "enum": [
+            "lithiation",
+            "delithiation",
+            "average"
+          ],
+          "description": "For OCP curves: which hysteresis branch the curve represents. Matters for large-hysteresis materials (silicon)."
+        }
+      }
+    },
+    "Expression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "language"
+      ],
+      "description": "Functional parameter given as an expression string (as BPX allows). Kept verbatim with its language tag; consumers that cannot evaluate it must treat the claim as opaque.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "bpx",
+            "python",
+            "sympy"
+          ]
+        },
+        "argument": {
+          "type": "string",
+          "description": "Name of the free variable (e.g. 'x' for stoichiometry, 'c' for concentration)."
+        }
+      }
+    },
+    "OrganizationRefIri": {
+      "type": "string",
+      "pattern": "^https://w3id\\.org/battinfo/(?:(?:id/[1-9][0-9]{3,}/)?organization/|id/)[0-9a-hjkmnp-tv-z]{4}(?:-[0-9a-hjkmnp-tv-z]{4}){3}$",
+      "description": "IRI of an organization record (https://w3id.org/battinfo/organization/xxxx-xxxx-xxxx-xxxx, or the same under https://w3id.org/battinfo/id/{prefix}/), or of a maker as a shared thing (https://w3id.org/battinfo/id/xxxx-xxxx-xxxx-xxxx)."
+    },
+    "Organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Organization"
+        },
+        "id": {
+          "$ref": "#/$defs/OrganizationRefIri"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri",
+          "description": "External identifier IRI for this organization (e.g. ROR or Wikidata)."
+        }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "datasheet",
+            "manufacturer",
+            "measurement",
+            "lab",
+            "literature",
+            "manual",
+            "other"
+          ]
+        },
+        "source_name": {
+          "type": "string"
+        },
+        "source_file": {
+          "type": "string"
+        },
+        "source_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "citation": {
+          "type": "string",
+          "format": "uri"
+        },
+        "citation_doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/[-._;()/:A-Za-z0-9]+$"
+        },
+        "retrieved_at": {
+          "$ref": "#/$defs/UnixTime"
+        },
+        "file_hash": {
+          "type": "string",
+          "pattern": "^[A-Fa-f0-9]{64}$"
+        },
+        "workflow_version": {
+          "type": "string"
+        },
+        "curated_by": {
+          "type": "string"
+        },
+        "comment": {
+          "type": "string"
+        },
+        "battinfo_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(((a|b|rc)\\d+)?(\\.post\\d+)?(\\.dev\\d+)?(\\+[A-Za-z0-9.]+)?|-[A-Za-z0-9.-]+)$"
+        }
+      }
+    },
+    "Funding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Funding project (grant) under which the record was produced.",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "type": {
+          "const": "Grant"
+        },
+        "id": {
+          "type": "string",
+          "format": "uri"
+        },
+        "identifier": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "acronym": {
+          "type": "string"
+        },
+        "program": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "Organization"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "same_as": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "type": {
+          "const": "Person"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "given_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "same_as": {
+          "type": "string",
+          "format": "uri"
+        },
+        "affiliation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Organization"
+            },
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/Organization"
+              },
+              "minItems": 1
+            }
+          ],
+          "description": "Organization(s) the person is affiliated with: one, or a list."
+        }
+      }
+    },
+    "ParameterFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "content_url",
+        "encoding_format",
+        "checksum"
+      ],
+      "properties": {
+        "type": {
+          "const": "DataDownload",
+          "description": "JSON-LD type discriminator."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "File name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "source",
+            "runnable",
+            "mirror"
+          ],
+          "description": "'source': the file exactly as published by its authors. 'runnable': a declared conversion of the source that current solvers load (derived_from names the source checksum, conversion says what changed). 'mirror': the source's exact bytes served from another place (same checksum)."
+        },
+        "content_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Direct https download URL of an immutable copy of the file."
+        },
+        "encoding_format": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Media type of the file (e.g. 'application/json')."
+        },
+        "conforms_to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The format and version the file follows, e.g. 'BPX 1.0' or 'BPX 1.1'."
+        },
+        "byte_size": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "File size in bytes."
+        },
+        "checksum": {
+          "$ref": "#/$defs/Checksum",
+          "description": "Integrity checksum of the exact bytes at content_url."
+        },
+        "derived_from": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "Runnable files only: 'sha256:<hex>' of the source file it was converted from."
+        },
+        "conversion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Runnable files only: what changed relative to the source, and which tool and version made the change."
+        },
+        "software_requirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Software a solver needs beyond the format itself to run this file as intended (e.g. 'aepybamm>=0.2.3' for a file whose User-defined block encodes vendor functions)."
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FileCheck"
+          },
+          "description": "Checks run on this exact file at ingest (format parse, solver smoke run)."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "const": "runnable"
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "derived_from",
+              "conversion"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "enum": [
+                  "source",
+                  "mirror"
+                ]
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "derived_from"
+                  ]
+                },
+                {
+                  "required": [
+                    "conversion"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "description": "One parameter file: where its immutable bytes live, what format it follows, and what was checked."
+    },
+    "Checksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "sha256"
+          ],
+          "description": "Hash algorithm. Parameter files are addressed by sha256 only."
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Lowercase hex digest."
+        }
+      },
+      "description": "Integrity checksum of a parameter file."
+    },
+    "FileCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check",
+        "passed"
+      ],
+      "properties": {
+        "check": {
+          "type": "string",
+          "enum": [
+            "bpx_parse",
+            "simulation_smoke"
+          ],
+          "description": "What was checked: 'bpx_parse' (the official bpx package parses the file) or 'simulation_smoke' (a short simulation ran to completion)."
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Tool and version that ran the check, e.g. 'bpx 1.1.1' or 'pybamm 26.9.0'."
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string",
+          "description": "What was run and what happened (the first error on failure)."
+        },
+        "checked_at": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the check ran."
+        }
+      },
+      "description": "One check run on a parameter file at ingest."
+    }
+  }
+}

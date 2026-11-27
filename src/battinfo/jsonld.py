@@ -1336,9 +1336,10 @@ def cell_measured_property_nodes(measured: Any, *, context_label: str = "") -> l
 def dataset_is_based_on(values: Any) -> list[dict]:
     """A dataset's ``is_based_on`` IRIs as ``schema:isBasedOn`` references.
 
-    The shape the resolver writes, shared by :func:`dataset_to_jsonld` and the
-    deposit graph that ``ws.zenodo()`` builds. Entries that are not strings
-    are skipped.
+    The shape the resolver writes, shared by :func:`dataset_to_jsonld`, the
+    deposit graph that ``ws.zenodo()`` builds and the parameter-set emitter
+    (a parameter set is a dataset, and each of its claims may name what its
+    value was computed from). Entries that are not strings are skipped.
     """
     if isinstance(values, str):
         values = [values]

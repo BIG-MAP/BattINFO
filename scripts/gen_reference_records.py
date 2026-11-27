@@ -568,6 +568,35 @@ def snippet_parameter_set():
     return record
 
 
+def snippet_parameter_set_based_on():
+    from battinfo.api import create_parameter_set
+
+    # is_based_on on the set: what the whole set was built from.
+    # is_based_on on a claim: what that one value was computed from.
+    record = create_parameter_set(
+        name="Graphite OCP from pseudo-OCV measurements, Smith 2026",
+        material_kind="graphite",
+        is_based_on=["https://doi.org/10.5281/zenodo.1234567"],
+        claims=[
+            {
+                "parameter": "ocp",
+                "curve": {
+                    "x_quantity": "stoichiometry",
+                    "x": [0.05, 0.5, 0.95],
+                    "y": [0.6, 0.12, 0.08],
+                    "y_unit": "V",
+                },
+                "provenance_class": "derived",
+                "is_based_on": [
+                    "https://w3id.org/battinfo/id/1001/dataset/6nec-h262-tthy-4rnt",
+                    "https://w3id.org/battinfo/id/1001/dataset/fm9p-sqkk-tbx3-rr66",
+                ],
+            }
+        ],
+    )
+    return record
+
+
 def snippet_parameter_file():
     import json
 
@@ -1017,6 +1046,20 @@ FAMILIES = [
                 ],
             },
             {
+                "heading": "What a claim batch was derived from",
+                "fn": snippet_parameter_set_based_on,
+                "record_type": "parameter-set",
+                "notice": [
+                    "`is_based_on` on the record becomes `schema:isBasedOn` on the "
+                    "parameter-set node, and on a claim it becomes `schema:isBasedOn` "
+                    "on that claim's node (here the curve's `schema:PropertyValue`; a "
+                    "scalar claim's quantity node carries it the same way).",
+                    "Each entry is an `@id` reference, a genome record IRI or an "
+                    "outside URI such as a DOI URL. A bare string counts as one "
+                    "URI, and the field never enters the IRI.",
+                ],
+            },
+            {
                 "heading": "One BPX file as one record",
                 "fn": snippet_parameter_file,
                 "record_type": "parameter-set",
@@ -1034,7 +1077,7 @@ FAMILIES = [
                 ],
             },
         ],
-        "schemas": ["parameter-set.schema.json"],
+        "schemas": ["v2/parameter-set.schema.json"],
     },
     {
         "slug": "organizations",
@@ -1103,7 +1146,8 @@ def render_field_tables(schema_file: str) -> str:
     top_props = schema.get("properties", {})
     top_required = set(schema.get("required", []))
     body_keys = [k for k in top_props if k not in ENVELOPE_KEYS]
-    label = schema_file.replace(".schema.json", "")
+    # A versioned schema (v2/<name>) keeps the heading its name gives.
+    label = schema_file.rsplit("/", 1)[-1].replace(".schema.json", "")
 
     parts = [f"### {label} fields", NL, NL]
     parts += [
