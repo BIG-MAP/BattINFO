@@ -112,6 +112,7 @@ from battinfo._util import jsonld_text as _jsonld_text
 from battinfo._util import local_files_message as _local_files_message
 from battinfo.canonical_aliases import migrate_quantity_values
 from battinfo.entities import (
+    ENTITY_KINDS,
     entity_id_from_doc,
     given_test_name,
     held_record_iri,
@@ -6719,6 +6720,12 @@ class AuthoringWorkspace:
         outcome list instead.  Returns a list of per-record outcome dicts (``ok``,
         ``status``, ``error``, ``iri`` …).  No git or filesystem dependency.
 
+        A cell spec or parameter set is sent with its own JSON-LD
+        (:func:`battinfo.jsonld.record_to_jsonld`) as ``resource.record_jsonld``,
+        so the registry can serve the record's statements at its IRI. A record
+        that cannot be exported fails like an invalid one, before anything is
+        sent.
+
         A record the registry already holds with other content is retried once
         as a new version (``version_bumped``).  A record whose IRI another
         publisher holds is not: its outcome has status ``conflict``, names the
@@ -7024,6 +7031,21 @@ class AuthoringWorkspace:
                         }
                     )
                     continue
+                export_error = _record_jsonld_error(rec, s)
+                if export_error is not None:
+                    print(f"  ERROR: {f.name} -- {export_error}")
+                    prefailed.append(
+                        {
+                            "title": f.name,
+                            "source_local_id": f.stem,
+                            "ok": False,
+                            "status": "invalid",
+                            "error": export_error,
+                            "iri": entity_id_from_doc(rec) or "",
+                            "result": None,
+                        }
+                    )
+                    continue
                 if not allow_local_files:
                     found = _submission_local_files(rec, s, records_dir)
                     if found:
@@ -7264,18 +7286,26 @@ class AuthoringWorkspace:
                                     "canonical_iri": body[tgt_field],
                                 }
                             )
-                payload = _simple_submission_payload(
-                    raw,
-                    resource_type=resource_type,
-                    rdf_type=rdf_type,
-                    record_key=record_key,
-                    wid=wid,
-                    pid=pid,
-                    ver=ver,
-                    source_local_id=source_local_id,
-                    title=title,
-                    related_resources=record_links,
-                )
+                try:
+                    payload = _simple_submission_payload(
+                        raw,
+                        resource_type=resource_type,
+                        rdf_type=rdf_type,
+                        record_key=record_key,
+                        wid=wid,
+                        pid=pid,
+                        ver=ver,
+                        source_local_id=source_local_id,
+                        title=title,
+                        related_resources=record_links,
+                    )
+                except ValueError as exc:
+                    # The checks before the IRI lookups exported this record; the
+                    # adopted IRIs and the DOI added since are not expected to break
+                    # it, but if they do, it is reported as failed here, like a record
+                    # the registry rejects, and the batch goes on.
+                    outcomes.append(_unbuilt_submission(title, source_local_id, raw, exc))
+                    continue
                 outcomes.append(
                     _journaled_submit(
                         journal,
@@ -7308,14 +7338,18 @@ class AuthoringWorkspace:
             source_local_id = _make_record_slug(mfr_name, model, year)
             raw = _with_citation_doi(raw, doi_for(product.get("id")))
 
-            payload = _cell_spec_submission_payload(
-                raw,
-                wid=wid,
-                pid=pid,
-                ver=ver,
-                source_local_id=source_local_id,
-                title=title,
-            )
+            try:
+                payload = _cell_spec_submission_payload(
+                    raw,
+                    wid=wid,
+                    pid=pid,
+                    ver=ver,
+                    source_local_id=source_local_id,
+                    title=title,
+                )
+            except ValueError as exc:  # its export failed after the up-front check, as above
+                outcomes.append(_unbuilt_submission(title, source_local_id, raw, exc))
+                continue
             outcomes.append(
                 _journaled_submit(
                     journal,
@@ -14296,6 +14330,42 @@ def _point_source_url_at_public_copy(record: dict, public_url_for: Callable[[obj
         return False
     provenance["source_url"] = public
     return True
+
+
+def _record_jsonld_error(record: dict, subdir: str) -> str | None:
+    """Why *record*, saved in the folder *subdir*, cannot be exported as the JSON-LD its submission carries.
+
+    ``None`` when it can, or when its kind carries none (the kinds are
+    ``api._staging._RECORD_JSONLD_KINDS``; the folder's kind comes from the
+    entity registry). :meth:`AuthoringWorkspace.submit` asks before anything
+    is sent, so such a record stops the batch there rather than part way
+    through it.
+    """
+    kind = next((kind for kind in ENTITY_KINDS if kind.subdir == subdir), None)
+    if kind is None:
+        return None
+    from battinfo.api import _submission_record_jsonld  # noqa: PLC0415
+
+    try:
+        _submission_record_jsonld(kind.record_key, record)
+    except ValueError as exc:
+        return str(exc)
+    return None
+
+
+def _unbuilt_submission(title: str, source_local_id: str, record: dict, exc: ValueError) -> dict:
+    """The failed outcome of a record whose submission envelope could not be built; nothing was sent for it."""
+    print(f"  ERROR: {title} -- {exc}")
+    return {
+        "title": title,
+        "source_local_id": source_local_id,
+        "ok": False,
+        "status": "invalid",
+        "iri": entity_id_from_doc(record) or "",
+        "error": str(exc),
+        "result": None,
+        "version_bumped": None,
+    }
 
 
 def _submission_local_files(record: dict, subdir: str, records_dir: Path) -> list[tuple[str, str]]:
