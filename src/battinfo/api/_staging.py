@@ -6,7 +6,9 @@ import the public surface from ``battinfo.api``, not from this module.
 
 from __future__ import annotations
 
+import copy
 import re
+import warnings
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -20,6 +22,7 @@ from battinfo.bundle import (
     CellSpec,
 )
 from battinfo.canonical_aliases import record_to_snake_aliases
+from battinfo.entities import ENTITY_BY_RECORD_KEY
 from battinfo.namespace import DEFAULT_RECORD_BASE
 from battinfo.validate.core import DEFAULT_POLICY, ValidationPolicy
 from battinfo.validate.record import validate_record
@@ -663,6 +666,43 @@ def _curated_cell_spec_title(record: Mapping[str, Any]) -> str:
     return str(product.get("name") or f"{manufacturer or 'Battery'} {product.get('model') or 'Cell'}").strip()
 
 
+# The entity kinds whose registry submissions carry the record's own JSON-LD
+# as ``resource.record_jsonld``. A submission of one names its resource type
+# by the kind's record key (``cell_spec``, ``parameter_set``).
+_RECORD_JSONLD_KINDS: frozenset[str] = frozenset({"cell-spec", "parameter-set"})
+
+
+def _submission_record_jsonld(resource_type: str, record: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The JSON-LD a submission of *record* carries as ``resource.record_jsonld``, or ``None``.
+
+    For a cell spec or a parameter set it is ``record_to_jsonld(record, ...)``
+    with its default context, whose ``@id`` is the record's IRI, so the
+    registry can serve the record's own statements at that IRI; other resource
+    types carry none. The emitter's semantic warnings (``UserWarning``) are
+    not shown here: the record's validation reports the same issues, and they
+    do not stop a submission. A record that cannot be exported raises
+    ``ValueError`` naming it. A Zenodo deposit of such a record fails as well,
+    since ``ws.preview_jsonld()`` reports it as an error and ``ws.zenodo()``
+    refuses it.
+    """
+    kind = ENTITY_BY_RECORD_KEY.get(resource_type)
+    if kind is None or kind.entity_type not in _RECORD_JSONLD_KINDS:
+        return None
+    from battinfo.jsonld import record_to_jsonld  # noqa: PLC0415
+
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", UserWarning)
+            return record_to_jsonld(copy.deepcopy(dict(record)), kind.entity_type)
+    except Exception as exc:  # noqa: BLE001 - any emitter failure is reported as this record's
+        body = record.get(kind.record_key)
+        iri = body.get("id") if isinstance(body, Mapping) else None
+        raise ValueError(
+            f"the {kind.entity_type} record {iri or '(no id)'} cannot be exported as JSON-LD for the registry "
+            f"({type(exc).__name__}: {exc})"
+        ) from exc
+
+
 def build_submission_envelope(
     *,
     resource_type: str,
@@ -689,6 +729,11 @@ def build_submission_envelope(
     here, so the shape can never fork again. Callers differ only in the
     fields that SHOULD differ: publication mode, provenance system/workflow,
     the embedded records, and the validation verdict.
+
+    A cell spec or parameter set resource also carries ``record_jsonld``, the
+    record's own JSON-LD (``record_to_jsonld`` with its default context, under
+    ``records[resource_type]``), beside ``semantic_payload``. A record that
+    cannot be exported raises ``ValueError``.
     """
     generated_at = _now_iso()
     semantic_payload: dict[str, Any] = {}
@@ -697,6 +742,18 @@ def build_submission_envelope(
     semantic_payload["battinfo_records"] = {k: dict(v) for k, v in records.items()}
     if preview:
         semantic_payload["preview"] = preview
+    resource: dict[str, Any] = {
+        "resource_type": resource_type,
+        "source_local_id": source_local_id,
+        "title": title,
+        "semantic_payload": semantic_payload,
+        "related_resources": list(related_resources or []),
+        "distributions": list(distributions or []),
+    }
+    record = records.get(resource_type)
+    record_jsonld = _submission_record_jsonld(resource_type, record) if isinstance(record, Mapping) else None
+    if record_jsonld is not None:
+        resource["record_jsonld"] = record_jsonld
     return {
         "schema_version": SCHEMA_VERSION,
         "kind": "BattinfoSubmission",
@@ -714,14 +771,7 @@ def build_submission_envelope(
         },
         "release": {"version": source_version},
         "workspace": workspace,
-        "resource": {
-            "resource_type": resource_type,
-            "source_local_id": source_local_id,
-            "title": title,
-            "semantic_payload": semantic_payload,
-            "related_resources": list(related_resources or []),
-            "distributions": list(distributions or []),
-        },
+        "resource": resource,
         "artifacts": [],
         "validation": validation or {"ok": True, "errors": [], "policy": "default"},
     }
