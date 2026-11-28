@@ -56,10 +56,8 @@ print(result.canonical_iri)
 
 export const installSnippet = `python -m venv .venv
 # macOS / Linux:
-.venv/bin/pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
+.venv/bin/pip install battinfo
 # Windows (PowerShell / cmd):
-.venv\\Scripts\\pip install "battinfo @ git+https://github.com/BIG-MAP/BattINFO.git"
-# 0.8.0 will be the first working release on PyPI; until then, install from GitHub.
-# ws.convert() needs the processing extra, which installs
-# the batterydf 0.2.0 release candidate:
-#   pip install "battinfo[processing] @ git+https://github.com/BIG-MAP/BattINFO.git"`;
+.venv\\Scripts\\pip install battinfo
+# ws.convert() needs the processing extra:
+#   pip install "battinfo[processing]"`;
